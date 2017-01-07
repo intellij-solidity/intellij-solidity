@@ -1,0 +1,50 @@
+<idea-plugin version="2">
+    <id>me.serce.solidity</id>
+    <name>Intellij-Solidity</name>
+    <version>1.0</version>
+    <vendor email="sergeicelov@gmail.com" url="http://serce.me">Sergey Tselovalnikov</vendor>
+
+    <description><![CDATA[
+        IntelliJ solidity support
+    ]]></description>
+
+    <idea-version since-build="141.0"/>
+
+
+    <depends>com.intellij.modules.lang</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <fileTypeFactory implementation="me.serce.solidity.lang.SoliditylFileTypeFactory"/>
+
+        <lang.parserDefinition language="Solidity" implementationClass="me.serce.solidity.lang.core.SolidityParserDefinition"/>
+
+        <!--<lang.syntaxHighlighterFactory language="Solidity" implementationClass="Solidity"/>-->
+
+        <!-- Commenter -->
+        <!--<lang.commenter language="Solidity" implementationClass="Commenter"/>-->
+
+        <!-- Brace Matcher -->
+        <lang.braceMatcher language="Solidity" implementationClass="me.serce.solidity.ide.SolidityBraceMatcher"/>
+
+        <!-- Quote Handlers -->
+        <!--<lang.quoteHandler language="Solidity" implementationClass="QuoteHandler"/>-->
+
+        <!-- Annotator -->
+        <!--<annotator language="Solidity" implementationClass="org.toml.ide.annotator.TomlAnnotator"/>-->
+    </extensions>
+
+    <application-components>
+        <!-- Add your project components here -->
+    </application-components>
+
+    <project-components>
+        <!-- Add your project components here -->
+    </project-components>
+
+    <module-components>
+        <!-- Add your modules components here -->
+    </module-components>
+
+
+
+</idea-plugin>

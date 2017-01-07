@@ -1,0 +1,35 @@
+### Intellij ###
+# User-specific stuff:
+.idea
+*.iml
+*.ipr
+*.iws
+gen
+lib
+.sandbox
+
+/out/
+
+### Java ###
+*.class
+
+# Package Files #
+*.jar
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+
+### Gradle ###
+.gradle
+/build/
+
+# Ignore Gradle GUI config
+gradle-app.setting
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+# Cache of project
+.gradletasknamecache
+
