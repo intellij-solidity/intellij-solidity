@@ -43,29 +43,43 @@ IDENTIFIER=[a-zA-Z_0-9]*
   "."                   { return DOT; }
   "_"                   { return PLACEHOLDER; }
   ":"                   { return COLON; }
+  ";"                   { return SEMICOLON; }
   ","                   { return COMMA; }
   "+"                   { return PLUS; }
   "-"                   { return MINUS; }
   "*"                   { return MULT; }
   "/"                   { return DIV; }
   "**"                  { return EXPONENT; }
+  "!"                   { return NOT; }
+  "="                   { return ASSIGN; }
   "=>"                  { return TO; }
-  "="                   { return EQ; }
+  "=="                  { return EQ; }
   "!="                  { return NEQ; }
   "++"                  { return INC; }
   "--"                  { return DEC; }
   "+="                  { return PLUSEQ; }
   "<"                   { return LESS; }
+  "<="                  { return LESSEQ; }
   ">"                   { return MORE; }
+  ">="                  { return MOREEQ; }
   "^"                   { return CARET; }
+  "&"                   { return AND; }
   "&&"                  { return ANDAND; }
-  "&&"                  { return OROR; }
+  "|"                   { return OR; }
+  "||"                  { return OROR; }
   "["                   { return LBRACKET; }
   "]"                   { return RBRACKET; }
   "{"                   { return LBRACE; }
   "}"                   { return RBRACE; }
   "("                   { return LPAREN; }
   ")"                   { return RPAREN; }
+  "?"                   { return QUESTION; }
+  "%"                   { return PERCENT; }
+  "~"                   { return TILDE; }
+  "<<"                  { return LSHIFT; }
+  ">>"                  { return RSHIFT; }
+  ":="                  { return LEFT_ASSEMBLY; }
+  "=:"                  { return RIGHT_ASSEMBLY; }
   "pragma"              { return PRAGMA; }
   "import"              { return IMPORT; }
   "as"                  { return AS; }
@@ -88,6 +102,7 @@ IDENTIFIER=[a-zA-Z_0-9]*
   "event"               { return EVENT; }
   "anonymous"           { return ANONYMOUS; }
   "enum"                { return ENUM; }
+  "indexed"             { return INDEXED; }
   "mapping"             { return MAPPING; }
   "memory"              { return MEMORY; }
   "storage"             { return STORAGE; }
