@@ -1,0 +1,1 @@
+# Solidity plugin for IntelliJ
