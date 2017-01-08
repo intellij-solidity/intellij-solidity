@@ -134,4 +134,4 @@ InlineAssemblyBlock = '{' AssemblyItem* '}'
 AssemblyItem = Identifier | FunctionalAssemblyExpression | InlineAssemblyBlock | AssemblyLocalBinding | AssemblyAssignment | NumberLiteral | StringLiteral | HexLiteral
 AssemblyLocalBinding = 'let' Identifier ':=' FunctionalAssemblyExpression
 AssemblyAssignment = Identifier ':=' FunctionalAssemblyExpression | '=:' Identifier
-FunctionalAssemblyExpression = Identifier '(' AssemblyItem? ( ',' AssemblyItem )* ')'F
+FunctionalAssemblyExpression = Identifier '(' AssemblyItem? ( ',' AssemblyItem )* ')'

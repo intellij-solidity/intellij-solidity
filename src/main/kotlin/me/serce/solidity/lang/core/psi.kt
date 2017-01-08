@@ -12,4 +12,4 @@ class SolidityFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, S
     override fun toString(): String = "Solidity File"
 }
 
-class SolidityElementType(debugName: String) : IElementType(debugName, SolidityLanguage)
+class SolidityElementType(val name: String) : IElementType(name, SolidityLanguage)

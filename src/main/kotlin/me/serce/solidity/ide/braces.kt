@@ -6,7 +6,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.tree.IElementType
 import me.serce.solidity.lang.core.SolidityTokenTypes.*
 
-class SolidityBraceMatcher() : PairedBraceMatcher {
+class SolidityBraceMatcher : PairedBraceMatcher {
 
     override fun getPairs() = PAIRS
 
@@ -17,7 +17,8 @@ class SolidityBraceMatcher() : PairedBraceMatcher {
     companion object {
         private val PAIRS = arrayOf(
                 BracePair(LBRACE, RBRACE, false),
-                BracePair(LBRACKET, RBRACKET, false)
+                BracePair(LBRACKET, RBRACKET, false),
+                BracePair(LPAREN, RPAREN, false)
         )
     }
 }

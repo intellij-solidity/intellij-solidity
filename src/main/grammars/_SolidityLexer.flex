@@ -57,7 +57,11 @@ IDENTIFIER=[a-zA-Z_0-9]*
   "!="                  { return NEQ; }
   "++"                  { return INC; }
   "--"                  { return DEC; }
-  "+="                  { return PLUSEQ; }
+  "+="                  { return PLUS_ASSIGN; }
+  "-="                  { return MINUS_ASSIGN; }
+  "*="                  { return MULT_ASSIGN; }
+  "/="                  { return DIV_ASSIGN; }
+  "%="                  { return PERCENT_ASSIGN; }
   "<"                   { return LESS; }
   "<="                  { return LESSEQ; }
   ">"                   { return MORE; }
