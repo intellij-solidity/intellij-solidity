@@ -4,7 +4,6 @@ import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.fileTypes.SingleLazyInstanceSyntaxHighlighterFactory
 import com.intellij.openapi.fileTypes.SyntaxHighlighterBase
 import com.intellij.psi.tree.IElementType
-import me.serce.solidity.lang.core.SolidityElementType
 import me.serce.solidity.lang.core.SolidityLexer
 import me.serce.solidity.lang.core.SolidityTokenTypes.*
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as Defaults
@@ -34,7 +33,10 @@ class SolidityHighlighter : SyntaxHighlighterBase() {
       SEMICOLON to Defaults.SEMICOLON,
 
 
-      NUMBER_LITERAL to Defaults.NUMBER,
+      DECIMALNUMBER to Defaults.NUMBER,
+      HEXNUMBER to Defaults.NUMBER,
+      NUMBERUNIT to Defaults.NUMBER,
+
       STRINGLITERAL to Defaults.STRING
     ).plus(
       keywords().map { it to Defaults.KEYWORD }

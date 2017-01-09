@@ -16,9 +16,13 @@
     <extensions defaultExtensionNs="com.intellij">
         <fileTypeFactory implementation="me.serce.solidity.lang.SoliditylFileTypeFactory"/>
 
-        <lang.parserDefinition language="Solidity" implementationClass="me.serce.solidity.lang.core.SolidityParserDefinition"/>
+        <lang.parserDefinition language="Solidity"
+                               implementationClass="me.serce.solidity.lang.core.SolidityParserDefinition"/>
 
-        <lang.syntaxHighlighterFactory language="Solidity" implementationClass="me.serce.solidity.ide.SolidityHighlighterFactory"/>
+        <lang.syntaxHighlighterFactory language="Solidity"
+                                       implementationClass="me.serce.solidity.ide.SolidityHighlighterFactory"/>
+
+        <annotator language="Solidity" implementationClass="me.serce.solidity.ide.SolidityAnnotator"/>
 
         <!-- Commenter -->
         <lang.commenter language="Solidity" implementationClass="me.serce.solidity.ide.SolidityCommenter"/>
