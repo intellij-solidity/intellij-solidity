@@ -32,11 +32,14 @@ sourceSets {
     }
 }
 
+clean.doFirst {
+    delete 'gen'
+}
 
 intellij {
     pluginName 'Intellij-Solidity'
 
-    version '2016.1.2'
+    version '2016.3'
     downloadSources Boolean.valueOf(true)
     updateSinceUntilBuild = false
 
@@ -61,3 +64,39 @@ release {
     buildTasks = ['buildPlugin']
 }
 
+
+task codegen(dependsOn: ['lexer', 'parser']) {}
+
+task lexer(type: JavaExec) {
+    def lexerName = "_SolidityLexer"
+    def pkg = "me/serce/solidity"
+    def src = "$project.projectDir/src/main/grammars/${lexerName}.flex"
+    def dst = "gen/$pkg"
+    new File(dst).mkdirs()
+
+    main = 'jflex.Main'
+    classpath = files('lib/jflex-1.7.0-SNAPSHOT.jar')
+
+    args = ['--skel', 'src/main/grammars/idea-flex.skeleton', '-d', dst, src]
+
+    inputs.file file(src)
+    outputs.dir file("$dst/_${lexerName}.java")
+}
+
+task parser(type: JavaExec) {
+    def pkg = 'me/serce/solidity/lang'
+    def dstRoot = "gen"
+    def src = "$project.projectDir/src/main/grammars/solidity.bnf"
+    def dst = "$dstRoot/$pkg"
+    doFirst {
+        delete file(dst)
+    }
+
+    main = 'org.intellij.grammar.Main'
+    classpath(configurations.compile + files('lib/grammar-kit-1.5.0.jar'))
+
+    args = [dstRoot, file(src)]
+
+    inputs.file file(src)
+    outputs.dir dst
+}
