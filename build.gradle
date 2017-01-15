@@ -51,11 +51,19 @@ repositories {
     jcenter()
 }
 
+configurations {
+    lexer
+    parser
+}
+
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
     testCompile group: 'junit', name: 'junit', version: '4.11'
+
+    lexer files('lib/jflex-1.7.0-SNAPSHOT.jar') //'de.jflex:jflex:1.6.1'
+    parser files('lib/grammar-kit-1.5.0.jar')
 }
 
 release {
@@ -66,6 +74,7 @@ release {
 
 
 task codegen(dependsOn: ['lexer', 'parser']) {}
+tasks.compileKotlin.dependsOn codegen
 
 task lexer(type: JavaExec) {
     def lexerName = "_SolidityLexer"
@@ -75,12 +84,11 @@ task lexer(type: JavaExec) {
     new File(dst).mkdirs()
 
     main = 'jflex.Main'
-    classpath = files('lib/jflex-1.7.0-SNAPSHOT.jar')
-
+    classpath configurations.lexer
     args = ['--skel', 'src/main/grammars/idea-flex.skeleton', '-d', dst, src]
 
     inputs.file file(src)
-    outputs.dir file("$dst/_${lexerName}.java")
+    outputs.dir file("$dst/${lexerName}.java")
 }
 
 task parser(type: JavaExec) {
@@ -93,7 +101,7 @@ task parser(type: JavaExec) {
     }
 
     main = 'org.intellij.grammar.Main'
-    classpath(configurations.compile + files('lib/grammar-kit-1.5.0.jar'))
+    classpath(configurations.compile + configurations.parser)
 
     args = [dstRoot, file(src)]
 

@@ -14,4 +14,4 @@ cache:
 before_script:
   - uname -a
 script:
-  - ./gradlew codegen build check
+  - ./gradlew clean build check
