@@ -85,14 +85,6 @@
 
 SourceUnit ::= (PragmaDirective | ImportDirective | ContractDefinition | Expression)*
 
-//private SourceUnits ::= (PragmaDirective | ImportDirective | ContractDefinition | Expression)*
-//private SourceUnitsWithRecover ::= !('}' | <<eof>>) SourceUnits {
-//  pin = 1
-//  recoverWhile = Item_recover
-//}
-//private Item_recover ::= !('}' | class | pragma | import | conract | library | struct | enum | using | function | event )
-
-
 // Pragma actually parses anything up to the trailing ';' to be fully forward-compatible.
 PragmaDirective ::= pragma Identifier pragmaAll ';'
 
@@ -194,13 +186,15 @@ Expression ::=
   | OrExpression
   | TernaryExpression
   | AssignmentExpression
-//  | MapExpression // todo
+  | MapExpression // todo
   | SeqExpression
   | PrimaryExpression
 
 // TODO: couldn't find that in grammar
-//private MapExpressionClause ::= Identifier ':' Expression
-//MapExpression ::= '{' MapExpressionClause (',' MapExpressionClause )* '}'
+// TODO ambiquity
+private MapExpressionClause ::= Identifier ':' Expression {pin = 2}
+private MapExpr ::= MapExpressionClause (',' MapExpressionClause )*
+MapExpression ::= '{' MapExpr '}'
 
 private SeqExpression ::= Seq1Expression | Seq2Expression
 Seq1Expression ::= (',' Expression)
