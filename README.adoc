@@ -1,0 +1,3 @@
+= Solidity plugin for IntelliJ
+
+image:https://travis-ci.org/SerCeMan/intellij-solidity.svg?branch=master["Build Status", link="https://travis-ci.org/SerCeMan/intellij-solidity"]
