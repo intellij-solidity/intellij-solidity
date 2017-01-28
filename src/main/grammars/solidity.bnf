@@ -92,8 +92,8 @@ SourceUnit ::= (PragmaDirective | ImportDirective | ContractDefinition | Express
 PragmaDirective ::= pragma Identifier pragmaAll ';'
 
 ImportDirective ::= import StringLiteral (as Identifier)? ';'
-        | import ('*' | Identifier) (as Identifier)? from StringLiteral ';'
-        | import '{' Identifier (as Identifier)? ( ',' Identifier (as Identifier)? )* '}' from StringLiteral ';'
+        | import ('*' | Identifier) (as Identifier)? 'from' StringLiteral ';'
+        | import '{' Identifier (as Identifier)? ( ',' Identifier (as Identifier)? )* '}' 'from' StringLiteral ';'
 
 
 ContractDefinition ::= ( contract | library ) Identifier
