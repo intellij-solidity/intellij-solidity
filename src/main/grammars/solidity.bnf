@@ -15,6 +15,7 @@
 
   tokens = [
     comment='regexp://.*'
+    doccomment='regexp:/\*(.|[\r\n])*?\*/' // not ideal, but good enough for the beginning
     stringLiteral='regexp:("([^"\r\n\\]|\\.)*")'
     decimalNumber='regexp:([0-9]+)'
     hexNumber='regexp:(0x[0-9a-fA-F]+)'
@@ -75,6 +76,8 @@
     RSHIFT='>>'
     LEFT_ASSEMBLY=':='
     RIGHT_ASSEMBLY='=:'
+    DOC_COMMENT_BEGIN='/*'
+    DOC_COMMENT_END='*/'
   ]
 
     extends(".*Expression")=Expression

@@ -27,6 +27,7 @@ EOL=\R
 WHITE_SPACE=\s+
 
 COMMENT="//".*
+DOCCOMMENT="/"\*(.|[\r\n])*?\*"/"
 STRINGLITERAL=(\"([^\"\r\n\\]|\\.)*\")
 DECIMALNUMBER=([0-9]+)
 HEXNUMBER=(0x[0-9a-fA-F]+)
@@ -61,6 +62,11 @@ IDENTIFIER=[a-zA-Z_0-9]*
   "-="                  { return MINUS_ASSIGN; }
   "*="                  { return MULT_ASSIGN; }
   "/="                  { return DIV_ASSIGN; }
+  "|="                  { return OR_ASSIGN; }
+  "^="                  { return XOR_ASSIGN; }
+  "&="                  { return AND_ASSIGN; }
+  "<<="                 { return LSHIFT_ASSIGN; }
+  ">>="                 { return RSHIFT_ASSIGN; }
   "%="                  { return PERCENT_ASSIGN; }
   "<"                   { return LESS; }
   "<="                  { return LESSEQ; }
@@ -1296,6 +1302,7 @@ IDENTIFIER=[a-zA-Z_0-9]*
   "let"                 { return LET; }
 
   {COMMENT}             { return COMMENT; }
+  {DOCCOMMENT}          { return DOCCOMMENT; }
   {STRINGLITERAL}       { return STRINGLITERAL; }
   {DECIMALNUMBER}       { return DECIMALNUMBER; }
   {HEXNUMBER}           { return HEXNUMBER; }
