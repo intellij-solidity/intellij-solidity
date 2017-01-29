@@ -90,10 +90,11 @@ IDENTIFIER=[a-zA-Z_0-9]*
   ">>"                  { return RSHIFT; }
   ":="                  { return LEFT_ASSEMBLY; }
   "=:"                  { return RIGHT_ASSEMBLY; }
+  "/*"                  { return DOC_COMMENT_BEGIN; }
+  "*/"                  { return DOC_COMMENT_END; }
   "pragma"              { return PRAGMA; }
   "import"              { return IMPORT; }
   "as"                  { return AS; }
-  "from"                { return FROM; }
   "contract"            { return CONTRACT; }
   "library"             { return LIBRARY; }
   "is"                  { return IS; }

@@ -47,7 +47,7 @@ class SolidityHighlighter : SyntaxHighlighterBase() {
     ).mapValues { solidityKey(it.key, it.value) }
 
     private fun keywords() = setOf<IElementType>(
-      IMPORT, AS, FROM, PRAGMA,
+      IMPORT, AS, PRAGMA,
       CONTRACT, LIBRARY, IS, STRUCT, FUNCTION, ENUM,
       PUBLIC, PRIVATE, INTERNAL, EXTERNAL, CONSTANT, PAYABLE,
       IF, ELSE, FOR, WHILE, DO, BREAK, CONTINUE, THROW, USING, RETURN, RETURNS,

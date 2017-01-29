@@ -1,0 +1,43 @@
+{
+  tokens=[
+    SEMI=';'
+    EQ='='
+    LP='('
+    RP=')'
+
+    space='regexp:\s+'
+    comment='regexp://.*'
+    number='regexp:\d+(\.\d*)?'
+    id='regexp:\p{Alpha}\w*'
+    string="regexp:('([^'\\]|\\.)*'|\"([^\"\\]|\\.)*\")"
+
+    op_1='+'
+    op_2='-'
+    op_3='*'
+    op_4='/'
+    op_5='!'
+  ]
+
+  name(".*expr")='expression'
+  extends(".*expr")=expr
+}
+
+root ::= root_item *
+private root_item ::= !<<eof>> property ';'
+{pin=1 recoverWhile=property_recover}
+private property_recover ::= !(';' | id '=')
+
+property ::= id '=' expr  {pin=2}
+
+expr ::= factor plus_expr *
+left plus_expr ::= plus_op factor
+private plus_op ::= '+'|'-'
+private factor ::= primary mul_expr *
+left mul_expr  ::= mul_op primary
+private mul_op ::= '*'|'/'
+private primary ::= primary_inner factorial_expr ?
+left factorial_expr ::= '!'
+private primary_inner ::= literal_expr | ref_expr | paren_expr
+paren_expr ::= '(' expr ')' {pin=1}
+ref_expr ::= id
+literal_expr ::= number | string | float
