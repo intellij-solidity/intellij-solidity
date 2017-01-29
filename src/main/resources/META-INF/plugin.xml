@@ -31,7 +31,7 @@
         <lang.braceMatcher language="Solidity" implementationClass="me.serce.solidity.ide.SolidityBraceMatcher"/>
 
         <!-- Quote Handlers -->
-        <!--<lang.quoteHandler language="Solidity" implementationClass="QuoteHandler"/>-->
+        <lang.quoteHandler language="Solidity" implementationClass="me.serce.solidity.ide.SolidityQuoteTokenHandler"/>
     </extensions>
 
     <application-components>

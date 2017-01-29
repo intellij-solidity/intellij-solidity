@@ -236,8 +236,8 @@ BooleanLiteral ::= booleanLiteral
 NumberLiteral ::= ( HexNumber | DecimalNumber ) (' ' NumberUnit)?
 NumberUnit ::= wei | szabo | finney | ether
              | seconds | minutes | hours | days | weeks | years
-HexLiteral ::= hexNumber
-StringLiteral ::= stringLiteral
+private HexLiteral ::= hexNumber
+private StringLiteral ::= stringLiteral
 
 
 HexNumber ::= hexNumber
