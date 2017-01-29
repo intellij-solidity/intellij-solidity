@@ -28,7 +28,7 @@ WHITE_SPACE=\s+
 
 COMMENT="//".*
 DOCCOMMENT="/"\*(.|[\r\n])*?\*"/"
-STRINGLITERAL=(\"([^\"\r\n\\]|\\.)*\")
+STRINGLITERAL=(\"([^\"\r\n\\]|\\.)*\")|(\'([^\'\r\n\\]|\\.)*\')
 DECIMALNUMBER=([0-9]+)
 HEXNUMBER=(0x[0-9a-fA-F]+)
 NUMBERUNIT=(wei|szabo|finney|ether|seconds|minutes|hours|days|weeks|years)

@@ -1,0 +1,8 @@
+Solidity File
+  SolidityPragmaDirectiveImpl(PRAGMA_DIRECTIVE)
+    PsiElement(pragma)('pragma')
+    PsiWhiteSpace(' ')
+    PsiElement(Identifier)('solidity')
+    PsiWhiteSpace(' ')
+    PsiElement(pragmaAll)('^0.4.2')
+    PsiElement(;)(';')
