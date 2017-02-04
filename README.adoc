@@ -5,7 +5,7 @@ image:https://badges.gitter.im/SerCeMan/intellij-solidity.svg[link="https://gitt
 
 == Current status
 
-This plugin is in alpha stage. You can support development of the plugin by sending some currency to:
+This plugin is in alpha stage. You can support the plugin development by clicking ★ and sending some currency to:
 
 [title=eth]
 ----
