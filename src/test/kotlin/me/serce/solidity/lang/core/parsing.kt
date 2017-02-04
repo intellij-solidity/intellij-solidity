@@ -25,6 +25,7 @@ class SolidityCompleteParsingTest : SolidityParsingTestBase() {
   fun testMappings() = doTest(true)
   fun testEvent() = doTest(true)
   fun testFunctions() = doTest(true)
+  fun testMapInvoke() = doTest(true)
   fun testContractWithLiterals() = doTest(true)
   fun testContractWithDifferentFields() = doTest(true)
 }

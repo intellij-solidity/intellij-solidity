@@ -127,7 +127,8 @@ TypeNameList ::=         '(' ( TypeName (',' TypeName )* )? ')'
 
 // semantic restriction: mappings and structs (recursively) containing mappings
 // are not allowed in argument lists
-VariableDeclaration ::= TypeName Identifier
+private declarationList ::= '(' ( Identifier ',' | ',' )* ( Identifier ','? | ',' ) ')' ;
+VariableDeclaration ::= var declarationList | TypeName Identifier
 
 //
 //TypeName = ElementaryTypeName
@@ -171,7 +172,8 @@ ContinueSt ::= continue
 BreakSt ::= break
 ReturnSt ::= return Expression?
 ThrowSt ::= throw
-VariableDefinition ::= VariableDeclaration ( '=' Expression )?
+SeqExpression ::= '(' Expression (',' Expression)* ')'
+VariableDefinition ::= VariableDeclaration ( '=' (SeqExpression | Expression) )?
 
 Expression ::=
   IncrementExpression | FunctionCallExpression | IndexAccessExpression | MemberAccessExpression | ParenExpression
@@ -189,19 +191,9 @@ Expression ::=
   | OrExpression
   | TernaryExpression
   | AssignmentExpression
-  | MapExpression // todo
-  | SeqExpression
   | PrimaryExpression
 
-// TODO: couldn't find that in grammar
-// TODO ambiquity
-private MapExpressionClause ::= Identifier ':' Expression {pin = 2}
-private MapExpr ::= MapExpressionClause (',' MapExpressionClause )*
-MapExpression ::= '{' MapExpr '}'
 
-private SeqExpression ::= Seq1Expression | Seq2Expression
-Seq1Expression ::= (',' Expression)
-Seq2Expression ::= Expression (',' Expression)
 
 AssignmentExpression ::= Expression ('=' | '|=' | '^=' | '&=' | '<<=' | '>>=' | '+=' | '-=' | '*=' | '/=' | '%=') Expression
 TernaryExpression ::= Expression '?' Expression ':' Expression
@@ -217,7 +209,7 @@ PlusMinExpression ::=Expression ('+' | '-') Expression
 MultDivExpression ::= Expression ('*' | '/' | '%') Expression
 ExponentExpression ::= Expression '**' Expression
 UnaryExpression ::= ('!' | '~' | delete | '++' | '--' | '+' | '-') Expression
-IncrementExpression ::= Expression ('++')
+IncrementExpression ::= Expression ('++' | '--')
 ParenExpression ::= '(' Expression ')' { pin = 1 }
 
 PrimaryExpression ::= Identifier
@@ -227,7 +219,11 @@ PrimaryExpression ::= Identifier
                   | StringLiteral
                   | ElementaryTypeNameExpression
 
-FunctionCallExpression ::= ( PrimaryExpression | NewExpression | TypeName ) ( ( '.' Identifier ) | ( '[' Expression ']' ) )* '(' Expression? ( ',' Expression )* ')'
+FunctionCallExpression ::= ( PrimaryExpression | NewExpression | TypeName ) ( ( '.' Identifier ) | ( '[' Expression ']' ) )* '(' FunctionCallArguments? ')'
+FunctionCallArguments ::= MapExpression | Expression? ( ',' Expression )*
+private MapExpressionClause ::= Identifier ':' Expression
+MapExpression ::= '{' MapExpressionClause (',' MapExpressionClause )* '}'
+
 NewExpression ::= new Identifier
 MemberAccessExpression ::= Expression '.' Identifier
 IndexAccessExpression ::= Expression '[' Expression? ']'
@@ -240,8 +236,8 @@ private HexLiteral ::= hexNumber
 private StringLiteral ::= stringLiteral
 
 
-HexNumber ::= hexNumber
-DecimalNumber ::= decimalNumber
+private HexNumber ::= hexNumber
+private DecimalNumber ::= decimalNumber
 
 ElementaryTypeNameExpression ::= ElementaryTypeName
 
