@@ -26,8 +26,8 @@ import static me.serce.solidity.lang.core.SolidityTokenTypes.*;
 EOL=\R
 WHITE_SPACE=\s+
 
-COMMENT="//".*
-DOCCOMMENT="/"\*(.|[\r\n])*?\*"/"
+// TODO: proper grammar instead of this regex hell
+COMMENT=("//".*)|(\/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\/)
 STRINGLITERAL=(\"([^\"\r\n\\]|\\.)*\")|(\'([^\'\r\n\\]|\\.)*\')
 DECIMALNUMBER=([0-9]+)
 HEXNUMBER=(0x[0-9a-fA-F]+)
@@ -114,6 +114,7 @@ IDENTIFIER=[a-zA-Z_0-9]*
   "anonymous"           { return ANONYMOUS; }
   "enum"                { return ENUM; }
   "indexed"             { return INDEXED; }
+  "var"                 { return VAR; }
   "mapping"             { return MAPPING; }
   "memory"              { return MEMORY; }
   "storage"             { return STORAGE; }
@@ -141,7 +142,6 @@ IDENTIFIER=[a-zA-Z_0-9]*
   "address"             { return ADDRESS; }
   "bool"                { return BOOL; }
   "string"              { return STRING; }
-  "var"                 { return VAR; }
   "int"                 { return INT; }
   "int8"                { return INT8; }
   "int16"               { return INT16; }
@@ -1303,7 +1303,6 @@ IDENTIFIER=[a-zA-Z_0-9]*
   "let"                 { return LET; }
 
   {COMMENT}             { return COMMENT; }
-  {DOCCOMMENT}          { return DOCCOMMENT; }
   {STRINGLITERAL}       { return STRINGLITERAL; }
   {DECIMALNUMBER}       { return DECIMALNUMBER; }
   {HEXNUMBER}           { return HEXNUMBER; }

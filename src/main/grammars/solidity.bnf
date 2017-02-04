@@ -14,8 +14,7 @@
   tokenTypeClass="me.serce.solidity.lang.core.SolidityTokenTypes"
 
   tokens = [
-    comment='regexp://.*'
-    doccomment='regexp:/\*(.|[\r\n])*?\*/' // not ideal, but good enough for the beginning
+    comment='regexp:(//.*)|(/\\*(?:.|[\\n\\r])*?\\*/)'
     stringLiteral='regexp:("([^"\r\n\\]|\\.)*")'
     decimalNumber='regexp:([0-9]+)'
     hexNumber='regexp:(0x[0-9a-fA-F]+)'
