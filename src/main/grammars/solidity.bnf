@@ -233,7 +233,7 @@ MemberAccessExpression ::= Expression '.' Identifier
 IndexAccessExpression ::= Expression '[' Expression? ']'
 
 BooleanLiteral ::= booleanLiteral
-NumberLiteral ::= ( HexNumber | DecimalNumber ) (' ' NumberUnit)?
+NumberLiteral ::= ( HexNumber | DecimalNumber ) NumberUnit?
 NumberUnit ::= wei | szabo | finney | ether
              | seconds | minutes | hours | days | weeks | years
 private HexLiteral ::= hexNumber
