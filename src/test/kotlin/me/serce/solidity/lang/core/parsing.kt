@@ -21,7 +21,9 @@ abstract class SolidityParsingTestBase : ParsingTestCase("fixtures/parser", "sol
 
 class SolidityCompleteParsingTest : SolidityParsingTestBase() {
   fun testPragma() = doTest(true)
+  fun testArithmetics() = doTest(true)
   fun testComments() = doTest(true)
+  fun testLibrary() = doTest(true)
   fun testImports() = doTest(true)
   fun testMappings() = doTest(true)
   fun testEvent() = doTest(true)
