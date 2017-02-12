@@ -1,6 +1,3 @@
-/**
- * Created by serce on 29/1/17.
- */
 package me.serce.solidity.lang.core
 
 import com.intellij.core.CoreApplicationEnvironment
@@ -21,11 +18,14 @@ abstract class SolidityParsingTestBase : ParsingTestCase("fixtures/parser", "sol
 
 class SolidityCompleteParsingTest : SolidityParsingTestBase() {
   fun testPragma() = doTest(true)
-  fun testArithmetics() = doTest(true)
+  fun testArithmetic() = doTest(true)
+  fun testAssignments() = doTest(true)
   fun testComments() = doTest(true)
   fun testLibrary() = doTest(true)
   fun testImports() = doTest(true)
+  fun testEnums() = doTest(true)
   fun testMappings() = doTest(true)
+  fun testModifiers() = doTest(true)
   fun testEvent() = doTest(true)
   fun testFunctions() = doTest(true)
   fun testMapInvoke() = doTest(true)
