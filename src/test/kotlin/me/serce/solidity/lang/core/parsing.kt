@@ -21,6 +21,7 @@ class SolidityCompleteParsingTest : SolidityParsingTestBase() {
   fun testArithmetic() = doTest(true)
   fun testAssignments() = doTest(true)
   fun testComments() = doTest(true)
+  fun testCallChain() = doTest(true)
   fun testLibrary() = doTest(true)
   fun testImports() = doTest(true)
   fun testEnums() = doTest(true)

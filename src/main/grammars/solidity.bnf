@@ -175,7 +175,7 @@ SeqExpression ::= '(' Expression (',' Expression)* ')'
 VariableDefinition ::= VariableDeclaration ( '=' (SeqExpression | Expression) )?
 
 Expression ::=
-  IncrementExpression | FunctionCallExpression | IndexAccessExpression | MemberAccessExpression | ParenExpression
+  IncrementExpression | FunctionCallExpression | CallExpression | IndexAccessExpression | MemberAccessExpression | ParenExpression
   | UnaryExpression
   | ExponentExpression
   | MultDivExpression
@@ -218,7 +218,8 @@ PrimaryExpression ::= Identifier
                   | StringLiteral
                   | ElementaryTypeNameExpression
 
-FunctionCallExpression ::= ( PrimaryExpression | NewExpression | TypeName ) ( ( '.' Identifier ) | ( '[' Expression ']' ) )* '(' FunctionCallArguments? ')'
+FunctionCallExpression ::= ( PrimaryExpression | NewExpression | TypeName ) ( ( '.' Identifier ) | ( '[' Expression ']' ) )*  '(' FunctionCallArguments? ')'
+CallExpression ::= Expression ( ( '.' Identifier ) | ( '[' Expression ']' ) )* '(' FunctionCallArguments? ')' ('(' FunctionCallArguments? ')')*
 FunctionCallArguments ::= MapExpression | Expression? ( ',' Expression )*
 private MapExpressionClause ::= Identifier ':' Expression
 MapExpression ::= '{' MapExpressionClause (',' MapExpressionClause )* '}'
