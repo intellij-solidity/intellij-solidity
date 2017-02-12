@@ -32,6 +32,10 @@
 
         <!-- Quote Handlers -->
         <lang.quoteHandler language="Solidity" implementationClass="me.serce.solidity.ide.SolidityQuoteTokenHandler"/>
+
+
+        <completion.contributor language="Solidity"
+                                implementationClass="me.serce.solidity.lang.completion.SolidityKeywordCompletionContributor"/>
     </extensions>
 
     <application-components>
