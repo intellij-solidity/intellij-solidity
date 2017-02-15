@@ -79,20 +79,34 @@
     DOC_COMMENT_END='*/'
   ]
 
-    extends(".*Expression")=Expression
-    extends(".*TypeName")=TypeName
-    extends(".*NumType")=NumberType
+  extends(".*Expression")=Expression
+  extends(".*TypeName")=TypeName
+  extends(".*NumType")=NumberType
 }
 
 
 SourceUnit ::= (PragmaDirective | ImportDirective | ContractDefinition | Expression)*
 
-// Pragma actually parses anything up to the trailing ';' to be fully forward-compatible.
-PragmaDirective ::= pragma Identifier pragmaAll ';'
+private UntilSemicolonRecover ::= !(';')
 
-ImportDirective ::= import StringLiteral (as Identifier)? ';'
-        | import ('*' | Identifier) (as Identifier)? 'from' StringLiteral ';'
-        | import '{' Identifier (as Identifier)? ( ',' Identifier (as Identifier)? )* '}' 'from' StringLiteral ';'
+// Pragma actually parses anything up to the trailing ';' to be fully forward-compatible.
+private PragmaPart ::= pragma Identifier pragmaAll {
+    pin = 2
+    recoverWhile = UntilSemicolonRecover
+}
+PragmaDirective ::= PragmaPart ';'
+
+private ClosedBracketRecover ::= !('}')
+private ImportRuleSet ::= Identifier (as Identifier)? ( ',' Identifier (as Identifier)? )* {
+    recoverWhile = ClosedBracketRecover
+}
+private ImportDirectivePart ::= import StringLiteral (as Identifier)?
+        | import ('*' | Identifier) (as Identifier)? 'from' StringLiteral
+        | import '{' ImportRuleSet '}' 'from' StringLiteral {
+ pin = 1
+ recoverWhile = UntilSemicolonRecover
+}
+ImportDirective ::= ImportDirectivePart ';'
 
 
 ContractDefinition ::= ( contract | library ) Identifier
@@ -155,9 +169,11 @@ FunctionTypeName ::= function TypeNameList ( internal | external | constant | pa
 StorageLocation ::= memory | storage
 
 Block ::= '{' Statement* '}'
-Statement ::= IfStatement | WhileStatement | ForStatement | Block | InlineAssemblyStatement |
-            ( DoWhileStatement | PlaceholderStatement | ContinueSt | BreakSt | ReturnSt |
-              ThrowSt | SimpleStatement ) ';'
+FinishedStatement ::= DoWhileStatement | PlaceholderStatement | ContinueSt | BreakSt | ReturnSt | ThrowSt | SimpleStatement {
+  recoverWhile = UntilSemicolonRecover
+}
+Statement ::= IfStatement | WhileStatement | ForStatement | Block | InlineAssemblyStatement | FinishedStatement ';'
+
 
 ExpressionStatement ::= Expression
 IfStatement ::= if '(' Expression ')' Statement ( else Statement )? {pin = 2}
