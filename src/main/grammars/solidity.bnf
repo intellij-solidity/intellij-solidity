@@ -169,7 +169,7 @@ FunctionTypeName ::= function TypeNameList ( internal | external | constant | pa
 StorageLocation ::= memory | storage
 
 Block ::= '{' Statement* '}'
-FinishedStatement ::= DoWhileStatement | PlaceholderStatement | ContinueSt | BreakSt | ReturnSt | ThrowSt | SimpleStatement {
+private FinishedStatement ::= DoWhileStatement | PlaceholderStatement | ContinueSt | BreakSt | ReturnSt | ThrowSt | SimpleStatement {
   recoverWhile = UntilSemicolonRecover
 }
 Statement ::= IfStatement | WhileStatement | ForStatement | Block | InlineAssemblyStatement | FinishedStatement ';'
