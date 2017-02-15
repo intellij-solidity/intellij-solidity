@@ -4,6 +4,7 @@ import com.intellij.icons.AllIcons
 import com.intellij.lang.Language
 import com.intellij.openapi.fileTypes.*
 import com.intellij.openapi.vfs.VirtualFile
+import me.serce.solidity.ide.SolidityIcons
 import java.nio.charset.StandardCharsets.UTF_8
 
 object SolidityLanguage : Language("Solidity", "text/solidity") {
@@ -27,6 +28,6 @@ object SolidityFileType : LanguageFileType(SolidityLanguage) {
     override fun getName() = DEFAULTS.DESCRIPTION
     override fun getDescription() = DEFAULTS.DESCRIPTION
     override fun getDefaultExtension() = DEFAULTS.EXTENSION
-    override fun getIcon() = AllIcons.FileTypes.Text
+    override fun getIcon() = SolidityIcons.FILE_ICON
     override fun getCharset(file: VirtualFile, content: ByteArray) = UTF_8.name()
 }
