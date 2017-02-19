@@ -1,6 +1,7 @@
 package me.serce.solidity.ide
 
 import com.intellij.openapi.util.IconLoader
+import java.util.*
 import javax.swing.Icon
 
 object SolidityIcons {
