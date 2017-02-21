@@ -36,7 +36,17 @@
 
         <completion.contributor language="Solidity"
                                 implementationClass="me.serce.solidity.lang.completion.SolidityKeywordCompletionContributor"/>
+        <internalFileTemplate name="Solidity Contract"/>
+        <internalFileTemplate name="Solidity Library"/>
     </extensions>
+
+    <actions>
+        <action id="solidity.file.create"
+                class="me.serce.solidity.ide.actions.SolidityCreateFileAction"
+                text="Smart contract" description="Create new solidity contract">
+            <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFile"/>
+        </action>
+    </actions>
 
     <application-components>
         <!-- Add your project components here -->
@@ -49,17 +59,6 @@
     <module-components>
         <!-- Add your modules components here -->
     </module-components>
-
-
-    <actions>
-        <action id="Solidity.NewSolidityFile"
-                class="me.serce.solidity.ide.actions.SolidityCreateFileAction"
-                text="Solidity File"
-                description="Create new Solidity file">
-            <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFile"/>
-        </action>
-
-    </actions>
 
 
 </idea-plugin>
