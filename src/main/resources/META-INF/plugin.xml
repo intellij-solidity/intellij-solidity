@@ -50,4 +50,16 @@
         <!-- Add your modules components here -->
     </module-components>
 
+
+    <actions>
+        <action id="Solidity.NewSolidityFile"
+                class="me.serce.solidity.ide.actions.SolidityCreateFileAction"
+                text="Solidity File"
+                description="Create new Solidity file">
+            <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFile"/>
+        </action>
+
+    </actions>
+
+
 </idea-plugin>
