@@ -196,7 +196,7 @@ SeqExpression ::= '(' Expression (',' Expression)* ')'
 VariableDefinition ::= VariableDeclaration ( '=' (SeqExpression | Expression) )?
 
 Expression ::=
-  IncrementExpression | FunctionCallExpression | CallExpression | IndexAccessExpression | MemberAccessExpression | ParenExpression
+  TernaryExpression | IncrementExpression | FunctionCallExpression | CallExpression | IndexAccessExpression | MemberAccessExpression | ParenExpression
   | UnaryExpression
   | ExponentExpression
   | MultDivExpression
@@ -209,7 +209,6 @@ Expression ::=
   | EqExpression
   | AndExpression
   | OrExpression
-  | TernaryExpression
   | AssignmentExpression
   | PrimaryExpression
 
