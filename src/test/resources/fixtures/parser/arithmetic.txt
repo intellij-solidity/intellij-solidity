@@ -41,6 +41,8 @@ Solidity File
         SolidityBlockImpl(BLOCK)
           PsiElement({)('{')
           PsiWhiteSpace('\n    ')
+          PsiComment(comment)('//TODO  var c = (x) + 3;')
+          PsiWhiteSpace('\n    ')
           SolidityStatementImpl(STATEMENT)
             SoliditySimpleStatementImpl(SIMPLE_STATEMENT)
               SolidityVariableDefinitionImpl(VARIABLE_DEFINITION)
