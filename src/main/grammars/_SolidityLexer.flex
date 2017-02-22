@@ -2,7 +2,6 @@ package me.serce.solidity;
 
 import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
-import org.intellij.grammar.psi.BnfTypes;
 
 import static com.intellij.psi.TokenType.BAD_CHARACTER;
 import static com.intellij.psi.TokenType.WHITE_SPACE;
@@ -98,20 +97,20 @@ IDENTIFIER=[a-zA-Z_0-9]*
   "/*"                  { return DOC_COMMENT_BEGIN; }
   "*/"                  { return DOC_COMMENT_END; }
   "pragma"              { return PRAGMA; }
-  "import"              { return IMPORT; }
   "as"                  { return AS; }
+  "import"              { return IMPORT; }
   "contract"            { return CONTRACT; }
   "library"             { return LIBRARY; }
   "is"                  { return IS; }
   "public"              { return PUBLIC; }
   "internal"            { return INTERNAL; }
   "private"             { return PRIVATE; }
+  "constant"            { return CONSTANT; }
   "using"               { return USING; }
   "for"                 { return FOR; }
   "struct"              { return STRUCT; }
   "modifier"            { return MODIFIER; }
   "function"            { return FUNCTION; }
-  "constant"            { return CONSTANT; }
   "payable"             { return PAYABLE; }
   "external"            { return EXTERNAL; }
   "returns"             { return RETURNS; }
