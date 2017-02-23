@@ -13,10 +13,8 @@ import com.intellij.psi.TokenType
 import com.intellij.psi.tree.IFileElementType
 import com.intellij.psi.tree.TokenSet
 import me.serce.solidity.SolidityParser
-import me.serce.solidity.lang.core.SolidityTokenTypes
+import me.serce.solidity.lang.core.SolidityTokenTypes.*
 import me.serce.solidity.lang.SolidityLanguage
-import me.serce.solidity.lang.core.SolidityFile
-import me.serce.solidity.lang.core.SolidityLexer
 
 class SolidityParserDefinition : ParserDefinition {
     override fun createParser(project: Project?): PsiParser = SolidityParser()
@@ -42,6 +40,16 @@ class SolidityParserDefinition : ParserDefinition {
         val FILE: IFileElementType = IFileElementType(SolidityLanguage)
         val WHITE_SPACES: TokenSet = TokenSet.create(TokenType.WHITE_SPACE)
         val COMMENTS: TokenSet = TokenSet.create(SolidityTokenTypes.COMMENT)
+        val BINARY_OPERATORS: TokenSet = TokenSet.create(
+            PLUS, MINUS, MULT, DIV, EXPONENT, NOT,
+            ASSIGN, TO, EQ, NEQ,
+            PLUS_ASSIGN, MINUS_ASSIGN, MULT_ASSIGN, DIV_ASSIGN, OR_ASSIGN, XOR_ASSIGN, AND_ASSIGN, LSHIFT_ASSIGN, RSHIFT_ASSIGN, PERCENT_ASSIGN,
+            LESS, LESSEQ, MORE, MOREEQ, CARET, AND, ANDAND, OR, OROR,
+            PERCENT, LSHIFT, RSHIFT, LEFT_ASSEMBLY, RIGHT_ASSEMBLY
+        )
+        val CONTROL_STRUCTURES: TokenSet = TokenSet.create(
+            IF, ELSE, WHILE, FOR, DO
+        )
     }
 
 }
