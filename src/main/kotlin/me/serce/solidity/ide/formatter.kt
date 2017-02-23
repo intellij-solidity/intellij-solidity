@@ -13,7 +13,10 @@ import com.intellij.psi.PsiFile
 import me.serce.solidity.lang.core.SolidityParserDefinition.Companion.BINARY_OPERATORS
 import me.serce.solidity.lang.core.SolidityParserDefinition.Companion.CONTROL_STRUCTURES
 
-
+/**
+ * Ideally we should fully implement this
+ * https://github.com/ethereum/solidity/blob/develop/docs/style-guide.rst
+ */
 class SolidityFormattingModelBuilder : FormattingModelBuilder {
   private fun createSpacingBuilder(settings: CodeStyleSettings): SpacingBuilder {
     return SpacingBuilder(settings, SolidityLanguage)
