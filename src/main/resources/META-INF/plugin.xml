@@ -61,6 +61,9 @@
 
         <completion.contributor language="Solidity"
                                 implementationClass="me.serce.solidity.lang.completion.SolidityKeywordCompletionContributor"/>
+
+        <lang.formatter language="Solidity" implementationClass="me.serce.solidity.ide.SolidityFormattingModelBuilder"/>
+
         <internalFileTemplate name="Solidity Contract"/>
         <internalFileTemplate name="Solidity Library"/>
     </extensions>
