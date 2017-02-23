@@ -116,7 +116,7 @@ ImportDirective ::= ImportDirectivePart ';'
 
 ContractDefinition ::= ( contract | library ) Identifier
                      ( is InheritanceSpecifier (',' InheritanceSpecifier )* )?
-                     '{' ContractPart* '}'
+                     '{' ContractPart* '}' {pin=1}
 
 ContractPart ::= StateVariableDeclaration | UsingForDeclaration
              | StructDefinition | ModifierDefinition | FunctionDefinition | EventDefinition | EnumDefinition
@@ -125,19 +125,19 @@ InheritanceSpecifier ::= UserDefinedTypeName ( '(' Expression ( ',' Expression )
 
 StateVariableDeclaration ::= TypeName ( public | internal | private | constant )? Identifier ('=' Expression)? ';'
 
-UsingForDeclaration ::= using Identifier for ('*' | TypeName) ';'
+UsingForDeclaration ::= using Identifier for ('*' | TypeName) ';' {pin=1}
 
 StructDefinition ::= struct Identifier '{'
-                     ( VariableDeclaration ';' (VariableDeclaration ';')* )? '}'
+                     ( VariableDeclaration ';' (VariableDeclaration ';')* )? '}' {pin=1}
 
 ModifierDefinition ::= modifier Identifier ParameterList? Block
 FunctionDefinition ::= function Identifier? ParameterList
                      ( FunctionCallExpression | constant | payable | external | public | internal | private | Identifier)*
-                     ( returns ParameterList )? ( ';' | Block )
-EventDefinition ::= event Identifier IndexedParameterList anonymous? ';'
+                     ( returns ParameterList )? ( ';' | Block ) {pin=1}
+EventDefinition ::= event Identifier IndexedParameterList anonymous? ';' {pin=1}
 
 EnumValue ::= Identifier
-EnumDefinition ::= enum Identifier '{' EnumValue? (',' EnumValue)* '}'
+EnumDefinition ::= enum Identifier '{' EnumValue? (',' EnumValue)* '}' {pin=1}
 
 IndexedParameterList ::= '(' ( TypeName indexed? Identifier? (',' TypeName indexed? Identifier?)* )? ')'
 ParameterList ::=        '(' ( TypeName            Identifier? (',' TypeName            Identifier?)* )? ')'
@@ -168,12 +168,12 @@ UserDefinedWithoutLocationTypeName ::= UserDefinedTypeName
 
 UserDefinedTypeName ::= Identifier ( '.' Identifier )*
 
-MappingTypeName ::= mapping '(' ElementaryTypeName '=>' TypeName ')' { pin = 2}
+MappingTypeName ::= mapping '(' ElementaryTypeName '=>' TypeName ')' {pin = 1}
 FunctionTypeName ::= function TypeNameList ( internal | external | constant | payable )*
-                   ( returns TypeNameList )?
+                   ( returns TypeNameList )? {pin=1}
 StorageLocation ::= memory | storage
 
-Block ::= '{' Statement* '}'
+Block ::= '{' Statement* '}' {pin=1}
 private FinishedStatement ::= DoWhileStatement | PlaceholderStatement | ContinueSt | BreakSt | ReturnSt | ThrowSt | SimpleStatement {
   recoverWhile = UntilSemicolonRecover
 }
@@ -181,16 +181,16 @@ Statement ::= IfStatement | WhileStatement | ForStatement | Block | InlineAssemb
 
 
 ExpressionStatement ::= Expression
-IfStatement ::= if '(' Expression ')' Statement ( else Statement )? {pin = 2}
-WhileStatement ::= while '(' Expression ')' Statement {pin = 2}
+IfStatement ::= if '(' Expression ')' Statement ( else Statement )? {pin = 1}
+WhileStatement ::= while '(' Expression ')' Statement {pin = 1}
 PlaceholderStatement ::= '_'
 SimpleStatement ::= VariableDefinition | ExpressionStatement
-ForStatement ::= for '(' (SimpleStatement)? ';' (Expression)? ';' (ExpressionStatement)? ')' Statement
-InlineAssemblyStatement ::= assembly InlineAssemblyBlock
-DoWhileStatement ::= do Statement while '(' Expression ')'
+ForStatement ::= for '(' (SimpleStatement)? ';' (Expression)? ';' (ExpressionStatement)? ')' Statement {pin=1}
+InlineAssemblyStatement ::= assembly InlineAssemblyBlock {pin=1}
+DoWhileStatement ::= do Statement while '(' Expression ')' {pin=1}
 ContinueSt ::= continue
 BreakSt ::= break
-ReturnSt ::= return Expression?
+ReturnSt ::= return Expression? {pin=1}
 ThrowSt ::= throw
 SeqExpression ::= '(' Expression (',' Expression)* ')'
 VariableDefinition ::= VariableDeclaration ( '=' (SeqExpression | Expression) )?
@@ -224,10 +224,10 @@ OrOpExpression ::= Expression '|' Expression
 XorOpExpression ::= Expression '^' Expression
 AndOpExpression ::= Expression '&' Expression
 ShiftExpression ::= Expression ('<<' | '>>') Expression
-PlusMinExpression ::=Expression ('+' | '-') Expression
+PlusMinExpression ::= Expression ('+' | '-') Expression
 MultDivExpression ::= Expression ('*' | '/' | '%') Expression
 ExponentExpression ::= Expression '**' Expression
-UnaryExpression ::= ('!' | '~' | delete | '++' | '--' | '+' | '-') Expression
+UnaryExpression ::= ('!' | '~' | delete | '++' | '--' | '+' | '-') Expression {pin=1}
 IncrementExpression ::= Expression ('++' | '--')
 ParenExpression ::= '(' Expression ')' { pin = 1 }
 
@@ -241,8 +241,8 @@ PrimaryExpression ::= Identifier
 FunctionCallExpression ::= ( PrimaryExpression | NewExpression | TypeName ) ( ( '.' Identifier ) | ( '[' Expression ']' ) )*  '(' FunctionCallArguments? ')'
 CallExpression ::= Expression ( ( '.' Identifier ) | ( '[' Expression ']' ) )* '(' FunctionCallArguments? ')' ('(' FunctionCallArguments? ')')*
 FunctionCallArguments ::= MapExpression | Expression? ( ',' Expression )*
-private MapExpressionClause ::= Identifier ':' Expression
-MapExpression ::= '{' MapExpressionClause (',' MapExpressionClause )* '}'
+private MapExpressionClause ::= Identifier ':' Expression {pin=2}
+MapExpression ::= '{' MapExpressionClause (',' MapExpressionClause )* '}' {pin=1}
 
 NewExpression ::= new Identifier
 MemberAccessExpression ::= Expression '.' Identifier
@@ -265,9 +265,9 @@ ElementaryTypeName ::= address | bool | string | var | NumberType
 
 NumberType ::= intNumType | uIntNumType | byteNumType | fixedNumType | uFixedNumType
 
-InlineAssemblyBlock ::= '{' AssemblyItem* '}'
+InlineAssemblyBlock ::= '{' AssemblyItem* '}' {pin=1}
 
 AssemblyItem ::= Identifier | FunctionalAssemblyExpression | InlineAssemblyBlock | AssemblyLocalBinding | AssemblyAssignment | NumberLiteral | StringLiteral | HexLiteral
-AssemblyLocalBinding ::= let Identifier ':=' FunctionalAssemblyExpression
-AssemblyAssignment ::= Identifier ':=' FunctionalAssemblyExpression | '=:' Identifier
+AssemblyLocalBinding ::= let Identifier ':=' FunctionalAssemblyExpression {pin=1}
+AssemblyAssignment ::= Identifier ':=' FunctionalAssemblyExpression | '=:' Identifier {pin=1}
 FunctionalAssemblyExpression ::= Identifier '(' AssemblyItem? ( ',' AssemblyItem )* ')'
