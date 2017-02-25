@@ -86,7 +86,6 @@
 
   extends(".*Expression")=Expression
   extends(".*TypeName")=TypeName
-  extends(".*NumType")=NumberType
 }
 
 
@@ -177,8 +176,14 @@ Block ::= '{' Statement* '}' {pin=1}
 private FinishedStatement ::= DoWhileStatement | PlaceholderStatement | ContinueSt | BreakSt | ReturnSt | ThrowSt | SimpleStatement {
   recoverWhile = UntilSemicolonRecover
 }
-Statement ::= IfStatement | WhileStatement | ForStatement | Block | InlineAssemblyStatement | FinishedStatement ';'
+Statement ::= IfStatement | WhileStatement | ForStatement | Block | InlineAssemblyStatement | TupleStatement | FinishedStatement ';'
 
+// intentionally not pinned
+TupleStatement ::= VariableDeclaration '=' SeqExpression ';'
+    | declarationList '=' SeqExpression ';'
+    | SeqExpression '=' SeqExpression ';'
+    | declarationList '=' Expression ';'
+    | SeqExpression '=' Expression ';'
 
 ExpressionStatement ::= Expression
 IfStatement ::= if '(' Expression ')' Statement ( else Statement )? {pin = 1}
@@ -192,8 +197,8 @@ ContinueSt ::= continue
 BreakSt ::= break
 ReturnSt ::= return Expression? {pin=1}
 ThrowSt ::= throw
-SeqExpression ::= '(' Expression (',' Expression)* ')'
-VariableDefinition ::= VariableDeclaration ( '=' (SeqExpression | Expression) )?
+SeqExpression ::= '(' ','? Expression (',' Expression)* ','? ')'
+VariableDefinition ::= VariableDeclaration ( '=' Expression )?
 
 Expression ::=
   TernaryExpression | IncrementExpression | FunctionCallExpression | CallExpression | IndexAccessExpression | MemberAccessExpression | ParenExpression
