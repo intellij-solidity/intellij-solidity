@@ -180,9 +180,7 @@ Statement ::= IfStatement | WhileStatement | ForStatement | Block | InlineAssemb
 
 // intentionally not pinned
 TupleStatement ::= VariableDeclaration '=' SeqExpression ';'
-    | declarationList '=' SeqExpression ';'
     | SeqExpression '=' SeqExpression ';'
-    | declarationList '=' Expression ';'
     | SeqExpression '=' Expression ';'
 
 ExpressionStatement ::= Expression
