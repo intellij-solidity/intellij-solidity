@@ -102,11 +102,15 @@ PragmaDirective ::= PragmaPart ';'
 
 private ClosedBracketRecover ::= !('}')
 private ImportRuleSet ::= Identifier (as Identifier)? ( ',' Identifier (as Identifier)? )* {
-    recoverWhile = ClosedBracketRecover
+  recoverWhile = ClosedBracketRecover
 }
-private ImportDirectivePart ::= import StringLiteral (as Identifier)?
-        | import ('*' | Identifier) (as Identifier)? 'from' StringLiteral
-        | import '{' ImportRuleSet '}' 'from' StringLiteral {
+ImportPath ::= StringLiteral {
+  implements = [ "me.serce.solidity.lang.psi.SolidityNamedElement" ]
+  mixin = "me.serce.solidity.lang.psi.impl.mixin.SolidityImportPathElement"
+}
+private ImportDirectivePart ::= import ImportPath (as Identifier)?
+        | import ('*' | Identifier) (as Identifier)? 'from' ImportPath
+        | import '{' ImportRuleSet '}' 'from' ImportPath {
  pin = 1
  recoverWhile = UntilSemicolonRecover
 }
