@@ -66,6 +66,11 @@
 
         <internalFileTemplate name="Solidity Contract"/>
         <internalFileTemplate name="Solidity Library"/>
+
+        <stubIndex implementation="me.serce.solidity.lang.stubs.SolidityNamedElementIndex"/>
+        <stubIndex implementation="me.serce.solidity.lang.stubs.SolidityGotoClassIndex"/>
+
+        <gotoClassContributor implementation="me.serce.solidity.ide.navigation.SolidityClassNavigationContributor"/>
     </extensions>
 
     <actions>

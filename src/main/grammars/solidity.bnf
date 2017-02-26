@@ -102,11 +102,11 @@ PragmaDirective ::= PragmaPart ';'
 
 private ClosedBracketRecover ::= !('}')
 private ImportRuleSet ::= Identifier (as Identifier)? ( ',' Identifier (as Identifier)? )* {
-  recoverWhile = ClosedBracketRecover
+    recoverWhile = ClosedBracketRecover
 }
 ImportPath ::= StringLiteral {
-  implements = [ "me.serce.solidity.lang.psi.SolidityNamedElement" ]
-  mixin = "me.serce.solidity.lang.psi.impl.mixin.SolidityImportPathElement"
+    implements = [ "me.serce.solidity.lang.psi.SolidityNamedElement" ]
+    mixin = "me.serce.solidity.lang.psi.impl.mixin.SolidityImportPathElement"
 }
 private ImportDirectivePart ::= import ImportPath (as Identifier)?
         | import ('*' | Identifier) (as Identifier)? 'from' ImportPath
@@ -119,7 +119,13 @@ ImportDirective ::= ImportDirectivePart ';'
 
 ContractDefinition ::= ( contract | library ) Identifier
                      ( is InheritanceSpecifier (',' InheritanceSpecifier )* )?
-                     '{' ContractPart* '}' {pin=1}
+                     '{' ContractPart* '}' {
+    pin = 1
+    implements = "me.serce.solidity.lang.psi.SolidityContractOrLibElement"
+    mixin = "me.serce.solidity.lang.psi.impl.mixin.SolidityContractOrLibMixin"
+    stubClass = "me.serce.solidity.lang.stubs.SolidityContractOrLibDefStub"
+    elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
+}
 
 ContractPart ::= StateVariableDeclaration | UsingForDeclaration
              | StructDefinition | ModifierDefinition | FunctionDefinition | EventDefinition | EnumDefinition
@@ -140,7 +146,13 @@ FunctionDefinition ::= function Identifier? ParameterList
 EventDefinition ::= event Identifier IndexedParameterList anonymous? ';' {pin=1}
 
 EnumValue ::= Identifier
-EnumDefinition ::= enum Identifier '{' EnumValue? (',' EnumValue)* '}' {pin=1}
+EnumDefinition ::= enum Identifier '{' EnumValue? (',' EnumValue)* '}' {
+    pin = 1
+    implements = "me.serce.solidity.lang.psi.SolidityEnumDefElement"
+    mixin = "me.serce.solidity.lang.psi.impl.mixin.SolidityEnumItemImplMixin"
+    stubClass = "me.serce.solidity.lang.stubs.SolidityEnumDefStub"
+    elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
+}
 
 IndexedParameterList ::= '(' ( TypeName indexed? Identifier? (',' TypeName indexed? Identifier?)* )? ')'
 ParameterList ::=        '(' ( TypeName            Identifier? (',' TypeName            Identifier?)* )? ')'
@@ -178,7 +190,7 @@ StorageLocation ::= memory | storage
 
 Block ::= '{' Statement* '}' {pin=1}
 private FinishedStatement ::= DoWhileStatement | PlaceholderStatement | ContinueSt | BreakSt | ReturnSt | ThrowSt | SimpleStatement {
-  recoverWhile = UntilSemicolonRecover
+    recoverWhile = UntilSemicolonRecover
 }
 Statement ::= IfStatement | WhileStatement | ForStatement | Block | InlineAssemblyStatement | TupleStatement | FinishedStatement ';'
 

@@ -10,3 +10,8 @@ interface SolidityElement : PsiElement {
 }
 
 interface SolidityNamedElement : SolidityElement, PsiNamedElement, NavigatablePsiElement
+
+
+interface SolidityEnumDefElement : SolidityNamedElement
+
+interface SolidityContractOrLibElement : SolidityNamedElement

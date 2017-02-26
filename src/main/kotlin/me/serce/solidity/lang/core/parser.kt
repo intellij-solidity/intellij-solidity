@@ -14,7 +14,7 @@ import com.intellij.psi.tree.IFileElementType
 import com.intellij.psi.tree.TokenSet
 import me.serce.solidity.SolidityParser
 import me.serce.solidity.lang.core.SolidityTokenTypes.*
-import me.serce.solidity.lang.SolidityLanguage
+import me.serce.solidity.lang.stubs.SolidityFileStub
 
 class SolidityParserDefinition : ParserDefinition {
     override fun createParser(project: Project?): PsiParser = SolidityParser()
@@ -30,14 +30,13 @@ class SolidityParserDefinition : ParserDefinition {
 
     override fun getCommentTokens(): TokenSet = COMMENTS
 
-    override fun getFileNodeType(): IFileElementType? = FILE
+    override fun getFileNodeType(): IFileElementType? = SolidityFileStub.Type
 
     override fun createLexer(project: Project?): Lexer = SolidityLexer()
 
     override fun createElement(node: ASTNode?): PsiElement = SolidityTokenTypes.Factory.createElement(node)
 
     companion object {
-        val FILE: IFileElementType = IFileElementType(SolidityLanguage)
         val WHITE_SPACES: TokenSet = TokenSet.create(TokenType.WHITE_SPACE)
         val COMMENTS: TokenSet = TokenSet.create(SolidityTokenTypes.COMMENT)
         val BINARY_OPERATORS: TokenSet = TokenSet.create(
