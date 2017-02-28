@@ -10,6 +10,7 @@ import com.intellij.formatting.SpacingBuilder
 import me.serce.solidity.lang.SolidityLanguage
 import me.serce.solidity.lang.core.SolidityTokenTypes.*
 import com.intellij.psi.PsiFile
+import com.intellij.psi.tree.TokenSet
 import me.serce.solidity.lang.core.SolidityParserDefinition.Companion.BINARY_OPERATORS
 import me.serce.solidity.lang.core.SolidityParserDefinition.Companion.CONTROL_STRUCTURES
 
@@ -33,6 +34,7 @@ class SolidityFormattingModelBuilder : FormattingModelBuilder {
 
   companion object {
     fun createSpacingBuilder(settings: CodeStyleSettings): SpacingBuilder {
+      val SOURCE_UNIT = TokenSet.create(CONTRACT_DEFINITION, IMPORT_DIRECTIVE, PRAGMA_DIRECTIVE)
       return SpacingBuilder(settings, SolidityLanguage)
         .after(LPAREN).none()
         .before(RPAREN).none()
@@ -51,6 +53,7 @@ class SolidityFormattingModelBuilder : FormattingModelBuilder {
         .after(CONTRACT).spaces(1)
         .aroundInside(IDENTIFIER, CONTRACT_DEFINITION).spaces(1)
         .after(STATEMENT).lineBreakInCode()
+        .between(SOURCE_UNIT, SOURCE_UNIT).blankLines(2)
     }
   }
 }
