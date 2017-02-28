@@ -26,21 +26,10 @@ class SolidityFormattingTest : SolidityLightPlatformCodeInsightFixtureTestCase()
   private val expectedOutputFileName: String
     get() = this.getTestName(true) + "-after.sol"
 
-  fun testContract() {
-    this.doTest()
-  }
-
-  fun testLibrary() {
-    this.doTest()
-  }
-
-  fun testIndent() {
-    this.doTest()
-  }
-
-  fun testStatementLineBreak() {
-    this.doTest()
-  }
+  fun testContract() = this.doTest()
+  fun testLibrary() = this.doTest()
+  fun testIndent() = this.doTest()
+  fun testStatementLineBreak() = this.doTest()
 
   override fun getTestDataPath(): String {
     return "src/test/resources/fixtures/formatter/"
