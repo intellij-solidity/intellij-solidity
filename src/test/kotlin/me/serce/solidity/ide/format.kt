@@ -10,7 +10,6 @@ import java.io.File
 import me.serce.solidity.utils.SolidityLightPlatformCodeInsightFixtureTestCase
 
 class SolidityFormattingTest : SolidityLightPlatformCodeInsightFixtureTestCase() {
-  @Throws(Exception::class)
   private fun doTest() {
     val inputFile = this.inputFileName
     val inputText = FileUtil.loadFile(File(this.testDataPath + inputFile))
@@ -27,22 +26,18 @@ class SolidityFormattingTest : SolidityLightPlatformCodeInsightFixtureTestCase()
   private val expectedOutputFileName: String
     get() = this.getTestName(true) + "-after.sol"
 
-  @Throws(Exception::class)
   fun testContract() {
     this.doTest()
   }
 
-  @Throws(Exception::class)
   fun testLibrary() {
     this.doTest()
   }
 
-  @Throws(Exception::class)
   fun testIndent() {
     this.doTest()
   }
 
-  @Throws(Exception::class)
   fun testStatementLineBreak() {
     this.doTest()
   }

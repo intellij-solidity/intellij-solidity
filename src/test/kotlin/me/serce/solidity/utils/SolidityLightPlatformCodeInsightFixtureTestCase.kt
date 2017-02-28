@@ -22,7 +22,6 @@ abstract class SolidityLightPlatformCodeInsightFixtureTestCase : LightPlatformCo
     myIsSmallIde = false
   }
 
-  @Throws(Exception::class)
   override fun setUp() {
     if (myIsSmallIde) {
       myBackedUpPlatformPrefix = PlatformUtils.getPlatformPrefix()
@@ -31,7 +30,6 @@ abstract class SolidityLightPlatformCodeInsightFixtureTestCase : LightPlatformCo
     super.setUp()
   }
 
-  @Throws(Exception::class)
   override fun tearDown() {
     if (myIsSmallIde) {
       System.setProperty(PlatformUtils.PLATFORM_PREFIX_KEY, myBackedUpPlatformPrefix!!)
