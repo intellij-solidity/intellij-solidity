@@ -1,3 +1,5 @@
+image:./src/main/resources/images/plugin_logo.png[link=https://plugins.jetbrains.com/idea/plugin/9475-intellij-solidity]
+
 = link:https://solidity.readthedocs.io/[Solidity] plugin for IntelliJ
 
 image:https://travis-ci.org/intellij-solidity/intellij-solidity.svg?branch=master["Build Status", link="https://travis-ci.org/intellij-solidity/intellij-solidity"]
