@@ -18,36 +18,38 @@ import me.serce.solidity.lang.core.SolidityParserDefinition.Companion.CONTROL_ST
  * https://github.com/ethereum/solidity/blob/develop/docs/style-guide.rst
  */
 class SolidityFormattingModelBuilder : FormattingModelBuilder {
-  private fun createSpacingBuilder(settings: CodeStyleSettings): SpacingBuilder {
-    return SpacingBuilder(settings, SolidityLanguage)
-      .after(LPAREN).none()
-      .before(RPAREN).none()
-      .after(LBRACE).none()
-      .before(RBRACE).none()
-      .after(LBRACKET).none()
-      .before(RBRACKET).none()
-      .before(COMMA).none()
-      .before(SEMICOLON).none()
-      .around(BINARY_OPERATORS).spaces(1)
-      .around(QUESTION).spaces(1)
-      .around(COLON).spaces(1)
-      .beforeInside(EXPRESSION, UNARY_EXPRESSION).none()
-      .beforeInside(PARAMETER_LIST, FUNCTION_DEFINITION).none()
-      .after(CONTROL_STRUCTURES).spaces(1)
-      .after(CONTRACT).spaces(1)
-      .aroundInside(IDENTIFIER, CONTRACT_DEFINITION).spaces(1)
-  }
-
   override fun createModel(element: PsiElement, settings: CodeStyleSettings): FormattingModel {
     val spacingBuilder = createSpacingBuilder(settings)
 
     val containingFile = element.containingFile
-    val solidityBlock = SolidityBlock(element.node, spacingBuilder)
+    val solidityBlock = SolidityFormattingBlock(element.node, null, Indent.getNoneIndent(), null, settings, spacingBuilder)
 
     return FormattingModelProvider.createFormattingModelForPsiFile(containingFile, solidityBlock, settings)
   }
 
   override fun getRangeAffectingIndent(file: PsiFile, offset: Int, elementAtOffset: ASTNode): TextRange? {
     return null
+  }
+
+  companion object {
+    fun createSpacingBuilder(settings: CodeStyleSettings): SpacingBuilder {
+      return SpacingBuilder(settings, SolidityLanguage)
+        .after(LPAREN).none()
+        .before(RPAREN).none()
+        .after(LBRACE).none()
+        .before(RBRACE).none()
+        .after(LBRACKET).none()
+        .before(RBRACKET).none()
+        .before(COMMA).none()
+        .before(SEMICOLON).none()
+        .around(BINARY_OPERATORS).spaces(1)
+        .around(QUESTION).spaces(1)
+        .around(COLON).spaces(1)
+        .beforeInside(EXPRESSION, UNARY_EXPRESSION).none()
+        .beforeInside(PARAMETER_LIST, FUNCTION_DEFINITION).none()
+        .after(CONTROL_STRUCTURES).spaces(1)
+        .after(CONTRACT).spaces(1)
+        .aroundInside(IDENTIFIER, CONTRACT_DEFINITION).spaces(1)
+    }
   }
 }

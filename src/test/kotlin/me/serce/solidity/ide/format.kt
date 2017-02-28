@@ -37,6 +37,11 @@ class SolidityFormattingTest : SolidityLightPlatformCodeInsightFixtureTestCase()
     this.doTest()
   }
 
+  @Throws(Exception::class)
+  fun testIndent() {
+    this.doTest()
+  }
+
   override fun getTestDataPath(): String {
     return "src/test/resources/fixtures/formatter/"
   }
