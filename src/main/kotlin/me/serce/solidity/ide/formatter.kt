@@ -54,6 +54,7 @@ class SolidityFormattingModelBuilder : FormattingModelBuilder {
         .aroundInside(IDENTIFIER, CONTRACT_DEFINITION).spaces(1)
         .after(STATEMENT).lineBreakInCode()
         .between(SOURCE_UNIT, SOURCE_UNIT).blankLines(2)
+        .between(CONTRACT_PART, CONTRACT_PART).blankLines(1)
     }
   }
 }

@@ -31,6 +31,7 @@ class SolidityFormattingTest : SolidityLightPlatformCodeInsightFixtureTestCase()
   fun testIndent() = this.doTest()
   fun testStatementLineBreak() = this.doTest()
   fun testBlankLinesBetweenContracts() = this.doTest()
+  fun testBlankLinesBetweenContractParts() = this.doTest()
 
   override fun getTestDataPath(): String {
     return "src/test/resources/fixtures/formatter/"
