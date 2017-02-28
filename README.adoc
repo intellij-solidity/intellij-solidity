@@ -5,6 +5,8 @@ image:./src/main/resources/images/plugin_logo.png[link=https://plugins.jetbrains
 image:https://travis-ci.org/intellij-solidity/intellij-solidity.svg?branch=master["Build Status", link="https://travis-ci.org/intellij-solidity/intellij-solidity"]
 image:https://badges.gitter.im/intellij-solidity/intellij-solidity.svg[link="https://gitter.im/intellij-solidity/intellij-solidity?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge"]
 
+image:./src/main/resources/images/contract_creation.gif[]
+
 == Current status
 
 This plugin is in alpha stage.
