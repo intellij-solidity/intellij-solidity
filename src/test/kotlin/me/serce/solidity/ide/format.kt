@@ -42,6 +42,11 @@ class SolidityFormattingTest : SolidityLightPlatformCodeInsightFixtureTestCase()
     this.doTest()
   }
 
+  @Throws(Exception::class)
+  fun testStatementLineBreak() {
+    this.doTest()
+  }
+
   override fun getTestDataPath(): String {
     return "src/test/resources/fixtures/formatter/"
   }

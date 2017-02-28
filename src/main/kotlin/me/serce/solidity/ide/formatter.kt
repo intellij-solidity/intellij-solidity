@@ -50,6 +50,7 @@ class SolidityFormattingModelBuilder : FormattingModelBuilder {
         .after(CONTROL_STRUCTURES).spaces(1)
         .after(CONTRACT).spaces(1)
         .aroundInside(IDENTIFIER, CONTRACT_DEFINITION).spaces(1)
+        .after(STATEMENT).lineBreakInCode()
     }
   }
 }
