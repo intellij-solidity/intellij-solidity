@@ -40,7 +40,7 @@ class SolidityParserDefinition : ParserDefinition {
         val WHITE_SPACES: TokenSet = TokenSet.create(TokenType.WHITE_SPACE)
         val COMMENTS: TokenSet = TokenSet.create(SolidityTokenTypes.COMMENT)
         val BINARY_OPERATORS: TokenSet = TokenSet.create(
-            PLUS, MINUS, MULT, DIV, EXPONENT, NOT,
+            PLUS, MINUS, MULT, DIV, EXPONENT,
             ASSIGN, TO, EQ, NEQ,
             PLUS_ASSIGN, MINUS_ASSIGN, MULT_ASSIGN, DIV_ASSIGN, OR_ASSIGN, XOR_ASSIGN, AND_ASSIGN, LSHIFT_ASSIGN, RSHIFT_ASSIGN, PERCENT_ASSIGN,
             LESS, LESSEQ, MORE, MOREEQ, CARET, AND, ANDAND, OR, OROR,

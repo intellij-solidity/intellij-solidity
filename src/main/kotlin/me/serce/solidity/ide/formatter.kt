@@ -47,6 +47,7 @@ class SolidityFormattingModelBuilder : FormattingModelBuilder {
         .around(BINARY_OPERATORS).spaces(1)
         .around(QUESTION).spaces(1)
         .around(COLON).spaces(1)
+        .after(RETURNS).spaces(1)
         .beforeInside(EXPRESSION, UNARY_EXPRESSION).none()
         .beforeInside(PARAMETER_LIST, FUNCTION_DEFINITION).none()
         .after(CONTROL_STRUCTURES).spaces(1)
