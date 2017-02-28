@@ -13,6 +13,8 @@
         <b>v0.1.3</b>
         <ul>
           <li>Improve grammar (error recovering)</li>
+          <li>Add goto definition</li>
+          <li>Add code formatting</li>
         </ul>
       </p>
       <p>
