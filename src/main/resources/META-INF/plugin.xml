@@ -79,7 +79,7 @@
         <action id="solidity.file.create"
                 class="me.serce.solidity.ide.actions.SolidityCreateFileAction"
                 text="Smart contract" description="Create new solidity contract">
-            <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFile"/>
+            <add-to-group group-id="NewGroup" anchor="after" relative-to-action="NewDir"/>
         </action>
     </actions>
 
