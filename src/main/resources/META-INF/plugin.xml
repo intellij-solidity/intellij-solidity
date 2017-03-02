@@ -15,6 +15,7 @@
           <li>Improve grammar (error recovering)</li>
           <li>Add goto definition</li>
           <li>Add code formatting</li>
+          <li>Add block and comments folding/unfolding</li>
         </ul>
       </p>
       <p>
@@ -73,6 +74,7 @@
         <stubIndex implementation="me.serce.solidity.lang.stubs.SolidityGotoClassIndex"/>
 
         <gotoClassContributor implementation="me.serce.solidity.ide.navigation.SolidityClassNavigationContributor"/>
+        <lang.foldingBuilder language="Solidity" implementationClass="me.serce.solidity.ide.SolidityFoldingBuilder"/>
     </extensions>
 
     <actions>
