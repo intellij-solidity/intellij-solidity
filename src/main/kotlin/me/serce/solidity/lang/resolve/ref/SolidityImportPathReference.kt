@@ -4,7 +4,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiManager
 import me.serce.solidity.lang.psi.impl.mixin.SolidityImportPathElement
 
-class SolidityPathReference(element: SolidityImportPathElement) : SolidityReferenceBase<SolidityImportPathElement>(element) {
+class SolidityImportPathReference(element: SolidityImportPathElement) : SolidityReferenceBase<SolidityImportPathElement>(element) {
   override fun singleResolve(): PsiElement? {
     val importText = element.text
     if (importText.length < 2) {

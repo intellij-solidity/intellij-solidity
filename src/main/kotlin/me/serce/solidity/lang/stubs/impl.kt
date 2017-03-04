@@ -8,8 +8,8 @@ import me.serce.solidity.lang.SolidityLanguage
 import me.serce.solidity.lang.core.SolidityFile
 import me.serce.solidity.lang.psi.SolidityContractDefinition
 import me.serce.solidity.lang.psi.SolidityEnumDefinition
-import me.serce.solidity.lang.psi.impl.SolidityContractDefinitionImpl
-import me.serce.solidity.lang.psi.impl.SolidityEnumDefinitionImpl
+import me.serce.solidity.lang.psi.SolidityTypeName
+import me.serce.solidity.lang.psi.impl.*
 
 class SolidityFileStub(file: SolidityFile?) : PsiFileStubImpl<SolidityFile>(file) {
   override fun getType() = Type
@@ -30,6 +30,15 @@ class SolidityFileStub(file: SolidityFile?) : PsiFileStubImpl<SolidityFile>(file
 fun factory(name: String): SolidityStubElementType<*, *> = when (name) {
   "ENUM_DEFINITION" -> SolidityEnumDefStub.Type
   "CONTRACT_DEFINITION" -> SolidityContractOrLibDefStub.Type
+
+  "ELEMENTARY_TYPE_NAME" -> SolidityTypeRefStub.Type("ELEMENTARY_TYPE_NAME", ::SolidityElementaryTypeNameImpl)
+  "MAPPING_TYPE_NAME" -> SolidityTypeRefStub.Type("MAPPING_TYPE_NAME", ::SolidityMappingTypeNameImpl)
+  "FUNCTION_TYPE_NAME" -> SolidityTypeRefStub.Type("FUNCTION_TYPE_NAME", ::SolidityFunctionTypeNameImpl)
+  "ARRAY_TYPE_NAME" -> SolidityTypeRefStub.Type("ARRAY_TYPE_NAME", ::SolidityArrayTypeNameImpl)
+  "USER_DEFINED_LOCATION_TYPE_NAME" -> SolidityTypeRefStub.Type("USER_DEFINED_LOCATION_TYPE_NAME", ::SolidityUserDefinedLocationTypeNameImpl)
+
+  "USER_DEFINED_TYPE_NAME" -> SolidityTypeRefStub.Type("USER_DEFINED_TYPE_NAME", ::SolidityUserDefinedTypeNameImpl)
+
   else -> error("Unknown element $name")
 }
 
@@ -79,5 +88,25 @@ class SolidityContractOrLibDefStub(parent: StubElement<*>?,
   }
 }
 
+class SolidityTypeRefStub(parent: StubElement<*>?,
+                          elementType: IStubElementType<*, *>)
+  : StubBase<SolidityTypeName>(parent, elementType) {
+
+  class Type<T : SolidityTypeName>(val debugName: String,
+                                   private val psiFactory: (SolidityTypeRefStub, IStubElementType<*, *>) -> T)
+    : SolidityStubElementType<SolidityTypeRefStub, T>(debugName) {
+    override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?) =
+      SolidityTypeRefStub(parentStub, this)
+
+    override fun serialize(stub: SolidityTypeRefStub, dataStream: StubOutputStream) = with(dataStream) {
+    }
+
+    override fun createPsi(stub: SolidityTypeRefStub) = psiFactory(stub, this)
+
+    override fun createStub(psi: T, parentStub: StubElement<*>?) = SolidityTypeRefStub(parentStub, this)
+
+    override fun indexStub(stub: SolidityTypeRefStub, sink: IndexSink) {}
+  }
+}
 
 private fun StubInputStream.readNameAsString(): String? = readName()?.string

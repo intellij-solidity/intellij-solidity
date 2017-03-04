@@ -174,18 +174,43 @@ TypeName ::= ElementaryTypeName
          | MappingTypeName
          | UserDefinedLocationTypeName
          | ArrayTypeName
-         | FunctionTypeName
+         | FunctionTypeName {
+    stubClass = "me.serce.solidity.lang.stubs.SolidityTypeRefStub"
+    extends = "me.serce.solidity.lang.psi.impl.SolidityStubbedElementImpl<?>"
+}
 
-ArrayTypeName ::= TypeName '[' Expression? ']' StorageLocation?
-private UserDefinedLocationTypeName ::= UserDefinedWithLocationTypeName | UserDefinedWithoutLocationTypeName
-UserDefinedWithLocationTypeName ::= UserDefinedTypeName StorageLocation
-UserDefinedWithoutLocationTypeName ::= UserDefinedTypeName
+ArrayTypeName ::= TypeName '[' Expression? ']' StorageLocation? {
+    stubClass = "me.serce.solidity.lang.stubs.SolidityTypeRefStub"
+    elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
+}
 
-UserDefinedTypeName ::= Identifier ( '.' Identifier )*
+UserDefinedLocationTypeName ::= UserDefinedWithLocationTypeName | UserDefinedWithoutLocationTypeName {
+    stubClass = "me.serce.solidity.lang.stubs.SolidityTypeRefStub"
+    elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
+}
+private UserDefinedWithLocationTypeName ::= UserDefinedTypeName StorageLocation
+private UserDefinedWithoutLocationTypeName ::= UserDefinedTypeName
 
-MappingTypeName ::= mapping '(' ElementaryTypeName '=>' TypeName ')' {pin = 1}
+UserDefinedTypeName ::= Identifier ( '.' Identifier )* {
+    implements = "me.serce.solidity.lang.psi.SolidityReferenceElement"
+    mixin = "me.serce.solidity.lang.psi.impl.mixin.SolidityUserDefinedTypeNameImplMixin"
+//    stubClass = "me.serce.solidity.lang.stubs.SolidityUserDefinedTypeNameStub"
+    elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
+}
+
+MappingTypeName ::= mapping '(' ElementaryTypeName '=>' TypeName ')' {
+    pin = 1
+    stubClass = "me.serce.solidity.lang.stubs.SolidityTypeRefStub"
+    elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
+}
+
 FunctionTypeName ::= function TypeNameList ( internal | external | constant | payable )*
-                   ( returns TypeNameList )? {pin=1}
+                   ( returns TypeNameList )? {
+    pin = 1
+    stubClass = "me.serce.solidity.lang.stubs.SolidityTypeRefStub"
+    elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
+}
+
 StorageLocation ::= memory | storage
 
 Block ::= '{' Statement* '}' {pin=1}
@@ -280,7 +305,10 @@ private DecimalNumber ::= decimalNumber
 
 ElementaryTypeNameExpression ::= ElementaryTypeName
 
-ElementaryTypeName ::= address | bool | string | var | NumberType
+ElementaryTypeName ::= address | bool | string | var | NumberType {
+    stubClass = "me.serce.solidity.lang.stubs.SolidityTypeRefStub"
+    elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
+}
 
 NumberType ::= intNumType | uIntNumType | byteNumType | fixedNumType | uFixedNumType
 
