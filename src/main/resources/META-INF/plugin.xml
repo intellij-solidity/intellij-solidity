@@ -42,44 +42,44 @@
     <depends>com.intellij.modules.lang</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <fileTypeFactory implementation="me.serce.solidity.lang.SoliditylFileTypeFactory"/>
+        <fileTypeFactory implementation="me.serce.solidity.lang.SolidityFileTypeFactory"/>
 
         <lang.parserDefinition language="Solidity"
                                implementationClass="me.serce.solidity.lang.core.SolidityParserDefinition"/>
 
         <lang.syntaxHighlighterFactory language="Solidity"
-                                       implementationClass="me.serce.solidity.ide.SolidityHighlighterFactory"/>
+                                       implementationClass="me.serce.solidity.ide.SolHighlighterFactory"/>
 
         <annotator language="Solidity" implementationClass="me.serce.solidity.ide.SolidityAnnotator"/>
 
         <!-- Commenter -->
-        <lang.commenter language="Solidity" implementationClass="me.serce.solidity.ide.SolidityCommenter"/>
+        <lang.commenter language="Solidity" implementationClass="me.serce.solidity.ide.SolCommenter"/>
 
         <!-- Brace Matcher -->
-        <lang.braceMatcher language="Solidity" implementationClass="me.serce.solidity.ide.SolidityBraceMatcher"/>
+        <lang.braceMatcher language="Solidity" implementationClass="me.serce.solidity.ide.SolBraceMatcher"/>
 
         <!-- Quote Handlers -->
-        <lang.quoteHandler language="Solidity" implementationClass="me.serce.solidity.ide.SolidityQuoteTokenHandler"/>
+        <lang.quoteHandler language="Solidity" implementationClass="me.serce.solidity.ide.SolQuoteTokenHandler"/>
 
 
         <completion.contributor language="Solidity"
-                                implementationClass="me.serce.solidity.lang.completion.SolidityKeywordCompletionContributor"/>
+                                implementationClass="me.serce.solidity.lang.completion.SolKeywordCompletionContributor"/>
 
         <lang.formatter language="Solidity" implementationClass="me.serce.solidity.ide.SolidityFormattingModelBuilder"/>
 
         <internalFileTemplate name="Solidity Contract"/>
         <internalFileTemplate name="Solidity Library"/>
 
-        <stubIndex implementation="me.serce.solidity.lang.stubs.SolidityNamedElementIndex"/>
-        <stubIndex implementation="me.serce.solidity.lang.stubs.SolidityGotoClassIndex"/>
+        <stubIndex implementation="me.serce.solidity.lang.stubs.SolNamedElementIndex"/>
+        <stubIndex implementation="me.serce.solidity.lang.stubs.SolGotoClassIndex"/>
 
-        <gotoClassContributor implementation="me.serce.solidity.ide.navigation.SolidityClassNavigationContributor"/>
+        <gotoClassContributor implementation="me.serce.solidity.ide.navigation.SolClassNavigationContributor"/>
         <lang.foldingBuilder language="Solidity" implementationClass="me.serce.solidity.ide.SolidityFoldingBuilder"/>
     </extensions>
 
     <actions>
         <action id="solidity.file.create"
-                class="me.serce.solidity.ide.actions.SolidityCreateFileAction"
+                class="me.serce.solidity.ide.actions.SolCreateFileAction"
                 text="Smart contract" description="Create new solidity contract">
             <add-to-group group-id="NewGroup" anchor="after" relative-to-action="NewDir"/>
         </action>

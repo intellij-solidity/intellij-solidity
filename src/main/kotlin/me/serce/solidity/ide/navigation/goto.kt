@@ -7,13 +7,13 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.stubs.StubIndex
 import com.intellij.psi.stubs.StubIndexKey
-import me.serce.solidity.lang.psi.SolidityNamedElement
-import me.serce.solidity.lang.stubs.SolidityGotoClassIndex
+import me.serce.solidity.lang.psi.SolNamedElement
+import me.serce.solidity.lang.stubs.SolGotoClassIndex
 
 
-abstract class SolidityNavigationContributorBase<T>(
+abstract class SolNavigationContributorBase<T>(
   private val indexKey: StubIndexKey<String, T>,
-  private val clazz: Class<T>) : ChooseByNameContributor, GotoClassContributor where T : NavigationItem, T : SolidityNamedElement {
+  private val clazz: Class<T>) : ChooseByNameContributor, GotoClassContributor where T : NavigationItem, T : SolNamedElement {
 
   override fun getNames(project: Project?, includeNonProjectItems: Boolean): Array<out String> = when (project) {
     null -> emptyArray()
@@ -42,5 +42,5 @@ abstract class SolidityNavigationContributorBase<T>(
 }
 
 
-class SolidityClassNavigationContributor
-  : SolidityNavigationContributorBase<SolidityNamedElement>(SolidityGotoClassIndex.KEY, SolidityNamedElement::class.java)
+class SolClassNavigationContributor
+  : SolNavigationContributorBase<SolNamedElement>(SolGotoClassIndex.KEY, SolNamedElement::class.java)

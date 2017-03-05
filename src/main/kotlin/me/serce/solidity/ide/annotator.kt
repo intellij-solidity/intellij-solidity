@@ -4,15 +4,15 @@ import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.Annotator
 import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.psi.PsiElement
-import me.serce.solidity.lang.psi.SolidityElement
-import me.serce.solidity.lang.psi.SolidityElementaryTypeName
-import me.serce.solidity.lang.psi.SolidityNumberType
-import me.serce.solidity.lang.psi.SolidityUserDefinedTypeName
+import me.serce.solidity.lang.psi.SolElement
+import me.serce.solidity.lang.psi.SolElementaryTypeName
+import me.serce.solidity.lang.psi.SolNumberType
+import me.serce.solidity.lang.psi.SolUserDefinedTypeName
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as Defaults
 
 class SolidityAnnotator : Annotator {
   override fun annotate(element: PsiElement, holder: AnnotationHolder) {
-    if (element is SolidityElement) {
+    if (element is SolElement) {
       val highlight = highlight(element)
       if (highlight != null) {
         val (partToHighlight, color) = highlight
@@ -21,12 +21,12 @@ class SolidityAnnotator : Annotator {
     }
   }
 
-  private fun highlight(element: SolidityElement): Pair<PsiElement, TextAttributesKey>? {
+  private fun highlight(element: SolElement): Pair<PsiElement, TextAttributesKey>? {
     return when (element) {
-      is SolidityNumberType -> element to Defaults.KEYWORD
-      is SolidityElementaryTypeName -> element to Defaults.KEYWORD
+      is SolNumberType -> element to Defaults.KEYWORD
+      is SolElementaryTypeName -> element to Defaults.KEYWORD
 
-      is SolidityUserDefinedTypeName -> element to Defaults.CLASS_REFERENCE
+      is SolUserDefinedTypeName -> element to Defaults.CLASS_REFERENCE
 
       else -> null
     }

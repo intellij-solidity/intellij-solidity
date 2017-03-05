@@ -1,16 +1,16 @@
 {
   parserClass="me.serce.solidity.SolidityParser"
 
-  psiClassPrefix="Solidity"
+  psiClassPrefix="Sol"
   psiImplClassSuffix="Impl"
   psiPackage="me.serce.solidity.lang.psi"
   psiImplPackage="me.serce.solidity.lang.psi.impl"
-  implements="me.serce.solidity.lang.psi.SolidityElement"
+  implements="me.serce.solidity.lang.psi.SolElement"
 
   elementTypeHolderClass="me.serce.solidity.lang.core.SolidityTokenTypes"
   elementTypePrefix=""
-  elementTypeClass="me.serce.solidity.lang.core.SolidityElementType"
-  tokenTypeClass="me.serce.solidity.lang.core.SolidityElementType"
+  elementTypeClass="me.serce.solidity.lang.core.SolElementType"
+  tokenTypeClass="me.serce.solidity.lang.core.SolElementType"
   tokenTypeClass="me.serce.solidity.lang.core.SolidityTokenTypes"
 
   tokens = [
@@ -105,8 +105,8 @@ private ImportRuleSet ::= Identifier (as Identifier)? ( ',' Identifier (as Ident
     recoverWhile = ClosedBracketRecover
 }
 ImportPath ::= StringLiteral {
-    implements = [ "me.serce.solidity.lang.psi.SolidityNamedElement" ]
-    mixin = "me.serce.solidity.lang.psi.impl.SolidityImportPathElement"
+    implements = "me.serce.solidity.lang.psi.SolNamedElement"
+    mixin = "me.serce.solidity.lang.psi.impl.SolImportPathElement"
 }
 private ImportDirectivePart ::= import ImportPath (as Identifier)?
         | import ('*' | Identifier) (as Identifier)? 'from' ImportPath
@@ -121,9 +121,9 @@ ContractDefinition ::= ( contract | library ) Identifier
                      ( is InheritanceSpecifier (',' InheritanceSpecifier )* )?
                      '{' ContractPart* '}' {
     pin = 1
-    implements = "me.serce.solidity.lang.psi.SolidityContractOrLibElement"
-    mixin = "me.serce.solidity.lang.psi.impl.SolidityContractOrLibMixin"
-    stubClass = "me.serce.solidity.lang.stubs.SolidityContractOrLibDefStub"
+    implements = "me.serce.solidity.lang.psi.SolContractOrLibElement"
+    mixin = "me.serce.solidity.lang.psi.impl.SolContractOrLibMixin"
+    stubClass = "me.serce.solidity.lang.stubs.SolContractOrLibDefStub"
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
 
@@ -148,9 +148,9 @@ EventDefinition ::= event Identifier IndexedParameterList anonymous? ';' {pin=1}
 EnumValue ::= Identifier
 EnumDefinition ::= enum Identifier '{' EnumValue? (',' EnumValue)* '}' {
     pin = 1
-    implements = "me.serce.solidity.lang.psi.SolidityEnumDefElement"
-    mixin = "me.serce.solidity.lang.psi.impl.SolidityEnumItemImplMixin"
-    stubClass = "me.serce.solidity.lang.stubs.SolidityEnumDefStub"
+    implements = "me.serce.solidity.lang.psi.SolEnumDefElement"
+    mixin = "me.serce.solidity.lang.psi.impl.SolEnumItemImplMixin"
+    stubClass = "me.serce.solidity.lang.stubs.SolEnumDefStub"
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
 
@@ -175,38 +175,38 @@ TypeName ::= ElementaryTypeName
          | UserDefinedLocationTypeName
          | ArrayTypeName
          | FunctionTypeName {
-    stubClass = "me.serce.solidity.lang.stubs.SolidityTypeRefStub"
-    extends = "me.serce.solidity.lang.psi.impl.SolidityStubbedElementImpl<?>"
+    stubClass = "me.serce.solidity.lang.stubs.SolTypeRefStub"
+    extends = "me.serce.solidity.lang.psi.impl.SolStubbedElementImpl<?>"
 }
 
 ArrayTypeName ::= TypeName '[' Expression? ']' StorageLocation? {
-    stubClass = "me.serce.solidity.lang.stubs.SolidityTypeRefStub"
+    stubClass = "me.serce.solidity.lang.stubs.SolTypeRefStub"
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
 
 UserDefinedLocationTypeName ::= UserDefinedWithLocationTypeName | UserDefinedWithoutLocationTypeName {
-    stubClass = "me.serce.solidity.lang.stubs.SolidityTypeRefStub"
+    stubClass = "me.serce.solidity.lang.stubs.SolTypeRefStub"
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
 private UserDefinedWithLocationTypeName ::= UserDefinedTypeName StorageLocation
 private UserDefinedWithoutLocationTypeName ::= UserDefinedTypeName
 
 UserDefinedTypeName ::= Identifier ( '.' Identifier )* {
-    implements = "me.serce.solidity.lang.psi.SolidityReferenceElement"
-    mixin = "me.serce.solidity.lang.psi.impl.SolidityUserDefinedTypeNameImplMixin"
+    implements = "me.serce.solidity.lang.psi.SolReferenceElement"
+    mixin = "me.serce.solidity.lang.psi.impl.SolUserDefinedTypeNameImplMixin"
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
 
 MappingTypeName ::= mapping '(' ElementaryTypeName '=>' TypeName ')' {
     pin = 1
-    stubClass = "me.serce.solidity.lang.stubs.SolidityTypeRefStub"
+    stubClass = "me.serce.solidity.lang.stubs.SolTypeRefStub"
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
 
 FunctionTypeName ::= function TypeNameList ( internal | external | constant | payable )*
                    ( returns TypeNameList )? {
     pin = 1
-    stubClass = "me.serce.solidity.lang.stubs.SolidityTypeRefStub"
+    stubClass = "me.serce.solidity.lang.stubs.SolTypeRefStub"
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
 
@@ -305,7 +305,7 @@ private DecimalNumber ::= decimalNumber
 ElementaryTypeNameExpression ::= ElementaryTypeName
 
 ElementaryTypeName ::= address | bool | string | var | NumberType {
-    stubClass = "me.serce.solidity.lang.stubs.SolidityTypeRefStub"
+    stubClass = "me.serce.solidity.lang.stubs.SolTypeRefStub"
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
 

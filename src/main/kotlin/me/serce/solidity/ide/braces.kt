@@ -6,7 +6,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.tree.IElementType
 import me.serce.solidity.lang.core.SolidityTokenTypes.*
 
-class SolidityBraceMatcher : PairedBraceMatcher {
+class SolBraceMatcher : PairedBraceMatcher {
 
     override fun getPairs() = PAIRS
 

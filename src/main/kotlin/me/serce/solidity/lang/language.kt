@@ -1,8 +1,10 @@
 package me.serce.solidity.lang
 
-import com.intellij.icons.AllIcons
 import com.intellij.lang.Language
-import com.intellij.openapi.fileTypes.*
+import com.intellij.openapi.fileTypes.ExtensionFileNameMatcher
+import com.intellij.openapi.fileTypes.FileTypeConsumer
+import com.intellij.openapi.fileTypes.FileTypeFactory
+import com.intellij.openapi.fileTypes.LanguageFileType
 import com.intellij.openapi.vfs.VirtualFile
 import me.serce.solidity.ide.SolidityIcons
 import java.nio.charset.StandardCharsets.UTF_8
@@ -11,7 +13,7 @@ object SolidityLanguage : Language("Solidity", "text/solidity") {
     override fun isCaseSensitive() = true
 }
 
-class SoliditylFileTypeFactory : FileTypeFactory() {
+class SolidityFileTypeFactory : FileTypeFactory() {
     override fun createFileTypes(consumer: FileTypeConsumer) {
         consumer.consume(
                 SolidityFileType,

@@ -2,23 +2,23 @@ package me.serce.solidity.lang.stubs
 
 import com.intellij.psi.stubs.StringStubIndexExtension
 import com.intellij.psi.stubs.StubIndexKey
-import me.serce.solidity.lang.psi.SolidityNamedElement
+import me.serce.solidity.lang.psi.SolNamedElement
 
-class SolidityGotoClassIndex : StringStubIndexExtension<SolidityNamedElement>() {
+class SolGotoClassIndex : StringStubIndexExtension<SolNamedElement>() {
   companion object {
-    val KEY: StubIndexKey<String, SolidityNamedElement> = StubIndexKey.createIndexKey(SolidityGotoClassIndex::class.java.canonicalName)
+    val KEY: StubIndexKey<String, SolNamedElement> = StubIndexKey.createIndexKey(SolGotoClassIndex::class.java.canonicalName)
   }
 
   override fun getVersion(): Int = SolidityFileStub.Type.stubVersion
-  override fun getKey(): StubIndexKey<String, SolidityNamedElement> = KEY
+  override fun getKey(): StubIndexKey<String, SolNamedElement> = KEY
 }
 
 
-class SolidityNamedElementIndex : StringStubIndexExtension<SolidityNamedElement>() {
+class SolNamedElementIndex : StringStubIndexExtension<SolNamedElement>() {
   companion object {
-    val KEY: StubIndexKey<String, SolidityNamedElement> = StubIndexKey.createIndexKey(SolidityNamedElementIndex::class.java.canonicalName)
+    val KEY: StubIndexKey<String, SolNamedElement> = StubIndexKey.createIndexKey(SolNamedElementIndex::class.java.canonicalName)
   }
 
   override fun getVersion(): Int = SolidityFileStub.Type.stubVersion
-  override fun getKey(): StubIndexKey<String, SolidityNamedElement> = KEY
+  override fun getKey(): StubIndexKey<String, SolNamedElement> = KEY
 }

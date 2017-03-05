@@ -6,15 +6,18 @@ import com.intellij.psi.stubs.*
 import com.intellij.psi.tree.IStubFileElementType
 import me.serce.solidity.lang.SolidityLanguage
 import me.serce.solidity.lang.core.SolidityFile
-import me.serce.solidity.lang.psi.SolidityContractDefinition
-import me.serce.solidity.lang.psi.SolidityEnumDefinition
-import me.serce.solidity.lang.psi.SolidityTypeName
+import me.serce.solidity.lang.psi.SolContractDefinition
+import me.serce.solidity.lang.psi.SolEnumDefinition
+import me.serce.solidity.lang.psi.SolTypeName
 import me.serce.solidity.lang.psi.impl.*
 
 class SolidityFileStub(file: SolidityFile?) : PsiFileStubImpl<SolidityFile>(file) {
   override fun getType() = Type
 
   object Type : IStubFileElementType<SolidityFileStub>(SolidityLanguage) {
+    // bump version every time stub tree changes
+    override fun getStubVersion() = 1
+
     override fun getBuilder(): StubBuilder = object : DefaultStubBuilder() {
       override fun createStubForFile(file: PsiFile) = SolidityFileStub(file as SolidityFile)
     }
@@ -27,85 +30,85 @@ class SolidityFileStub(file: SolidityFile?) : PsiFileStubImpl<SolidityFile>(file
   }
 }
 
-fun factory(name: String): SolidityStubElementType<*, *> = when (name) {
-  "ENUM_DEFINITION" -> SolidityEnumDefStub.Type
-  "CONTRACT_DEFINITION" -> SolidityContractOrLibDefStub.Type
+fun factory(name: String): SolStubElementType<*, *> = when (name) {
+  "ENUM_DEFINITION" -> SolEnumDefStub.Type
+  "CONTRACT_DEFINITION" -> SolContractOrLibDefStub.Type
 
-  "ELEMENTARY_TYPE_NAME" -> SolidityTypeRefStub.Type("ELEMENTARY_TYPE_NAME", ::SolidityElementaryTypeNameImpl)
-  "MAPPING_TYPE_NAME" -> SolidityTypeRefStub.Type("MAPPING_TYPE_NAME", ::SolidityMappingTypeNameImpl)
-  "FUNCTION_TYPE_NAME" -> SolidityTypeRefStub.Type("FUNCTION_TYPE_NAME", ::SolidityFunctionTypeNameImpl)
-  "ARRAY_TYPE_NAME" -> SolidityTypeRefStub.Type("ARRAY_TYPE_NAME", ::SolidityArrayTypeNameImpl)
-  "USER_DEFINED_LOCATION_TYPE_NAME" -> SolidityTypeRefStub.Type("USER_DEFINED_LOCATION_TYPE_NAME", ::SolidityUserDefinedLocationTypeNameImpl)
+  "ELEMENTARY_TYPE_NAME" -> SolTypeRefStub.Type("ELEMENTARY_TYPE_NAME", ::SolElementaryTypeNameImpl)
+  "MAPPING_TYPE_NAME" -> SolTypeRefStub.Type("MAPPING_TYPE_NAME", ::SolMappingTypeNameImpl)
+  "FUNCTION_TYPE_NAME" -> SolTypeRefStub.Type("FUNCTION_TYPE_NAME", ::SolFunctionTypeNameImpl)
+  "ARRAY_TYPE_NAME" -> SolTypeRefStub.Type("ARRAY_TYPE_NAME", ::SolArrayTypeNameImpl)
+  "USER_DEFINED_LOCATION_TYPE_NAME" -> SolTypeRefStub.Type("USER_DEFINED_LOCATION_TYPE_NAME", ::SolUserDefinedLocationTypeNameImpl)
 
-  "USER_DEFINED_TYPE_NAME" -> SolidityTypeRefStub.Type("USER_DEFINED_TYPE_NAME", ::SolidityUserDefinedTypeNameImpl)
+  "USER_DEFINED_TYPE_NAME" -> SolTypeRefStub.Type("USER_DEFINED_TYPE_NAME", ::SolUserDefinedTypeNameImpl)
 
   else -> error("Unknown element $name")
 }
 
 
-class SolidityEnumDefStub(parent: StubElement<*>?,
-                          elementType: IStubElementType<*, *>,
-                          override val name: String?)
-  : StubBase<SolidityEnumDefinition>(parent, elementType), SolidityNamedStub {
+class SolEnumDefStub(parent: StubElement<*>?,
+                     elementType: IStubElementType<*, *>,
+                     override val name: String?)
+  : StubBase<SolEnumDefinition>(parent, elementType), SolNamedStub {
 
-  object Type : SolidityStubElementType<SolidityEnumDefStub, SolidityEnumDefinition>("ENUM_DEFINITION") {
+  object Type : SolStubElementType<SolEnumDefStub, SolEnumDefinition>("ENUM_DEFINITION") {
     override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?) =
-      SolidityEnumDefStub(parentStub, this, dataStream.readNameAsString())
+      SolEnumDefStub(parentStub, this, dataStream.readNameAsString())
 
-    override fun serialize(stub: SolidityEnumDefStub, dataStream: StubOutputStream) = with(dataStream) {
+    override fun serialize(stub: SolEnumDefStub, dataStream: StubOutputStream) = with(dataStream) {
       writeName(stub.name)
     }
 
-    override fun createPsi(stub: SolidityEnumDefStub) = SolidityEnumDefinitionImpl(stub, this)
+    override fun createPsi(stub: SolEnumDefStub) = SolEnumDefinitionImpl(stub, this)
 
-    override fun createStub(psi: SolidityEnumDefinition, parentStub: StubElement<*>?) =
-      SolidityEnumDefStub(parentStub, this, psi.name)
+    override fun createStub(psi: SolEnumDefinition, parentStub: StubElement<*>?) =
+      SolEnumDefStub(parentStub, this, psi.name)
 
-    override fun indexStub(stub: SolidityEnumDefStub, sink: IndexSink) = sink.indexEnumDef(stub)
+    override fun indexStub(stub: SolEnumDefStub, sink: IndexSink) = sink.indexEnumDef(stub)
   }
 }
 
 
-class SolidityContractOrLibDefStub(parent: StubElement<*>?,
-                          elementType: IStubElementType<*, *>,
-                          override val name: String?)
-  : StubBase<SolidityContractDefinition>(parent, elementType), SolidityNamedStub {
+class SolContractOrLibDefStub(parent: StubElement<*>?,
+                              elementType: IStubElementType<*, *>,
+                              override val name: String?)
+  : StubBase<SolContractDefinition>(parent, elementType), SolNamedStub {
 
-  object Type : SolidityStubElementType<SolidityContractOrLibDefStub, SolidityContractDefinition>("CONTRACT_DEFINITION") {
+  object Type : SolStubElementType<SolContractOrLibDefStub, SolContractDefinition>("CONTRACT_DEFINITION") {
     override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?) =
-      SolidityContractOrLibDefStub(parentStub, this, dataStream.readNameAsString())
+      SolContractOrLibDefStub(parentStub, this, dataStream.readNameAsString())
 
-    override fun serialize(stub: SolidityContractOrLibDefStub, dataStream: StubOutputStream) = with(dataStream) {
+    override fun serialize(stub: SolContractOrLibDefStub, dataStream: StubOutputStream) = with(dataStream) {
       writeName(stub.name)
     }
 
-    override fun createPsi(stub: SolidityContractOrLibDefStub) = SolidityContractDefinitionImpl(stub, this)
+    override fun createPsi(stub: SolContractOrLibDefStub) = SolContractDefinitionImpl(stub, this)
 
-    override fun createStub(psi: SolidityContractDefinition, parentStub: StubElement<*>?) =
-      SolidityContractOrLibDefStub(parentStub, this, psi.name)
+    override fun createStub(psi: SolContractDefinition, parentStub: StubElement<*>?) =
+      SolContractOrLibDefStub(parentStub, this, psi.name)
 
-    override fun indexStub(stub: SolidityContractOrLibDefStub, sink: IndexSink) = sink.indexContractDef(stub)
+    override fun indexStub(stub: SolContractOrLibDefStub, sink: IndexSink) = sink.indexContractDef(stub)
   }
 }
 
-class SolidityTypeRefStub(parent: StubElement<*>?,
-                          elementType: IStubElementType<*, *>)
-  : StubBase<SolidityTypeName>(parent, elementType) {
+class SolTypeRefStub(parent: StubElement<*>?,
+                     elementType: IStubElementType<*, *>)
+  : StubBase<SolTypeName>(parent, elementType) {
 
-  class Type<T : SolidityTypeName>(val debugName: String,
-                                   private val psiFactory: (SolidityTypeRefStub, IStubElementType<*, *>) -> T)
-    : SolidityStubElementType<SolidityTypeRefStub, T>(debugName) {
+  class Type<T : SolTypeName>(val debugName: String,
+                                   private val psiFactory: (SolTypeRefStub, IStubElementType<*, *>) -> T)
+    : SolStubElementType<SolTypeRefStub, T>(debugName) {
     override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?) =
-      SolidityTypeRefStub(parentStub, this)
+      SolTypeRefStub(parentStub, this)
 
-    override fun serialize(stub: SolidityTypeRefStub, dataStream: StubOutputStream) = with(dataStream) {
+    override fun serialize(stub: SolTypeRefStub, dataStream: StubOutputStream) = with(dataStream) {
     }
 
-    override fun createPsi(stub: SolidityTypeRefStub) = psiFactory(stub, this)
+    override fun createPsi(stub: SolTypeRefStub) = psiFactory(stub, this)
 
-    override fun createStub(psi: T, parentStub: StubElement<*>?) = SolidityTypeRefStub(parentStub, this)
+    override fun createStub(psi: T, parentStub: StubElement<*>?) = SolTypeRefStub(parentStub, this)
 
-    override fun indexStub(stub: SolidityTypeRefStub, sink: IndexSink) {}
+    override fun indexStub(stub: SolTypeRefStub, sink: IndexSink) {}
   }
 }
 

@@ -11,18 +11,16 @@ import com.intellij.psi.PsiDirectory
 import me.serce.solidity.ide.SolidityIcons
 
 private val CAPTION = "New Solidity File"
-private val CONTRACT_TEMPLATE = "Solidity Contract"
-private val LIBRARY_TEMPLATE = "Solidity Library"
 
-class SolidityCreateFileAction : CreateFileFromTemplateAction(CAPTION, "", SolidityIcons.FILE_ICON), DumbAware {
+class SolCreateFileAction : CreateFileFromTemplateAction(CAPTION, "", SolidityIcons.FILE_ICON), DumbAware {
 
   override fun getActionName(directory: PsiDirectory?, newName: String?, templateName: String?) = CAPTION
 
   override fun buildDialog(project: Project?, directory: PsiDirectory?,
                            builder: CreateFileFromTemplateDialog.Builder) {
     builder.setTitle(CAPTION)
-      .addKind("Smart contract", SolidityIcons.FILE_ICON, CONTRACT_TEMPLATE)
-      .addKind("Solidity library", SolidityIcons.FILE_ICON, LIBRARY_TEMPLATE)
+      .addKind("Smart contract", SolidityIcons.FILE_ICON, "Solidity Contract")
+      .addKind("Solidity library", SolidityIcons.FILE_ICON, "Solidity Library")
       .setValidator(object : InputValidatorEx {
         override fun checkInput(inputString: String): Boolean {
           return getErrorText(inputString) == null

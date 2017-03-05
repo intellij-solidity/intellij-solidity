@@ -2,9 +2,9 @@ package me.serce.solidity.lang.resolve.ref
 
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiManager
-import me.serce.solidity.lang.psi.impl.SolidityImportPathElement
+import me.serce.solidity.lang.psi.impl.SolImportPathElement
 
-class SolidityImportPathReference(element: SolidityImportPathElement) : SolidityReferenceBase<SolidityImportPathElement>(element) {
+class SolImportPathReference(element: SolImportPathElement) : SolReferenceBase<SolImportPathElement>(element) {
   override fun singleResolve(): PsiElement? {
     val importText = element.text
     if (importText.length < 2) {

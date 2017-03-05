@@ -6,9 +6,9 @@ import com.intellij.psi.PsiElementResolveResult
 import com.intellij.psi.PsiPolyVariantReferenceBase
 import com.intellij.psi.ResolveResult
 import com.intellij.psi.impl.source.resolve.ResolveCache
-import me.serce.solidity.lang.psi.SolidityNamedElement
+import me.serce.solidity.lang.psi.SolNamedElement
 
-abstract class SolidityReferenceBase<T : SolidityNamedElement>(element: T) : PsiPolyVariantReferenceBase<T>(element), SolidityReference {
+abstract class SolReferenceBase<T : SolNamedElement>(element: T) : PsiPolyVariantReferenceBase<T>(element), SolReference {
   override fun calculateDefaultRangeInElement() = TextRange(0, element.textRange.length)
 
   override fun getVariants(): Array<out Any> = emptyArray()

@@ -2,7 +2,7 @@ package me.serce.solidity.ide
 
 import com.intellij.lang.Commenter
 
-class SolidityCommenter : Commenter {
+class SolCommenter : Commenter {
   override fun getLineCommentPrefix() = "//"
 
   override fun getCommentedBlockCommentPrefix() = null

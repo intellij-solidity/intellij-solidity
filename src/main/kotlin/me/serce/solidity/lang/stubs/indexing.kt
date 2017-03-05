@@ -3,25 +3,25 @@ package me.serce.solidity.lang.stubs
 import com.intellij.psi.stubs.IndexSink
 
 
-fun IndexSink.indexEnumDef(stub: SolidityEnumDefStub) {
+fun IndexSink.indexEnumDef(stub: SolEnumDefStub) {
   indexNamedStub(stub)
   indexGotoClass(stub)
 }
 
-fun IndexSink.indexContractDef(stub: SolidityContractOrLibDefStub) {
+fun IndexSink.indexContractDef(stub: SolContractOrLibDefStub) {
   indexNamedStub(stub)
   indexGotoClass(stub)
 }
 
 
-private fun IndexSink.indexNamedStub(stub: SolidityNamedStub) {
+private fun IndexSink.indexNamedStub(stub: SolNamedStub) {
   stub.name?.let {
-    occurrence(SolidityNamedElementIndex.KEY, it)
+    occurrence(SolNamedElementIndex.KEY, it)
   }
 }
 
-private fun IndexSink.indexGotoClass(stub: SolidityNamedStub) {
+private fun IndexSink.indexGotoClass(stub: SolNamedStub) {
   stub.name?.let {
-    occurrence(SolidityGotoClassIndex.KEY, it)
+    occurrence(SolGotoClassIndex.KEY, it)
   }
 }

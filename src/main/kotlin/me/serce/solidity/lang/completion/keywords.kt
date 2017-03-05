@@ -9,9 +9,9 @@ import com.intellij.patterns.PsiElementPattern
 import com.intellij.psi.PsiElement
 import com.intellij.util.ProcessingContext
 import me.serce.solidity.lang.core.SolidityFile
-import me.serce.solidity.lang.psi.SolidityContractPart
-import me.serce.solidity.lang.psi.SolidityPrimaryExpression
-import me.serce.solidity.lang.psi.SolidityStatement
+import me.serce.solidity.lang.psi.SolContractPart
+import me.serce.solidity.lang.psi.SolPrimaryExpression
+import me.serce.solidity.lang.psi.SolStatement
 
 /**
  * Special Variables and Functions
@@ -21,7 +21,7 @@ import me.serce.solidity.lang.psi.SolidityStatement
 
 val KEYWORD_PRIORITY = 10.0
 
-class SolidityKeywordCompletionProvider(vararg val keywords: String) : CompletionProvider<CompletionParameters>() {
+class SolKeywordCompletionProvider(vararg val keywords: String) : CompletionProvider<CompletionParameters>() {
   override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext?, result: CompletionResultSet) {
     keywords
       .map { LookupElementBuilder.create(it) }
@@ -29,7 +29,7 @@ class SolidityKeywordCompletionProvider(vararg val keywords: String) : Completio
   }
 }
 
-class SoliditySimpleFunctionCompletionProvider(vararg val functions: String) : CompletionProvider<CompletionParameters>() {
+class SolSimpleFunctionCompletionProvider(vararg val functions: String) : CompletionProvider<CompletionParameters>() {
   override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext?, result: CompletionResultSet) {
     functions
       .map {
@@ -43,10 +43,10 @@ class SoliditySimpleFunctionCompletionProvider(vararg val functions: String) : C
   }
 }
 
-class SolidityKeywordCompletionContributor : CompletionContributor(), DumbAware {
+class SolKeywordCompletionContributor : CompletionContributor(), DumbAware {
   init {
     extend(CompletionType.BASIC, rootDeclaration(),
-      SolidityKeywordCompletionProvider("pragma ", "import ", "contract ", "library "))
+      SolKeywordCompletionProvider("pragma ", "import ", "contract ", "library "))
     extend(CompletionType.BASIC, rootDeclaration(), object : CompletionProvider<CompletionParameters>() {
       override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext?, result: CompletionResultSet) {
         val pragmaBuilder = LookupElementBuilder
@@ -62,23 +62,23 @@ class SolidityKeywordCompletionContributor : CompletionContributor(), DumbAware 
     })
 
     extend(CompletionType.BASIC, statement(),
-      SoliditySimpleFunctionCompletionProvider("assert", "addmod", "mulmod", "keccak256", "sha3", "sha256", "ripemd160",
+      SolSimpleFunctionCompletionProvider("assert", "addmod", "mulmod", "keccak256", "sha3", "sha256", "ripemd160",
         "ecrecover", "revert"))
 
     extend(CompletionType.BASIC, insideContract(),
-      SolidityKeywordCompletionProvider("this"))
+      SolKeywordCompletionProvider("this"))
     extend(CompletionType.BASIC, insideContract(),
-      SoliditySimpleFunctionCompletionProvider("selfdestruct"))
+      SolSimpleFunctionCompletionProvider("selfdestruct"))
   }
 
   private fun rootDeclaration() = psiElement<PsiElement>()
-    .withParents(SolidityPrimaryExpression::class.java, SolidityFile::class.java)
+    .withParents(SolPrimaryExpression::class.java, SolidityFile::class.java)
 
   private fun statement() = psiElement<PsiElement>()
-    .inside(SolidityStatement::class.java)
+    .inside(SolStatement::class.java)
 
   private fun insideContract() = psiElement<PsiElement>()
-    .inside(SolidityContractPart::class.java)
+    .inside(SolContractPart::class.java)
 
 }
 

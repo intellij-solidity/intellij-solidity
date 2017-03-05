@@ -8,11 +8,11 @@ import me.serce.solidity.lang.core.SolidityLexer
 import me.serce.solidity.lang.core.SolidityTokenTypes.*
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as Defaults
 
-class SolidityHighlighterFactory : SingleLazyInstanceSyntaxHighlighterFactory() {
-  override fun createHighlighter() = SolidityHighlighter()
+class SolHighlighterFactory : SingleLazyInstanceSyntaxHighlighterFactory() {
+  override fun createHighlighter() = SolHighlighter()
 }
 
-class SolidityHighlighter : SyntaxHighlighterBase() {
+class SolHighlighter : SyntaxHighlighterBase() {
   override fun getHighlightingLexer() = SolidityLexer()
 
 
