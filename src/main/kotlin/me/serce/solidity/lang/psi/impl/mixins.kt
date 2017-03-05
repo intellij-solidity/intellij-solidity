@@ -1,4 +1,4 @@
-package me.serce.solidity.lang.psi.impl.mixin
+package me.serce.solidity.lang.psi.impl
 
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
@@ -12,7 +12,6 @@ import me.serce.solidity.lang.psi.SolidityUserDefinedTypeName
 import me.serce.solidity.lang.psi.impl.SolidityNamedElementImpl
 import me.serce.solidity.lang.psi.impl.SolidityStubbedElementImpl
 import me.serce.solidity.lang.psi.impl.SolidityStubbedNamedElementImpl
-import me.serce.solidity.lang.psi.impl.SolidityUserDefinedTypeNameImpl
 import me.serce.solidity.lang.resolve.ref.SolidityImportPathReference
 import me.serce.solidity.lang.resolve.ref.SolidityReference
 import me.serce.solidity.lang.resolve.ref.SolidityUserDefinedTypeNameReferenceImpl

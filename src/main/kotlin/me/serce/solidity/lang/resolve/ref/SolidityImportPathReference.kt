@@ -2,7 +2,7 @@ package me.serce.solidity.lang.resolve.ref
 
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiManager
-import me.serce.solidity.lang.psi.impl.mixin.SolidityImportPathElement
+import me.serce.solidity.lang.psi.impl.SolidityImportPathElement
 
 class SolidityImportPathReference(element: SolidityImportPathElement) : SolidityReferenceBase<SolidityImportPathElement>(element) {
   override fun singleResolve(): PsiElement? {

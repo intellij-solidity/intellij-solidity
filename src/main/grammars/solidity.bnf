@@ -106,7 +106,7 @@ private ImportRuleSet ::= Identifier (as Identifier)? ( ',' Identifier (as Ident
 }
 ImportPath ::= StringLiteral {
     implements = [ "me.serce.solidity.lang.psi.SolidityNamedElement" ]
-    mixin = "me.serce.solidity.lang.psi.impl.mixin.SolidityImportPathElement"
+    mixin = "me.serce.solidity.lang.psi.impl.SolidityImportPathElement"
 }
 private ImportDirectivePart ::= import ImportPath (as Identifier)?
         | import ('*' | Identifier) (as Identifier)? 'from' ImportPath
@@ -122,7 +122,7 @@ ContractDefinition ::= ( contract | library ) Identifier
                      '{' ContractPart* '}' {
     pin = 1
     implements = "me.serce.solidity.lang.psi.SolidityContractOrLibElement"
-    mixin = "me.serce.solidity.lang.psi.impl.mixin.SolidityContractOrLibMixin"
+    mixin = "me.serce.solidity.lang.psi.impl.SolidityContractOrLibMixin"
     stubClass = "me.serce.solidity.lang.stubs.SolidityContractOrLibDefStub"
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
@@ -149,7 +149,7 @@ EnumValue ::= Identifier
 EnumDefinition ::= enum Identifier '{' EnumValue? (',' EnumValue)* '}' {
     pin = 1
     implements = "me.serce.solidity.lang.psi.SolidityEnumDefElement"
-    mixin = "me.serce.solidity.lang.psi.impl.mixin.SolidityEnumItemImplMixin"
+    mixin = "me.serce.solidity.lang.psi.impl.SolidityEnumItemImplMixin"
     stubClass = "me.serce.solidity.lang.stubs.SolidityEnumDefStub"
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
@@ -193,8 +193,7 @@ private UserDefinedWithoutLocationTypeName ::= UserDefinedTypeName
 
 UserDefinedTypeName ::= Identifier ( '.' Identifier )* {
     implements = "me.serce.solidity.lang.psi.SolidityReferenceElement"
-    mixin = "me.serce.solidity.lang.psi.impl.mixin.SolidityUserDefinedTypeNameImplMixin"
-//    stubClass = "me.serce.solidity.lang.stubs.SolidityUserDefinedTypeNameStub"
+    mixin = "me.serce.solidity.lang.psi.impl.SolidityUserDefinedTypeNameImplMixin"
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
 
