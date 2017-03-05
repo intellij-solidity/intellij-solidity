@@ -7,9 +7,9 @@ import com.intellij.psi.codeStyle.CodeStyleManager
 
 import java.io.File
 
-import me.serce.solidity.utils.SolidityLightPlatformCodeInsightFixtureTestCase
+import me.serce.solidity.utils.SolLightPlatformCodeInsightFixtureTestCase
 
-class SolidityFormattingTest : SolidityLightPlatformCodeInsightFixtureTestCase() {
+class SolidityFormattingTest : SolLightPlatformCodeInsightFixtureTestCase() {
   private fun doTest() {
     val inputFile = this.inputFileName
     val inputText = FileUtil.loadFile(File(this.testDataPath + inputFile))

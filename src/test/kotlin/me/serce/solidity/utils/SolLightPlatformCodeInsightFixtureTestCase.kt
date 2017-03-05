@@ -10,7 +10,7 @@ import com.intellij.util.ObjectUtils
 import com.intellij.util.PlatformUtils
 import com.intellij.util.containers.ContainerUtil
 
-abstract class SolidityLightPlatformCodeInsightFixtureTestCase : LightPlatformCodeInsightFixtureTestCase {
+abstract class SolLightPlatformCodeInsightFixtureTestCase : LightPlatformCodeInsightFixtureTestCase {
   private var myBackedUpPlatformPrefix: String? = null
   private val myIsSmallIde: Boolean
 
