@@ -10,6 +10,11 @@
 
     <change-notes><![CDATA[
       <p>
+        <b>v0.1.4</b>
+        <ul>
+          <li>Find usages for contracts</li>
+          <li>Go to declaration for contracts</li>
+        </ul>
         <b>v0.1.3</b>
         <ul>
           <li>Improve grammar (error recovering)</li>
