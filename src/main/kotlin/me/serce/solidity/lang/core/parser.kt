@@ -50,5 +50,4 @@ class SolidityParserDefinition : ParserDefinition {
             IF, ELSE, WHILE, FOR, DO
         )
     }
-
 }

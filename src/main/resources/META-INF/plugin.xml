@@ -75,6 +75,8 @@
 
         <gotoClassContributor implementation="me.serce.solidity.ide.navigation.SolClassNavigationContributor"/>
         <lang.foldingBuilder language="Solidity" implementationClass="me.serce.solidity.ide.SolidityFoldingBuilder"/>
+
+        <lang.findUsagesProvider language="Solidity" implementationClass="me.serce.solidity.ide.SolFindUsagesProvider"/>
     </extensions>
 
     <actions>
