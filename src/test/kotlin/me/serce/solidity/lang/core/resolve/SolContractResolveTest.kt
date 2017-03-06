@@ -1,7 +1,7 @@
 package me.serce.solidity.lang.core.resolve
 
 class SolContractResolveTest : SolResolveTestBase() {
-  fun testTwoContracts() = checkByCode("""
+  fun testField() = checkByCode("""
         contract A {}
                //x
 
@@ -10,4 +10,14 @@ class SolContractResolveTest : SolResolveTestBase() {
           //^
         }
   """)
+
+  fun testInheritance() = checkByCode("""
+        contract A {}
+               //x
+
+        contract B is A {
+                    //^
+        }
+  """)
+
 }
