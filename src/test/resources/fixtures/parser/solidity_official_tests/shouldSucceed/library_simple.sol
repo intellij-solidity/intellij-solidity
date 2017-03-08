@@ -1,0 +1,3 @@
+library Lib {
+  function f() { }
+}

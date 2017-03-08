@@ -1,0 +1,3 @@
+contract c {
+  enum foo { }
+}
