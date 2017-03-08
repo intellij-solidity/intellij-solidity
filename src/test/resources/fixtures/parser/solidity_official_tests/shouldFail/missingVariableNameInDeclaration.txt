@@ -1,0 +1,18 @@
+Solidity File
+  SolContractDefinitionImpl(CONTRACT_DEFINITION)
+    PsiElement(contract)('contract')
+    PsiWhiteSpace(' ')
+    PsiElement(Identifier)('test')
+    PsiWhiteSpace(' ')
+    PsiElement({)('{')
+  PsiErrorElement:<contract definition>, <expression>, <type name>, enum, event, function, import, intNumType, modifier, pragma, struct, uIntNumType, using or '}' expected, got 'uint256'
+    <empty list>
+  PsiWhiteSpace('\n  ')
+  SolElementaryTypeNameExpressionImpl(ELEMENTARY_TYPE_NAME_EXPRESSION)
+    SolElementaryTypeNameImpl(ELEMENTARY_TYPE_NAME)
+      SolNumberTypeImpl(NUMBER_TYPE)
+        PsiElement(uIntNumType)('uint256')
+  PsiWhiteSpace(' ')
+  PsiElement(;)(';')
+  PsiWhiteSpace('\n')
+  PsiElement(})('}')

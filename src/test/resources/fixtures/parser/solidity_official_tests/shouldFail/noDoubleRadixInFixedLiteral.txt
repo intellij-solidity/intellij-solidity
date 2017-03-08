@@ -1,0 +1,34 @@
+Solidity File
+  SolContractDefinitionImpl(CONTRACT_DEFINITION)
+    PsiElement(contract)('contract')
+    PsiWhiteSpace(' ')
+    PsiElement(Identifier)('A')
+    PsiWhiteSpace(' ')
+    PsiElement({)('{')
+  PsiErrorElement:<contract definition>, <expression>, <type name>, byteNumType, enum, event, fixedNumType, function, import, intNumType, modifier, pragma, struct, uIntNumType, using or '}' expected, got 'fixed40x40'
+    <empty list>
+  PsiWhiteSpace('\n  ')
+  SolElementaryTypeNameExpressionImpl(ELEMENTARY_TYPE_NAME_EXPRESSION)
+    SolElementaryTypeNameImpl(ELEMENTARY_TYPE_NAME)
+      SolNumberTypeImpl(NUMBER_TYPE)
+        PsiElement(fixedNumType)('fixed40x40')
+  PsiErrorElement:'(', <contract definition>, <expression>, Identifier, constant, import, internal, pragma, private or public expected, got 'pi'
+    <empty list>
+  PsiWhiteSpace(' ')
+  SolAssignmentExpressionImpl(ASSIGNMENT_EXPRESSION)
+    SolPrimaryExpressionImpl(PRIMARY_EXPRESSION)
+      PsiElement(Identifier)('pi')
+    PsiWhiteSpace(' ')
+    PsiElement(=)('=')
+    PsiWhiteSpace(' ')
+    SolPrimaryExpressionImpl(PRIMARY_EXPRESSION)
+      SolNumberLiteralImpl(NUMBER_LITERAL)
+        PsiElement(decimalNumber)('3')
+  PsiElement(.)('.')
+  PsiErrorElement:Identifier expected, got '14'
+    PsiElement(decimalNumber)('14')
+  PsiElement(.)('.')
+  PsiElement(decimalNumber)('15')
+  PsiElement(;)(';')
+  PsiWhiteSpace('\n')
+  PsiElement(})('}')

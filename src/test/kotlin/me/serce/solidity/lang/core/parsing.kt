@@ -121,3 +121,29 @@ class SolidityCompleteOfficialSuccessfulParsingTest :
   fun testVisibilitySpecifiers() = doTest(true)
   fun testWhileLoop() = doTest(true)
 }
+
+class SolidityCompleteOfficialFailingParsingTest :
+  SolidityParsingTestBase("fixtures/parser/solidity_official_tests/shouldFail") {
+  fun testConstantIsKeyword() = doTest(true)
+//  fun testEmptyEnumDeclaration() = doTest(true)
+  fun testExternalVariable() = doTest(true)
+  fun testFunctionTypeAsStorageVariableWithModifiers() = doTest(true)
+  fun testInlineArrayEmptyCellsCheckLvalue() = doTest(true)
+  fun testInlineArrayEmptyCellsCheckWithoutLvalue() = doTest(true)
+  fun testInvalidFixedConversionLeadingZeroesCheck() = doTest(true)
+  fun testLocalConstVariable() = doTest(true)
+  fun testLocationSpecifiersForState() = doTest(true)
+  fun testLocationSpecifiersWithVar() = doTest(true)
+  fun testMalformedEnumDeclaration() = doTest(true)
+  fun testMissingArgumentInNamedArgs() = doTest(true)
+  fun testMissingParameterNameInNamedArgs() = doTest(true)
+  fun testMissingVariableNameInDeclaration() = doTest(true)
+  fun testModifierWithoutSemicolon() = doTest(true)
+  fun testMultipleVisibilitySpecifiers() = doTest(true)
+  fun testNoDoubleRadixInFixedLiteral() = doTest(true)
+  fun testPayableAccessor() = doTest(true)
+  fun testVarArray() = doTest(true)
+//  fun testVariableDefinitionInFunctionParameter() = doTest(true)
+//  fun testVariableDefinitionInFunctionReturn() = doTest(true)
+//  fun testVariableDefinitionInMapping() = doTest(true)
+}
