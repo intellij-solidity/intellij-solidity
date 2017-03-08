@@ -23,12 +23,11 @@ Solidity File
     PsiWhiteSpace(' ')
     SolPrimaryExpressionImpl(PRIMARY_EXPRESSION)
       SolNumberLiteralImpl(NUMBER_LITERAL)
-        PsiElement(decimalNumber)('3')
-  PsiElement(.)('.')
-  PsiErrorElement:Identifier expected, got '14'
-    PsiElement(decimalNumber)('14')
-  PsiElement(.)('.')
-  PsiElement(decimalNumber)('15')
-  PsiElement(;)(';')
+        PsiElement(fixedNumber)('3.14')
+  SolPrimaryExpressionImpl(PRIMARY_EXPRESSION)
+    SolNumberLiteralImpl(NUMBER_LITERAL)
+      PsiElement(fixedNumber)('.15')
+  PsiErrorElement:'(', <contract definition>, <expression>, <number unit>, import or pragma expected, got ';'
+    PsiElement(;)(';')
   PsiWhiteSpace('\n')
   PsiElement(})('}')

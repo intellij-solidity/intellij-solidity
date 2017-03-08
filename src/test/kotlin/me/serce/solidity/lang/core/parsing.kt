@@ -54,7 +54,7 @@ class SolidityCompleteOfficialSuccessfulParsingTest :
   fun testContractMultipleInheritance() = doTest(true)
   fun testContractMultipleInheritanceWithArguments() = doTest(true)
   fun testDeclaringFixedAndUfixedVariables() = doTest(true)
-//  fun testDeclaringFixedLiteralVariables() = doTest(true)
+  fun testDeclaringFixedLiteralVariables() = doTest(true)
   fun testElseIfStatement() = doTest(true)
   fun testEmptyComment() = doTest(true)
   fun testEmptyFunction() = doTest(true)

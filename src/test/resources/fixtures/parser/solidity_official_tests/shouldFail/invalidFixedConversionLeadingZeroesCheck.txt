@@ -32,10 +32,9 @@ Solidity File
                 PsiWhiteSpace(' ')
                 SolPrimaryExpressionImpl(PRIMARY_EXPRESSION)
                   SolNumberLiteralImpl(NUMBER_LITERAL)
-                    PsiElement(decimalNumber)('1')
-            PsiElement(.)('.')
-            PsiErrorElement:Identifier expected, got '0x2'
-              PsiElement(hexNumber)('0x2')
+                    PsiElement(fixedNumber)('1.0')
+            PsiErrorElement:'(' or <number unit> expected, got 'x2'
+              PsiElement(Identifier)('x2')
             PsiElement(;)(';')
           PsiWhiteSpace('\n  ')
           PsiElement(})('}')
