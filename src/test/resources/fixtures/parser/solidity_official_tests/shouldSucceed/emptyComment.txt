@@ -1,0 +1,10 @@
+Solidity File
+  PsiComment(comment)('//')
+  PsiWhiteSpace('\n')
+  SolContractDefinitionImpl(CONTRACT_DEFINITION)
+    PsiElement(contract)('contract')
+    PsiWhiteSpace(' ')
+    PsiElement(Identifier)('test')
+    PsiWhiteSpace('\n')
+    PsiElement({)('{')
+    PsiElement(})('}')
