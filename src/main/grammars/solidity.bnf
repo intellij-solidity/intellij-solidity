@@ -155,8 +155,8 @@ EnumDefinition ::= enum Identifier '{' EnumValue? (',' EnumValue)* '}' {
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
 
-IndexedParameterList ::= '(' ( TypeName indexed? Identifier? (',' TypeName indexed? Identifier?)* )? ')'
-ParameterList ::=        '(' ( TypeName            Identifier? (',' TypeName            Identifier?)* )? ')'
+IndexedParameterList ::= '(' ( TypeName indexed?  Identifier? (',' TypeName indexed?  Identifier?)* )? ')'
+ParameterList ::=        '(' ( TypeName constant? Identifier? (',' TypeName constant? Identifier?)* )? ')'
 TypeNameList ::=         '(' ( TypeName (',' TypeName )* )? ')'
 
 // semantic restriction: mappings and structs (recursively) containing mappings
