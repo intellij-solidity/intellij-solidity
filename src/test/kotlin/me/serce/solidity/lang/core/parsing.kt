@@ -113,7 +113,7 @@ class SolidityCompleteOfficialSuccessfulParsingTest :
   fun testSmokeTest() = doTest(true)
   fun testStatementStartingWithTypeConversion() = doTest(true)
   fun testStructDefinition() = doTest(true)
-//  fun testTuples() = doTest(true)
+  fun testTuples() = doTest(true)
   fun testTwoExactFunctions() = doTest(true)
   fun testTypeConversionToDynamicArray() = doTest(true)
   fun testUsingFor() = doTest(true)

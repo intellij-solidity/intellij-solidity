@@ -161,7 +161,7 @@ TypeNameList ::=         '(' ( TypeName (',' TypeName )* )? ')'
 
 // semantic restriction: mappings and structs (recursively) containing mappings
 // are not allowed in argument lists
-private declarationList ::= '(' ( Identifier ',' | ',' )* ( Identifier ','? | ',' ) ')' ;
+private declarationList ::= '(' ( Identifier ','? | ',' )*  ')' ;
 VariableDeclaration ::= var declarationList | TypeName Identifier
 
 //
