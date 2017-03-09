@@ -77,7 +77,7 @@ class SolidityCompleteOfficialSuccessfulParsingTest :
   fun testFunctionTypeAsStorageVariable() = doTest(true)
   fun testFunctionTypeAsStorageVariableWithAssignment() = doTest(true)
   fun testFunctionTypeInExpression() = doTest(true)
-//  fun testFunctionTypeInStruct() = doTest(true)
+  fun testFunctionTypeInStruct() = doTest(true)
   fun testFunctionTypeStateVariable() = doTest(true)
   fun testIfStatement() = doTest(true)
   fun testImportDirective() = doTest(true)

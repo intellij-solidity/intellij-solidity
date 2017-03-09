@@ -204,8 +204,9 @@ MappingTypeName ::= mapping '(' ElementaryTypeName '=>' TypeName ')' {
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
 
-FunctionTypeName ::= function TypeNameList ( internal | external | constant | payable )*
-                   ( returns TypeNameList )? {
+// According to grammar.txt, it should be only TypeNameList after function, but according to reality ...
+FunctionTypeName ::= function ParameterList ( internal | external | constant | payable )*
+                   ( returns ParameterList )? {
     pin = 1
     stubClass = "me.serce.solidity.lang.stubs.SolTypeRefStub"
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
