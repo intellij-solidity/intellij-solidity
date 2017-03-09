@@ -6,6 +6,7 @@ import com.intellij.psi.PsiElementResolveResult
 import com.intellij.psi.PsiPolyVariantReferenceBase
 import com.intellij.psi.ResolveResult
 import com.intellij.psi.impl.source.resolve.ResolveCache
+import me.serce.solidity.lang.psi.SolElement
 import me.serce.solidity.lang.psi.SolNamedElement
 
 abstract class SolReferenceBase<T : SolNamedElement>(element: T) : PsiPolyVariantReferenceBase<T>(element), SolReference {
@@ -21,4 +22,7 @@ abstract class SolReferenceBase<T : SolNamedElement>(element: T) : PsiPolyVarian
   open fun multiResolve(): List<PsiElement> = singleResolve()?.let { listOf(it) } ?: emptyList()
 
   open fun singleResolve(): PsiElement? = null
+
+  // to please Kotlin 1.1 compiler
+  override fun resolve(): SolElement? = PsiPolyVariantReferenceBase@ super.resolve() as SolElement?
 }
