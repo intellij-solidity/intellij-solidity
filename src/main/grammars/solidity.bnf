@@ -258,11 +258,13 @@ Expression ::=
   | AndExpression
   | OrExpression
   | AssignmentExpression
+  | InlineArrayExpression
   | PrimaryExpression
 
 
 
 AssignmentExpression ::= Expression ('=' | '|=' | '^=' | '&=' | '<<=' | '>>=' | '+=' | '-=' | '*=' | '/=' | '%=') Expression
+InlineArrayExpression ::= '[' Expression (',' Expression)* ']'
 TernaryExpression ::= Expression '?' Expression ':' Expression
 OrExpression ::= Expression '||' Expression
 AndExpression ::= Expression '&&' Expression

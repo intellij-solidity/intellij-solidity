@@ -82,7 +82,7 @@ class SolidityCompleteOfficialSuccessfulParsingTest :
   fun testFunctionTypeStateVariable() = doTest(true)
   fun testIfStatement() = doTest(true)
   fun testImportDirective() = doTest(true)
-//  fun testInlineArrayDeclaration() = doTest(true)
+  fun testInlineArrayDeclaration() = doTest(true)
   fun testLibrarySimple() = doTest(true)
   fun testLiteralConstantsWithEtherSubdenominations() = doTest(true)
   fun testLiteralConstantsWithEtherSubdenominationsInExpressions() = doTest(true)

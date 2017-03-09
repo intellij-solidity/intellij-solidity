@@ -50,13 +50,12 @@ Solidity File
               PsiWhiteSpace(' ')
               SolParenExpressionImpl(PAREN_EXPRESSION)
                 PsiElement(()('(')
-                PsiErrorElement:',' or <expression> expected, got '['
-                  <empty list>
             PsiElement([)('[')
             PsiElement(decimalNumber)('3')
             PsiElement(,)(',')
             PsiWhiteSpace(' ')
-            PsiElement(,)(',')
+            PsiErrorElement:<expression> expected, got ','
+              PsiElement(,)(',')
             PsiElement(decimalNumber)('4')
             PsiElement(])(']')
             PsiElement([)('[')
