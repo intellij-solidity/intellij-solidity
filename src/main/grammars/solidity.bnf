@@ -218,12 +218,15 @@ Block ::= '{' Statement* '}' {pin=1}
 private FinishedStatement ::= DoWhileStatement | PlaceholderStatement | ContinueSt | BreakSt | ReturnSt | ThrowSt | SimpleStatement {
     recoverWhile = UntilSemicolonRecover
 }
-Statement ::= IfStatement | WhileStatement | ForStatement | Block | InlineAssemblyStatement | TupleStatement | FinishedStatement ';'
+Statement ::= IfStatement | WhileStatement | ForStatement | Block | InlineAssemblyStatement | TupleStatement | ReturnTupleStatement | FinishedStatement ';'
 
 // intentionally not pinned
 TupleStatement ::= VariableDeclaration '=' SeqExpression ';'
     | SeqExpression '=' SeqExpression ';'
     | SeqExpression '=' Expression ';'
+
+// intentionally not pinned
+ReturnTupleStatement ::= return SeqExpression ';'
 
 ExpressionStatement ::= Expression
 IfStatement ::= if '(' Expression ')' Statement ( else Statement )? {pin = 1}

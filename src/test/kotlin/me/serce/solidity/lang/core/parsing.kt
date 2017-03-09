@@ -30,6 +30,7 @@ class SolidityCompleteCustomParsingTest : SolidityParsingTestBase("fixtures/pars
   fun testEvent() = doTest(true)
   fun testFunctions() = doTest(true)
   fun testTernary() = doTest(true)
+  fun testReturnTuples() = doTest(true)
   fun testMapInvoke() = doTest(true)
   fun testDestructuring() = doTest(true)
   fun testContractWithLiterals() = doTest(true)
