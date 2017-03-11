@@ -19,7 +19,7 @@ import me.serce.solidity.lang.psi.SolStatement
  * http://solidity.readthedocs.io/en/develop/units-and-global-variables.html#special-variables-and-functions
  */
 
-val KEYWORD_PRIORITY = 10.0
+private val KEYWORD_PRIORITY = 10.0
 
 class SolKeywordCompletionProvider(vararg val keywords: String) : CompletionProvider<CompletionParameters>() {
   override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext?, result: CompletionResultSet) {
