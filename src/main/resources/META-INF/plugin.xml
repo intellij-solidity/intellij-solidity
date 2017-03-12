@@ -83,6 +83,8 @@
         <lang.foldingBuilder language="Solidity" implementationClass="me.serce.solidity.ide.SolidityFoldingBuilder"/>
 
         <lang.findUsagesProvider language="Solidity" implementationClass="me.serce.solidity.ide.SolFindUsagesProvider"/>
+
+        <spellchecker.support language="Solidity" implementationClass="me.serce.solidity.ide.SolSpellcheckingStrategy"/>
     </extensions>
 
     <actions>
