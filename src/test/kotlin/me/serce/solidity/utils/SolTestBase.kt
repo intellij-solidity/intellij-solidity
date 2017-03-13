@@ -3,9 +3,10 @@ package me.serce.solidity.utils
 import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PsiTreeUtil
+import org.intellij.lang.annotations.Language
 
 abstract class SolTestBase : SolLightPlatformCodeInsightFixtureTestCase() {
-  inner class InlineFile(private val code: String, val name: String = "ctr.sol") {
+  inner class InlineFile(@Language("Solidity") private val code: String, val name: String = "ctr.sol") {
     private val hasCaretMarker = "/*caret*/" in code
 
     init {
