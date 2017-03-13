@@ -5,16 +5,11 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.stubs.IStubElementType
 import me.serce.solidity.ide.SolidityIcons
 import me.serce.solidity.lang.core.SolidityTokenTypes.IDENTIFIER
-import me.serce.solidity.lang.psi.SolContractDefinition
-import me.serce.solidity.lang.psi.SolEnumDefinition
-import me.serce.solidity.lang.psi.SolUserDefinedTypeName
-import me.serce.solidity.lang.psi.SolReferenceElement
+import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.resolve.ref.SolUserDefinedTypeNameReference
 import me.serce.solidity.lang.resolve.ref.SolImportPathReference
 import me.serce.solidity.lang.resolve.ref.SolReference
-import me.serce.solidity.lang.stubs.SolContractOrLibDefStub
-import me.serce.solidity.lang.stubs.SolEnumDefStub
-import me.serce.solidity.lang.stubs.SolTypeRefStub
+import me.serce.solidity.lang.stubs.*
 
 open class SolImportPathElement(node: ASTNode) : SolNamedElementImpl(node) {
   override fun getReference() = SolImportPathReference(this)
@@ -32,6 +27,21 @@ abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrL
   constructor(stub: SolContractOrLibDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
 
   override fun getIcon(flags: Int) = SolidityIcons.CONTRACT
+}
+
+abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefStub>, SolFunctionDefinition {
+  constructor(node: ASTNode) : super(node)
+  constructor(stub: SolFunctionDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
+
+  override fun getIcon(flags: Int) = SolidityIcons.FUNCTION
+}
+
+
+abstract class SolStateVarDeclMixin : SolStubbedNamedElementImpl<SolStateVarDeclStub>, SolStateVariableDeclaration {
+  constructor(node: ASTNode) : super(node)
+  constructor(stub: SolStateVarDeclStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
+
+  override fun getIcon(flags: Int) = SolidityIcons.STATE_VAR
 }
 
 

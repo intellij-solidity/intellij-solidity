@@ -133,7 +133,12 @@ ContractPart ::= StateVariableDeclaration | UsingForDeclaration
 
 InheritanceSpecifier ::= UserDefinedTypeName ( '(' Expression ( ',' Expression )* ')' )?
 
-StateVariableDeclaration ::= TypeName ( public | internal | private | constant )? Identifier ('=' Expression)? ';'
+StateVariableDeclaration ::= TypeName ( public | internal | private | constant )? Identifier ('=' Expression)? ';'  {
+    implements = "me.serce.solidity.lang.psi.SolNamedElement"
+    mixin = "me.serce.solidity.lang.psi.impl.SolStateVarDeclMixin"
+    stubClass = "me.serce.solidity.lang.stubs.SolStateVarDeclStub"
+    elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
+}
 
 UsingForDeclaration ::= using Identifier for ('*' | TypeName) ';' {pin=1}
 
@@ -143,7 +148,13 @@ StructDefinition ::= struct Identifier '{'
 ModifierDefinition ::= modifier Identifier ParameterList? Block
 FunctionDefinition ::= function Identifier? ParameterList
                      ( FunctionCallExpression | constant | payable | external | public | internal | private | Identifier)*
-                     ( returns ParameterList )? ( ';' | Block ) {pin=1}
+                     ( returns ParameterList )? ( ';' | Block ) {
+    pin = 1
+    implements = "me.serce.solidity.lang.psi.SolNamedElement"
+    mixin = "me.serce.solidity.lang.psi.impl.SolFunctionDefMixin"
+    stubClass = "me.serce.solidity.lang.stubs.SolFunctionDefStub"
+    elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
+}
 EventDefinition ::= event Identifier IndexedParameterList anonymous? ';' {pin=1}
 
 EnumValue ::= Identifier

@@ -9,6 +9,7 @@ import com.intellij.psi.stubs.StubIndex
 import com.intellij.psi.stubs.StubIndexKey
 import me.serce.solidity.lang.psi.SolNamedElement
 import me.serce.solidity.lang.stubs.SolGotoClassIndex
+import me.serce.solidity.lang.stubs.SolNamedElementIndex
 
 
 abstract class SolNavigationContributorBase<T>(
@@ -44,3 +45,7 @@ abstract class SolNavigationContributorBase<T>(
 
 class SolClassNavigationContributor
   : SolNavigationContributorBase<SolNamedElement>(SolGotoClassIndex.KEY, SolNamedElement::class.java)
+
+class SolSymbolNavigationContributor
+  : SolNavigationContributorBase<SolNamedElement>(SolNamedElementIndex.KEY, SolNamedElement::class.java)
+

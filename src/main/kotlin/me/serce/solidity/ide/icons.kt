@@ -9,4 +9,6 @@ object SolidityIcons {
 
   val ENUM: Icon = AllIcons.Nodes.Enum
   val CONTRACT: Icon = AllIcons.Nodes.Class
+  val FUNCTION: Icon = AllIcons.Nodes.Method
+  val STATE_VAR: Icon = AllIcons.Nodes.Field
 }

@@ -12,6 +12,11 @@
       <p>
         <b>v0.1.4</b>
         <ul>
+          <li>Grammar fixes</li>
+          <li>Go to symbol for methods and state vars</li>
+        </ul>
+        <b>v0.1.4</b>
+        <ul>
           <li>Find usages for contracts</li>
           <li>Go to declaration for contracts</li>
           <li>Fix NoSuchMethod exception at com.intellij.formatting.SpacingBuilder.before(TokenSet)</li>
@@ -80,6 +85,8 @@
         <stubIndex implementation="me.serce.solidity.lang.stubs.SolGotoClassIndex"/>
 
         <gotoClassContributor implementation="me.serce.solidity.ide.navigation.SolClassNavigationContributor"/>
+        <gotoSymbolContributor implementation="me.serce.solidity.ide.navigation.SolSymbolNavigationContributor"/>
+        
         <lang.foldingBuilder language="Solidity" implementationClass="me.serce.solidity.ide.SolidityFoldingBuilder"/>
 
         <lang.findUsagesProvider language="Solidity" implementationClass="me.serce.solidity.ide.SolFindUsagesProvider"/>
