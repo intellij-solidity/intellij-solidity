@@ -10,10 +10,11 @@
 
     <change-notes><![CDATA[
       <p>
-        <b>v0.1.4</b>
+        <b>v0.1.5</b>
         <ul>
           <li>Grammar fixes</li>
           <li>Go to symbol for methods and state vars</li>
+          <li>Autocompletion for contract names</li>
         </ul>
         <b>v0.1.4</b>
         <ul>
