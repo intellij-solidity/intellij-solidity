@@ -2,12 +2,15 @@ package me.serce.solidity.lang.psi.impl
 
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiReference
 import com.intellij.psi.stubs.IStubElementType
 import me.serce.solidity.ide.SolidityIcons
+import me.serce.solidity.lang.core.SolidityTokenTypes.FUNCTION_MODIFIER
 import me.serce.solidity.lang.core.SolidityTokenTypes.IDENTIFIER
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.resolve.ref.SolUserDefinedTypeNameReference
 import me.serce.solidity.lang.resolve.ref.SolImportPathReference
+import me.serce.solidity.lang.resolve.ref.SolModifierReference
 import me.serce.solidity.lang.resolve.ref.SolReference
 import me.serce.solidity.lang.stubs.*
 
@@ -30,8 +33,26 @@ abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrL
 }
 
 abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefStub>, SolFunctionDefinition {
+  override val modifiers: List<PsiElement>
+    get() {
+      return findChildrenByType<PsiElement>(FUNCTION_MODIFIER)
+    }
+
   constructor(node: ASTNode) : super(node)
   constructor(stub: SolFunctionDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
+
+  override fun getReference() = references.firstOrNull()
+
+  override fun getReferences(): Array<SolReference> {
+    return modifiers.map { SolModifierReference(this, it) }.toTypedArray()
+  }
+
+  override fun getIcon(flags: Int) = SolidityIcons.FUNCTION
+}
+
+abstract class SolModifierDefMixin : SolStubbedNamedElementImpl<SolModifierDefStub>, SolModifierDefinition {
+  constructor(node: ASTNode) : super(node)
+  constructor(stub: SolModifierDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
 
   override fun getIcon(flags: Int) = SolidityIcons.FUNCTION
 }

@@ -86,5 +86,5 @@ inline fun <reified I : PsiElement> psiElement(): PsiElementPattern.Capture<I> {
   return psiElement(I::class.java)
 }
 
-private fun LookupElementBuilder.keywordPrioritised() = PrioritizedLookupElement.withPriority(this, KEYWORD_PRIORITY)
+fun LookupElementBuilder.keywordPrioritised() = PrioritizedLookupElement.withPriority(this, KEYWORD_PRIORITY)
 

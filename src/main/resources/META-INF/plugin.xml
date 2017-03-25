@@ -10,39 +10,15 @@
 
     <change-notes><![CDATA[
       <p>
-        <b>v0.1.5</b>
+        <b>v0.1.6</b>
+        <ul>
+          <li>Resolve, search and autocompletion for modifiers</li>
+        </ul>
+        <b>v0.1.5</b>s
         <ul>
           <li>Grammar fixes</li>
           <li>Go to symbol for methods and state vars</li>
           <li>Autocompletion for contract names</li>
-        </ul>
-        <b>v0.1.4</b>
-        <ul>
-          <li>Find usages for contracts</li>
-          <li>Go to declaration for contracts</li>
-          <li>Fix NoSuchMethod exception at com.intellij.formatting.SpacingBuilder.before(TokenSet)</li>
-        </ul>
-        <b>v0.1.3</b>
-        <ul>
-          <li>Improve grammar (error recovering)</li>
-          <li>Add goto class</li>
-          <li>Add code formatting</li>
-          <li>Add block and comments folding/unfolding</li>
-        </ul>
-      </p>
-      <p>
-        <b>v0.1.2</b>
-        <ul>
-          <li>Add create file action</li>
-          <li>Add file templates</li>
-        </ul>
-      </p>
-      <p>
-        <b>v0.1.1</b>
-        <ul>
-          <li>Add solidity grammar</li>
-          <li>Add basic syntax highlighting</li>
-          <li>Add built-in functions completion</li>
         </ul>
       </p>
     ]]>
@@ -84,6 +60,7 @@
 
         <stubIndex implementation="me.serce.solidity.lang.stubs.SolNamedElementIndex"/>
         <stubIndex implementation="me.serce.solidity.lang.stubs.SolGotoClassIndex"/>
+        <stubIndex implementation="me.serce.solidity.lang.stubs.SolModifierIndex"/>
 
         <gotoClassContributor implementation="me.serce.solidity.ide.navigation.SolClassNavigationContributor"/>
         <gotoSymbolContributor implementation="me.serce.solidity.ide.navigation.SolSymbolNavigationContributor"/>

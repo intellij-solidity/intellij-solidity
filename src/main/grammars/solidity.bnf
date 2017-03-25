@@ -145,16 +145,26 @@ UsingForDeclaration ::= using Identifier for ('*' | TypeName) ';' {pin=1}
 StructDefinition ::= struct Identifier '{'
                      ( VariableDeclaration ';' (VariableDeclaration ';')* )? '}' {pin=1}
 
-ModifierDefinition ::= modifier Identifier ParameterList? Block
-FunctionDefinition ::= function Identifier? ParameterList
-                     ( FunctionCallExpression | constant | payable | external | public | internal | private | Identifier)*
-                     ( returns ParameterList )? ( ';' | Block ) {
+ModifierDefinition ::= modifier Identifier ParameterList? Block {
     pin = 1
     implements = "me.serce.solidity.lang.psi.SolNamedElement"
+    mixin = "me.serce.solidity.lang.psi.impl.SolModifierDefMixin"
+    stubClass = "me.serce.solidity.lang.stubs.SolModifierDefStub"
+    elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
+}
+
+FunctionModifier ::= constant | payable | external | public | internal | private | Identifier
+
+FunctionDefinition ::= function Identifier? ParameterList
+                     ( FunctionCallExpression | FunctionModifier)*
+                     ( returns ParameterList )? ( ';' | Block ) {
+    pin = 1
+    implements = "me.serce.solidity.lang.psi.SolFunctionDefElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolFunctionDefMixin"
     stubClass = "me.serce.solidity.lang.stubs.SolFunctionDefStub"
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
+
 EventDefinition ::= event Identifier IndexedParameterList anonymous? ';' {pin=1}
 
 EnumValue ::= Identifier

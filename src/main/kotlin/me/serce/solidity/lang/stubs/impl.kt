@@ -14,7 +14,7 @@ class SolidityFileStub(file: SolidityFile?) : PsiFileStubImpl<SolidityFile>(file
 
   object Type : IStubFileElementType<SolidityFileStub>(SolidityLanguage) {
     // bump version every time stub tree changes
-    override fun getStubVersion() = 3
+    override fun getStubVersion() = 7
 
     override fun getBuilder(): StubBuilder = object : DefaultStubBuilder() {
       override fun createStubForFile(file: PsiFile) = SolidityFileStub(file as SolidityFile)
@@ -32,6 +32,7 @@ fun factory(name: String): SolStubElementType<*, *> = when (name) {
   "ENUM_DEFINITION" -> SolEnumDefStub.Type
   "CONTRACT_DEFINITION" -> SolContractOrLibDefStub.Type
   "FUNCTION_DEFINITION" -> SolFunctionDefStub.Type
+  "MODIFIER_DEFINITION" -> SolModifierDefStub.Type
   "STATE_VARIABLE_DECLARATION" -> SolStateVarDeclStub.Type
 
   "ELEMENTARY_TYPE_NAME" -> SolTypeRefStub.Type("ELEMENTARY_TYPE_NAME", ::SolElementaryTypeNameImpl)
@@ -90,9 +91,32 @@ class SolFunctionDefStub(parent: StubElement<*>?,
   }
 }
 
-class SolStateVarDeclStub(parent: StubElement<*>?,
+class SolModifierDefStub(parent: StubElement<*>?,
                          elementType: IStubElementType<*, *>,
                          override val name: String?)
+  : StubBase<SolModifierDefinition>(parent, elementType), SolNamedStub {
+
+  object Type : SolStubElementType<SolModifierDefStub, SolModifierDefinition>("MODIFIER_DEFINITION") {
+    override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?) =
+      SolModifierDefStub(parentStub, this, dataStream.readNameAsString())
+
+    override fun serialize(stub: SolModifierDefStub, dataStream: StubOutputStream) = with(dataStream) {
+      writeName(stub.name)
+    }
+
+    override fun createPsi(stub: SolModifierDefStub) = SolModifierDefinitionImpl(stub, this)
+
+    override fun createStub(psi: SolModifierDefinition, parentStub: StubElement<*>?) =
+      SolModifierDefStub(parentStub, this, psi.name)
+
+    override fun indexStub(stub: SolModifierDefStub, sink: IndexSink) = sink.indexModifierDef(stub)
+  }
+}
+
+
+class SolStateVarDeclStub(parent: StubElement<*>?,
+                          elementType: IStubElementType<*, *>,
+                          override val name: String?)
   : StubBase<SolStateVariableDeclaration>(parent, elementType), SolNamedStub {
 
   object Type : SolStubElementType<SolStateVarDeclStub, SolStateVariableDeclaration>("STATE_VARIABLE_DECLARATION") {
@@ -111,7 +135,6 @@ class SolStateVarDeclStub(parent: StubElement<*>?,
     override fun indexStub(stub: SolStateVarDeclStub, sink: IndexSink) = sink.indexStateVarDecl(stub)
   }
 }
-
 
 
 class SolContractOrLibDefStub(parent: StubElement<*>?,
@@ -141,7 +164,7 @@ class SolTypeRefStub(parent: StubElement<*>?,
   : StubBase<SolTypeName>(parent, elementType) {
 
   class Type<T : SolTypeName>(val debugName: String,
-                                   private val psiFactory: (SolTypeRefStub, IStubElementType<*, *>) -> T)
+                              private val psiFactory: (SolTypeRefStub, IStubElementType<*, *>) -> T)
     : SolStubElementType<SolTypeRefStub, T>(debugName) {
     override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?) =
       SolTypeRefStub(parentStub, this)

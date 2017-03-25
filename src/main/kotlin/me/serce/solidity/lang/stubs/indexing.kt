@@ -17,10 +17,21 @@ fun IndexSink.indexFunctionDef(stub: SolFunctionDefStub) {
   indexNamedStub(stub)
 }
 
+fun IndexSink.indexModifierDef(stub: SolModifierDefStub) {
+  indexNamedStub(stub)
+  indexModifier(stub)
+}
+
 fun IndexSink.indexStateVarDecl(stub: SolStateVarDeclStub) {
   indexNamedStub(stub)
 }
 
+
+private fun IndexSink.indexModifier(stub: SolModifierDefStub) {
+  stub.name?.let {
+    occurrence(SolModifierIndex.KEY, it)
+  }
+}
 
 private fun IndexSink.indexNamedStub(stub: SolNamedStub) {
   stub.name?.let {

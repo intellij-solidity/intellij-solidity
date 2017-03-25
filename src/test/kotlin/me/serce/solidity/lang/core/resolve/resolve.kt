@@ -1,7 +1,6 @@
 package me.serce.solidity.lang.core.resolve
 
 import me.serce.solidity.lang.psi.SolNamedElement
-import me.serce.solidity.lang.psi.SolReferenceElement
 import me.serce.solidity.utils.SolTestBase
 import org.intellij.lang.annotations.Language
 
@@ -19,13 +18,15 @@ abstract class SolResolveTestBase : SolTestBase() {
       return
     }
 
-    val resolved = checkNotNull(refElement.reference?.resolve()) {
-      "Failed to resolve ${refElement.text}"
-    }
-
+    val references = refElement.references
+    assertTrue("Failed to resolve ${refElement.text}", references.isNotEmpty())
     val target = findElementInEditor<SolNamedElement>("x")
 
-    assertEquals(target, resolved)
+    if(references.size ==  1) {
+      assertEquals(target, references.first())
+    } else {
+      assertTrue(references.map { it?.resolve() }.filterNotNull().contains(target))
+    }
   }
 
   protected fun assertCode() {
