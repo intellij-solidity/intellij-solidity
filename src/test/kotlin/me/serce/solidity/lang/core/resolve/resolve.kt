@@ -18,14 +18,14 @@ abstract class SolResolveTestBase : SolTestBase() {
       return
     }
 
-    val references = refElement.references
+    val references = refElement.references.map { it?.resolve() }.filterNotNull()
     assertTrue("Failed to resolve ${refElement.text}", references.isNotEmpty())
     val target = findElementInEditor<SolNamedElement>("x")
 
     if(references.size ==  1) {
       assertEquals(target, references.first())
     } else {
-      assertTrue(references.map { it?.resolve() }.filterNotNull().contains(target))
+      assertTrue(references.contains(target))
     }
   }
 

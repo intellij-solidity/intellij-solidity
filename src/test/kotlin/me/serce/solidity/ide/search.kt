@@ -1,6 +1,5 @@
 package me.serce.solidity.ide
 
-import junit.framework.Assert
 import me.serce.solidity.lang.psi.SolNamedElement
 import me.serce.solidity.utils.SolTestBase
 import org.intellij.lang.annotations.Language
@@ -29,6 +28,6 @@ class SolFindUsagesTest : SolTestBase() {
     InlineFile(code)
     val source = findElementInEditor<SolNamedElement>()
     val usages = myFixture.findUsages(source)
-    Assert.assertEquals(expectedUsages, usages.size)
+    assertEquals(expectedUsages, usages.size)
   }
 }
