@@ -85,6 +85,9 @@ abstract class SolUserDefinedTypeNameImplMixin : SolStubbedElementImpl<SolTypeRe
   override val referenceNameElement: PsiElement
     get() = findChildByType(IDENTIFIER)!!
 
+  override val referenceName: String
+    get() = referenceNameElement.text
+
   override fun getParent(): PsiElement? = parentByStub
 
   override fun setName(name: String) = this
