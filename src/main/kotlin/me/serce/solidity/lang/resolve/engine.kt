@@ -43,6 +43,21 @@ object SolResolver {
       is SolVariableDeclaration -> sequenceOf(scope)
       is SolVariableDefinition -> lexicalDeclarations(scope.firstChild, place)
 
+      is SolStateVariableDeclaration -> sequenceOf(scope)
+      is SolContractDefinition -> {
+        scope.children.asSequence()
+          .filter { it is SolContractPart }
+          .map { lexicalDeclarations(it, place) }
+          .flatten()
+      }
+      is SolContractPart -> {
+        scope.children.asSequence()
+          .filter { it is SolStateVariableDeclaration }
+          .map { lexicalDeclarations(it, place) }
+          .flatten()
+      }
+
+
       is SolStatement -> {
         scope.children.asSequence()
           .map { lexicalDeclarations(it, place) }
