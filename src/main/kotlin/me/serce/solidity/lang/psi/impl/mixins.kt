@@ -8,10 +8,7 @@ import me.serce.solidity.ide.SolidityIcons
 import me.serce.solidity.lang.core.SolidityTokenTypes.FUNCTION_MODIFIER
 import me.serce.solidity.lang.core.SolidityTokenTypes.IDENTIFIER
 import me.serce.solidity.lang.psi.*
-import me.serce.solidity.lang.resolve.ref.SolUserDefinedTypeNameReference
-import me.serce.solidity.lang.resolve.ref.SolImportPathReference
-import me.serce.solidity.lang.resolve.ref.SolModifierReference
-import me.serce.solidity.lang.resolve.ref.SolReference
+import me.serce.solidity.lang.resolve.ref.*
 import me.serce.solidity.lang.stubs.*
 
 open class SolImportPathElement(node: ASTNode) : SolNamedElementImpl(node) {
@@ -34,9 +31,7 @@ abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrL
 
 abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefStub>, SolFunctionDefinition {
   override val modifiers: List<PsiElement>
-    get() {
-      return findChildrenByType<PsiElement>(FUNCTION_MODIFIER)
-    }
+    get() = findChildrenByType<PsiElement>(FUNCTION_MODIFIER)
 
   constructor(node: ASTNode) : super(node)
   constructor(stub: SolFunctionDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
@@ -66,6 +61,20 @@ abstract class SolStateVarDeclMixin : SolStubbedNamedElementImpl<SolStateVarDecl
 }
 
 
+abstract class SolVarLiteralMixin(node: ASTNode) : SolNamedElementImpl(node), SolVarLiteral {
+  override val referenceNameElement: PsiElement
+    get() = findChildByType(IDENTIFIER)!!
+
+  override val referenceName: String
+    get() = referenceNameElement.text
+
+  override fun getReference(): SolReference = SolVarLiteralReference(this)
+
+  override fun setName(name: String) = this
+}
+
+open class SolVariableDeclarationMixin(node: ASTNode) : SolNamedElementImpl(node)
+
 abstract class SolUserDefinedTypeNameImplMixin : SolStubbedElementImpl<SolTypeRefStub>, SolUserDefinedTypeName {
   constructor(node: ASTNode) : super(node)
 
@@ -75,8 +84,6 @@ abstract class SolUserDefinedTypeNameImplMixin : SolStubbedElementImpl<SolTypeRe
 
   override val referenceNameElement: PsiElement
     get() = findChildByType(IDENTIFIER)!!
-
-  override val referenceName: String get() = (stub as? SolReferenceElement)?.referenceName ?: referenceNameElement.text
 
   override fun getParent(): PsiElement? = parentByStub
 

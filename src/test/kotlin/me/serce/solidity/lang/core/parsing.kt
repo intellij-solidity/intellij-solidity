@@ -3,7 +3,9 @@ package me.serce.solidity.lang.core
 import com.intellij.core.CoreApplicationEnvironment
 import com.intellij.lang.LanguageExtensionPoint
 import com.intellij.openapi.extensions.Extensions
+import com.intellij.rt.execution.junit.FileComparisonFailure
 import com.intellij.testFramework.ParsingTestCase
+import org.junit.Assert
 
 abstract class SolidityParsingTestBase(baseDir: String) : ParsingTestCase(baseDir, "sol", true, SolidityParserDefinition()) {
 
@@ -11,6 +13,17 @@ abstract class SolidityParsingTestBase(baseDir: String) : ParsingTestCase(baseDi
     super.setUp()
     CoreApplicationEnvironment.registerExtensionPoint(
       Extensions.getRootArea(), "com.intellij.lang.braceMatcher", LanguageExtensionPoint::class.java)
+  }
+
+  /**
+   * This method is needed because in 2017.1 support for FileComparisonFailure was broken
+   */
+  override fun doTest(checkResult: Boolean) {
+    try {
+      super.doTest(checkResult)
+    } catch (e: FileComparisonFailure) {
+      Assert.assertEquals(e.expected, e.actual)
+    }
   }
 
   override fun getTestDataPath() = "src/test/resources"

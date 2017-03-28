@@ -1,11 +1,13 @@
 package me.serce.solidity.lang.resolve
 
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiNamedElement
 import com.intellij.psi.stubs.StubIndex
-import me.serce.solidity.lang.psi.SolNamedElement
-import me.serce.solidity.lang.psi.SolUserDefinedTypeName
+import com.intellij.psi.util.PsiUtilCore
+import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.stubs.SolGotoClassIndex
 import me.serce.solidity.lang.stubs.SolModifierIndex
+import java.util.*
 
 object SolResolver {
   fun resolveTypeName(element: SolUserDefinedTypeName): List<SolNamedElement> = StubIndex.getElements(
@@ -23,4 +25,48 @@ object SolResolver {
     null,
     SolNamedElement::class.java
   ).toList()
+
+  fun resolveVarLiteral(element: SolVarLiteral): List<SolNamedElement> {
+    return lexicalDeclarations(element)
+      .filter { it.name == element.name }
+      .toList()
+  }
+
+  fun lexicalDeclarations(place: SolElement, stop: (PsiElement) -> Boolean = { false }): Sequence<SolNamedElement> =
+    place.ancestors
+      .takeWhileInclusive { it is SolElement && !stop(it) }
+      .flatMap { lexicalDeclarations(it, place) }
+
+
+  private fun lexicalDeclarations(scope: PsiElement, place: SolElement): Sequence<SolNamedElement> {
+    return when (scope) {
+      is SolVariableDeclaration -> sequenceOf(scope)
+      is SolVariableDefinition -> lexicalDeclarations(scope.firstChild, place)
+
+      is SolStatement -> {
+        scope.children.asSequence()
+          .map { lexicalDeclarations(it, place) }
+          .flatten()
+      }
+
+      is SolBlock -> {
+        scope.children.asSequence()
+          .filter { it is SolStatement }
+          .map { lexicalDeclarations(it, place) }
+          .flatten()
+      }
+
+      else -> emptySequence()
+    }
+  }
+
+}
+
+private fun <T> Sequence<T>.takeWhileInclusive(pred: (T) -> Boolean): Sequence<T> {
+  var shouldContinue = true
+  return takeWhile {
+    val result = shouldContinue
+    shouldContinue = pred(it)
+    result
+  }
 }

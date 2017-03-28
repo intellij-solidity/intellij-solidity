@@ -10,3 +10,5 @@ fun PsiElement.rangeRelativeTo(ancestor: PsiElement): TextRange {
 
 val PsiElement.parentRelativeRange: TextRange
   get() = rangeRelativeTo(parent)
+
+val PsiElement.ancestors: Sequence<PsiElement> get() = generateSequence(this) { it.parent }

@@ -178,12 +178,14 @@ EnumDefinition ::= enum Identifier '{' EnumValue? (',' EnumValue)* '}' {
 
 IndexedParameterList ::= '(' ( TypeName indexed?  Identifier? (',' TypeName indexed?  Identifier?)* )? ')'
 ParameterList ::=        '(' ( TypeName constant? Identifier? (',' TypeName constant? Identifier?)* )? ')'
-TypeNameList ::=         '(' ( TypeName (',' TypeName )* )? ')'
 
 // semantic restriction: mappings and structs (recursively) containing mappings
 // are not allowed in argument lists
 private declarationList ::= '(' ( Identifier ','? | ',' )*  ')' ;
-VariableDeclaration ::= var declarationList | TypeName Identifier
+VariableDeclaration ::= var declarationList | TypeName Identifier {
+    implements = "me.serce.solidity.lang.psi.SolNamedElement"
+    mixin = "me.serce.solidity.lang.psi.impl.SolVariableDeclarationMixin"
+}
 
 //
 //TypeName = ElementaryTypeName
@@ -249,11 +251,11 @@ TupleStatement ::= VariableDeclaration '=' SeqExpression ';'
 // intentionally not pinned
 ReturnTupleStatement ::= return SeqExpression ';'
 
-ExpressionStatement ::= Expression
+private ExpressionStatement ::= Expression
 IfStatement ::= if '(' Expression ')' Statement ( else Statement )? {pin = 1}
 WhileStatement ::= while '(' Expression ')' Statement {pin = 1}
 PlaceholderStatement ::= '_'
-SimpleStatement ::= VariableDefinition | ExpressionStatement
+private SimpleStatement ::= VariableDefinition | ExpressionStatement
 ForStatement ::= for '(' (SimpleStatement)? ';' (Expression)? ';' (ExpressionStatement)? ')' Statement {pin=1}
 InlineAssemblyStatement ::= assembly InlineAssemblyBlock {pin=1}
 DoWhileStatement ::= do Statement while '(' Expression ')' {pin=1}
@@ -302,13 +304,17 @@ UnaryExpression ::= ('!' | '~' | delete | '++' | '--' | '+' | '-') Expression {p
 IncrementExpression ::= Expression ('++' | '--')
 ParenExpression ::= '(' Expression ')' { pin = 1 }
 
-PrimaryExpression ::= Identifier
+PrimaryExpression ::= VarLiteral
                   | BooleanLiteral
                   | NumberLiteral
                   | HexLiteral
                   | StringLiteral
                   | ElementaryTypeNameExpression
 
+VarLiteral ::= Identifier {
+    implements = "me.serce.solidity.lang.psi.SolReferenceElement"
+    mixin = "me.serce.solidity.lang.psi.impl.SolVarLiteralMixin"
+}
 FunctionCallExpression ::= ( PrimaryExpression | NewExpression | TypeName ) ( ( '.' Identifier ) | ( '[' Expression ']' ) )*  '(' FunctionCallArguments? ')'
 CallExpression ::= Expression ( ( '.' Identifier ) | ( '[' Expression ']' ) )* '(' FunctionCallArguments? ')' ('(' FunctionCallArguments? ')')*
 FunctionCallArguments ::= MapExpression | Expression? ( ',' Expression )*

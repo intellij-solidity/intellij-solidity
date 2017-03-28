@@ -24,7 +24,8 @@ Solidity File
         PsiWhiteSpace(' ')
         SolFunctionCallExpressionImpl(FUNCTION_CALL_EXPRESSION)
           SolPrimaryExpressionImpl(PRIMARY_EXPRESSION)
-            PsiElement(Identifier)('modifier1')
+            SolVarLiteralImpl(VAR_LITERAL)
+              PsiElement(Identifier)('modifier1')
           PsiElement(()('(')
           SolFunctionCallArgumentsImpl(FUNCTION_CALL_ARGUMENTS)
             <empty list>
@@ -42,7 +43,8 @@ Solidity File
           <empty list>
   PsiWhiteSpace(' ')
   SolPrimaryExpressionImpl(PRIMARY_EXPRESSION)
-    PsiElement(Identifier)('f1')
+    SolVarLiteralImpl(VAR_LITERAL)
+      PsiElement(Identifier)('f1')
   PsiErrorElement:'(', '.', <contract definition>, <expression>, <storage location>, Identifier, constant, import, internal, pragma, private or public expected, got ';'
     PsiElement(;)(';')
   PsiWhiteSpace('\n')
