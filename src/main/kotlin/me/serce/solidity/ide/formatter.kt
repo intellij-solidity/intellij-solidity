@@ -63,7 +63,7 @@ class SolidityFormattingModelBuilder : FormattingModelBuilder {
         .after(CONTROL_STRUCTURES).spaces(1)
         .beforeInside(STATEMENT, TokenSet.create(IF_STATEMENT, WHILE_STATEMENT, FOR_STATEMENT, DO_WHILE_STATEMENT)).spaces(1)
         .after(CONTRACT).spaces(1)
-        .aroundInside(IDENTIFIER, TokenSet.create(CONTRACT_DEFINITION, PRAGMA_DIRECTIVE, STRUCT_DEFINITION)).spaces(1)
+        .aroundInside(IDENTIFIER, TokenSet.create(CONTRACT_DEFINITION, PRAGMA_DIRECTIVE, STRUCT_DEFINITION, PARAMETER_DEF)).spaces(1)
         .afterInside(TYPE_NAME, TokenSet.create(VARIABLE_DECLARATION, PARAMETER_LIST, INDEXED_PARAMETER_LIST)).spaces(1)
         .beforeInside(IDENTIFIER, TokenSet.create(VARIABLE_DECLARATION, PARAMETER_LIST, INDEXED_PARAMETER_LIST)).spaces(1)
         .after(COMMA).spaces(1)
