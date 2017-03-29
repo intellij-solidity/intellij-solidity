@@ -12,7 +12,9 @@
       <p>
         <b>v0.1.6</b>
         <ul>
+          <li>Grammar fixes</li>
           <li>Resolve, search and autocompletion for modifiers</li>
+          <li>Resolve for local variables, state variables and function parameters</li>
         </ul>
         <b>v0.1.5</b>s
         <ul>
