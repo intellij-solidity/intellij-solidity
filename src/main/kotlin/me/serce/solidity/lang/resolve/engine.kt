@@ -57,6 +57,9 @@ object SolResolver {
           .flatten()
       }
 
+      is SolFunctionDefinition -> {
+        scope.parameters.asSequence()
+      }
 
       is SolStatement -> {
         scope.children.asSequence()

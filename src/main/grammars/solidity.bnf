@@ -177,7 +177,11 @@ EnumDefinition ::= enum Identifier '{' EnumValue? (',' EnumValue)* '}' {
 }
 
 IndexedParameterList ::= '(' ( TypeName indexed?  Identifier? (',' TypeName indexed?  Identifier?)* )? ')'
-ParameterList ::=        '(' ( TypeName constant? Identifier? (',' TypeName constant? Identifier?)* )? ')'
+ParameterDef ::= TypeName constant? Identifier? {
+    implements = "me.serce.solidity.lang.psi.SolNamedElement"
+    mixin = "me.serce.solidity.lang.psi.impl.SolParameterDefMixin"
+}
+ParameterList ::= '(' ( ParameterDef (',' ParameterDef)* )? ')'
 
 // semantic restriction: mappings and structs (recursively) containing mappings
 // are not allowed in argument lists
@@ -283,7 +287,6 @@ Expression ::=
   | AssignmentExpression
   | InlineArrayExpression
   | PrimaryExpression
-
 
 
 AssignmentExpression ::= Expression ('=' | '|=' | '^=' | '&=' | '<<=' | '>>=' | '+=' | '-=' | '*=' | '/=' | '%=') Expression

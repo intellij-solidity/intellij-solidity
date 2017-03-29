@@ -27,7 +27,7 @@ class SolVarResolveTest : SolResolveTestBase() {
         }
   """)
 
-  fun testFieldResolve1() = checkByCode("""
+  fun testField1() = checkByCode("""
         contract B {
             uint public lastC;
                         //x
@@ -38,4 +38,27 @@ class SolVarResolveTest : SolResolveTestBase() {
             }
         }
   """)
+
+  fun testFunctionParams() = checkByCode("""
+        contract B {
+            function B(uint abc) {
+                          //x
+                _;
+                abc = 1;
+                //^
+            }
+        }
+  """)
+
+  fun testFunctionParamsSecond() = checkByCode("""
+        contract B {
+            function B(uint abc1, uint abc2) {
+                                       //x
+                abc1 = 1;
+                abc2 = 1;
+                //^
+            }
+        }
+  """)
+
 }

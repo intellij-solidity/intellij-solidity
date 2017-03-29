@@ -5,8 +5,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiReference
 import com.intellij.psi.stubs.IStubElementType
 import me.serce.solidity.ide.SolidityIcons
-import me.serce.solidity.lang.core.SolidityTokenTypes.FUNCTION_MODIFIER
-import me.serce.solidity.lang.core.SolidityTokenTypes.IDENTIFIER
+import me.serce.solidity.lang.core.SolidityTokenTypes.*
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.resolve.ref.*
 import me.serce.solidity.lang.stubs.*
@@ -32,6 +31,10 @@ abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrL
 abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefStub>, SolFunctionDefinition {
   override val modifiers: List<PsiElement>
     get() = findChildrenByType<PsiElement>(FUNCTION_MODIFIER)
+  override val parameters: List<SolParameterDef>
+    get() = findChildByType<SolParameterList>(PARAMETER_LIST)!!
+      .children
+      .filterIsInstance(SolParameterDef::class.java)
 
   constructor(node: ASTNode) : super(node)
   constructor(stub: SolFunctionDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
@@ -74,6 +77,8 @@ abstract class SolVarLiteralMixin(node: ASTNode) : SolNamedElementImpl(node), So
 }
 
 open class SolVariableDeclarationMixin(node: ASTNode) : SolNamedElementImpl(node)
+
+open class SolParameterDefMixin(node: ASTNode) : SolNamedElementImpl(node)
 
 abstract class SolUserDefinedTypeNameImplMixin : SolStubbedElementImpl<SolTypeRefStub>, SolUserDefinedTypeName {
   constructor(node: ASTNode) : super(node)

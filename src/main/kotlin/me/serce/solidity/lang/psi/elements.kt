@@ -14,6 +14,7 @@ interface SolNamedElement : SolElement, PsiNamedElement, NavigatablePsiElement
 
 interface SolFunctionDefElement : SolNamedElement {
   val modifiers: List<PsiElement>
+  val parameters: List<SolParameterDef>
 }
 
 interface SolEnumDefElement : SolNamedElement
