@@ -45,10 +45,21 @@ object SolResolver {
 
       is SolStateVariableDeclaration -> sequenceOf(scope)
       is SolContractDefinition -> {
-        scope.children.asSequence()
+        val childrenScope = scope.children.asSequence()
           .filter { it is SolContractPart }
           .map { lexicalDeclarations(it, place) }
           .flatten()
+        val extendsScope = scope.children.asSequence()
+          .filter { it is SolInheritanceSpecifier }
+          .flatMap { it.children.asSequence() }
+          .map { (it as? SolUserDefinedTypeName)?.let { resolveTypeName(it) }?.firstOrNull() }
+          .filterNotNull()
+          .map { lexicalDeclarations(it, place) }
+          .flatten()
+        sequenceOf(
+          childrenScope,
+          extendsScope
+        ).flatten()
       }
       is SolContractPart -> {
         scope.children.asSequence()

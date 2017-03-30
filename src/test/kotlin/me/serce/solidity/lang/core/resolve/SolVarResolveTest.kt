@@ -61,4 +61,21 @@ class SolVarResolveTest : SolResolveTestBase() {
         }
   """)
 
+  fun testResolveStateInheritance() = checkByCode("""
+
+        contract C {
+            uint abc;
+                //x
+        }
+
+        contract B {}
+
+        contract A is B, C {
+            function A() {
+                abc = 1;
+                //^
+            }
+        }
+  """)
+
 }
