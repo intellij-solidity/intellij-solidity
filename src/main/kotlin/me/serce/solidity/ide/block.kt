@@ -62,7 +62,7 @@ internal class SolidityFormattingBlock(private val astNode: ASTNode,
   private fun calcIndent(child: ASTNode): Indent {
     val type = astNode.elementType
     val parentType = astNode.treeParent?.elementType
-    if (child is PsiComment) return Indent.getNormalIndent()
+    if (child is PsiComment && (type === CONTRACT_DEFINITION || type === BLOCK)) return Indent.getNormalIndent()
     if (parentType === CONTRACT_DEFINITION) return Indent.getNormalIndent()
     if (parentType === BLOCK) return Indent.getNormalIndent()
     return Indent.getNoneIndent()
