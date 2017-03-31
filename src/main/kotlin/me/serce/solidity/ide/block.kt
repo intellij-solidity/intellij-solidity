@@ -3,6 +3,7 @@ package me.serce.solidity.ide
 import com.intellij.formatting.*
 import com.intellij.lang.ASTNode
 import com.intellij.openapi.util.TextRange
+import com.intellij.psi.PsiComment
 import com.intellij.psi.TokenType
 import com.intellij.psi.codeStyle.CodeStyleSettings
 import com.intellij.util.containers.ContainerUtil
@@ -54,14 +55,15 @@ internal class SolidityFormattingBlock(private val astNode: ASTNode,
   }
 
   private fun buildSubBlock(child: ASTNode): Block {
-    val indent = calcIndent()
+    val indent = calcIndent(child)
     return SolidityFormattingBlock(child, alignment, indent, null, codeStyleSettings, spacingBuilder)
   }
 
-  private fun calcIndent(): Indent {
+  private fun calcIndent(child: ASTNode): Indent {
     val type = astNode.elementType
     val parentType = astNode.treeParent?.elementType
-    if (type === CONTRACT_PART) return Indent.getNormalIndent()
+    if (child is PsiComment) return Indent.getNormalIndent()
+    if (parentType === CONTRACT_DEFINITION) return Indent.getNormalIndent()
     if (parentType === BLOCK) return Indent.getNormalIndent()
     return Indent.getNoneIndent()
   }
