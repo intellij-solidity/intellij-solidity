@@ -16,7 +16,7 @@
           <li>Resolve, search and autocompletion for modifiers</li>
           <li>Resolve for local variables, state variables and function parameters</li>
         </ul>
-        <b>v0.1.5</b>s
+        <b>v0.1.5</b>
         <ul>
           <li>Grammar fixes</li>
           <li>Go to symbol for methods and state vars</li>
