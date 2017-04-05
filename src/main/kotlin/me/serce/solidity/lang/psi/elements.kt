@@ -19,7 +19,9 @@ interface SolFunctionDefElement : SolNamedElement {
 
 interface SolEnumDefElement : SolNamedElement
 
-interface SolContractOrLibElement : SolNamedElement
+interface SolContractOrLibElement : SolNamedElement {
+  val supers: List<SolUserDefinedTypeName>
+}
 
 interface SolReferenceElement : SolNamedElement {
   val referenceNameElement: PsiElement

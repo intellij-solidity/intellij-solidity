@@ -49,10 +49,8 @@ object SolResolver {
           .filter { it is SolContractPart }
           .map { lexicalDeclarations(it, place) }
           .flatten()
-        val extendsScope = scope.children.asSequence()
-          .filter { it is SolInheritanceSpecifier }
-          .flatMap { it.children.asSequence() }
-          .map { (it as? SolUserDefinedTypeName)?.let { resolveTypeName(it) }?.firstOrNull() }
+        val extendsScope = scope.supers.asSequence()
+          .map { resolveTypeName(it).firstOrNull() }
           .filterNotNull()
           .map { lexicalDeclarations(it, place) }
           .flatten()

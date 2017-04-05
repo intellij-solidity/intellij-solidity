@@ -22,6 +22,11 @@ abstract class SolEnumItemImplMixin : SolStubbedNamedElementImpl<SolEnumDefStub>
 }
 
 abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrLibDefStub>, SolContractDefinition {
+  override val supers: List<SolUserDefinedTypeName>
+    get() = findChildrenByType<SolInheritanceSpecifier>(INHERITANCE_SPECIFIER)
+      .map { it.children.filterIsInstance(SolUserDefinedTypeName::class.java).firstOrNull() }
+      .filterNotNull()
+
   constructor(node: ASTNode) : super(node)
   constructor(stub: SolContractOrLibDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
 
