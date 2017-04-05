@@ -39,6 +39,7 @@ fun factory(name: String): SolStubElementType<*, *> = when (name) {
   "MAPPING_TYPE_NAME" -> SolTypeRefStub.Type("MAPPING_TYPE_NAME", ::SolMappingTypeNameImpl)
   "FUNCTION_TYPE_NAME" -> SolTypeRefStub.Type("FUNCTION_TYPE_NAME", ::SolFunctionTypeNameImpl)
   "ARRAY_TYPE_NAME" -> SolTypeRefStub.Type("ARRAY_TYPE_NAME", ::SolArrayTypeNameImpl)
+  "BYTES_ARRAY_TYPE_NAME" -> SolTypeRefStub.Type("BYTES_ARRAY_TYPE_NAME", ::SolArrayTypeNameImpl)
   "USER_DEFINED_LOCATION_TYPE_NAME" -> SolTypeRefStub.Type("USER_DEFINED_LOCATION_TYPE_NAME", ::SolUserDefinedLocationTypeNameImpl)
 
   "USER_DEFINED_TYPE_NAME" -> SolTypeRefStub.Type("USER_DEFINED_TYPE_NAME", ::SolUserDefinedTypeNameImpl)
