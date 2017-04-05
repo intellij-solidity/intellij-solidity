@@ -10,6 +10,10 @@
 
     <change-notes><![CDATA[
       <p>
+        <b>v0.1.7</b>
+        <ul>
+          <li>Rename refactoring</li>
+        </ul>
         <b>v0.1.6</b>
         <ul>
           <li>Grammar fixes</li>

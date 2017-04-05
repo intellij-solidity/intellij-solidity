@@ -10,7 +10,12 @@ import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.resolve.ref.*
 import me.serce.solidity.lang.stubs.*
 
-open class SolImportPathElement(node: ASTNode) : SolNamedElementImpl(node) {
+open class SolImportPathElement(node: ASTNode) : SolNamedElementImpl(node), SolReferenceElement {
+  override val referenceNameElement: PsiElement
+    get() = findChildByType(STRINGLITERAL)!!
+  override val referenceName: String
+    get() = referenceNameElement.text
+
   override fun getReference() = SolImportPathReference(this)
 }
 
@@ -34,6 +39,10 @@ abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrL
 }
 
 abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefStub>, SolFunctionDefinition {
+  override val referenceNameElement: PsiElement
+    get() = findChildByType(IDENTIFIER)!!
+  override val referenceName: String
+    get() = referenceNameElement.text
   override val modifiers: List<PsiElement>
     get() = findChildrenByType<PsiElement>(FUNCTION_MODIFIER)
   override val parameters: List<SolParameterDef>
@@ -77,8 +86,6 @@ abstract class SolVarLiteralMixin(node: ASTNode) : SolNamedElementImpl(node), So
     get() = referenceNameElement.text
 
   override fun getReference(): SolReference = SolVarLiteralReference(this)
-
-  override fun setName(name: String) = this
 }
 
 open class SolVariableDeclarationMixin(node: ASTNode) : SolNamedElementImpl(node)
@@ -100,5 +107,12 @@ abstract class SolUserDefinedTypeNameImplMixin : SolStubbedElementImpl<SolTypeRe
 
   override fun getParent(): PsiElement? = parentByStub
 
-  override fun setName(name: String) = this
+  override fun getName(): String? {
+    return referenceNameElement.text
+  }
+
+  override fun setName(name: String): SolUserDefinedTypeNameImplMixin {
+    referenceNameElement.replace(SolPsiFactory(project).createIdentifier(name))
+    return this
+  }
 }

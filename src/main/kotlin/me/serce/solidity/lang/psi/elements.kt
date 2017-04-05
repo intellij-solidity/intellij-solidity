@@ -12,7 +12,7 @@ interface SolElement : PsiElement {
 
 interface SolNamedElement : SolElement, PsiNamedElement, NavigatablePsiElement
 
-interface SolFunctionDefElement : SolNamedElement {
+interface SolFunctionDefElement : SolReferenceElement {
   val modifiers: List<PsiElement>
   val parameters: List<SolParameterDef>
 }
@@ -27,5 +27,5 @@ interface SolReferenceElement : SolNamedElement {
   val referenceNameElement: PsiElement
   val referenceName: String
 
-  override fun getReference(): SolReference
+  override fun getReference(): SolReference?
 }

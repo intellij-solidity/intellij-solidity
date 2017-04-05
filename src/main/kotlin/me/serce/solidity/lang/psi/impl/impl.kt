@@ -12,6 +12,7 @@ import com.intellij.psi.stubs.StubElement
 import me.serce.solidity.lang.core.SolidityTokenTypes.IDENTIFIER
 import me.serce.solidity.lang.psi.SolElement
 import me.serce.solidity.lang.psi.SolNamedElement
+import me.serce.solidity.lang.psi.SolPsiFactory
 import me.serce.solidity.lang.resolve.ref.SolReference
 import me.serce.solidity.lang.stubs.SolNamedStub
 
@@ -22,9 +23,12 @@ abstract class SolElementImpl(node: ASTNode) : ASTWrapperPsiElement(node), SolEl
 abstract class SolNamedElementImpl(node: ASTNode) : SolElementImpl(node), SolNamedElement, PsiNameIdentifierOwner {
   override fun getNameIdentifier(): PsiElement? = findChildByType(IDENTIFIER)
 
-  override fun getName(): String? = nameIdentifier?.text
+  override fun getName(): String? {
+    return nameIdentifier?.text
+  }
 
   override fun setName(name: String): PsiElement? {
+    nameIdentifier?.replace(SolPsiFactory(project).createIdentifier(name))
     return this
   }
 
@@ -61,6 +65,7 @@ abstract class SolStubbedNamedElementImpl<S> :
   override fun getName() = stub?.name ?: nameIdentifier?.text
 
   override fun setName(name: String): PsiElement? {
+    nameIdentifier?.replace(SolPsiFactory(project).createIdentifier(name))
     return this
   }
 
