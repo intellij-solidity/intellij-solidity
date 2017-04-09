@@ -45,8 +45,13 @@ object SolResolver {
 
       is SolStateVariableDeclaration -> sequenceOf(scope)
       is SolContractDefinition -> {
-        val childrenScope = scope.children.asSequence()
-          .filter { it is SolContractPart }
+        val childrenScope = sequenceOf(
+          scope.stateVariableDeclarationList,
+          scope.structDefinitionList,
+          scope.enumDefinitionList,
+          scope.functionDefinitionList,
+          scope.eventDefinitionList)
+          .flatten()
           .map { lexicalDeclarations(it, place) }
           .flatten()
         val extendsScope = scope.supers.asSequence()
@@ -59,13 +64,6 @@ object SolResolver {
           extendsScope
         ).flatten()
       }
-      is SolContractPart -> {
-        scope.children.asSequence()
-          .filter { it is SolStateVariableDeclaration }
-          .map { lexicalDeclarations(it, place) }
-          .flatten()
-      }
-
       is SolFunctionDefinition -> {
         scope.parameters.asSequence()
       }

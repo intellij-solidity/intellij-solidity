@@ -6,7 +6,9 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiComment
 import com.intellij.psi.TokenType
 import com.intellij.psi.codeStyle.CodeStyleSettings
+import com.intellij.psi.tree.IElementType
 import com.intellij.util.containers.ContainerUtil
+import me.serce.solidity.lang.core.SolidityTokenTypes
 import me.serce.solidity.lang.core.SolidityTokenTypes.*
 import java.util.*
 
@@ -39,7 +41,7 @@ internal class SolidityFormattingBlock(private val astNode: ASTNode,
     var child = astNode.getFirstChildNode()
     while (child != null) {
       val childType = child.getElementType()
-      if (child.getTextRange().getLength() === 0) {
+      if (child.getTextRange().getLength() == 0) {
         child = child.getTreeNext()
         continue
       }
@@ -60,12 +62,15 @@ internal class SolidityFormattingBlock(private val astNode: ASTNode,
   }
 
   private fun calcIndent(child: ASTNode): Indent {
+    val childType = child.elementType
     val type = astNode.elementType
     val parentType = astNode.treeParent?.elementType
-    if (child is PsiComment && (type === CONTRACT_DEFINITION || type === BLOCK)) return Indent.getNormalIndent()
-    if (parentType === CONTRACT_DEFINITION) return Indent.getNormalIndent()
-    if (parentType === BLOCK) return Indent.getNormalIndent()
-    return Indent.getNoneIndent()
+    return when {
+      child is PsiComment && (type == CONTRACT_DEFINITION || type == BLOCK || type == FUNCTION_DEFINITION) -> Indent.getNormalIndent()
+      childType.isContractPart() -> Indent.getNormalIndent()
+      parentType == BLOCK -> Indent.getNormalIndent()
+      else -> return Indent.getNoneIndent()
+    }
   }
 
   override fun getWrap(): Wrap? {
@@ -96,6 +101,17 @@ internal class SolidityFormattingBlock(private val astNode: ASTNode,
   override fun isLeaf(): Boolean {
     return astNode.firstChildNode == null
   }
+
+  // TODO nicer way to do the same
+  private fun IElementType.isContractPart() = this in listOf(
+    STATE_VARIABLE_DECLARATION,
+    USING_FOR_DECLARATION,
+    STRUCT_DEFINITION,
+    MODIFIER_DEFINITION,
+    FUNCTION_DEFINITION,
+    EVENT_DEFINITION,
+    ENUM_DEFINITION
+  )
 
 }
 

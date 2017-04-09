@@ -9,7 +9,7 @@ import com.intellij.patterns.PsiElementPattern
 import com.intellij.psi.PsiElement
 import com.intellij.util.ProcessingContext
 import me.serce.solidity.lang.core.SolidityFile
-import me.serce.solidity.lang.psi.SolContractPart
+import me.serce.solidity.lang.psi.SolContractDefinition
 import me.serce.solidity.lang.psi.SolPrimaryExpression
 import me.serce.solidity.lang.psi.SolStatement
 
@@ -78,7 +78,7 @@ class SolKeywordCompletionContributor : CompletionContributor(), DumbAware {
     .inside(SolStatement::class.java)
 
   private fun insideContract() = psiElement<PsiElement>()
-    .inside(SolContractPart::class.java)
+    .inside(SolContractDefinition::class.java)
 
 }
 

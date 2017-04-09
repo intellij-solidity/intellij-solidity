@@ -76,7 +76,8 @@ class SolidityFormattingModelBuilder : FormattingModelBuilder {
         .between(IMPORT_DIRECTIVE, IMPORT_DIRECTIVE).blankLines(0)
         .between(SOURCE_UNIT, SOURCE_UNIT).blankLines(2)
         .between(SOURCE_UNIT, COMMENT).blankLines(2)
-        .between(CONTRACT_PART, CONTRACT_PART).blankLines(1)
+        .between(TokenSet.create(FUNCTION_DEFINITION, EVENT_DEFINITION, STRUCT_DEFINITION, STATE_VARIABLE_DECLARATION),
+          TokenSet.create(FUNCTION_DEFINITION, EVENT_DEFINITION, STRUCT_DEFINITION, STATE_VARIABLE_DECLARATION)).blankLines(1)
     }
   }
 }

@@ -129,7 +129,7 @@ ContractDefinition ::= ( contract | library ) Identifier
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
 
-ContractPart ::= StateVariableDeclaration | UsingForDeclaration
+private ContractPart ::= StateVariableDeclaration | UsingForDeclaration
              | StructDefinition | ModifierDefinition | FunctionDefinition | EventDefinition | EnumDefinition
 
 InheritanceSpecifier ::= UserDefinedTypeName ( '(' Expression ( ',' Expression )* ')' )?

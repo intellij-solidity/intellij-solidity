@@ -77,6 +77,9 @@
         <lang.findUsagesProvider language="Solidity" implementationClass="me.serce.solidity.ide.SolFindUsagesProvider"/>
 
         <spellchecker.support language="Solidity" implementationClass="me.serce.solidity.ide.SolSpellcheckingStrategy"/>
+
+        <lang.psiStructureViewFactory language="Solidity"
+                                      implementationClass="me.serce.solidity.ide.SolPsiStructureViewFactory"/>
     </extensions>
 
     <actions>
