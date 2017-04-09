@@ -1,13 +1,10 @@
 package me.serce.solidity.lang.resolve
 
 import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiNamedElement
 import com.intellij.psi.stubs.StubIndex
-import com.intellij.psi.util.PsiUtilCore
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.stubs.SolGotoClassIndex
 import me.serce.solidity.lang.stubs.SolModifierIndex
-import java.util.*
 
 object SolResolver {
   fun resolveTypeName(element: SolUserDefinedTypeName): List<SolNamedElement> = StubIndex.getElements(
@@ -47,11 +44,7 @@ object SolResolver {
       is SolContractDefinition -> {
         val childrenScope = sequenceOf(
           scope.stateVariableDeclarationList,
-          scope.structDefinitionList,
-          scope.enumDefinitionList,
-          scope.functionDefinitionList,
-          scope.eventDefinitionList)
-          .flatten()
+          scope.structDefinitionList).flatten()
           .map { lexicalDeclarations(it, place) }
           .flatten()
         val extendsScope = scope.supers.asSequence()
@@ -59,10 +52,7 @@ object SolResolver {
           .filterNotNull()
           .map { lexicalDeclarations(it, place) }
           .flatten()
-        sequenceOf(
-          childrenScope,
-          extendsScope
-        ).flatten()
+        childrenScope + extendsScope
       }
       is SolFunctionDefinition -> {
         scope.parameters.asSequence()
@@ -75,8 +65,7 @@ object SolResolver {
       }
 
       is SolBlock -> {
-        scope.children.asSequence()
-          .filter { it is SolStatement }
+        scope.statementList.asSequence()
           .map { lexicalDeclarations(it, place) }
           .flatten()
       }
