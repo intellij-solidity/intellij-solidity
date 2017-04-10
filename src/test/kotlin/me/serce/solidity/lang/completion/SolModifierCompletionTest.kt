@@ -1,6 +1,6 @@
 package me.serce.solidity.lang.completion
 
-class SolModidiferCompletionTest : SolCompletionTestBase() {
+class SolModifierCompletionTest : SolCompletionTestBase() {
   fun testModifierCompletion() = checkCompletion(hashSetOf("onlySeller"), """
         contract B {
             modifier onlySeller() {
