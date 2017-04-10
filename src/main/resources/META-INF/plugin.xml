@@ -14,18 +14,13 @@
         <ul>
           <li>Grammar fixes</li>
           <li>Rename refactoring</li>
+          <li>Better autocomplete</li>
         </ul>
         <b>v0.1.6</b>
         <ul>
           <li>Grammar fixes</li>
           <li>Resolve, search and autocompletion for modifiers</li>
           <li>Resolve for local variables, state variables and function parameters</li>
-        </ul>
-        <b>v0.1.5</b>
-        <ul>
-          <li>Grammar fixes</li>
-          <li>Go to symbol for methods and state vars</li>
-          <li>Autocompletion for contract names</li>
         </ul>
       </p>
     ]]>
