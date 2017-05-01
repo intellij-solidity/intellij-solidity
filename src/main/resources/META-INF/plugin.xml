@@ -75,6 +75,15 @@
 
         <lang.psiStructureViewFactory language="Solidity"
                                       implementationClass="me.serce.solidity.ide.SolPsiStructureViewFactory"/>
+
+        <lang.inspectionSuppressor language="Solidity"
+                                   implementationClass="me.serce.solidity.ide.inspections.SolInspectionSuppressor"/>
+
+        <localInspection language="Solidity" groupName="Solidity"
+                         displayName="suicide is deprecated. Use seldestruct instead EIP 6"
+                         enabledByDefault="true"
+                         level="WARNING"
+                         implementationClass="me.serce.solidity.ide.inspections.SelfdestructRenameInspection"/>
     </extensions>
 
     <actions>

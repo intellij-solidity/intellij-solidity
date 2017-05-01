@@ -23,3 +23,6 @@ val PsiElement.ancestors: Sequence<PsiElement> get() = generateSequence(this) { 
 
 val PsiElement.elementType: IElementType
   get() = if (this is SolidityFile) SolidityFileStub.Type else PsiUtilCore.getElementType(this)
+
+inline fun <reified T : PsiElement> PsiElement.parentOfType(strict: Boolean = true, minStartOffset: Int = -1): T? =
+  PsiTreeUtil.getParentOfType(this, T::class.java, strict, minStartOffset)
