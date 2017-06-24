@@ -10,26 +10,26 @@ import me.serce.solidity.ide.SolidityIcons
 import java.nio.charset.StandardCharsets.UTF_8
 
 object SolidityLanguage : Language("Solidity", "text/solidity") {
-    override fun isCaseSensitive() = true
+  override fun isCaseSensitive() = true
 }
 
 class SolidityFileTypeFactory : FileTypeFactory() {
-    override fun createFileTypes(consumer: FileTypeConsumer) {
-        consumer.consume(
-                SolidityFileType,
-                ExtensionFileNameMatcher(SolidityFileType.DEFAULTS.EXTENSION))
-    }
+  override fun createFileTypes(consumer: FileTypeConsumer) {
+    consumer.consume(
+      SolidityFileType,
+      ExtensionFileNameMatcher(SolidityFileType.DEFAULTS.EXTENSION))
+  }
 }
 
 object SolidityFileType : LanguageFileType(SolidityLanguage) {
-    object DEFAULTS {
-        val EXTENSION = "sol"
-        val DESCRIPTION = "Solidity file"
-    }
+  object DEFAULTS {
+    val EXTENSION = "sol"
+    val DESCRIPTION = "Solidity file"
+  }
 
-    override fun getName() = DEFAULTS.DESCRIPTION
-    override fun getDescription() = DEFAULTS.DESCRIPTION
-    override fun getDefaultExtension() = DEFAULTS.EXTENSION
-    override fun getIcon() = SolidityIcons.FILE_ICON
-    override fun getCharset(file: VirtualFile, content: ByteArray) = UTF_8.name()
+  override fun getName() = DEFAULTS.DESCRIPTION
+  override fun getDescription() = DEFAULTS.DESCRIPTION
+  override fun getDefaultExtension() = DEFAULTS.EXTENSION
+  override fun getIcon() = SolidityIcons.FILE_ICON
+  override fun getCharset(file: VirtualFile, content: ByteArray) = UTF_8.name()
 }

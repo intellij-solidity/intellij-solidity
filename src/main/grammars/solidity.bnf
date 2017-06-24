@@ -351,7 +351,7 @@ private DecimalNumber ::= decimalNumber
 
 private PrimitiveLiteral ::= intNumType | uIntNumType | byteNumType | bytesNumType | fixedNumType | uFixedNumType | booleanLiteral
 
-ElementaryTypeNameExpression ::= ElementaryTypeName
+private ElementaryTypeNameExpression ::= ElementaryTypeName
 
 ElementaryTypeName ::= address | bool | string | var | NumberType {
     stubClass = "me.serce.solidity.lang.stubs.SolTypeRefStub"
