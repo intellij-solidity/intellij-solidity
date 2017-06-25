@@ -29,3 +29,5 @@ interface SolReferenceElement : SolNamedElement {
 
   override fun getReference(): SolReference?
 }
+
+
