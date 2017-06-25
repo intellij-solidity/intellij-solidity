@@ -8,7 +8,7 @@ Solidity File
   PsiErrorElement:<contract definition>, <expression>, <type name>, byteNumType, enum, event, fixedNumType, function, import, intNumType, modifier, pragma, struct, uIntNumType, using or '}' expected, got 'fixed40x40'
     <empty list>
   PsiWhiteSpace('\n  ')
-  SolElementaryTypeNameExpressionImpl(ELEMENTARY_TYPE_NAME_EXPRESSION)
+  SolPrimaryExpressionImpl(PRIMARY_EXPRESSION)
     SolElementaryTypeNameImpl(ELEMENTARY_TYPE_NAME)
       SolNumberTypeImpl(NUMBER_TYPE)
         PsiElement(fixedNumType)('fixed40x40')

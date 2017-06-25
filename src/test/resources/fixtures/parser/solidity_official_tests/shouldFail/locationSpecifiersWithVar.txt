@@ -18,7 +18,7 @@ Solidity File
         PsiElement({)('{')
         PsiWhiteSpace(' ')
         SolStatementImpl(STATEMENT)
-          SolElementaryTypeNameExpressionImpl(ELEMENTARY_TYPE_NAME_EXPRESSION)
+          SolPrimaryExpressionImpl(PRIMARY_EXPRESSION)
             SolElementaryTypeNameImpl(ELEMENTARY_TYPE_NAME)
               PsiElement(var)('var')
           PsiWhiteSpace(' ')

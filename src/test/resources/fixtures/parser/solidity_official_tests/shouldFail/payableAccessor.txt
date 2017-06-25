@@ -8,7 +8,7 @@ Solidity File
   PsiErrorElement:<contract definition>, <expression>, <type name>, enum, event, function, import, intNumType, modifier, pragma, struct, uIntNumType, using or '}' expected, got 'uint'
     <empty list>
   PsiWhiteSpace('\n  ')
-  SolElementaryTypeNameExpressionImpl(ELEMENTARY_TYPE_NAME_EXPRESSION)
+  SolPrimaryExpressionImpl(PRIMARY_EXPRESSION)
     SolElementaryTypeNameImpl(ELEMENTARY_TYPE_NAME)
       SolNumberTypeImpl(NUMBER_TYPE)
         PsiElement(uIntNumType)('uint')

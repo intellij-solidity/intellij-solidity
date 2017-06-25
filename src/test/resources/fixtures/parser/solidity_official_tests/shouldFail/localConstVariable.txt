@@ -30,7 +30,7 @@ Solidity File
         PsiElement({)('{')
         PsiWhiteSpace('\n    ')
         SolStatementImpl(STATEMENT)
-          SolElementaryTypeNameExpressionImpl(ELEMENTARY_TYPE_NAME_EXPRESSION)
+          SolPrimaryExpressionImpl(PRIMARY_EXPRESSION)
             SolElementaryTypeNameImpl(ELEMENTARY_TYPE_NAME)
               SolNumberTypeImpl(NUMBER_TYPE)
                 PsiElement(uIntNumType)('uint')

@@ -28,7 +28,7 @@ Solidity File
             PsiElement(=)('=')
             PsiWhiteSpace(' ')
             SolFunctionCallExpressionImpl(FUNCTION_CALL_EXPRESSION)
-              SolElementaryTypeNameExpressionImpl(ELEMENTARY_TYPE_NAME_EXPRESSION)
+              SolPrimaryExpressionImpl(PRIMARY_EXPRESSION)
                 SolElementaryTypeNameImpl(ELEMENTARY_TYPE_NAME)
                   SolNumberTypeImpl(NUMBER_TYPE)
                     PsiElement(uIntNumType)('uint64')
