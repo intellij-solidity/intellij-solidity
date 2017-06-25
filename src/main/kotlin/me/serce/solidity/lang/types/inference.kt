@@ -1,6 +1,5 @@
 package me.serce.solidity.lang.types
 
-import com.intellij.configurationStore.exportSettings
 import com.intellij.openapi.util.RecursionManager
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
@@ -8,13 +7,23 @@ import com.intellij.psi.util.PsiModificationTracker
 import me.serce.solidity.firstOrElse
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.resolve.SolResolver
-import org.codehaus.groovy.ast.expr.TernaryExpression
 
 private fun getSolType(solTypeName: SolTypeName?): SolType {
   return when (solTypeName) {
-    is SolElementaryTypeName -> when (solTypeName.firstChild.text) {
-      "bool" -> SolBoolean
-      else -> SolUnknown
+    is SolElementaryTypeName -> {
+      val text = solTypeName.firstChild.text
+      when (text) {
+        "bool" -> SolBoolean
+        "string" -> SolString
+        "address" -> SolAddress
+        else -> {
+          try {
+            SolInteger.parse(text)
+          } catch (e: IllegalArgumentException) {
+            SolUnknown
+          }
+        }
+      }
     }
     else -> SolUnknown
   }
@@ -56,6 +65,8 @@ fun inferExprType(expr: SolExpression?): SolType {
     is SolPrimaryExpression -> {
       expr.varLiteral?.let { inferRefType(it) }
         ?: expr.booleanLiteral?.let { SolBoolean }
+        ?: expr.stringLiteral?.let { SolString }
+        ?: expr.numberLiteral?.let { SolInteger.INT }
         ?: SolUnknown
     }
     is SolAndExpression,

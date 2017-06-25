@@ -5,56 +5,88 @@ import me.serce.solidity.utils.SolTestBase
 import org.intellij.lang.annotations.Language
 
 class SolExpressionTypeProviderTest : SolTestBase() {
-  fun testBoolTyped() = checkExpr("""
-    contract A {
-        function f() {
-            bool x = true;
-            x;
-          //^ bool
-        }
+  fun checkPrimitiveTypes(inference: Boolean = false, @Language("Solidity") codeProvider: (String, String) -> String) {
+    var cases = listOf(
+      "true" to "bool",
+      "42" to "int256",
+      "\"hello\"" to "string"
+    )
+
+    if(!inference) {
+      cases += listOf(
+        "42" to "uint8",
+        "42" to "address",
+        "100000" to "uint256"
+      )
     }
-  """)
 
-  fun testBoolVar() = checkExpr("""
-    contract A {
-        function f() {
-            var x = true;
-            x;
-          //^ bool
-        }
+    for ((value, type) in cases) {
+      val code = codeProvider(value, type)
+      checkExpr(code, "$value: $type")
     }
-  """)
+  }
 
-  fun testFunctionParameter() = checkExpr("""
-    contract A {
-        function f(bool x) {
-            x;
-          //^ bool
+
+  fun testAssignTyped() = checkPrimitiveTypes { value, type ->
+    """
+      contract A {
+          function f() {
+              $type x = $value;
+              x;
+            //^ $type
+          }
+      }
+    """
+  }
+
+  fun testBoolVar() = checkPrimitiveTypes(true) { value, type ->
+    """
+        contract A {
+            function f() {
+                var x = $value;
+                x;
+              //^ $type
+            }
         }
-    }
-  """)
+    """
+  }
 
-
-  fun testStateVar() = checkExpr("""
-    contract A {
-        bool x;
-
-        function f() {
-            x;
-          //^ bool
+  fun testFunctionParameter() = checkPrimitiveTypes { value, type ->
+    """
+        contract A {
+            function f($type x) {
+                x;
+              //^ $type
+            }
         }
-    }
-  """)
+    """
+  }
 
-  fun testBoolTernary() = checkExpr("""
-    contract A {
-        function f() {
-            var x = true ? true : false;
-            x;
-          //^ bool
-        }
-    }
-  """)
+
+  fun testStateVar() = checkPrimitiveTypes { value, type ->
+    """
+      contract A {
+          $type x;
+
+          function f() {
+              x;
+            //^ $type
+          }
+      }
+    """
+  }
+
+  fun testBoolTernary() = checkPrimitiveTypes(true) { value, type ->
+    """
+      contract A {
+          function f() {
+              var x = true ? $value : $value;
+              x;
+            //^ $type
+          }
+      }
+    """
+  }
 
   fun testBinOperatorsBool() {
     val cases = listOf(
@@ -68,16 +100,16 @@ class SolExpressionTypeProviderTest : SolTestBase() {
       Pair("true || false", "bool")
     )
 
-    for (case in cases) {
+    for ((value, type) in cases) {
       checkExpr("""
         contract A {
             function f() {
-                var x = ${case.first};
+                var x = $value;
                 x;
-              //^ ${case.second}
+              //^ $type
             }
         }
-    """, case.toString())
+    """, "$value: $type")
     }
   }
 
