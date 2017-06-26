@@ -25,6 +25,13 @@ private fun getSolType(solTypeName: SolTypeName?): SolType {
         }
       }
     }
+    is SolUserDefinedTypeName -> {
+      val resolvedTypes = SolResolver.resolveTypeName(solTypeName)
+      return resolvedTypes.asSequence()
+        .filterIsInstance(SolContractDefinition::class.java)
+        .map { SolContract(it) }
+        .firstOrElse(SolUnknown)
+    }
     else -> SolUnknown
   }
 }
@@ -41,6 +48,7 @@ fun inferDeclType(decl: SolNamedElement): SolType {
       } else
         getSolType(decl.typeName)
     }
+    is SolContractDefinition -> SolContract(decl)
     is SolParameterDef -> getSolType(decl.typeName)
     is SolStateVariableDeclaration -> getSolType(decl.typeName)
     else -> SolUnknown

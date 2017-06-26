@@ -1,5 +1,7 @@
 package me.serce.solidity.lang.types
 
+import me.serce.solidity.lang.psi.SolContractDefinition
+
 // http://solidity.readthedocs.io/en/develop/types.html
 
 interface SolType
@@ -51,6 +53,10 @@ data class SolInteger(val unsigned: Boolean, val size: Int) : SolPrimitiveType {
   override fun toString(): String {
     return "${if (unsigned) "u" else ""}int$size"
   }
+}
+
+data class SolContract(val ref: SolContractDefinition) : SolType {
+  override fun toString() = ref.name ?: ref.text ?: "$ref"
 }
 
 

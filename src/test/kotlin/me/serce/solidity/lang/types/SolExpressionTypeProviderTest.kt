@@ -12,7 +12,7 @@ class SolExpressionTypeProviderTest : SolTestBase() {
       "\"hello\"" to "string"
     )
 
-    if(!inference) {
+    if (!inference) {
       cases += listOf(
         "42" to "uint8",
         "42" to "address",
@@ -25,7 +25,6 @@ class SolExpressionTypeProviderTest : SolTestBase() {
       checkExpr(code, "$value: $type")
     }
   }
-
 
   fun testAssignTyped() = checkPrimitiveTypes { value, type ->
     """
@@ -111,6 +110,57 @@ class SolExpressionTypeProviderTest : SolTestBase() {
         }
     """, "$value: $type")
     }
+  }
+
+  fun testContractTypes(inference: Boolean = false, @Language("Solidity") codeProvider: (String, String) -> String) {
+    var cases = listOf(
+      "B" to "B"
+    )
+
+    if (!inference) {
+      cases += listOf()
+    }
+
+    for ((value, type) in cases) {
+      val code = codeProvider(value, type)
+      checkExpr(code, "$value: $type")
+    }
+  }
+
+  fun testContractParameter() = testContractTypes { value, type ->
+    """
+        contract B {}
+        contract A {
+            function f($type x) {
+                x;
+              //^ $type
+            }
+        }
+    """
+  }
+
+  fun testContractStateVar() = testContractTypes { value, type ->
+    """
+        contract B {}
+        contract A {
+            B x;
+            function f() {
+                x;
+              //^ $type
+            }
+        }
+    """
+  }
+
+  fun testSelfType() {
+    checkExpr("""
+         contract A {
+            function f() {
+                this;
+              //^ A
+            }
+        }
+    """)
   }
 
   private fun checkExpr(@Language("Solidity") code: String, msg: String = "") {

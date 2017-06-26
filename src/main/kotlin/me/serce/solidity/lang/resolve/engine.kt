@@ -24,6 +24,16 @@ object SolResolver {
   ).toList()
 
   fun resolveVarLiteral(element: SolVarLiteral): List<SolNamedElement> {
+    if (element.name == "this") {
+      val firstContact = element.ancestors
+        .asSequence()
+        .filterIsInstance<SolContractDefinition>()
+        .firstOrNull()
+      return when (firstContact) {
+          null -> listOf()
+          else -> listOf(firstContact)
+      }
+    }
     return lexicalDeclarations(element)
       .filter { it.name == element.name }
       .toList()
