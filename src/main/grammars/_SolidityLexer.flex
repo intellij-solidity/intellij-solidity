@@ -27,7 +27,7 @@ WHITE_SPACE=\s+
 
 // TODO: proper grammar instead of this regex hell
 COMMENT=("//".*)|(\/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\/)
-HEXLITERAL=hex\"([0-9a-fA-F]+)\"
+HEXLITERAL=(hex\"([0-9a-fA-F]+)\"|hex\'([0-9a-fA-F]+)\')
 STRINGLITERAL=(\"([^\"\r\n\\]|\\.)*\")|(\'([^\'\r\n\\]|\\.)*\')
 DECIMALNUMBER=([0-9]+)
 FIXEDNUMBER=([0-9]+\.[0-9]*|[0-9]*\.[0-9]+)

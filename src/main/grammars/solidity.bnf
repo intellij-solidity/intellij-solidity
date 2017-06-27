@@ -348,7 +348,6 @@ BooleanLiteral ::= booleanLiteral
 NumberLiteral ::= ( HexNumber | DecimalNumber | FixedNumber) NumberUnit?
 NumberUnit ::= wei | szabo | finney | ether
              | seconds | minutes | hours | days | weeks | years
-
 // https://github.com/ethereum/solidity/pull/832
 private HexLiteral ::= hexLiteral
 private StringLiteral ::= stringLiteral
