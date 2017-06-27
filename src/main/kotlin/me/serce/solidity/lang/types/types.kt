@@ -7,6 +7,7 @@ import me.serce.solidity.lang.psi.SolStructDefinition
 
 interface SolType
 interface SolPrimitiveType : SolType
+interface SolNumeric : SolPrimitiveType
 
 object SolUnknown : SolPrimitiveType {
   override fun toString() = "<unknown>"
@@ -24,7 +25,7 @@ object SolAddress : SolPrimitiveType {
   override fun toString() = "address"
 }
 
-data class SolInteger(val unsigned: Boolean, val size: Int) : SolPrimitiveType {
+data class SolInteger(val unsigned: Boolean, val size: Int) : SolNumeric {
   companion object {
     val INT = SolInteger(false, 256)
 

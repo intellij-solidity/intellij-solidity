@@ -27,6 +27,7 @@ WHITE_SPACE=\s+
 
 // TODO: proper grammar instead of this regex hell
 COMMENT=("//".*)|(\/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\/)
+HEXLITERAL=hex\"([0-9a-fA-F]+)\"
 STRINGLITERAL=(\"([^\"\r\n\\]|\\.)*\")|(\'([^\'\r\n\\]|\\.)*\')
 DECIMALNUMBER=([0-9]+)
 FIXEDNUMBER=([0-9]+\.[0-9]*|[0-9]*\.[0-9]+)
@@ -112,9 +113,9 @@ IDENTIFIER=[a-zA-Z_$][a-zA-Z_$0-9]*
   "for"                 { return FOR; }
   "struct"              { return STRUCT; }
   "modifier"            { return MODIFIER; }
-  "function"            { return FUNCTION; }
   "payable"             { return PAYABLE; }
   "external"            { return EXTERNAL; }
+  "function"            { return FUNCTION; }
   "returns"             { return RETURNS; }
   "event"               { return EVENT; }
   "anonymous"           { return ANONYMOUS; }
@@ -124,6 +125,7 @@ IDENTIFIER=[a-zA-Z_$][a-zA-Z_$0-9]*
   "mapping"             { return MAPPING; }
   "memory"              { return MEMORY; }
   "storage"             { return STORAGE; }
+  "return"              { return RETURN; }
   "if"                  { return IF; }
   "else"                { return ELSE; }
   "while"               { return WHILE; }
@@ -131,7 +133,6 @@ IDENTIFIER=[a-zA-Z_$][a-zA-Z_$0-9]*
   "do"                  { return DO; }
   "continue"            { return CONTINUE; }
   "break"               { return BREAK; }
-  "return"              { return RETURN; }
   "throw"               { return THROW; }
   "delete"              { return DELETE; }
   "new"                 { return NEW; }
@@ -151,6 +152,7 @@ IDENTIFIER=[a-zA-Z_$][a-zA-Z_$0-9]*
   "let"                 { return LET; }
 
   {COMMENT}             { return COMMENT; }
+  {HEXLITERAL}          { return HEXLITERAL; }
   {STRINGLITERAL}       { return STRINGLITERAL; }
   {DECIMALNUMBER}       { return DECIMALNUMBER; }
   {FIXEDNUMBER}         { return FIXEDNUMBER; }
