@@ -112,22 +112,18 @@ class SolExpressionTypeProviderTest : SolTestBase() {
     }
   }
 
-  fun testContractTypes(inference: Boolean = false, @Language("Solidity") codeProvider: (String, String) -> String) {
-    var cases = listOf(
+  fun testContractTypes(@Language("Solidity") codeProvider: (String, String) -> String) {
+    val cases = listOf(
       "B" to "B"
     )
 
-    if (!inference) {
-      cases += listOf()
-    }
-
-    for ((value, type) in cases) {
-      val code = codeProvider(value, type)
-      checkExpr(code, "$value: $type")
+    for ((name, type) in cases) {
+      val code = codeProvider(name, type)
+      checkExpr(code, "$name: $type")
     }
   }
 
-  fun testContractParameter() = testContractTypes { value, type ->
+  fun testContractParameter() = testContractTypes { name, type ->
     """
         contract B {}
         contract A {
@@ -139,7 +135,7 @@ class SolExpressionTypeProviderTest : SolTestBase() {
     """
   }
 
-  fun testContractStateVar() = testContractTypes { value, type ->
+  fun testContractStateVar() = testContractTypes { name, type ->
     """
         contract B {}
         contract A {
@@ -152,7 +148,21 @@ class SolExpressionTypeProviderTest : SolTestBase() {
     """
   }
 
-  fun testSelfType() {
+  fun testStructs() {
+    checkExpr("""
+         contract A {
+            struct B {}
+            B b;
+            function f() {
+              var x = b;
+              x;
+            //^ B
+            }
+        }
+    """)
+  }
+
+  fun testThisType() {
     checkExpr("""
          contract A {
             function f() {

@@ -77,6 +77,13 @@ abstract class SolStateVarDeclMixin : SolStubbedNamedElementImpl<SolStateVarDecl
   override fun getIcon(flags: Int) = SolidityIcons.STATE_VAR
 }
 
+abstract class SolStructDefMixin : SolStubbedNamedElementImpl<SolStructDefStub>, SolStructDefinition {
+  constructor(node: ASTNode) : super(node)
+  constructor(stub: SolStructDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
+
+  override fun getIcon(flags: Int) = SolidityIcons.STRUCT
+}
+
 
 abstract class SolVarLiteralMixin(node: ASTNode) : SolNamedElementImpl(node), SolVarLiteral {
   override val referenceNameElement: PsiElement

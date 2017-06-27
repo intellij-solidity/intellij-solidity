@@ -13,6 +13,11 @@ fun IndexSink.indexContractDef(stub: SolContractOrLibDefStub) {
   indexGotoClass(stub)
 }
 
+fun IndexSink.indexStructDef(stub: SolStructDefStub) {
+  indexNamedStub(stub)
+  indexGotoClass(stub)
+}
+
 fun IndexSink.indexFunctionDef(stub: SolFunctionDefStub) {
   indexNamedStub(stub)
 }

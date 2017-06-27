@@ -8,6 +8,7 @@ object SolidityIcons {
 
   val ENUM: Icon = IconLoader.getIcon("/icons/sol-enum.png")
   val CONTRACT: Icon = IconLoader.getIcon("/icons/sol-contract.png")
+  val STRUCT: Icon = IconLoader.getIcon("/icons/sol-contract.png")
   val FUNCTION: Icon = IconLoader.getIcon("/icons/sol-method.png")
   val STATE_VAR: Icon = IconLoader.getIcon("/icons/sol-state-var.png")
 }

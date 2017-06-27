@@ -14,7 +14,7 @@ class SolidityFileStub(file: SolidityFile?) : PsiFileStubImpl<SolidityFile>(file
 
   object Type : IStubFileElementType<SolidityFileStub>(SolidityLanguage) {
     // bump version every time stub tree changes
-    override fun getStubVersion() = 8
+    override fun getStubVersion() = 9
 
     override fun getBuilder(): StubBuilder = object : DefaultStubBuilder() {
       override fun createStubForFile(file: PsiFile) = SolidityFileStub(file as SolidityFile)
@@ -33,6 +33,7 @@ fun factory(name: String): SolStubElementType<*, *> = when (name) {
   "CONTRACT_DEFINITION" -> SolContractOrLibDefStub.Type
   "FUNCTION_DEFINITION" -> SolFunctionDefStub.Type
   "MODIFIER_DEFINITION" -> SolModifierDefStub.Type
+  "STRUCT_DEFINITION" -> SolStructDefStub.Type
   "STATE_VARIABLE_DECLARATION" -> SolStateVarDeclStub.Type
 
   "ELEMENTARY_TYPE_NAME" -> SolTypeRefStub.Type("ELEMENTARY_TYPE_NAME", ::SolElementaryTypeNameImpl)
@@ -114,6 +115,27 @@ class SolModifierDefStub(parent: StubElement<*>?,
   }
 }
 
+class SolStructDefStub(parent: StubElement<*>?,
+                         elementType: IStubElementType<*, *>,
+                         override val name: String?)
+  : StubBase<SolStructDefinition>(parent, elementType), SolNamedStub {
+
+  object Type : SolStubElementType<SolStructDefStub, SolStructDefinition>("STRUCT_DEFINITION") {
+    override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?) =
+      SolStructDefStub(parentStub, this, dataStream.readNameAsString())
+
+    override fun serialize(stub: SolStructDefStub, dataStream: StubOutputStream) = with(dataStream) {
+      writeName(stub.name)
+    }
+
+    override fun createPsi(stub: SolStructDefStub) = SolStructDefinitionImpl(stub, this)
+
+    override fun createStub(psi: SolStructDefinition, parentStub: StubElement<*>?) =
+      SolStructDefStub(parentStub, this, psi.name)
+
+    override fun indexStub(stub: SolStructDefStub, sink: IndexSink) = sink.indexStructDef(stub)
+  }
+}
 
 class SolStateVarDeclStub(parent: StubElement<*>?,
                           elementType: IStubElementType<*, *>,
