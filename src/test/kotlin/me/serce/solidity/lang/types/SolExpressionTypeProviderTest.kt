@@ -9,7 +9,6 @@ class SolExpressionTypeProviderTest : SolTestBase() {
     var cases = listOf(
       "true" to "bool",
       "42" to "int256",
-      "42" to "mapping(uint => uint)",
       "\"hello\"" to "string"
     )
 
