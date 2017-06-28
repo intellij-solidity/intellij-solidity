@@ -5,6 +5,7 @@ import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiModificationTracker
 import me.serce.solidity.firstOrElse
+import me.serce.solidity.lang.types.SolArray.*
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.resolve.SolResolver
 
@@ -44,6 +45,15 @@ private fun getSolType(type: SolTypeName?): SolType {
         getSolType(type.typeNameList[1])
       )
       else -> SolUnknown
+    }
+    is SolArrayTypeName -> {
+      val sizeExpr = type.expression
+      when {
+        sizeExpr == null -> SolDynamicArray(getSolType(type.typeName))
+        sizeExpr is SolPrimaryExpression && sizeExpr.firstChild is SolNumberLiteral ->
+          SolStaticArray(getSolType(type.typeName), Integer.parseInt(sizeExpr.firstChild.text))
+        else -> SolUnknown
+      }
     }
     else -> SolUnknown
   }
@@ -97,6 +107,14 @@ fun inferExprType(expr: SolExpression?): SolType {
     is SolCompExpression -> SolBoolean
 
     is SolTernaryExpression -> inferExprType(expr.expressionList[1])
+
+    is SolIndexAccessExpression -> {
+      val arrType = inferExprType(expr.expressionList[0])
+      when (arrType) {
+        is SolArray -> arrType.type
+        else -> SolUnknown
+      }
+    }
 
     else -> SolUnknown
   }

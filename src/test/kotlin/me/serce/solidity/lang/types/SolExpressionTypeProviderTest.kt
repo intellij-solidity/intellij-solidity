@@ -150,7 +150,7 @@ class SolExpressionTypeProviderTest : SolTestBase() {
 
   fun testStructs() {
     checkExpr("""
-         contract A {
+        contract A {
             struct B {}
             B b;
             function f() {
@@ -164,7 +164,7 @@ class SolExpressionTypeProviderTest : SolTestBase() {
 
   fun testMapping() {
     checkExpr("""
-         contract A {
+        contract A {
             mapping(int8 => A) d;
             function f() {
               var x = d;
@@ -173,6 +173,28 @@ class SolExpressionTypeProviderTest : SolTestBase() {
             }
         }
     """)
+  }
+
+  fun testArrays() {
+    val cases = listOf(
+      ("d" to "int[]") to "int256[]",
+      ("d" to "int[5]") to "int256[5]",
+      ("d[0]" to "int256[]") to "int256"
+    )
+
+    for ((value, type) in cases) {
+      checkExpr("""
+        contract A {
+            ${value.second} d;
+
+            function f() {
+              var x = ${value.first};
+              x;
+            //^ $type
+            }
+        }
+      """)
+    }
   }
 
   fun testThisType() {

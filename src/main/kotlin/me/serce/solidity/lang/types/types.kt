@@ -52,9 +52,7 @@ data class SolInteger(val unsigned: Boolean, val size: Int) : SolNumeric {
     }
   }
 
-  override fun toString(): String {
-    return "${if (unsigned) "u" else ""}int$size"
-  }
+  override fun toString() = "${if (unsigned) "u" else ""}int$size"
 }
 
 data class SolContract(val ref: SolContractDefinition) : SolType {
@@ -68,6 +66,16 @@ data class SolStruct(val ref: SolStructDefinition) : SolType {
 data class SolMapping(val from: SolType, val to: SolType): SolType {
   override fun toString(): String {
     return "mapping($from => $to)"
+  }
+}
+
+sealed class SolArray(val type: SolType) : SolType {
+  class SolStaticArray(type: SolType, val size: Int) : SolArray(type) {
+    override fun toString() = "$type[$size]"
+  }
+
+  class SolDynamicArray(type: SolType) : SolArray(type) {
+    override fun toString() = "$type[]"
   }
 }
 
