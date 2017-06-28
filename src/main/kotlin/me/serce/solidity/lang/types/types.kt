@@ -65,6 +65,11 @@ data class SolStruct(val ref: SolStructDefinition) : SolType {
   override fun toString() = ref.name ?: ref.text ?: "$ref"
 }
 
+data class SolMapping(val from: SolType, val to: SolType): SolType {
+  override fun toString(): String {
+    return "mapping($from => $to)"
+  }
+}
 
 
 

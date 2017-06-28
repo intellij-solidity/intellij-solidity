@@ -8,10 +8,10 @@ import me.serce.solidity.firstOrElse
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.resolve.SolResolver
 
-private fun getSolType(solTypeName: SolTypeName?): SolType {
-  return when (solTypeName) {
+private fun getSolType(type: SolTypeName?): SolType {
+  return when (type) {
     is SolElementaryTypeName -> {
-      val text = solTypeName.firstChild.text
+      val text = type.firstChild.text
       when (text) {
         "bool" -> SolBoolean
         "string" -> SolString
@@ -26,7 +26,7 @@ private fun getSolType(solTypeName: SolTypeName?): SolType {
       }
     }
     is SolUserDefinedTypeName -> {
-      val resolvedTypes = SolResolver.resolveTypeName(solTypeName)
+      val resolvedTypes = SolResolver.resolveTypeName(type)
       return resolvedTypes.asSequence()
         .map {
           when (it) {
@@ -37,6 +37,13 @@ private fun getSolType(solTypeName: SolTypeName?): SolType {
         }
         .filterNotNull()
         .firstOrElse(SolUnknown)
+    }
+    is SolMappingTypeName -> when {
+      type.typeNameList.size >= 2 -> SolMapping(
+        getSolType(type.typeNameList[0]),
+        getSolType(type.typeNameList[1])
+      )
+      else -> SolUnknown
     }
     else -> SolUnknown
   }

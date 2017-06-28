@@ -9,6 +9,7 @@ class SolExpressionTypeProviderTest : SolTestBase() {
     var cases = listOf(
       "true" to "bool",
       "42" to "int256",
+      "42" to "mapping(uint => uint)",
       "\"hello\"" to "string"
     )
 
@@ -157,6 +158,19 @@ class SolExpressionTypeProviderTest : SolTestBase() {
               var x = b;
               x;
             //^ B
+            }
+        }
+    """)
+  }
+
+  fun testMapping() {
+    checkExpr("""
+         contract A {
+            mapping(int8 => A) d;
+            function f() {
+              var x = d;
+              x;
+            //^ mapping(int8 => A)
             }
         }
     """)
