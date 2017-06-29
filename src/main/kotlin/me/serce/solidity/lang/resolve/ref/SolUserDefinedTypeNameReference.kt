@@ -1,12 +1,9 @@
 package me.serce.solidity.lang.resolve.ref
 
+import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import me.serce.solidity.lang.completion.SolCompleter
-import me.serce.solidity.lang.psi.SolFunctionDefinition
-import me.serce.solidity.lang.psi.SolUserDefinedTypeName
-import me.serce.solidity.lang.psi.SolVarLiteral
-import me.serce.solidity.lang.psi.impl.SolVarLiteralMixin
-import me.serce.solidity.lang.psi.parentRelativeRange
+import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.resolve.SolResolver
 
 class SolUserDefinedTypeNameReference(element: SolUserDefinedTypeName) : SolReferenceBase<SolUserDefinedTypeName>(element), SolReference {
@@ -28,4 +25,14 @@ class SolModifierReference(element: SolFunctionDefinition, val modifierElement: 
   override fun multiResolve() = SolResolver.resolveModifier(modifierElement)
 
   override fun getVariants() = SolCompleter.completeModifier(modifierElement)
+}
+
+class SolMemberAccessReference (element: SolMemberAccessExpression): SolReferenceBase<SolMemberAccessExpression>(element), SolReference {
+  override fun calculateDefaultRangeInElement(): TextRange {
+    return element.identifier?.parentRelativeRange ?: super.calculateDefaultRangeInElement()
+  }
+
+  override fun multiResolve() = SolResolver.resolveMemberAccess(element)
+//
+//  override fun getVariants() = SolCompleter.completeLiteral(element)
 }

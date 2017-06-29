@@ -5,6 +5,10 @@ import com.intellij.psi.stubs.StubIndex
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.stubs.SolGotoClassIndex
 import me.serce.solidity.lang.stubs.SolModifierIndex
+import me.serce.solidity.lang.types.SolContract
+import me.serce.solidity.lang.types.SolStruct
+import me.serce.solidity.lang.types.SolUnknown
+import me.serce.solidity.lang.types.type
 
 object SolResolver {
   fun resolveTypeName(element: SolUserDefinedTypeName): List<SolNamedElement> = StubIndex.getElements(
@@ -39,11 +43,21 @@ object SolResolver {
       .toList()
   }
 
+  fun resolveMemberAccess(element: SolMemberAccessExpression): List<SolNamedElement> {
+    val propName = element.identifier?.text
+    val refType = element.expression.type
+    return when {
+      propName == null  -> emptyList()
+      refType is SolContract -> emptyList()
+      refType is SolStruct -> refType.ref.variableDeclarationList.filter { it.name == propName }
+      else -> emptyList()
+    }
+  }
+
   fun lexicalDeclarations(place: SolElement, stop: (PsiElement) -> Boolean = { false }): Sequence<SolNamedElement> =
     place.ancestors
       .takeWhileInclusive { it is SolElement && !stop(it) }
       .flatMap { lexicalDeclarations(it, place) }
-
 
   private fun lexicalDeclarations(scope: PsiElement, place: SolElement): Sequence<SolNamedElement> {
     return when (scope) {

@@ -162,24 +162,14 @@ class SolExpressionTypeProviderTest : SolTestBase() {
     """)
   }
 
-  fun testMapping() {
-    checkExpr("""
-        contract A {
-            mapping(int8 => A) d;
-            function f() {
-              var x = d;
-              x;
-            //^ mapping(int8 => A)
-            }
-        }
-    """)
-  }
 
   fun testArrays() {
     val cases = listOf(
       ("d" to "int[]") to "int256[]",
       ("d" to "int[5]") to "int256[5]",
-      ("d[0]" to "int256[]") to "int256"
+      ("d[0]" to "int256[]") to "int256",
+      ("d" to "mapping(int8 => A)") to "mapping(int8 => A)",
+      ("d[1]" to "mapping(int8 => A)") to "A"
     )
 
     for ((value, type) in cases) {

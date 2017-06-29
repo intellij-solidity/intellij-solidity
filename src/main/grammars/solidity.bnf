@@ -341,7 +341,11 @@ private MapExpressionClause ::= Identifier ':' Expression {pin=2}
 MapExpression ::= '{' MapExpressionClause (',' MapExpressionClause )* '}' {pin=1}
 
 NewExpression ::= new ( Identifier | PrimitiveLiteral)
-MemberAccessExpression ::= Expression '.' Identifier
+MemberAccessExpression ::= Expression '.' Identifier {
+    pin = 2
+    implements = "me.serce.solidity.lang.psi.SolReferenceElement"
+    mixin = "me.serce.solidity.lang.psi.impl.SolMemberAccessElement"
+}
 IndexAccessExpression ::= Expression '[' Expression? ']'
 
 BooleanLiteral ::= booleanLiteral

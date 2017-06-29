@@ -112,6 +112,7 @@ fun inferExprType(expr: SolExpression?): SolType {
       val arrType = inferExprType(expr.expressionList[0])
       when (arrType) {
         is SolArray -> arrType.type
+        is SolMapping -> arrType.to
         else -> SolUnknown
       }
     }

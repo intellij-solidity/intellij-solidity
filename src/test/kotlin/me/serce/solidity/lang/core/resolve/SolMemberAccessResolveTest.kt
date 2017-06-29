@@ -1,8 +1,7 @@
 package me.serce.solidity.lang.core.resolve
 
 class SolMemberAccessResolveTest : SolResolveTestBase() {
-  fun test() = Unit
-  fun skipTestLocal1() = checkByCode("""
+  fun testResolveStructMember() = checkByCode("""
         contract B {
             struct Prop {
                 uint8 prop;

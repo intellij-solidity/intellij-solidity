@@ -123,3 +123,12 @@ abstract class SolUserDefinedTypeNameImplMixin : SolStubbedElementImpl<SolTypeRe
     return this
   }
 }
+
+abstract class SolMemberAccessElement(node: ASTNode) : SolNamedElementImpl(node), SolReferenceElement, SolMemberAccessExpression {
+  override val referenceNameElement: PsiElement
+    get() = findChildByType(STRINGLITERAL)!!
+  override val referenceName: String
+    get() = referenceNameElement.text
+
+  override fun getReference() = SolMemberAccessReference(this)
+}
