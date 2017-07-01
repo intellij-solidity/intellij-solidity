@@ -48,10 +48,21 @@ object SolResolver {
     val refType = element.expression.type
     return when {
       propName == null  -> emptyList()
-      refType is SolContract -> emptyList()
+      refType is SolContract -> resolveContractMember(refType.ref, element)
       refType is SolStruct -> refType.ref.variableDeclarationList.filter { it.name == propName }
       else -> emptyList()
     }
+  }
+
+  private fun resolveContractMember(ref: SolContractDefinition, element: SolMemberAccessExpression): List<SolNamedElement> {
+    val members = ref.stateVariableDeclarationList.filter { it.name == element.name }
+    if(members.isNotEmpty()) {
+      return members
+    }
+    return ref.supers
+      .map { resolveTypeName(it).firstOrNull() }
+      .filterIsInstance<SolContractDefinition>()
+      .flatMap { resolveContractMember(it, element) }
   }
 
   fun lexicalDeclarations(place: SolElement, stop: (PsiElement) -> Boolean = { false }): Sequence<SolNamedElement> =
