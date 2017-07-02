@@ -2,9 +2,13 @@ package me.serce.solidity.lang.resolve.ref
 
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
+import me.serce.solidity.firstInstance
 import me.serce.solidity.lang.completion.SolCompleter
 import me.serce.solidity.lang.psi.*
+import me.serce.solidity.lang.psi.impl.SolFunctionCallElement
 import me.serce.solidity.lang.resolve.SolResolver
+import me.serce.solidity.lang.types.SolContract
+import me.serce.solidity.lang.types.type
 
 class SolUserDefinedTypeNameReference(element: SolUserDefinedTypeName) : SolReferenceBase<SolUserDefinedTypeName>(element), SolReference {
   override fun multiResolve() = SolResolver.resolveTypeName(element)
@@ -33,6 +37,24 @@ class SolMemberAccessReference (element: SolMemberAccessExpression): SolReferenc
   }
 
   override fun multiResolve() = SolResolver.resolveMemberAccess(element)
-//
-//  override fun getVariants() = SolCompleter.completeLiteral(element)
+
+  override fun getVariants() = SolCompleter.completeMemberAccess(element)
+}
+
+class SolFunctionCallReference (element: SolFunctionCallElement): SolReferenceBase<SolFunctionCallElement>(element), SolReference {
+  override fun calculateDefaultRangeInElement(): TextRange {
+    return element.referenceNameElement.parentRelativeRange
+  }
+
+  override fun multiResolve(): List<PsiElement> {
+    val contract: SolContractDefinition? = when {
+      element.expressionList.isEmpty() -> element.ancestors.firstInstance<SolContractDefinition>()
+      else -> (element.expressionList.first().type as? SolContract)?.ref
+    }
+
+    return when(contract) {
+      null -> emptyList()
+      else -> SolResolver.resolveFunction(contract, element)
+    }
+  }
 }

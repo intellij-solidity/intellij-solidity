@@ -13,6 +13,7 @@ interface SolElement : PsiElement {
 interface SolNamedElement : SolElement, PsiNamedElement, NavigatablePsiElement
 
 interface SolFunctionDefElement : SolReferenceElement {
+  val contract: SolContractDefinition
   val modifiers: List<PsiElement>
   val parameters: List<SolParameterDef>
 }
@@ -29,5 +30,3 @@ interface SolReferenceElement : SolNamedElement {
 
   override fun getReference(): SolReference?
 }
-
-

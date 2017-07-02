@@ -2,12 +2,12 @@ package me.serce.solidity.lang.resolve
 
 import com.intellij.psi.PsiElement
 import com.intellij.psi.stubs.StubIndex
+import me.serce.solidity.firstOrElse
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.stubs.SolGotoClassIndex
 import me.serce.solidity.lang.stubs.SolModifierIndex
 import me.serce.solidity.lang.types.SolContract
 import me.serce.solidity.lang.types.SolStruct
-import me.serce.solidity.lang.types.SolUnknown
 import me.serce.solidity.lang.types.type
 
 object SolResolver {
@@ -34,8 +34,8 @@ object SolResolver {
         .filterIsInstance<SolContractDefinition>()
         .firstOrNull()
       return when (firstContact) {
-          null -> listOf()
-          else -> listOf(firstContact)
+        null -> listOf()
+        else -> listOf(firstContact)
       }
     }
     return lexicalDeclarations(element)
@@ -47,7 +47,7 @@ object SolResolver {
     val propName = element.identifier?.text
     val refType = element.expression.type
     return when {
-      propName == null  -> emptyList()
+      propName == null -> emptyList()
       refType is SolContract -> resolveContractMember(refType.ref, element)
       refType is SolStruct -> refType.ref.variableDeclarationList.filter { it.name == propName }
       else -> emptyList()
@@ -56,13 +56,30 @@ object SolResolver {
 
   private fun resolveContractMember(ref: SolContractDefinition, element: SolMemberAccessExpression): List<SolNamedElement> {
     val members = ref.stateVariableDeclarationList.filter { it.name == element.name }
-    if(members.isNotEmpty()) {
+    if (members.isNotEmpty()) {
       return members
     }
     return ref.supers
       .map { resolveTypeName(it).firstOrNull() }
       .filterIsInstance<SolContractDefinition>()
       .flatMap { resolveContractMember(it, element) }
+  }
+
+  fun resolveFunction(contract: SolContractDefinition, element: SolFunctionCallExpression): List<PsiElement> {
+    val currentContractFunctions = contract.functionDefinitionList
+      .filter {
+        it.name == element.referenceName &&
+        it.parameterListList[0].parameterDefList.size == element.functionCallArguments?.expressionList?.size ?: 0
+      }
+    return when {
+      currentContractFunctions.isNotEmpty() -> currentContractFunctions
+      else -> contract.supers.asSequence()
+        .flatMap { resolveTypeName(it).asSequence() }
+        .filterIsInstance<SolContractDefinition>()
+        .map { resolveFunction(it, element) }
+        .filter { it.isNotEmpty() }
+        .firstOrElse(emptyList())
+    }
   }
 
   fun lexicalDeclarations(place: SolElement, stop: (PsiElement) -> Boolean = { false }): Sequence<SolNamedElement> =

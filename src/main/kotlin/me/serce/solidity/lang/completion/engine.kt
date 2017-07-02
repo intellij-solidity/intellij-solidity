@@ -5,13 +5,12 @@ import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.psi.PsiElement
 import com.intellij.psi.stubs.StubIndex
 import me.serce.solidity.ide.SolidityIcons
-import me.serce.solidity.lang.psi.SolFunctionDefinition
-import me.serce.solidity.lang.psi.SolModifierDefinition
-import me.serce.solidity.lang.psi.SolUserDefinedTypeName
-import me.serce.solidity.lang.psi.SolVarLiteral
+import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.stubs.SolGotoClassIndex
 import me.serce.solidity.lang.stubs.SolModifierIndex
+import me.serce.solidity.lang.types.SolStruct
+import me.serce.solidity.lang.types.type
 
 object SolCompleter {
   fun completeTypeName(element: SolUserDefinedTypeName): Array<out LookupElement> {
@@ -37,9 +36,20 @@ object SolCompleter {
   }
 
   fun completeLiteral(element: SolVarLiteral): Array<out LookupElement> {
-    return SolResolver.lexicalDeclarations(element)
-      .take(25) // TODO: is it needed? Try to elaborate on that
-      .toList()
+    val toList = SolResolver.lexicalDeclarations(element).take(25)
+    return toList.createLookups()
+  }
+
+  fun completeMemberAccess(element: SolMemberAccessExpression): Array<out LookupElement> {
+    val exprType = element.expression.type
+    return when(exprType) {
+      is SolStruct -> emptyArray()
+      else -> emptyArray()
+    }
+  }
+
+  private fun Sequence<SolNamedElement>.createLookups(): Array<LookupElementBuilder> {
+    return toList()
       .map { LookupElementBuilder.create(it, it.name ?: "").withIcon(SolidityIcons.STATE_VAR) }
       .toTypedArray()
   }

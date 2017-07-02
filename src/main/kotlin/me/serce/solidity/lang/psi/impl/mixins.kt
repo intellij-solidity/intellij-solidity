@@ -2,7 +2,6 @@ package me.serce.solidity.lang.psi.impl
 
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiReference
 import com.intellij.psi.stubs.IStubElementType
 import me.serce.solidity.ide.SolidityIcons
 import me.serce.solidity.lang.core.SolidityTokenTypes.*
@@ -49,6 +48,10 @@ abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefSt
     get() = findChildByType<SolParameterList>(PARAMETER_LIST)!!
       .children
       .filterIsInstance(SolParameterDef::class.java)
+  override val contract: SolContractDefinition
+    get() = this.ancestors.asSequence()
+      .filterIsInstance<SolContractDefinition>()
+      .first()
 
   constructor(node: ASTNode) : super(node)
   constructor(stub: SolFunctionDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
@@ -124,7 +127,7 @@ abstract class SolUserDefinedTypeNameImplMixin : SolStubbedElementImpl<SolTypeRe
   }
 }
 
-abstract class SolMemberAccessElement(node: ASTNode) : SolNamedElementImpl(node), SolReferenceElement, SolMemberAccessExpression {
+abstract class SolMemberAccessElement(node: ASTNode) : SolNamedElementImpl(node), SolMemberAccessExpression {
   override val referenceNameElement: PsiElement
     get() = findChildByType(STRINGLITERAL)!!
   override val referenceName: String
@@ -132,3 +135,14 @@ abstract class SolMemberAccessElement(node: ASTNode) : SolNamedElementImpl(node)
 
   override fun getReference() = SolMemberAccessReference(this)
 }
+
+abstract class SolFunctionCallElement(node: ASTNode) : SolNamedElementImpl(node), SolFunctionCallExpression {
+  // TODO: simplify
+  override val referenceNameElement: PsiElement
+    get() = findLastChildByType(IDENTIFIER) ?: firstChild
+  override val referenceName: String
+    get() = referenceNameElement.text
+
+  override fun getReference() = SolFunctionCallReference(this)
+}
+

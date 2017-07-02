@@ -10,3 +10,7 @@ fun <T> recursionGuard(key: Any, memoize: Boolean = true, block: Computable<T>):
 fun <T> Sequence<T>.firstOrElse(el: T): T {
   return firstOrNull() ?: el
 }
+
+inline fun <reified R> Sequence<Any?>.firstInstance(): R {
+  return first { it is R} as R
+}
