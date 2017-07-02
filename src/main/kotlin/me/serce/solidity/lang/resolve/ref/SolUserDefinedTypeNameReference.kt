@@ -26,7 +26,12 @@ class SolVarLiteralReference(element: SolVarLiteral) : SolReferenceBase<SolVarLi
 class SolModifierReference(element: SolFunctionDefinition, val modifierElement: PsiElement) : SolReferenceBase<SolFunctionDefinition>(element), SolReference {
   override fun calculateDefaultRangeInElement() = modifierElement.parentRelativeRange
 
-  override fun multiResolve() = SolResolver.resolveModifier(modifierElement)
+  override fun multiResolve(): List<SolNamedElement> {
+    val contract = element.ancestors.firstInstance<SolContractDefinition>()
+    val superNames: List<String> = (contract.collectSupers.map { it.name } + contract.name).filterNotNull()
+    return SolResolver.resolveModifier(modifierElement)
+      .filter { it.contract.name in superNames }
+  }
 
   override fun getVariants() = SolCompleter.completeModifier(modifierElement)
 }

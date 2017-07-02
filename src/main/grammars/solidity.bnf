@@ -157,7 +157,7 @@ StructDefinition ::= struct Identifier '{'
 
 ModifierDefinition ::= modifier Identifier ParameterList? Block {
     pin = 1
-    implements = "me.serce.solidity.lang.psi.SolNamedElement"
+    implements = "me.serce.solidity.lang.psi.SolModifierElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolModifierDefMixin"
     stubClass = "me.serce.solidity.lang.stubs.SolModifierDefStub"
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"

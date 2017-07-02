@@ -19,13 +19,14 @@ object SolResolver {
     SolNamedElement::class.java
   ).toList()
 
-  fun resolveModifier(modifier: PsiElement): List<SolNamedElement> = StubIndex.getElements(
+  fun resolveModifier(modifier: PsiElement): List<SolModifierDefinition> = StubIndex.getElements(
     SolModifierIndex.KEY,
     modifier.text,
     modifier.project,
     null,
     SolNamedElement::class.java
-  ).toList()
+  ).filterIsInstance<SolModifierDefinition>()
+    .toList()
 
   fun resolveVarLiteral(element: SolVarLiteral): List<SolNamedElement> {
     if (element.name == "this") {

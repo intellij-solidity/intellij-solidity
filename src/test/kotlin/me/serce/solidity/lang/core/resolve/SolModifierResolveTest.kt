@@ -14,6 +14,24 @@ class SolModifierResolveTest : SolResolveTestBase() {
         }
   """)
 
+  fun testResolveModifierAnother() = checkByCode("""
+        contract A {
+            modifier onlySeller() {
+                _;
+            }
+        }
+
+        contract B {
+            modifier onlySeller() {
+                     //x
+                _;
+            }
+            function doit() internal onlySeller constant {
+                                      //^
+            }
+        }
+  """)
+
   fun testResolveMulti() = checkByCode("""
         contract B {
             modifier onlySeller1() {

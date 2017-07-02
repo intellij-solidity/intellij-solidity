@@ -20,8 +20,13 @@ interface SolFunctionDefElement : SolReferenceElement {
 
 interface SolEnumDefElement : SolNamedElement
 
+interface SolModifierElement : SolNamedElement {
+  val contract: SolContractDefinition
+}
+
 interface SolContractOrLibElement : SolNamedElement {
   val supers: List<SolUserDefinedTypeName>
+  val collectSupers: Collection<SolUserDefinedTypeName>
 }
 
 interface SolReferenceElement : SolNamedElement {

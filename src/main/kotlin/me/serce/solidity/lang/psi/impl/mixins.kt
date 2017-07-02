@@ -3,11 +3,14 @@ package me.serce.solidity.lang.psi.impl
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
 import com.intellij.psi.stubs.IStubElementType
+import me.serce.solidity.firstInstance
 import me.serce.solidity.ide.SolidityIcons
 import me.serce.solidity.lang.core.SolidityTokenTypes.*
 import me.serce.solidity.lang.psi.*
+import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.resolve.ref.*
 import me.serce.solidity.lang.stubs.*
+import java.util.*
 
 open class SolImportPathElement(node: ASTNode) : SolNamedElementImpl(node), SolReferenceElement {
   override val referenceNameElement: PsiElement
@@ -30,6 +33,19 @@ abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrL
     get() = findChildrenByType<SolInheritanceSpecifier>(INHERITANCE_SPECIFIER)
       .map { it.children.filterIsInstance(SolUserDefinedTypeName::class.java).firstOrNull() }
       .filterNotNull()
+  override val collectSupers: Collection<SolUserDefinedTypeName>
+    get() {
+      val collectedSupers = LinkedHashSet<SolUserDefinedTypeName>()
+      val deque: Deque<SolUserDefinedTypeName> = ArrayDeque()
+      deque.addAll(supers)
+      while (deque.isNotEmpty()) {
+        val sup: SolUserDefinedTypeName = deque.poll()
+        collectedSupers.add(sup)
+        val typeNames = SolResolver.resolveTypeName(sup).filterIsInstance<SolUserDefinedTypeName>()
+        deque.addAll(typeNames)
+      }
+      return collectedSupers
+    }
 
   constructor(node: ASTNode) : super(node)
   constructor(stub: SolContractOrLibDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
@@ -66,6 +82,9 @@ abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefSt
 }
 
 abstract class SolModifierDefMixin : SolStubbedNamedElementImpl<SolModifierDefStub>, SolModifierDefinition {
+  override val contract: SolContractDefinition
+    get() = ancestors.firstInstance<SolContractDefinition>()
+
   constructor(node: ASTNode) : super(node)
   constructor(stub: SolModifierDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
 
