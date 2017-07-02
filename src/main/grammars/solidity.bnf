@@ -287,7 +287,7 @@ SeqExpression ::= '(' ','? Expression (',' Expression)* ','? ')'
 VariableDefinition ::= VariableDeclaration ( '=' Expression )?
 
 Expression ::=
-  TernaryExpression | IncrementExpression | FunctionCallExpression | CallExpression | IndexAccessExpression | MemberAccessExpression | ParenExpression
+  TernaryExpression | IncrementExpression | FunctionCallExpression | CallExpression | IndexAccessExpression | ParenExpression
   | UnaryExpression
   | ExponentExpression
   | MultDivExpression
@@ -301,6 +301,7 @@ Expression ::=
   | AndExpression
   | OrExpression
   | AssignmentExpression
+  | MemberAccessExpression
   | InlineArrayExpression
   | PrimaryExpression
 
