@@ -4,12 +4,16 @@ import me.serce.solidity.utils.SolTestBase
 import org.intellij.lang.annotations.Language
 
 abstract class SolCompletionTestBase : SolTestBase() {
-  protected fun checkCompletion(required: Set<String>, @Language("Solidity") code: String) {
+  protected fun checkCompletion(required: Set<String>, @Language("Solidity") code: String, strict: Boolean = false) {
     InlineFile(code).withCaret()
     val variants = myFixture.completeBasic()
     checkNotNull(variants) {
       "Expected completions that contain $required, but no completions found"
     }
-    assertTrue(variants.map { it.lookupString }.toHashSet().containsAll(required))
+    if (strict) {
+      assertEquals(variants.map { it.lookupString }.toHashSet(), required.toHashSet())
+    } else {
+      assertTrue(variants.map { it.lookupString }.toHashSet().containsAll(required))
+    }
   }
 }

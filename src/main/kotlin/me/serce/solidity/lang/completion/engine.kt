@@ -1,5 +1,6 @@
 package me.serce.solidity.lang.completion
 
+import com.intellij.codeInsight.completion.PrioritizedLookupElement
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.psi.PsiElement
@@ -11,6 +12,8 @@ import me.serce.solidity.lang.stubs.SolGotoClassIndex
 import me.serce.solidity.lang.stubs.SolModifierIndex
 import me.serce.solidity.lang.types.SolStruct
 import me.serce.solidity.lang.types.type
+
+val TYPED_COMPLETION_PRIORITY = 15.0
 
 object SolCompleter {
   fun completeTypeName(element: SolUserDefinedTypeName): Array<out LookupElement> {
@@ -36,21 +39,25 @@ object SolCompleter {
   }
 
   fun completeLiteral(element: SolVarLiteral): Array<out LookupElement> {
-    val toList = SolResolver.lexicalDeclarations(element).take(25)
-    return toList.createLookups()
+    val declarations = SolResolver.lexicalDeclarations(element).take(25).toList()
+    return declarations.createVarLookups()
   }
 
   fun completeMemberAccess(element: SolMemberAccessExpression): Array<out LookupElement> {
     val exprType = element.expression.type
-    return when(exprType) {
-      is SolStruct -> emptyArray()
+    return when (exprType) {
+      is SolStruct -> exprType.ref.variableDeclarationList.createVarLookups()
       else -> emptyArray()
     }
   }
 
-  private fun Sequence<SolNamedElement>.createLookups(): Array<LookupElementBuilder> {
-    return toList()
-      .map { LookupElementBuilder.create(it, it.name ?: "").withIcon(SolidityIcons.STATE_VAR) }
-      .toTypedArray()
+  private fun Collection<SolNamedElement>.createVarLookups(): Array<LookupElement> {
+    return map {
+      LookupElementBuilder.create(it, it.name ?: "")
+        .withIcon(SolidityIcons.STATE_VAR)
+
+    }.toTypedArray().map {
+      PrioritizedLookupElement.withPriority(it, TYPED_COMPLETION_PRIORITY)
+    }.toTypedArray()
   }
 }
