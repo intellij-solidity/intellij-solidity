@@ -1,8 +1,5 @@
 package me.serce.solidity.lang.completion
 
-/**
- * TODO: incomplete test (without ;)
- */
 class SolStructFieldCompletionTest : SolCompletionTestBase() {
   fun testModifierCompletion() = checkCompletion(hashSetOf("owner1", "owner2"), """
         contract B {

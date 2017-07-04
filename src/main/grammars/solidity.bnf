@@ -95,6 +95,7 @@
 SourceUnit ::= (PragmaDirective | ImportDirective | ContractDefinition | Expression)*
 
 private UntilSemicolonRecover ::= !(';')
+private UntilBraceRecover ::= !('}')
 
 // Pragma actually parses anything up to the trailing ';' to be fully forward-compatible.
 private PragmaPart ::= pragma Identifier pragmaAll {
@@ -257,7 +258,12 @@ FunctionTypeName ::= function ParameterList ( internal | external | constant | p
 
 StorageLocation ::= memory | storage
 
-Block ::= '{' Statement* '}' {pin=1}
+private UnfinishedBlock ::= '{' Statement* {
+    pin = 1
+    recoverWhile = UntilBraceRecover
+}
+Block ::= UnfinishedBlock '}'
+
 private FinishedStatement ::= DoWhileStatement | PlaceholderStatement | ContinueSt | BreakSt | ReturnSt | ThrowSt | SimpleStatement {
     recoverWhile = UntilSemicolonRecover
 }
