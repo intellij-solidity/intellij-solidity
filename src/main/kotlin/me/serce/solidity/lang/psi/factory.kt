@@ -11,6 +11,11 @@ class SolPsiFactory(val project: Project) {
       ?: error("Failed to create identifier: `$name`")
   }
 
+  fun createStruct(structBody: String): SolStructDefinition {
+    return createFromText<SolStructDefinition>("contract dummystruct$1 { $structBody }")
+      ?: error("Failed to create struct: `$structBody`")
+  }
+
   private inline fun <reified T : SolElement> createFromText(code: String): T? =
     PsiFileFactory.getInstance(project)
       .createFileFromText("DUMMY.sol", SolidityFileType, code)

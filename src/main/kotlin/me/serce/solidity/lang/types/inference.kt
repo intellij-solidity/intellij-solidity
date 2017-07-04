@@ -83,6 +83,9 @@ fun inferRefType(ref: SolReferenceElement): SolType {
   return when (ref) {
     is SolVarLiteral -> {
       val declarations = SolResolver.resolveVarLiteral(ref)
+      when (ref.name) {
+        "msg" -> return SolEmbeddedTypeFactory(ref.project).solMessageType()
+      }
       return declarations.asSequence()
         .map { inferDeclType(it) }
         .filter { it != SolUnknown }
@@ -115,6 +118,14 @@ fun inferExprType(expr: SolExpression?): SolType {
         is SolMapping -> arrType.to
         else -> SolUnknown
       }
+    }
+
+    is SolMemberAccessExpression -> {
+      val properties =  SolResolver.resolveMemberAccess(expr)
+      return properties.asSequence()
+        .map { inferDeclType(it) }
+        .filter { it != SolUnknown }
+        .firstOrElse(SolUnknown)
     }
 
     else -> SolUnknown

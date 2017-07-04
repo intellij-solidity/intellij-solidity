@@ -78,17 +78,3 @@ sealed class SolArray(val type: SolType) : SolType {
     override fun toString() = "$type[]"
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
