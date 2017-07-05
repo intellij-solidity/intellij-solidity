@@ -101,7 +101,10 @@
     </application-components>
 
     <project-components>
-        <!-- Add your project components here -->
+        <component>
+            <interface-class>me.serce.solidity.lang.types.SolEmbeddedTypeFactory</interface-class>
+            <implementation-class>me.serce.solidity.lang.types.SolEmbeddedTypeFactory</implementation-class>
+        </component>
     </project-components>
 
     <module-components>

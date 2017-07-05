@@ -84,9 +84,9 @@ fun inferRefType(ref: SolReferenceElement): SolType {
     is SolVarLiteral -> {
       val declarations = SolResolver.resolveVarLiteral(ref)
       when (ref.name) {
-        "msg" -> return SolEmbeddedTypeFactory(ref.project).solMessageType()
-        "block" -> return SolEmbeddedTypeFactory(ref.project).solBlockType()
-        "tx" -> return SolEmbeddedTypeFactory(ref.project).solTxType()
+        "msg" -> return SolEmbeddedTypeFactory.of(ref.project).messageType
+        "block" -> return SolEmbeddedTypeFactory.of(ref.project).blockType
+        "tx" -> return SolEmbeddedTypeFactory.of(ref.project).txType
       }
       return declarations.asSequence()
         .map { inferDeclType(it) }
