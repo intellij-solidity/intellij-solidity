@@ -29,19 +29,25 @@ object SolResolver {
     .toList()
 
   fun resolveVarLiteral(element: SolVarLiteral): List<SolNamedElement> {
-    if (element.name == "this") {
-      val firstContact = element.ancestors
-        .asSequence()
-        .filterIsInstance<SolContractDefinition>()
-        .firstOrNull()
-      return when (firstContact) {
-        null -> listOf()
-        else -> listOf(firstContact)
-      }
+    return when(element.name) {
+        "this" -> {
+          element.ancestors
+            .filterIsInstance<SolContractDefinition>()
+            .firstOrNull()
+            .wrap()
+        }
+        "super" -> {
+          element.ancestors
+            .filterIsInstance<SolContractDefinition>()
+            .map { it.supers.firstOrNull() }
+            .filterNotNull()
+            .flatMap { resolveTypeName(it).asSequence() }
+            .firstOrNull().wrap()
+        }
+        else -> lexicalDeclarations(element)
+          .filter { it.name == element.name }
+          .toList()
     }
-    return lexicalDeclarations(element)
-      .filter { it.name == element.name }
-      .toList()
   }
 
   fun resolveMemberAccess(element: SolMemberAccessExpression): List<SolNamedElement> {
@@ -127,6 +133,12 @@ object SolResolver {
     }
   }
 
+  private fun <T> T?.wrap(): List<T> {
+    return when (this) {
+      null -> listOf()
+      else -> listOf(this)
+    }
+  }
 }
 
 private fun <T> Sequence<T>.takeWhileInclusive(pred: (T) -> Boolean): Sequence<T> {

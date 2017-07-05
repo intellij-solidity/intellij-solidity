@@ -15,20 +15,6 @@ class SolFunctionResolveTest : SolResolveTestBase() {
         }
   """)
 
-  fun testResolveFunctionThis() = checkByCode("""
-        contract B {
-            function doit2() {
-                    //x
-            }
-
-
-            function doit() {
-                this.doit2();
-                     //^
-            }
-        }
-  """)
-
   fun testResolveFunctionWithParameters() = checkByCode("""
         contract B {
             function doit2(int a, int b) {
