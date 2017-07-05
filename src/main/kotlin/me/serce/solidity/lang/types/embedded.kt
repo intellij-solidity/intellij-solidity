@@ -8,12 +8,37 @@ class SolEmbeddedTypeFactory(val project: Project) {
 
   fun solMessageType(): SolType {
     return SolStruct(psiFactory.createStruct("""
-    struct msg {
-        bytes data;
-        uint gas;
-        address sender;
-        uint value;
-    }
-  """))
+      struct msg {
+          bytes data;
+          uint gas;
+          address sender;
+          uint value;
+      }
+    """))
+  }
+
+  fun solTxType(): SolType {
+    return SolStruct(psiFactory.createStruct("""
+      struct tx {
+          uint gasprice;
+          address origin;
+      }
+    """))
+  }
+
+
+  fun solBlockType(): SolType {
+    return SolContract(psiFactory.createContract("""
+      contract block {
+          address coinbase;
+          uint difficulty;
+          uint gaslimit;
+          uint number;
+          uint timestamp;
+
+          function blockhash(uint blockNumber) returns (bytes32) {
+          }
+      }
+    """))
   }
 }

@@ -220,6 +220,28 @@ class SolExpressionTypeProviderTest : SolTestBase() {
     """)
   }
 
+  fun testBlock() {
+    checkExpr("""
+         contract A {
+            function f() {
+                block;
+               //^ block
+            }
+        }
+    """)
+  }
+
+  fun testTx() {
+    checkExpr("""
+         contract A {
+            function f() {
+                tx;
+               //^ tx
+            }
+        }
+    """)
+  }
+
   private fun checkExpr(@Language("Solidity") code: String, msg: String = "") {
     InlineFile(code)
     val (expr, expectedType) = findElementAndDataInEditor<SolExpression>()
