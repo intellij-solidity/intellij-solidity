@@ -203,7 +203,7 @@ class SolExpressionTypeProviderTest : SolTestBase() {
          contract A {
             function f() {
                 msg;
-               //^ msg
+               //^ Msg
             }
         }
     """)
@@ -225,7 +225,18 @@ class SolExpressionTypeProviderTest : SolTestBase() {
          contract A {
             function f() {
                 block;
-               //^ block
+               //^ Block
+            }
+        }
+    """)
+  }
+
+  fun testBlockStateVar() {
+    checkExpr("""
+         contract A {
+            function f() {
+                block.coinbase;
+                        //^ address
             }
         }
     """)
@@ -236,7 +247,7 @@ class SolExpressionTypeProviderTest : SolTestBase() {
          contract A {
             function f() {
                 tx;
-               //^ tx
+               //^ Tx
             }
         }
     """)
@@ -245,6 +256,6 @@ class SolExpressionTypeProviderTest : SolTestBase() {
   private fun checkExpr(@Language("Solidity") code: String, msg: String = "") {
     InlineFile(code)
     val (expr, expectedType) = findElementAndDataInEditor<SolExpression>()
-    assertEquals(msg, expectedType, expr.type.toString())
+    assertEquals(msg, expectedType, deInternalise(expr.type.toString()))
   }
 }

@@ -15,7 +15,6 @@ class SolHighlighterFactory : SingleLazyInstanceSyntaxHighlighterFactory() {
 class SolHighlighter : SyntaxHighlighterBase() {
   override fun getHighlightingLexer() = SolidityLexer()
 
-
   override fun getTokenHighlights(tokenType: IElementType): Array<out TextAttributesKey> {
     return pack(tokenMapping[tokenType])
   }

@@ -27,6 +27,11 @@ private fun getSolType(type: SolTypeName?): SolType {
       }
     }
     is SolUserDefinedTypeName -> {
+      val name = type.name
+      if (name != null && isInternal(name)) {
+        val internalType = SolInternalTypeFactory.of(type.project).byName(name)
+        return internalType ?: SolUnknown
+      }
       val resolvedTypes = SolResolver.resolveTypeName(type)
       return resolvedTypes.asSequence()
         .map {
@@ -83,11 +88,6 @@ fun inferRefType(ref: SolReferenceElement): SolType {
   return when (ref) {
     is SolVarLiteral -> {
       val declarations = SolResolver.resolveVarLiteral(ref)
-      when (ref.name) {
-        "msg" -> return SolEmbeddedTypeFactory.of(ref.project).messageType
-        "block" -> return SolEmbeddedTypeFactory.of(ref.project).blockType
-        "tx" -> return SolEmbeddedTypeFactory.of(ref.project).txType
-      }
       return declarations.asSequence()
         .map { inferDeclType(it) }
         .filter { it != SolUnknown }
@@ -123,7 +123,7 @@ fun inferExprType(expr: SolExpression?): SolType {
     }
 
     is SolMemberAccessExpression -> {
-      val properties =  SolResolver.resolveMemberAccess(expr)
+      val properties = SolResolver.resolveMemberAccess(expr)
       return properties.asSequence()
         .map { inferDeclType(it) }
         .filter { it != SolUnknown }

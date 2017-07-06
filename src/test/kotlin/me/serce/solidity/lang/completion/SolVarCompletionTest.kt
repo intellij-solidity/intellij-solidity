@@ -1,7 +1,7 @@
 package me.serce.solidity.lang.completion
 
 class SolVarCompletionTest : SolCompletionTestBase() {
-  fun testModifierCompletion() = checkCompletion(hashSetOf("owner1", "owner2"), """
+  fun testStateVarCompletion() = checkCompletion(hashSetOf("owner1", "owner2"), """
         contract B {
             address owner1;
             address owner2;
@@ -11,4 +11,14 @@ class SolVarCompletionTest : SolCompletionTestBase() {
             }
         }
   """)
+
+  fun testGlobalVarCompletionTest() = checkCompletion(hashSetOf("msg", "now", "tx", "block"), """
+        contract B {
+
+            function doit() {
+                var var1 = /*caret*/;
+            }
+        }
+  """)
+
 }

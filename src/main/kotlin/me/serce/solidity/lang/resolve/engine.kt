@@ -7,6 +7,7 @@ import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.stubs.SolGotoClassIndex
 import me.serce.solidity.lang.stubs.SolModifierIndex
 import me.serce.solidity.lang.types.SolContract
+import me.serce.solidity.lang.types.SolInternalTypeFactory
 import me.serce.solidity.lang.types.SolStruct
 import me.serce.solidity.lang.types.type
 
@@ -89,10 +90,16 @@ object SolResolver {
     }
   }
 
-  fun lexicalDeclarations(place: SolElement, stop: (PsiElement) -> Boolean = { false }): Sequence<SolNamedElement> =
-    place.ancestors
+  fun lexicalDeclarations(place: SolElement, stop: (PsiElement) -> Boolean = { false }): Sequence<SolNamedElement> {
+    val globalType = SolInternalTypeFactory.of(place.project).globalType
+    return lexicalDeclarations(globalType.ref, place) + lexicalDeclRec(place, stop)
+  }
+
+  private fun lexicalDeclRec(place: SolElement, stop: (PsiElement) -> Boolean): Sequence<SolNamedElement> {
+    return place.ancestors
       .takeWhileInclusive { it is SolElement && !stop(it) }
       .flatMap { lexicalDeclarations(it, place) }
+  }
 
   private fun lexicalDeclarations(scope: PsiElement, place: SolElement): Sequence<SolNamedElement> {
     return when (scope) {

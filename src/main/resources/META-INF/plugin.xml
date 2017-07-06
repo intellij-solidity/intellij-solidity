@@ -102,8 +102,8 @@
 
     <project-components>
         <component>
-            <interface-class>me.serce.solidity.lang.types.SolEmbeddedTypeFactory</interface-class>
-            <implementation-class>me.serce.solidity.lang.types.SolEmbeddedTypeFactory</implementation-class>
+            <interface-class>me.serce.solidity.lang.types.SolInternalTypeFactory</interface-class>
+            <implementation-class>me.serce.solidity.lang.types.SolInternalTypeFactory</implementation-class>
         </component>
     </project-components>
 

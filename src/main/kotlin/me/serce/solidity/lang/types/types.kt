@@ -78,3 +78,15 @@ sealed class SolArray(val type: SolType) : SolType {
     override fun toString() = "$type[]"
   }
 }
+
+
+private val INTENAL_INDICATOR = "_sol1_s"
+
+fun internalise(name: String): String = "$name$INTENAL_INDICATOR"
+
+fun isInternal(name: String): Boolean = name.endsWith(INTENAL_INDICATOR)
+
+fun deInternalise(name: String): String = when {
+    name.endsWith(INTENAL_INDICATOR) -> name.removeSuffix(INTENAL_INDICATOR)
+    else -> name
+}
