@@ -21,4 +21,13 @@ class SolVarCompletionTest : SolCompletionTestBase() {
         }
   """)
 
+  fun testBlockCompletionTest() = checkCompletion(hashSetOf("coinbase", "difficulty"), """
+        contract B {
+
+            function doit() {
+                var var1 = block./*caret*/;
+            }
+        }
+  """)
+
 }

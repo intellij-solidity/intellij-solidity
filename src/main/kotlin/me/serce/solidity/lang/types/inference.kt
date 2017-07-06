@@ -104,6 +104,7 @@ fun inferExprType(expr: SolExpression?): SolType {
         ?: expr.booleanLiteral?.let { SolBoolean }
         ?: expr.stringLiteral?.let { SolString }
         ?: expr.numberLiteral?.let { SolInteger.INT }
+        ?: expr.elementaryTypeName?.let { getSolType(it) }
         ?: SolUnknown
     }
     is SolAndExpression,

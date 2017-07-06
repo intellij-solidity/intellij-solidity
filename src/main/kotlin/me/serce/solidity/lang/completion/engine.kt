@@ -10,6 +10,7 @@ import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.stubs.SolGotoClassIndex
 import me.serce.solidity.lang.stubs.SolModifierIndex
+import me.serce.solidity.lang.types.SolContract
 import me.serce.solidity.lang.types.SolStruct
 import me.serce.solidity.lang.types.type
 
@@ -47,6 +48,7 @@ object SolCompleter {
     val exprType = element.expression.type
     return when (exprType) {
       is SolStruct -> exprType.ref.variableDeclarationList.createVarLookups()
+      is SolContract -> exprType.ref.stateVariableDeclarationList.createVarLookups()
       else -> emptyArray()
     }
   }
