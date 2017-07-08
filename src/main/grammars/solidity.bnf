@@ -145,7 +145,7 @@ StateVariableDeclaration ::= TypeName (VisibilityModifiers constant | constant? 
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
 
-UsingForDeclaration ::= using Identifier for ('*' | TypeName) ';' {pin=1}
+UsingForDeclaration ::= using UserDefinedTypeName for ('*' | TypeName) ';' {pin=1}
 
 StructDefinition ::= struct Identifier '{'
                      ( VariableDeclaration ';' (VariableDeclaration ';')* )? '}' {

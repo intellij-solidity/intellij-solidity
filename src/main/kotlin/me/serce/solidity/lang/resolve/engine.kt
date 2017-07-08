@@ -12,7 +12,7 @@ import me.serce.solidity.lang.types.SolStruct
 import me.serce.solidity.lang.types.type
 
 object SolResolver {
-  fun resolveTypeName(element: SolUserDefinedTypeName): List<SolNamedElement> = StubIndex.getElements(
+  fun resolveTypeName(element: SolReferenceElement): List<SolNamedElement> = StubIndex.getElements(
     SolGotoClassIndex.KEY,
     element.referenceName,
     element.project,
@@ -30,24 +30,24 @@ object SolResolver {
     .toList()
 
   fun resolveVarLiteral(element: SolNamedElement): List<SolNamedElement> {
-    return when(element.name) {
-        "this" -> {
-          element.ancestors
-            .filterIsInstance<SolContractDefinition>()
-            .firstOrNull()
-            .wrap()
-        }
-        "super" -> {
-          element.ancestors
-            .filterIsInstance<SolContractDefinition>()
-            .map { it.supers.firstOrNull() }
-            .filterNotNull()
-            .flatMap { resolveTypeName(it).asSequence() }
-            .firstOrNull().wrap()
-        }
-        else -> lexicalDeclarations(element)
-          .filter { it.name == element.name }
-          .toList()
+    return when (element.name) {
+      "this" -> {
+        element.ancestors
+          .filterIsInstance<SolContractDefinition>()
+          .firstOrNull()
+          .wrap()
+      }
+      "super" -> {
+        element.ancestors
+          .filterIsInstance<SolContractDefinition>()
+          .map { it.supers.firstOrNull() }
+          .filterNotNull()
+          .flatMap { resolveTypeName(it).asSequence() }
+          .firstOrNull().wrap()
+      }
+      else -> lexicalDeclarations(element)
+        .filter { it.name == element.name }
+        .toList()
     }
   }
 
@@ -74,20 +74,30 @@ object SolResolver {
   }
 
   fun resolveFunction(contract: SolContractDefinition, element: SolFunctionCallExpression): List<PsiElement> {
+    if (element.argumentsNumber() == 1) {
+      val contracts = resolveTypeName(element)
+      if (contracts.isNotEmpty()) {
+        return contracts
+      }
+    }
+    return resolveFunRec(contract, element)
+  }
+
+  private fun resolveFunRec(contract: SolContractDefinition, element: SolFunctionCallExpression): List<PsiElement> {
     val currentContractFunctions = contract.functionDefinitionList
       .filter {
         it.name == element.referenceName &&
-        it.parameterListList[0].parameterDefList.size == element.functionCallArguments?.expressionList?.size ?: 0
+          it.parameterListList[0].parameterDefList.size == element.argumentsNumber()
       }
     return when {
       currentContractFunctions.isNotEmpty() -> currentContractFunctions
       else -> contract.supers.asSequence()
         .flatMap { resolveTypeName(it).asSequence() }
         .filterIsInstance<SolContractDefinition>()
-        .map { resolveFunction(it, element) }
+        .map { resolveFunRec(it, element) }
         .filter { it.isNotEmpty() }
         .firstOrElse(emptyList())
-    }
+      }
   }
 
   fun lexicalDeclarations(place: SolElement, stop: (PsiElement) -> Boolean = { false }): Sequence<SolNamedElement> {
@@ -139,6 +149,8 @@ object SolResolver {
       else -> emptySequence()
     }
   }
+
+  private fun SolFunctionCallExpression.argumentsNumber() = functionCallArguments?.expressionList?.size ?: 0
 
   private fun <T> T?.wrap(): List<T> {
     return when (this) {

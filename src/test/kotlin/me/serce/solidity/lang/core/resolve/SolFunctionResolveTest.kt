@@ -60,4 +60,17 @@ class SolFunctionResolveTest : SolResolveTestBase() {
             }
         }
   """)
+
+  fun testResolveContractConstructor() = checkByCode("""
+        contract A {
+               //x
+        }
+
+        contract B {
+            function doit() {
+                A a = A(1);
+                    //^
+            }
+        }
+  """)
 }
