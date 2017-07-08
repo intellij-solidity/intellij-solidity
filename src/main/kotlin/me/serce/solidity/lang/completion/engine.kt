@@ -48,7 +48,13 @@ object SolCompleter {
     val exprType = element.expression.type
     return when (exprType) {
       is SolStruct -> exprType.ref.variableDeclarationList.createVarLookups()
-      is SolContract -> exprType.ref.stateVariableDeclarationList.createVarLookups()
+      is SolContract -> {
+        val ref = exprType.ref
+        (ref.collectSupers.flatMap { SolResolver.resolveTypeName(it) } + ref)
+          .filterIsInstance<SolContractDefinition>()
+          .flatMap { it.stateVariableDeclarationList }
+          .createVarLookups()
+      }
       else -> emptyArray()
     }
   }

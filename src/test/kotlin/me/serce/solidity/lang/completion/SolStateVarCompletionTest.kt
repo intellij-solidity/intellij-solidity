@@ -1,6 +1,6 @@
 package me.serce.solidity.lang.completion
 
-class SolStructFieldCompletionTest : SolCompletionTestBase() {
+class SolStateVarCompletionTest : SolCompletionTestBase() {
   fun testModifierCompletion() = checkCompletion(hashSetOf("owner1", "owner2"), """
         contract B {
             struct C {
@@ -24,6 +24,35 @@ class SolStructFieldCompletionTest : SolCompletionTestBase() {
                 address owner2;
             }
             C c;
+
+            function doit() {
+                c.ow/*caret*/;
+            }
+        }
+  """, strict = true)
+
+  fun testContractCompletion() = checkCompletion(hashSetOf("owner1", "owner2"), """
+        contract C {
+            address owner1;
+            address owner2;
+        }
+        contract B {
+            C c;
+
+            function doit() {
+                c.ow/*caret*/;
+            }
+        }
+  """, strict = true)
+
+  fun testContractCompletionInheritance() = checkCompletion(hashSetOf("owner1", "owner2"), """
+        contract C {
+            address owner1;
+            address owner2;
+        }
+        contract D is C {}
+        contract B {
+            D c;
 
             function doit() {
                 c.ow/*caret*/;

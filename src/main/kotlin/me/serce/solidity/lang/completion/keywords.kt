@@ -1,17 +1,24 @@
 package me.serce.solidity.lang.completion
 
 import com.intellij.codeInsight.completion.*
+import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.editor.EditorModificationUtil
 import com.intellij.openapi.project.DumbAware
 import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.patterns.PsiElementPattern
 import com.intellij.psi.PsiElement
+import com.intellij.psi.impl.source.tree.CompositeElement
 import com.intellij.util.ProcessingContext
 import me.serce.solidity.lang.core.SolidityFile
+import me.serce.solidity.lang.core.SolidityTokenTypes
+import me.serce.solidity.lang.psi.SolBlock
 import me.serce.solidity.lang.psi.SolContractDefinition
 import me.serce.solidity.lang.psi.SolPrimaryExpression
 import me.serce.solidity.lang.psi.SolStatement
+import me.serce.solidity.lang.psi.impl.SolMemberAccessExpressionImpl
+import me.serce.solidity.lang.psi.impl.SolVarLiteralImpl
+import me.serce.solidity.lang.resolve.SolResolver
 
 /**
  * Special Variables and Functions
@@ -80,11 +87,13 @@ class SolKeywordCompletionContributor : CompletionContributor(), DumbAware {
   private fun insideContract() = psiElement<PsiElement>()
     .inside(SolContractDefinition::class.java)
 
+  private fun insideBlock() = psiElement<PsiElement>()
+    .inside(SolBlock::class.java)
 }
 
 inline fun <reified I : PsiElement> psiElement(): PsiElementPattern.Capture<I> {
   return psiElement(I::class.java)
 }
 
-fun LookupElementBuilder.keywordPrioritised() = PrioritizedLookupElement.withPriority(this, KEYWORD_PRIORITY)
+fun LookupElementBuilder.keywordPrioritised(): LookupElement = PrioritizedLookupElement.withPriority(this, KEYWORD_PRIORITY)
 

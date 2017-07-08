@@ -1,8 +1,12 @@
 package me.serce.solidity.lang.psi.impl
 
 import com.intellij.lang.ASTNode
+import com.intellij.openapi.util.RecursionManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.stubs.IStubElementType
+import com.intellij.psi.util.CachedValueProvider
+import com.intellij.psi.util.CachedValuesManager
+import com.intellij.psi.util.PsiModificationTracker
 import me.serce.solidity.firstInstance
 import me.serce.solidity.ide.SolidityIcons
 import me.serce.solidity.lang.core.SolidityTokenTypes.*
@@ -10,6 +14,9 @@ import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.resolve.ref.*
 import me.serce.solidity.lang.stubs.*
+import me.serce.solidity.lang.types.SolUnknown
+import me.serce.solidity.lang.types.inferExprType
+import me.serce.solidity.lang.types.type
 import java.util.*
 
 open class SolImportPathElement(node: ASTNode) : SolNamedElementImpl(node), SolReferenceElement {
@@ -34,17 +41,21 @@ abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrL
       .map { it.children.filterIsInstance(SolUserDefinedTypeName::class.java).firstOrNull() }
       .filterNotNull()
   override val collectSupers: Collection<SolUserDefinedTypeName>
-    get() {
-      val collectedSupers = LinkedHashSet<SolUserDefinedTypeName>()
-      val deque: Deque<SolUserDefinedTypeName> = ArrayDeque()
-      deque.addAll(supers)
-      while (deque.isNotEmpty()) {
-        val sup: SolUserDefinedTypeName = deque.poll()
-        collectedSupers.add(sup)
-        val typeNames = SolResolver.resolveTypeName(sup).filterIsInstance<SolUserDefinedTypeName>()
-        deque.addAll(typeNames)
+    get() = CachedValuesManager.getCachedValue(this) {
+      val collectedSupers = RecursionManager.doPreventingRecursion(this, true) {
+        val collectedSupers = LinkedHashSet<SolUserDefinedTypeName>()
+        val deque: Deque<SolUserDefinedTypeName> = ArrayDeque()
+        deque.addAll(supers)
+        while (deque.isNotEmpty()) {
+          val sup: SolUserDefinedTypeName = deque.poll()
+          collectedSupers.add(sup)
+          val typeNames = SolResolver.resolveTypeName(sup).filterIsInstance<SolUserDefinedTypeName>()
+          deque.addAll(typeNames)
+        }
+
+        collectedSupers
       }
-      return collectedSupers
+      CachedValueProvider.Result.create(collectedSupers, PsiModificationTracker.MODIFICATION_COUNT)
     }
 
   constructor(node: ASTNode) : super(node)
@@ -148,7 +159,7 @@ abstract class SolUserDefinedTypeNameImplMixin : SolStubbedElementImpl<SolTypeRe
 
 abstract class SolMemberAccessElement(node: ASTNode) : SolNamedElementImpl(node), SolMemberAccessExpression {
   override val referenceNameElement: PsiElement
-    get() = findChildByType(STRINGLITERAL)!!
+    get() = findChildByType(IDENTIFIER)!!
   override val referenceName: String
     get() = referenceNameElement.text
 

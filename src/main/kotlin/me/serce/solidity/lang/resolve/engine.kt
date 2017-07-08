@@ -29,7 +29,7 @@ object SolResolver {
   ).filterIsInstance<SolModifierDefinition>()
     .toList()
 
-  fun resolveVarLiteral(element: SolVarLiteral): List<SolNamedElement> {
+  fun resolveVarLiteral(element: SolNamedElement): List<SolNamedElement> {
     return when(element.name) {
         "this" -> {
           element.ancestors
