@@ -253,6 +253,18 @@ class SolExpressionTypeProviderTest : SolTestBase() {
     """)
   }
 
+  fun testEnum() {
+    checkExpr("""
+        contract A {
+            enum B { A1, A2 }
+            function f() {
+                B.A1;
+                //^ B
+            }
+        }
+    """)
+  }
+
   private fun checkExpr(@Language("Solidity") code: String, msg: String = "") {
     InlineFile(code)
     val (expr, expectedType) = findElementAndDataInEditor<SolExpression>()

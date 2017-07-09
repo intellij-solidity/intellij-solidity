@@ -182,7 +182,11 @@ EventDefinition ::= event Identifier IndexedParameterList anonymous? ';' {
     mixin = "me.serce.solidity.lang.psi.impl.SolEventDefMixin"
 }
 
-EnumValue ::= Identifier
+EnumValue ::= Identifier {
+    implements = "me.serce.solidity.lang.psi.SolEnumDefElement"
+    mixin = "me.serce.solidity.lang.psi.impl.SolEnumValueMixin"
+}
+
 EnumDefinition ::= enum Identifier '{' EnumValue? (',' EnumValue)* '}' {
     pin = 1
     implements = "me.serce.solidity.lang.psi.SolEnumDefElement"
@@ -200,7 +204,7 @@ ParameterList ::= '(' ( ParameterDef (',' ParameterDef)* )? ')'
 
 // semantic restriction: mappings and structs (recursively) containing mappings
 // are not allowed in argument lists
-private declarationList ::= '(' ( Identifier ','? | ',' )*  ')' ;
+private declarationList ::= '(' ( (Identifier | '_') ','? | ',' )*  ')' ;
 VariableDeclaration ::= var declarationList | TypeName Identifier {
     implements = "me.serce.solidity.lang.psi.SolNamedElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolVariableDeclarationMixin"

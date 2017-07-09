@@ -78,6 +78,8 @@ fun inferDeclType(decl: SolNamedElement): SolType {
     }
     is SolContractDefinition -> SolContract(decl)
     is SolStructDefinition -> SolStruct(decl)
+    is SolEnumDefinition -> SolEnum(decl)
+    is SolEnumValue -> inferDeclType(decl.parent as SolNamedElement)
     is SolParameterDef -> getSolType(decl.typeName)
     is SolStateVariableDeclaration -> getSolType(decl.typeName)
     else -> SolUnknown

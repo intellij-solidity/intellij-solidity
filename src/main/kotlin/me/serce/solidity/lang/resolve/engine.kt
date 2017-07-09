@@ -6,10 +6,7 @@ import me.serce.solidity.firstOrElse
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.stubs.SolGotoClassIndex
 import me.serce.solidity.lang.stubs.SolModifierIndex
-import me.serce.solidity.lang.types.SolContract
-import me.serce.solidity.lang.types.SolInternalTypeFactory
-import me.serce.solidity.lang.types.SolStruct
-import me.serce.solidity.lang.types.type
+import me.serce.solidity.lang.types.*
 
 object SolResolver {
   fun resolveTypeName(element: SolReferenceElement): List<SolNamedElement> = StubIndex.getElements(
@@ -58,6 +55,7 @@ object SolResolver {
       propName == null -> emptyList()
       refType is SolContract -> resolveContractMember(refType.ref, element)
       refType is SolStruct -> refType.ref.variableDeclarationList.filter { it.name == propName }
+      refType is SolEnum -> refType.ref.enumValueList.filter { it.name == propName }
       else -> emptyList()
     }
   }
@@ -126,6 +124,7 @@ object SolResolver {
       is SolContractDefinition -> {
         val childrenScope = sequenceOf(
           scope.stateVariableDeclarationList,
+          scope.enumDefinitionList,
           scope.structDefinitionList).flatten()
           .map { lexicalDeclarations(it, place) }
           .flatten()
@@ -139,6 +138,7 @@ object SolResolver {
       is SolFunctionDefinition -> {
         scope.parameters.asSequence()
       }
+      is SolEnumDefinition -> sequenceOf(scope)
 
       is SolStatement -> {
         scope.children.asSequence()

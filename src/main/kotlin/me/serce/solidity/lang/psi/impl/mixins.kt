@@ -35,6 +35,8 @@ abstract class SolEnumItemImplMixin : SolStubbedNamedElementImpl<SolEnumDefStub>
   override fun getIcon(flags: Int) = SolidityIcons.ENUM
 }
 
+abstract class SolEnumValueMixin(node: ASTNode) : SolNamedElementImpl(node), SolEnumValue
+
 abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrLibDefStub>, SolContractDefinition {
   override val supers: List<SolUserDefinedTypeName>
     get() = findChildrenByType<SolInheritanceSpecifier>(INHERITANCE_SPECIFIER)
