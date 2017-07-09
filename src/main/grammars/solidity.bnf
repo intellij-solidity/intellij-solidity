@@ -112,9 +112,9 @@ ImportPath ::= StringLiteral {
     implements = "me.serce.solidity.lang.psi.SolNamedElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolImportPathElement"
 }
-private ImportDirectivePart ::= import ImportPath (as Identifier)?
-        | import ('*' | Identifier) (as Identifier)? 'from' ImportPath
-        | import '{' ImportRuleSet '}' 'from' ImportPath {
+private ImportDirectivePart ::= import ( ImportPath (as Identifier)?
+        | ('*' | Identifier) (as Identifier)? 'from' ImportPath
+        | '{' ImportRuleSet '}' 'from' ImportPath ) {
  pin = 1
  recoverWhile = UntilSemicolonRecover
 }
@@ -176,7 +176,9 @@ FunctionDefinition ::= function Identifier? ParameterList
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
 
-EventDefinition ::= event Identifier IndexedParameterList anonymous? ';' {pin=1}
+EventDefinition ::= event Identifier IndexedParameterList anonymous? ';' {
+    pin=1
+}
 
 EnumValue ::= Identifier
 EnumDefinition ::= enum Identifier '{' EnumValue? (',' EnumValue)* '}' {
