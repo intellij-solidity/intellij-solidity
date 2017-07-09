@@ -1,26 +1,36 @@
 <idea-plugin version="2">
     <id>me.serce.solidity</id>
     <name>Intellij-Solidity</name>
-    <version>0.1.1</version>
     <vendor email="sergeicelov@gmail.com" url="https://github.com/intellij-solidity">Intellij Solidity</vendor>
 
     <description><![CDATA[
-        IntelliJ solidity support
+      IntelliJ solidity support
+
+      <p>
+        You can support the plugin development by clicking ★ on <a href="https://github.com/intellij-solidity/intellij-solidity">GitHub</a>
+        and rating it on the <a href="https://plugins.jetbrains.com/plugin/9475-intellij-solidity">plugin page</a>.
+      </p>
+      <p>
+        Contributions are always welcome!
+      </p>
     ]]></description>
 
     <change-notes><![CDATA[
       <p>
+        <b>v0.2.0</b>
+        <ul>
+          <li>Grammar fixes</li>
+          <li>Show type info action</li>
+          <li>Completion for built-in global variables</li>
+          <li>Completion for struct members and state variables</li>
+          <li>Better resolving (functions, enums, events, using-for)</li>
+          <li>Initial work on inspections</li>
+        </ul>
         <b>v0.1.7</b>
         <ul>
           <li>Grammar fixes</li>
           <li>Rename refactoring</li>
           <li>Better autocomplete</li>
-        </ul>
-        <b>v0.1.6</b>
-        <ul>
-          <li>Grammar fixes</li>
-          <li>Resolve, search and autocompletion for modifiers</li>
-          <li>Resolve for local variables, state variables and function parameters</li>
         </ul>
       </p>
     ]]>

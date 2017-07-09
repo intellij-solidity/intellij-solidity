@@ -14,7 +14,7 @@ class SolidityFileStub(file: SolidityFile?) : PsiFileStubImpl<SolidityFile>(file
 
   object Type : IStubFileElementType<SolidityFileStub>(SolidityLanguage) {
     // bump version every time stub tree changes
-    override fun getStubVersion() = 9
+    override fun getStubVersion() = 10
 
     override fun getBuilder(): StubBuilder = object : DefaultStubBuilder() {
       override fun createStubForFile(file: PsiFile) = SolidityFileStub(file as SolidityFile)
