@@ -89,8 +89,14 @@ object SolResolver {
         it.name == element.referenceName &&
           it.parameterListList[0].parameterDefList.size == element.argumentsNumber()
       }
+    val eventDefinitions = contract.eventDefinitionList
+      .filter {
+        it.name == element.referenceName &&
+          it.indexedParameterList?.typeNameList?.size ?: 0 == element.argumentsNumber()
+      }
     return when {
       currentContractFunctions.isNotEmpty() -> currentContractFunctions
+      eventDefinitions.isNotEmpty() -> eventDefinitions
       else -> contract.supers.asSequence()
         .flatMap { resolveTypeName(it).asSequence() }
         .filterIsInstance<SolContractDefinition>()

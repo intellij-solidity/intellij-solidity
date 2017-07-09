@@ -176,3 +176,4 @@ abstract class SolFunctionCallElement(node: ASTNode) : SolNamedElementImpl(node)
   override fun getReference() = SolFunctionCallReference(this)
 }
 
+abstract class SolEventDefMixin(node: ASTNode) : SolNamedElementImpl(node), SolEventDefinition

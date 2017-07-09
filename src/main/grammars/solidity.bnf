@@ -177,7 +177,9 @@ FunctionDefinition ::= function Identifier? ParameterList
 }
 
 EventDefinition ::= event Identifier IndexedParameterList anonymous? ';' {
-    pin=1
+    pin = 1
+    implements = "me.serce.solidity.lang.psi.SolNamedElement"
+    mixin = "me.serce.solidity.lang.psi.impl.SolEventDefMixin"
 }
 
 EnumValue ::= Identifier
