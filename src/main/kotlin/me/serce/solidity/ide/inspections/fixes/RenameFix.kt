@@ -1,20 +1,20 @@
 package me.serce.solidity.ide.inspections.fixes
 
-import com.intellij.codeInspection.LocalQuickFix
-import com.intellij.codeInspection.ProblemDescriptor
+import com.intellij.codeInspection.LocalQuickFixOnPsiElement
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
 import com.intellij.refactoring.RefactoringFactory
 
 
-class RenameFix(val element: PsiElement,
+class RenameFix(element: PsiElement,
                 val newName: String,
-                val fixName: String = "Rename to '$newName'") : LocalQuickFix {
-  override fun getName() = fixName
+                val fixName: String = "Rename to '$newName'") : LocalQuickFixOnPsiElement(element) {
+  override fun getText() = fixName
   override fun getFamilyName() = "Rename element"
 
-  override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
+  override fun invoke(project: Project, file: PsiFile, element: PsiElement, endElement: PsiElement) {
     ApplicationManager.getApplication().invokeLater {
       RefactoringFactory.getInstance(project).createRename(element, newName).run()
     }
