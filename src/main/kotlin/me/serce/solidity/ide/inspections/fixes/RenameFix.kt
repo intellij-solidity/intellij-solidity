@@ -15,8 +15,8 @@ class RenameFix(element: PsiElement,
   override fun getFamilyName() = "Rename element"
 
   override fun invoke(project: Project, file: PsiFile, element: PsiElement, endElement: PsiElement) {
-    ApplicationManager.getApplication().invokeLater {
-      RefactoringFactory.getInstance(project).createRename(element, newName).run()
-    }
+    RefactoringFactory.getInstance(project).createRename(element, newName).run()
   }
+
+  override fun startInWriteAction() = false
 }
