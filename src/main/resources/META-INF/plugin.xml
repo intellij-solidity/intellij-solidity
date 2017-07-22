@@ -96,6 +96,12 @@
                          enabledByDefault="true"
                          level="WARNING"
                          implementationClass="me.serce.solidity.ide.inspections.SelfdestructRenameInspection"/>
+
+        <localInspection language="Solidity" groupName="Solidity"
+                         displayName="Function has no modifiers and might modify owners of the contract"
+                         enabledByDefault="true"
+                         level="WARNING"
+                         implementationClass="me.serce.solidity.ide.inspections.UnprotectedFunctionInspection"/>
     </extensions>
 
     <actions>

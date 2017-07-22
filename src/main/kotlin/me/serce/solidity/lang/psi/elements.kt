@@ -16,6 +16,7 @@ interface SolFunctionDefElement : SolReferenceElement {
   val contract: SolContractDefinition
   val modifiers: List<PsiElement>
   val parameters: List<SolParameterDef>
+  val isConstructor: Boolean
 }
 
 interface SolEnumDefElement : SolNamedElement
