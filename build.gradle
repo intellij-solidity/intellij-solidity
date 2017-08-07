@@ -39,7 +39,7 @@ clean.doFirst {
 intellij {
     pluginName 'Intellij-Solidity'
 
-    version '2016.3.2'
+    version '2016.1'
     downloadSources Boolean.valueOf(true)
     updateSinceUntilBuild = false
 
