@@ -31,6 +31,7 @@ HEXLITERAL=(hex\"([0-9a-fA-F]+)\"|hex\'([0-9a-fA-F]+)\')
 STRINGLITERAL=(\"([^\"\r\n\\]|\\.)*\")|(\'([^\'\r\n\\]|\\.)*\')
 DECIMALNUMBER=([0-9]+)
 FIXEDNUMBER=([0-9]+\.[0-9]*|[0-9]*\.[0-9]+)
+SCIENTIFICNUMBER=(([0-9]+|[0-9]+\.[0-9]*|[0-9]*\.[0-9]+)[Ee][+-]?[0-9]+)
 HEXNUMBER=(0x[0-9a-fA-F]+)
 NUMBERUNIT=(wei|szabo|finney|ether|seconds|minutes|hours|days|weeks|years)
 INTNUMTYPE=int(8|16|24|32|40|48|56|64|72|80|88|96|104|112|120|128|136|144|152|160|168|176|184|192|200|208|216|224|232|240|248|256)?
@@ -156,6 +157,7 @@ IDENTIFIER=[a-zA-Z_$][a-zA-Z_$0-9]*
   {STRINGLITERAL}       { return STRINGLITERAL; }
   {DECIMALNUMBER}       { return DECIMALNUMBER; }
   {FIXEDNUMBER}         { return FIXEDNUMBER; }
+  {SCIENTIFICNUMBER}    { return SCIENTIFICNUMBER; }
   {HEXNUMBER}           { return HEXNUMBER; }
   {NUMBERUNIT}          { return NUMBERUNIT; }
   {INTNUMTYPE}          { return INTNUMTYPE; }
