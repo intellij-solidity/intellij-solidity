@@ -19,6 +19,7 @@
     stringLiteral='regexp:("([^"\r\n\\]|\\.)*")'
     decimalNumber='regexp:([0-9]+)'
     fixedNumber='regexp:(\d+\.\d*|\d*\.\d+)'
+    scientificNumber='regexp:((\d+|\d+\.\d*|\d*\.\d+)[Ee][+-]?[0-9]+)'
     hexNumber='regexp:(0x[0-9a-fA-F]+)'
     numberUnit='regexp:(wei|szabo|finney|ether|seconds|minutes|hours|days|weeks|years)'
     intNumType='regexp:int(8|16|24|32|40|48|56|64|72|80|88|96|104|112|120|128|136|144|152|160|168|176|184|192|200|208|216|224|232|240|248|256)?'
@@ -368,7 +369,7 @@ MemberAccessExpression ::= Expression '.' Identifier {
 IndexAccessExpression ::= Expression '[' Expression? ']'
 
 BooleanLiteral ::= booleanLiteral
-NumberLiteral ::= ( HexNumber | DecimalNumber | FixedNumber) NumberUnit?
+NumberLiteral ::= ( HexNumber | DecimalNumber | FixedNumber | ScientificNumber) NumberUnit?
 NumberUnit ::= wei | szabo | finney | ether
              | seconds | minutes | hours | days | weeks | years
 // https://github.com/ethereum/solidity/pull/832
@@ -379,6 +380,7 @@ private StringLiteral ::= stringLiteral
 private HexNumber ::= hexNumber
 private FixedNumber ::= fixedNumber
 private DecimalNumber ::= decimalNumber
+private ScientificNumber ::= scientificNumber
 
 private PrimitiveLiteral ::= intNumType | uIntNumType | byteNumType | bytesNumType | fixedNumType | uFixedNumType | booleanLiteral
 
