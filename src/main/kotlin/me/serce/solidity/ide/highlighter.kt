@@ -32,6 +32,8 @@ class SolHighlighter : SyntaxHighlighterBase() {
       SEMICOLON to Defaults.SEMICOLON,
 
 
+      SCIENTIFICNUMBER to Defaults.NUMBER,
+      FIXEDNUMBER to Defaults.NUMBER,
       DECIMALNUMBER to Defaults.NUMBER,
       HEXNUMBER to Defaults.NUMBER,
       NUMBERUNIT to Defaults.NUMBER,
