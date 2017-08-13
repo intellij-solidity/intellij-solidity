@@ -31,7 +31,6 @@ class SolHighlighter : SyntaxHighlighterBase() {
       RPAREN to Defaults.PARENTHESES,
       SEMICOLON to Defaults.SEMICOLON,
 
-
       SCIENTIFICNUMBER to Defaults.NUMBER,
       FIXEDNUMBER to Defaults.NUMBER,
       DECIMALNUMBER to Defaults.NUMBER,

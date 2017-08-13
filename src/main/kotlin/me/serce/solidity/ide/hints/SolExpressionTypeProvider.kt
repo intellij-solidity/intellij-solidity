@@ -1,7 +1,7 @@
-package me.serce.solidity.ide
+package me.serce.solidity.ide.hints
 
 import com.intellij.lang.ExpressionTypeProvider
-import com.intellij.openapi.util.text.StringUtil.escapeXml
+import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.PsiElement
 import com.intellij.psi.SyntaxTraverser
 import me.serce.solidity.lang.psi.SolExpression
@@ -14,10 +14,7 @@ class SolExpressionTypeProvider : ExpressionTypeProvider<SolExpression>() {
       .toList()
   }
 
-  override fun getInformationHint(element: SolExpression): String {
-    return escapeXml(element.type.toString())
-  }
+  override fun getInformationHint(element: SolExpression): String = StringUtil.escapeXml(element.type.toString())
 
   override fun getErrorHint() = "Select an expression"
 }
-
