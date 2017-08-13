@@ -62,7 +62,10 @@
         <lang.quoteHandler language="Solidity" implementationClass="me.serce.solidity.ide.SolQuoteTokenHandler"/>
 
         <!-- Hints -->
-        <codeInsight.typeInfo language="Solidity" implementationClass="me.serce.solidity.ide.SolExpressionTypeProvider"/>
+        <codeInsight.typeInfo language="Solidity"
+                              implementationClass="me.serce.solidity.ide.hints.SolExpressionTypeProvider"/>
+        <codeInsight.parameterInfo language="Solidity"
+                                   implementationClass="me.serce.solidity.ide.hints.SolParameterInfoHandler"/>
 
         <completion.contributor language="Solidity"
                                 implementationClass="me.serce.solidity.lang.completion.SolKeywordCompletionContributor"/>
