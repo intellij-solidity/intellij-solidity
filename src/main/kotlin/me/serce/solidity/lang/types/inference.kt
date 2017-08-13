@@ -138,9 +138,14 @@ fun inferExprType(expr: SolExpression?): SolType {
 }
 
 val SolExpression.type: SolType
-  get() = CachedValuesManager.getCachedValue(this) {
-    val type = RecursionManager.doPreventingRecursion(this, true) {
-      inferExprType(this)
-    } ?: SolUnknown
-    CachedValueProvider.Result.create(type, PsiModificationTracker.MODIFICATION_COUNT)
+  get() {
+    if (!isValid) {
+      return SolUnknown
+    }
+    return CachedValuesManager.getCachedValue(this) {
+      val type = RecursionManager.doPreventingRecursion(this, true) {
+        inferExprType(this)
+      } ?: SolUnknown
+      CachedValueProvider.Result.create(type, PsiModificationTracker.MODIFICATION_COUNT)
+    }
   }
