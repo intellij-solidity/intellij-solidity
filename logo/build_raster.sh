@@ -2,9 +2,6 @@
 #
 # Builds a raster logo with given size
 #
-# Example:
-# $ fontinfo.sh -size 64
-#
 set -eu
 set -o pipefail
 
