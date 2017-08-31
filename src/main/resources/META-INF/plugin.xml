@@ -81,6 +81,7 @@
 
         <gotoClassContributor implementation="me.serce.solidity.ide.navigation.SolClassNavigationContributor"/>
         <gotoSymbolContributor implementation="me.serce.solidity.ide.navigation.SolSymbolNavigationContributor"/>
+        <definitionsScopedSearch implementation="me.serce.solidity.ide.navigation.SolContractImplementationSearcher"/>
         
         <lang.foldingBuilder language="Solidity" implementationClass="me.serce.solidity.ide.SolidityFoldingBuilder"/>
 
