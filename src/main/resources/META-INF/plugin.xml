@@ -50,7 +50,7 @@
         <lang.syntaxHighlighterFactory language="Solidity"
                                        implementationClass="me.serce.solidity.ide.SolHighlighterFactory"/>
 
-        <annotator language="Solidity" implementationClass="me.serce.solidity.ide.SolidityAnnotator"/>
+        <annotator language="Solidity" implementationClass="me.serce.solidity.ide.annotation.SolidityAnnotator"/>
 
         <!-- Commenter -->
         <lang.commenter language="Solidity" implementationClass="me.serce.solidity.ide.SolCommenter"/>
@@ -71,6 +71,10 @@
                                 implementationClass="me.serce.solidity.lang.completion.SolKeywordCompletionContributor"/>
 
         <lang.formatter language="Solidity" implementationClass="me.serce.solidity.ide.SolidityFormattingModelBuilder"/>
+
+        <codeInsight.lineMarkerProvider language="Solidity"
+                                        implementationClass="me.serce.solidity.ide.annotation.SolContractLineMarkerProvider"/>
+
 
         <internalFileTemplate name="Solidity Contract"/>
         <internalFileTemplate name="Solidity Library"/>

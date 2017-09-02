@@ -1,4 +1,4 @@
-package me.serce.solidity.ide
+package me.serce.solidity.ide.annotation
 
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.Annotator

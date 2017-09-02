@@ -11,35 +11,42 @@ import me.serce.solidity.lang.psi.SolContractDefinition
 import me.serce.solidity.lang.psi.SolInheritanceSpecifier
 import java.util.*
 
+private val MAX_IMPLEMENTATIONS = 250
+
 class SolContractImplementationSearcher : QueryExecutorBase<PsiElement, SearchParameters>(true) {
-  private val MAX_IMPLEMENTATIONS = 250
 
   override fun processQuery(queryParameters: SearchParameters, consumer: Processor<PsiElement>) {
     val contract = queryParameters.element
     if (contract !is SolContractDefinition) {
       return
     }
-    val implementations = HashSet<SolContractDefinition>()
-    val implQueue = ArrayDeque<SolContractDefinition>(MAX_IMPLEMENTATIONS)
-    implQueue.add(contract)
-    while (implQueue.isNotEmpty() && implQueue.size < MAX_IMPLEMENTATIONS && implementations.size < MAX_IMPLEMENTATIONS) {
-      val current = implQueue.poll()
-      if (!implementations.add(current)) {
-        continue
-      }
-      current.findImplementations()
-        .filterQuery(Condition { !implementations.contains(it) })
-        .forEach(implQueue::add)
-    }
+    val implementations = contract.findAllImplementations()
     implementations.forEach { consumer.process(it) }
   }
+}
 
-  private fun SolContractDefinition.findImplementations(): Query<SolContractDefinition> {
-    return ReferencesSearch.search(this, this.useScope)
-      .mapQuery { it.element.parent }
-      .filterIsInstanceQuery<SolInheritanceSpecifier>()
-      .mapQuery { it.parent }
-      .filterIsInstanceQuery<SolContractDefinition>()
+
+fun SolContractDefinition.findAllImplementations(): HashSet<SolContractDefinition> {
+  val implementations = HashSet<SolContractDefinition>()
+  val implQueue = ArrayDeque<SolContractDefinition>(MAX_IMPLEMENTATIONS)
+  implQueue.add(this)
+  while (implQueue.isNotEmpty() && implQueue.size < MAX_IMPLEMENTATIONS && implementations.size < MAX_IMPLEMENTATIONS) {
+    val current = implQueue.poll()
+    if (!implementations.add(current)) {
+      continue
+    }
+    current.findImplementations()
+      .filterQuery(Condition { !implementations.contains(it) })
+      .forEach(implQueue::add)
   }
+  return implementations
+}
+
+fun SolContractDefinition.findImplementations(): Query<SolContractDefinition> {
+  return ReferencesSearch.search(this, this.useScope)
+    .mapQuery { it.element.parent }
+    .filterIsInstanceQuery<SolInheritanceSpecifier>()
+    .mapQuery { it.parent }
+    .filterIsInstanceQuery<SolContractDefinition>()
 }
 
