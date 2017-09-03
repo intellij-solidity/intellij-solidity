@@ -17,7 +17,7 @@ abstract class SolReferenceBase<T : SolReferenceElement>(element: T) : PsiPolyVa
   override fun getVariants(): Array<out Any> = emptyArray()
 
   override final fun multiResolve(incompleteCode: Boolean) = ResolveCache.getInstance(element.project)
-    .resolveWithCaching(this, { r, incomplete ->
+    .resolveWithCaching(this, { r, _ ->
       r.multiResolve().map(::PsiElementResolveResult).toTypedArray()
     }, true, false)
 
@@ -31,7 +31,7 @@ abstract class SolReferenceBase<T : SolReferenceElement>(element: T) : PsiPolyVa
   }
 
   // to please Kotlin 1.1 compiler
-  override fun resolve(): SolElement? = PsiPolyVariantReferenceBase@ super.resolve() as SolElement?
+  override fun resolve(): SolElement? = PsiPolyVariantReferenceBase@super.resolve() as SolElement?
 
   protected fun doRename(identifier: PsiElement, newName: String) {
     check(identifier.elementType == IDENTIFIER)

@@ -8,17 +8,11 @@ import com.intellij.openapi.project.DumbAware
 import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.patterns.PsiElementPattern
 import com.intellij.psi.PsiElement
-import com.intellij.psi.impl.source.tree.CompositeElement
 import com.intellij.util.ProcessingContext
 import me.serce.solidity.lang.core.SolidityFile
-import me.serce.solidity.lang.core.SolidityTokenTypes
-import me.serce.solidity.lang.psi.SolBlock
 import me.serce.solidity.lang.psi.SolContractDefinition
 import me.serce.solidity.lang.psi.SolPrimaryExpression
 import me.serce.solidity.lang.psi.SolStatement
-import me.serce.solidity.lang.psi.impl.SolMemberAccessExpressionImpl
-import me.serce.solidity.lang.psi.impl.SolVarLiteralImpl
-import me.serce.solidity.lang.resolve.SolResolver
 
 /**
  * Special Variables and Functions
@@ -28,7 +22,7 @@ import me.serce.solidity.lang.resolve.SolResolver
 
 private val KEYWORD_PRIORITY = 10.0
 
-class SolKeywordCompletionProvider(vararg val keywords: String) : CompletionProvider<CompletionParameters>() {
+class SolKeywordCompletionProvider(private vararg val keywords: String) : CompletionProvider<CompletionParameters>() {
   override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext?, result: CompletionResultSet) {
     keywords
       .map { LookupElementBuilder.create(it) }
@@ -36,12 +30,12 @@ class SolKeywordCompletionProvider(vararg val keywords: String) : CompletionProv
   }
 }
 
-class SolSimpleFunctionCompletionProvider(vararg val functions: String) : CompletionProvider<CompletionParameters>() {
+class SolSimpleFunctionCompletionProvider(private vararg val functions: String) : CompletionProvider<CompletionParameters>() {
   override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext?, result: CompletionResultSet) {
     functions
       .map {
         LookupElementBuilder.create(it).withTailText("()")
-          .withInsertHandler { context, lookupElement ->
+          .withInsertHandler { context, _ ->
             context.document.insertString(context.selectionEndOffset, "()")
             EditorModificationUtil.moveCaretRelatively(context.editor, 1)
           }
@@ -60,9 +54,9 @@ class SolKeywordCompletionContributor : CompletionContributor(), DumbAware {
           .create("pragma solidity")
           .bold()
           .withTailText(" ^...")
-          .withInsertHandler { context, lookupElement ->
-            context.document.insertString(context.selectionEndOffset, " ^0.4.4;")
-            EditorModificationUtil.moveCaretRelatively(context.editor, 9)
+          .withInsertHandler { ctx, _ ->
+            ctx.document.insertString(ctx.selectionEndOffset, " ^0.4.4;")
+            EditorModificationUtil.moveCaretRelatively(ctx.editor, 9)
           }
         result.addElement(PrioritizedLookupElement.withPriority(pragmaBuilder, KEYWORD_PRIORITY - 5))
       }
@@ -86,9 +80,6 @@ class SolKeywordCompletionContributor : CompletionContributor(), DumbAware {
 
   private fun insideContract() = psiElement<PsiElement>()
     .inside(SolContractDefinition::class.java)
-
-  private fun insideBlock() = psiElement<PsiElement>()
-    .inside(SolBlock::class.java)
 }
 
 inline fun <reified I : PsiElement> psiElement(): PsiElementPattern.Capture<I> {
