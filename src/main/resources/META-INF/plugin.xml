@@ -7,7 +7,7 @@
       IntelliJ solidity support
 
       <p>
-        You can support the plugin development by clicking ★ on <a href="https://github.com/intellij-solidity/intellij-solidity">GitHub</a>
+        You can support the plugin development by clicking star on <a href="https://github.com/intellij-solidity/intellij-solidity">GitHub</a>
         and rating it on the <a href="https://plugins.jetbrains.com/plugin/9475-intellij-solidity">plugin page</a>.
       </p>
       <p>
@@ -17,7 +17,16 @@
 
     <change-notes><![CDATA[
       <p>
-        <b>v0.2.0</b>
+        <b>v2.0.1</b>
+        <ul>
+          <li>Go to implementation action</li>
+          <li>Parameter info hint</li>
+          <li>Highlighting fixes. Thanks, @dukei</li>
+          <li>Added support for scientific notation. Thanks, @dukei</li>
+          <li>Experimental "unprotected function" inspection</li>
+          <li>Update minimal IDE version requirement</li>
+        </ul>
+        <b>v2.0.0</b>
         <ul>
           <li>Grammar fixes</li>
           <li>Show type info action</li>
@@ -25,12 +34,6 @@
           <li>Completion for struct members and state variables</li>
           <li>Better resolving (functions, enums, events, using-for)</li>
           <li>Initial work on inspections</li>
-        </ul>
-        <b>v0.1.7</b>
-        <ul>
-          <li>Grammar fixes</li>
-          <li>Rename refactoring</li>
-          <li>Better autocomplete</li>
         </ul>
       </p>
     ]]>

@@ -12,7 +12,7 @@ import me.serce.solidity.lang.psi.SolContractDefinition
 class SolContractLineMarkerProvider : LineMarkerProvider {
   override fun getLineMarkerInfo(element: PsiElement): LineMarkerInfo<*>? = null
 
-  override fun collectSlowLineMarkers(elements: MutableList<PsiElement>, result: MutableCollection<LineMarkerInfo<PsiElement>>) {
+  override fun collectSlowLineMarkers(elements: List<PsiElement>, result: MutableCollection<LineMarkerInfo<PsiElement>>) {
     for (el in elements) {
       if (el !is SolContractDefinition) {
         continue
