@@ -5,14 +5,14 @@ Solidity File
     PsiElement(Identifier)('A')
     PsiWhiteSpace(' ')
     PsiElement({)('{')
-  PsiErrorElement:<contract definition>, <expression>, <type name>, byteNumType, enum, event, fixedNumType, function, import, intNumType, modifier, pragma, struct, uIntNumType, using or '}' expected, got 'fixed40x40'
+  PsiErrorElement:<expression>, <type name>, byteNumType, contract, enum, event, fixedNumType, function, import, intNumType, interface, library, modifier, pragma, struct, uIntNumType, using or '}' expected, got 'fixed40x40'
     <empty list>
   PsiWhiteSpace('\n  ')
   SolPrimaryExpressionImpl(PRIMARY_EXPRESSION)
     SolElementaryTypeNameImpl(ELEMENTARY_TYPE_NAME)
       SolNumberTypeImpl(NUMBER_TYPE)
         PsiElement(fixedNumType)('fixed40x40')
-  PsiErrorElement:'(', <contract definition>, <expression>, Identifier, constant, import, internal, pragma, private or public expected, got 'pi'
+  PsiErrorElement:'(', <expression>, Identifier, constant, contract, import, interface, internal, library, pragma, private or public expected, got 'pi'
     <empty list>
   PsiWhiteSpace(' ')
   SolAssignmentExpressionImpl(ASSIGNMENT_EXPRESSION)

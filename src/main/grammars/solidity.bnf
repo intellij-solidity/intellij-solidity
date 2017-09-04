@@ -122,7 +122,7 @@ private ImportDirectivePart ::= import ( ImportPath (as Identifier)?
 ImportDirective ::= ImportDirectivePart ';'
 
 
-ContractDefinition ::= ( contract | library ) Identifier
+ContractDefinition ::= ( contract | library | interface ) Identifier
                      ( is InheritanceSpecifier (',' InheritanceSpecifier )* )?
                      '{' ContractPart* '}' {
     pin = 1
@@ -165,7 +165,7 @@ ModifierDefinition ::= modifier Identifier ParameterList? Block {
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
 
-FunctionModifier ::= constant | payable | external | public | internal | private | Identifier
+FunctionModifier ::= StateMutability | external | public | internal | private | Identifier
 
 FunctionDefinition ::= function Identifier? ParameterList
                      ( FunctionCallExpression | FunctionModifier)*
