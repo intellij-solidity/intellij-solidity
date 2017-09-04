@@ -53,6 +53,7 @@ class SolidityCompleteCustomParsingTest : SolidityParsingTestBase("fixtures/pars
   fun testDestructuring() = doTest(true)
   fun testContractWithLiterals() = doTest(true)
   fun testContractWithDifferentFields() = doTest(true)
+  fun testStateMutability() = doTest(true)
 }
 
 class SolidityCompleteOfficialSuccessfulParsingTest :

@@ -258,7 +258,7 @@ MappingTypeName ::= mapping '(' (BytesArrayTypeName | ElementaryTypeName  ) '=>'
 }
 
 // According to grammar.txt, it should be only TypeNameList after function, but according to reality ...
-FunctionTypeName ::= function ParameterList ( internal | external | constant | payable )*
+FunctionTypeName ::= function ParameterList ( internal | external | StateMutability )*
                    ( returns ParameterList )? {
     pin = 1
     stubClass = "me.serce.solidity.lang.stubs.SolTypeRefStub"
@@ -266,6 +266,7 @@ FunctionTypeName ::= function ParameterList ( internal | external | constant | p
 }
 
 StorageLocation ::= memory | storage
+StateMutability ::= pure | constant | view | payable
 
 private UnfinishedBlock ::= '{' Statement* {
     pin = 1
