@@ -198,7 +198,7 @@ EnumDefinition ::= enum Identifier '{' EnumValue? (',' EnumValue)* '}' {
 }
 
 IndexedParameterList ::= '(' ( TypeName indexed?  Identifier? (',' TypeName indexed?  Identifier?)* )? ')'
-ParameterDef ::= TypeName constant? Identifier? {
+ParameterDef ::= TypeName (constant StorageLocation? | StorageLocation constant?)? Identifier? {
     implements = "me.serce.solidity.lang.psi.SolNamedElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolParameterDefMixin"
 }

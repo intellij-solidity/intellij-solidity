@@ -21,4 +21,8 @@ contract MyToken {
     function () {
         throw;
     }
+
+    function hello() internal constant returns (string memory str) {
+        return "hel";
+    }
 }
