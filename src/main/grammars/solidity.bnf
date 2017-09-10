@@ -398,7 +398,7 @@ NumberType ::= intNumType | uIntNumType | byteNumType | fixedNumType | uFixedNum
 InlineAssemblyBlock ::= '{' AssemblyItem* '}' {pin=1}
 
 AssemblyItem ::=  FunctionalAssemblyExpression | InlineAssemblyBlock | AssemblyLocalBinding | AssemblyAssignment | AssemblyLabel | NumberLiteral | StringLiteral | HexLiteral | Identifier
-AssemblyLocalBinding ::= let Identifier ':=' FunctionalAssemblyExpression {pin=1}
+AssemblyLocalBinding ::= let Identifier ':=' (FunctionalAssemblyExpression | NumberLiteral | Identifier) {pin=1}
 AssemblyAssignment ::= Identifier ':=' (FunctionalAssemblyExpression | Identifier) | '=:' Identifier {pin=1}
 AssemblyLabel ::= Identifier ':'
 private AmbiguousAssemblyBytecode ::= 'return' | 'address' | 'byte'
