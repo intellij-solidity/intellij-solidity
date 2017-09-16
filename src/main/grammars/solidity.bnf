@@ -362,7 +362,7 @@ FunctionCallArguments ::= MapExpression | Expression? ( ',' Expression )*
 private MapExpressionClause ::= Identifier ':' Expression {pin=2}
 MapExpression ::= '{' MapExpressionClause (',' MapExpressionClause )* '}' {pin=1}
 
-NewExpression ::= new ( Identifier | PrimitiveLiteral)
+NewExpression ::= new ( Identifier | PrimitiveLiteral )
 MemberAccessExpression ::= Expression '.' Identifier {
     pin = 2
     implements = "me.serce.solidity.lang.psi.SolReferenceElement"
@@ -384,7 +384,7 @@ private FixedNumber ::= fixedNumber
 private DecimalNumber ::= decimalNumber
 private ScientificNumber ::= scientificNumber
 
-private PrimitiveLiteral ::= intNumType | uIntNumType | byteNumType | bytesNumType | fixedNumType | uFixedNumType | booleanLiteral
+private PrimitiveLiteral ::= intNumType | uIntNumType | byteNumType | bytesNumType | fixedNumType | uFixedNumType | booleanLiteral | address
 
 private ElementaryTypeNameExpression ::= ElementaryTypeName
 

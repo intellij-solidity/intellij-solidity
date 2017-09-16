@@ -15,17 +15,6 @@ abstract class SolidityParsingTestBase(baseDir: String) : ParsingTestCase(baseDi
       Extensions.getRootArea(), "com.intellij.lang.braceMatcher", LanguageExtensionPoint::class.java)
   }
 
-  /**
-   * This method is needed because in 2017.1 support for FileComparisonFailure was broken
-   */
-  override fun doTest(checkResult: Boolean) {
-    try {
-      super.doTest(checkResult)
-    } catch (e: FileComparisonFailure) {
-      Assert.assertEquals(e.expected, e.actual)
-    }
-  }
-
   override fun getTestDataPath() = "src/test/resources"
 }
 
