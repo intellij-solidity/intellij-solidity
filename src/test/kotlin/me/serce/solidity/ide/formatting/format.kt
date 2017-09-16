@@ -1,4 +1,4 @@
-package me.serce.solidity.ide
+package me.serce.solidity.ide.formatting
 
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.util.io.FileUtil

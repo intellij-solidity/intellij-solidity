@@ -20,6 +20,9 @@ abstract class SolTestBase : SolLightPlatformCodeInsightFixtureTestCase() {
     }
   }
 
+  protected val fileName: String
+    get() = "${getTestName(true)}.sol"
+
   protected fun replaceCaretMarker(text: String) = text.replace("/*caret*/", "<caret>")
 
   inline fun <reified T : PsiElement> findElementAndDataInEditor(marker: String = "^"): Pair<T, String> {
@@ -50,5 +53,12 @@ abstract class SolTestBase : SolLightPlatformCodeInsightFixtureTestCase() {
     val (element, data) = findElementAndDataInEditor<T>(marker)
     check(data.isEmpty()) { "Did not expect marker data" }
     return element
+  }
+
+  protected fun checkByFile(ignoreTrailingWhitespace: Boolean = true, action: () -> Unit) {
+    val (before, after) = (fileName to fileName.replace(".sol", "After.sol"))
+    myFixture.configureByFile(before)
+    action()
+    myFixture.checkResultByFile(after, ignoreTrailingWhitespace)
   }
 }
