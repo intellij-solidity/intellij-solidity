@@ -73,7 +73,8 @@
         <completion.contributor language="Solidity"
                                 implementationClass="me.serce.solidity.lang.completion.SolKeywordCompletionContributor"/>
 
-        <lang.formatter language="Solidity" implementationClass="me.serce.solidity.ide.formatting.SolidityFormattingModelBuilder"/>
+        <lang.formatter language="Solidity"
+                        implementationClass="me.serce.solidity.ide.formatting.SolidityFormattingModelBuilder"/>
 
         <codeInsight.lineMarkerProvider language="Solidity"
                                         implementationClass="me.serce.solidity.ide.annotation.SolContractLineMarkerProvider"/>
@@ -89,12 +90,19 @@
         <gotoClassContributor implementation="me.serce.solidity.ide.navigation.SolClassNavigationContributor"/>
         <gotoSymbolContributor implementation="me.serce.solidity.ide.navigation.SolSymbolNavigationContributor"/>
         <definitionsScopedSearch implementation="me.serce.solidity.ide.navigation.SolContractImplementationSearcher"/>
-        
+
         <lang.foldingBuilder language="Solidity" implementationClass="me.serce.solidity.ide.SolidityFoldingBuilder"/>
 
         <lang.findUsagesProvider language="Solidity" implementationClass="me.serce.solidity.ide.SolFindUsagesProvider"/>
 
         <spellchecker.support language="Solidity" implementationClass="me.serce.solidity.ide.SolSpellcheckingStrategy"/>
+
+        <!-- Code style -->
+
+        <codeStyleSettingsProvider implementation="me.serce.solidity.ide.formatting.SolCodeStyleSettingsProvider"/>
+        <langCodeStyleSettingsProvider
+                implementation="me.serce.solidity.ide.formatting.SolLanguageCodeStyleSettingsProvider"/>
+
 
         <lang.psiStructureViewFactory language="Solidity"
                                       implementationClass="me.serce.solidity.ide.SolPsiStructureViewFactory"/>
