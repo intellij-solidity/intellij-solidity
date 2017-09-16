@@ -23,7 +23,7 @@ class SolidityFormattingModelBuilder : FormattingModelBuilder {
     val spacingBuilder = createSpacingBuilder(settings)
 
     val containingFile = element.containingFile
-    val solidityBlock = SolidityFormattingBlock(element.node, null, Indent.getNoneIndent(), null, settings, spacingBuilder)
+    val solidityBlock = SolFormattingBlock(element.node, null, Indent.getNoneIndent(), null, settings, spacingBuilder)
 
     return FormattingModelProvider.createFormattingModelForPsiFile(containingFile, solidityBlock, settings)
   }

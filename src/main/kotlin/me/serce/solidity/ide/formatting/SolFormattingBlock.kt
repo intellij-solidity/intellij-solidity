@@ -6,34 +6,23 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiComment
 import com.intellij.psi.TokenType
 import com.intellij.psi.codeStyle.CodeStyleSettings
+import com.intellij.psi.formatter.FormatterUtil
 import com.intellij.psi.tree.IElementType
 import com.intellij.util.containers.ContainerUtil
 import me.serce.solidity.lang.core.SolidityTokenTypes.*
 import java.util.*
 
 
-class SolidityFormattingBlock(private val astNode: ASTNode,
-                              private val alignment: Alignment?,
-                              private val indent: Indent,
-                              private val wrap: Wrap?,
-                              private val codeStyleSettings: CodeStyleSettings,
-                              private val spacingBuilder: SpacingBuilder) : ASTBlock {
-  private var blocks: List<Block>? = null
+class SolFormattingBlock(private val astNode: ASTNode,
+                         private val alignment: Alignment?,
+                         private val indent: Indent,
+                         private val wrap: Wrap?,
+                         private val codeStyleSettings: CodeStyleSettings,
+                         private val spacingBuilder: SpacingBuilder) : ASTBlock {
+  private val nodeSubBlocks: List<Block> by lazy { buildSubBlocks() }
+  private val isNodeIncomplete: Boolean by lazy { FormatterUtil.isIncomplete(node) }
 
-  override fun getNode(): ASTNode {
-    return astNode
-  }
-
-  override fun getTextRange(): TextRange {
-    return astNode.textRange
-  }
-
-  override fun getSubBlocks(): List<Block> {
-    if (blocks == null) {
-      blocks = buildSubBlocks()
-    }
-    return blocks as List<Block>
-  }
+  override fun getSubBlocks(): List<Block> = nodeSubBlocks
 
   private fun buildSubBlocks(): List<Block> {
     val blocks = ContainerUtil.newArrayList<Block>()
@@ -57,7 +46,7 @@ class SolidityFormattingBlock(private val astNode: ASTNode,
 
   private fun buildSubBlock(child: ASTNode): Block {
     val indent = calcIndent(child)
-    return SolidityFormattingBlock(child, alignment, indent, null, codeStyleSettings, spacingBuilder)
+    return SolFormattingBlock(child, alignment, indent, null, codeStyleSettings, spacingBuilder)
   }
 
   private fun calcIndent(child: ASTNode): Indent {
@@ -72,34 +61,35 @@ class SolidityFormattingBlock(private val astNode: ASTNode,
     }
   }
 
-  override fun getWrap(): Wrap? {
-    return wrap
+  private fun newChildIndent(childIndex: Int): Indent? = when {
+    node.elementType in listOf(BLOCK, CONTRACT_DEFINITION) -> {
+      val lbraceIndex = subBlocks.indexOfFirst { it is ASTBlock && it.node.elementType == LBRACE }
+      if (lbraceIndex != -1 && lbraceIndex < childIndex) {
+        Indent.getNormalIndent()
+      } else {
+        Indent.getNoneIndent()
+      }
+    }
+    else -> Indent.getNoneIndent()
   }
 
-  override fun getIndent(): Indent? {
-    return indent
-  }
 
-  override fun getAlignment(): Alignment? {
-    return alignment
-  }
+  override fun getNode(): ASTNode = astNode
+  override fun getTextRange(): TextRange = astNode.textRange
+  override fun getWrap(): Wrap? = wrap
+  override fun getIndent(): Indent? = indent
+  override fun getAlignment(): Alignment? = alignment
 
   override fun getSpacing(child1: Block?, child2: Block): Spacing? {
     return spacingBuilder.getSpacing(this, child1, child2)
   }
 
-  override fun getChildAttributes(newChildIndex: Int): ChildAttributes {
-    val indent = Indent.getNoneIndent()
-    return ChildAttributes(indent, null)
-  }
+  override fun getChildAttributes(newChildIndex: Int): ChildAttributes =
+    ChildAttributes(newChildIndent(newChildIndex), null)
 
-  override fun isIncomplete(): Boolean {
-    return false
-  }
+  override fun isIncomplete(): Boolean = isNodeIncomplete
 
-  override fun isLeaf(): Boolean {
-    return astNode.firstChildNode == null
-  }
+  override fun isLeaf(): Boolean = astNode.firstChildNode == null
 
   // TODO nicer way to do the same
   private fun IElementType.isContractPart() = this in listOf(
@@ -111,6 +101,5 @@ class SolidityFormattingBlock(private val astNode: ASTNode,
     EVENT_DEFINITION,
     ENUM_DEFINITION
   )
-
 }
 
