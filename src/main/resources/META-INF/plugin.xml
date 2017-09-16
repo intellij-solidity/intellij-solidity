@@ -73,7 +73,7 @@
         <completion.contributor language="Solidity"
                                 implementationClass="me.serce.solidity.lang.completion.SolKeywordCompletionContributor"/>
 
-        <lang.formatter language="Solidity" implementationClass="me.serce.solidity.ide.SolidityFormattingModelBuilder"/>
+        <lang.formatter language="Solidity" implementationClass="me.serce.solidity.ide.formatting.SolidityFormattingModelBuilder"/>
 
         <codeInsight.lineMarkerProvider language="Solidity"
                                         implementationClass="me.serce.solidity.ide.annotation.SolContractLineMarkerProvider"/>

@@ -1,4 +1,4 @@
-package me.serce.solidity.ide
+package me.serce.solidity.ide.formatting
 
 import com.intellij.formatting.*
 import com.intellij.lang.ASTNode
@@ -8,17 +8,16 @@ import com.intellij.psi.TokenType
 import com.intellij.psi.codeStyle.CodeStyleSettings
 import com.intellij.psi.tree.IElementType
 import com.intellij.util.containers.ContainerUtil
-import me.serce.solidity.lang.core.SolidityTokenTypes
 import me.serce.solidity.lang.core.SolidityTokenTypes.*
 import java.util.*
 
 
-internal class SolidityFormattingBlock(private val astNode: ASTNode,
-                                       private val alignment: Alignment?,
-                                       private val indent: Indent,
-                                       private val wrap: Wrap?,
-                                       private val codeStyleSettings: CodeStyleSettings,
-                                       private val spacingBuilder: SpacingBuilder) : ASTBlock {
+class SolidityFormattingBlock(private val astNode: ASTNode,
+                              private val alignment: Alignment?,
+                              private val indent: Indent,
+                              private val wrap: Wrap?,
+                              private val codeStyleSettings: CodeStyleSettings,
+                              private val spacingBuilder: SpacingBuilder) : ASTBlock {
   private var blocks: List<Block>? = null
 
   override fun getNode(): ASTNode {
@@ -31,27 +30,27 @@ internal class SolidityFormattingBlock(private val astNode: ASTNode,
 
   override fun getSubBlocks(): List<Block> {
     if (blocks == null) {
-      blocks = buildSubBlocks();
+      blocks = buildSubBlocks()
     }
-    return blocks as List<Block>;
+    return blocks as List<Block>
   }
 
   private fun buildSubBlocks(): List<Block> {
     val blocks = ContainerUtil.newArrayList<Block>()
-    var child = astNode.getFirstChildNode()
+    var child = astNode.firstChildNode
     while (child != null) {
-      val childType = child.getElementType()
-      if (child.getTextRange().getLength() == 0) {
-        child = child.getTreeNext()
+      val childType = child.elementType
+      if (child.textRange.length == 0) {
+        child = child.treeNext
         continue
       }
       if (childType === TokenType.WHITE_SPACE) {
-        child = child.getTreeNext()
+        child = child.treeNext
         continue
       }
       val e = buildSubBlock(child)
       blocks.add(e)
-      child = child.getTreeNext()
+      child = child.treeNext
     }
     return Collections.unmodifiableList(blocks)
   }
@@ -90,7 +89,7 @@ internal class SolidityFormattingBlock(private val astNode: ASTNode,
   }
 
   override fun getChildAttributes(newChildIndex: Int): ChildAttributes {
-    var indent = Indent.getNoneIndent()
+    val indent = Indent.getNoneIndent()
     return ChildAttributes(indent, null)
   }
 

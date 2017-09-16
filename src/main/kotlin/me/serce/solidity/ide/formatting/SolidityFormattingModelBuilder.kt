@@ -1,4 +1,4 @@
-package me.serce.solidity.ide
+package me.serce.solidity.ide.formatting
 
 import com.intellij.formatting.*
 import com.intellij.lang.ASTNode
