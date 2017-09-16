@@ -103,6 +103,9 @@
         <langCodeStyleSettingsProvider
                 implementation="me.serce.solidity.ide.formatting.SolLanguageCodeStyleSettingsProvider"/>
 
+        <!-- Color settings -->
+        <colorSettingsPage implementation="me.serce.solidity.ide.colors.SolColorSettingsPage"/>
+
 
         <lang.psiStructureViewFactory language="Solidity"
                                       implementationClass="me.serce.solidity.ide.SolPsiStructureViewFactory"/>

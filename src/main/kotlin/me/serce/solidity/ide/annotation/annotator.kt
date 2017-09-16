@@ -2,13 +2,12 @@ package me.serce.solidity.ide.annotation
 
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.Annotator
-import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.psi.PsiElement
+import me.serce.solidity.ide.colors.SolColor
 import me.serce.solidity.lang.psi.SolElement
 import me.serce.solidity.lang.psi.SolElementaryTypeName
 import me.serce.solidity.lang.psi.SolNumberType
 import me.serce.solidity.lang.psi.SolUserDefinedTypeName
-import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as Defaults
 
 class SolidityAnnotator : Annotator {
   override fun annotate(element: PsiElement, holder: AnnotationHolder) {
@@ -16,17 +15,17 @@ class SolidityAnnotator : Annotator {
       val highlight = highlight(element)
       if (highlight != null) {
         val (partToHighlight, color) = highlight
-        holder.createInfoAnnotation(partToHighlight, null).textAttributes = color
+        holder.createInfoAnnotation(partToHighlight, null).textAttributes = color.textAttributesKey
       }
     }
   }
 
-  private fun highlight(element: SolElement): Pair<PsiElement, TextAttributesKey>? {
+  private fun highlight(element: SolElement): Pair<PsiElement, SolColor>? {
     return when (element) {
-      is SolNumberType -> element to Defaults.KEYWORD
-      is SolElementaryTypeName -> element to Defaults.KEYWORD
+      is SolNumberType -> element to SolColor.KEYWORD
+      is SolElementaryTypeName -> element to SolColor.KEYWORD
 
-      is SolUserDefinedTypeName -> element to Defaults.CLASS_REFERENCE
+      is SolUserDefinedTypeName -> element to SolColor.CONTRACT_REFERENCE
 
       else -> null
     }

@@ -4,9 +4,9 @@ import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.fileTypes.SingleLazyInstanceSyntaxHighlighterFactory
 import com.intellij.openapi.fileTypes.SyntaxHighlighterBase
 import com.intellij.psi.tree.IElementType
+import me.serce.solidity.ide.colors.SolColor
 import me.serce.solidity.lang.core.SolidityLexer
 import me.serce.solidity.lang.core.SolidityTokenTypes.*
-import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as Defaults
 
 class SolHighlighterFactory : SingleLazyInstanceSyntaxHighlighterFactory() {
   override fun createHighlighter() = SolHighlighter()
@@ -21,30 +21,30 @@ class SolHighlighter : SyntaxHighlighterBase() {
 
   companion object {
     private val tokenMapping: Map<IElementType, TextAttributesKey> = mapOf(
-      COMMENT to Defaults.LINE_COMMENT,
+      COMMENT to SolColor.LINE_COMMENT,
 
-      LBRACE to Defaults.BRACES,
-      RBRACE to Defaults.BRACES,
-      LBRACKET to Defaults.BRACKETS,
-      RBRACKET to Defaults.BRACKETS,
-      LPAREN to Defaults.PARENTHESES,
-      RPAREN to Defaults.PARENTHESES,
-      SEMICOLON to Defaults.SEMICOLON,
+      LBRACE to SolColor.BRACES,
+      RBRACE to SolColor.BRACES,
+      LBRACKET to SolColor.BRACKETS,
+      RBRACKET to SolColor.BRACKETS,
+      LPAREN to SolColor.PARENTHESES,
+      RPAREN to SolColor.PARENTHESES,
+      SEMICOLON to SolColor.SEMICOLON,
 
-      SCIENTIFICNUMBER to Defaults.NUMBER,
-      FIXEDNUMBER to Defaults.NUMBER,
-      DECIMALNUMBER to Defaults.NUMBER,
-      HEXNUMBER to Defaults.NUMBER,
-      NUMBERUNIT to Defaults.NUMBER,
+      SCIENTIFICNUMBER to SolColor.NUMBER,
+      FIXEDNUMBER to SolColor.NUMBER,
+      DECIMALNUMBER to SolColor.NUMBER,
+      HEXNUMBER to SolColor.NUMBER,
+      NUMBERUNIT to SolColor.NUMBER,
 
-      STRINGLITERAL to Defaults.STRING
+      STRINGLITERAL to SolColor.STRING
     ).plus(
-      keywords().map { it to Defaults.KEYWORD }
+      keywords().map { it to SolColor.KEYWORD }
     ).plus(
-      literals().map { it to Defaults.KEYWORD }
+      literals().map { it to SolColor.KEYWORD }
     ).plus(
-      operators().map { it to Defaults.OPERATION_SIGN }
-    ).mapValues { solidityKey(it.key, it.value) }
+      operators().map { it to SolColor.OPERATION_SIGN }
+    ).mapValues { it.value.textAttributesKey }
 
     private fun keywords() = setOf<IElementType>(
       IMPORT, AS, PRAGMA, NEW, DELETE,
@@ -70,7 +70,5 @@ class SolHighlighter : SyntaxHighlighterBase() {
   }
 }
 
-private fun solidityKey(type: IElementType, key: TextAttributesKey) =
-  TextAttributesKey.createTextAttributesKey("me.serce.solidity.$type", key)
 
 private inline fun <reified T : Any?> T?.asArray(): Array<out T> = if (this == null) emptyArray() else arrayOf(this)

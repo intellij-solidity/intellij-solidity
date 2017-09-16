@@ -5,12 +5,12 @@ import com.intellij.application.options.IndentOptionsEditor
 import com.intellij.application.options.SmartIndentOptionsEditor
 import com.intellij.application.options.TabbedLanguageCodeStylePanel
 import com.intellij.lang.Language
-import com.intellij.openapi.util.io.StreamUtil
 import com.intellij.psi.codeStyle.CodeStyleSettings
 import com.intellij.psi.codeStyle.CodeStyleSettingsProvider
 import com.intellij.psi.codeStyle.CustomCodeStyleSettings
 import com.intellij.psi.codeStyle.LanguageCodeStyleSettingsProvider
 import me.serce.solidity.lang.SolidityLanguage
+import me.serce.solidity.loadCodeSampleResource
 
 class SolCodeStyleSettingsProvider : CodeStyleSettingsProvider() {
   override fun createCustomSettings(settings: CodeStyleSettings) = SolCodeStyleSettings(settings)
@@ -47,13 +47,6 @@ class SolLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider()
   override fun getIndentOptionsEditor(): IndentOptionsEditor? = SmartIndentOptionsEditor()
 
   private val INDENT_SAMPLE: String by lazy {
-    loadCodeSampleResource("me/serce/solidity/ide/formatting/indent_sample.sol")
-  }
-
-  private fun loadCodeSampleResource(resource: String): String {
-    val stream = this.javaClass.classLoader.getResourceAsStream(resource)
-    // We need to convert line separators here, because IntelliJ always expects \n,
-    // while on Windows the resource file will be read with \r\n as line separator.
-    return StreamUtil.convertSeparators(StreamUtil.readText(stream, "UTF-8"))
+    loadCodeSampleResource(this, "me/serce/solidity/ide/formatting/indent_sample.sol")
   }
 }
