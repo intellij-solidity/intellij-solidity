@@ -207,7 +207,8 @@ ParameterList ::= '(' ( ParameterDef (',' ParameterDef)* )? ')'
 // semantic restriction: mappings and structs (recursively) containing mappings
 // are not allowed in argument lists
 private declarationList ::= '(' ( (Identifier | '_') ','? | ',' )*  ')' ;
-VariableDeclaration ::= var declarationList | TypeName Identifier {
+// TODO: remove storage declaration from all other places
+VariableDeclaration ::= var declarationList | TypeName StorageLocation? Identifier {
     implements = "me.serce.solidity.lang.psi.SolNamedElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolVariableDeclarationMixin"
 }

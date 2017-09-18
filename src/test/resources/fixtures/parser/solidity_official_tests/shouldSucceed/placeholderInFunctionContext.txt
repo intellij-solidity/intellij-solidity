@@ -34,7 +34,7 @@ Solidity File
             SolElementaryTypeNameImpl(ELEMENTARY_TYPE_NAME)
               PsiElement(var)('var')
           PsiWhiteSpace(' ')
-          PsiErrorElement:'(' or Identifier expected, got '_'
+          PsiErrorElement:'(', <storage location> or Identifier expected, got '_'
             PsiElement(_)('_')
           PsiWhiteSpace(' ')
           PsiElement(=)('=')
