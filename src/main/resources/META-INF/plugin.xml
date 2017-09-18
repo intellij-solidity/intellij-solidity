@@ -17,6 +17,14 @@
 
     <change-notes><![CDATA[
       <p>
+        <b>v2.0.2</b>
+        <ul>
+          <li>Solidity color scheme panel</li>
+          <li>Solidity code style panel</li>
+          <li>Block indentation (please select a proper indent in Setting->Editor->Code Style->Solidity)</li>
+          <li>Solidity grammar fixes</li>
+          <li>Add support for interfaces and pure/view modifiers</li>
+        </ul>
         <b>v2.0.1</b>
         <ul>
           <li>Go to implementation action</li>
@@ -25,15 +33,6 @@
           <li>Added support for scientific notation. Thanks, @dukei</li>
           <li>Experimental "unprotected function" inspection</li>
           <li>Update minimal IDE version requirement</li>
-        </ul>
-        <b>v2.0.0</b>
-        <ul>
-          <li>Grammar fixes</li>
-          <li>Show type info action</li>
-          <li>Completion for built-in global variables</li>
-          <li>Completion for struct members and state variables</li>
-          <li>Better resolving (functions, enums, events, using-for)</li>
-          <li>Initial work on inspections</li>
         </ul>
       </p>
     ]]>
