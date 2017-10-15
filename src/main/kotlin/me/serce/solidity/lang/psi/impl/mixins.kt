@@ -28,6 +28,8 @@ open class SolImportPathElement(node: ASTNode) : SolNamedElementImpl(node), SolR
   override fun getReference() = SolImportPathReference(this)
 }
 
+open class SolImportAliasMixin(node: ASTNode) : SolNamedElementImpl(node)
+
 abstract class SolEnumItemImplMixin : SolStubbedNamedElementImpl<SolEnumDefStub>, SolEnumDefinition {
   constructor(node: ASTNode) : super(node)
   constructor(stub: SolEnumDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
