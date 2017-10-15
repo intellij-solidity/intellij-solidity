@@ -107,15 +107,19 @@ private PragmaPart ::= pragma Identifier pragmaAll {
 PragmaDirective ::= PragmaPart ';'
 
 private ClosedBracketRecover ::= !('}')
-private ImportRuleSet ::= Identifier (as Identifier)? ( ',' Identifier (as Identifier)? )* {
+ImportAlias ::= Identifier {
+    implements = "me.serce.solidity.lang.psi.SolNamedElement"
+    mixin = "me.serce.solidity.lang.psi.impl.SolImportAliasMixin"
+}
+private ImportRuleSet ::= UserDefinedTypeName (as ImportAlias)? ( ',' UserDefinedTypeName (as ImportAlias)? )* {
     recoverWhile = ClosedBracketRecover
 }
 ImportPath ::= StringLiteral {
     implements = "me.serce.solidity.lang.psi.SolNamedElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolImportPathElement"
 }
-private ImportDirectivePart ::= import ( ImportPath (as Identifier)?
-        | ('*' | Identifier) (as Identifier)? 'from' ImportPath
+private ImportDirectivePart ::= import ( ImportPath (as ImportAlias)?
+        | ('*' | UserDefinedTypeName) (as ImportAlias)? 'from' ImportPath
         | '{' ImportRuleSet '}' 'from' ImportPath ) {
  pin = 1
  recoverWhile = UntilSemicolonRecover
