@@ -2,7 +2,7 @@ package me.serce.solidity.lang.core.resolve
 
 import me.serce.solidity.lang.psi.SolNamedElement
 
-class SolImportPathResolveTest : SolResolveTestBase() {
+class SolImportResolveTest : SolResolveTestBase() {
   fun testImportPathResolve() {
     val file1 = InlineFile(
       name = "Ownable.sol",
@@ -13,7 +13,29 @@ class SolImportPathResolveTest : SolResolveTestBase() {
           import "./Ownable.sol";
                       //^
 
-          contract a {}
+          contract b {}
+    """)
+
+    val (refElement) = findElementAndDataInEditor<SolNamedElement>("^")
+
+    val resolved = checkNotNull(refElement.reference?.resolve()) {
+      "Failed to resolve ${refElement.text}"
+    }
+
+    assertEquals(file1.name, resolved.containingFile.name)
+  }
+
+  fun testResolveFrom() {
+    val file1 = InlineFile(
+      name = "Ownable.sol",
+      code = "contract A {}"
+    )
+
+    InlineFile("""
+          import A from "./Ownable.sol";
+               //^
+
+          contract b {}
     """)
 
     val (refElement) = findElementAndDataInEditor<SolNamedElement>("^")
