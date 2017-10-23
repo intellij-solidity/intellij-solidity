@@ -11,13 +11,13 @@ import me.serce.solidity.utils.SolLightPlatformCodeInsightFixtureTestCase
 
 class SolidityFormattingTest : SolLightPlatformCodeInsightFixtureTestCase() {
   private fun doTest() {
-    val inputFile = this.inputFileName
-    val inputText = FileUtil.loadFile(File(this.testDataPath + inputFile))
-    this.myFixture.configureByText(inputFile, inputText)
-    WriteCommandAction.runWriteCommandAction(this.myFixture.project, Runnable { CodeStyleManager.getInstance(this@SolidityFormattingTest.project).reformat(this@SolidityFormattingTest.myFixture.file as PsiElement) })
-    val outputFile = File(this.myFixture.testDataPath + "/" + this.expectedOutputFileName)
-    val expectedResultText = FileUtil.loadFile(outputFile, true)
-    this.myFixture.checkResult(expectedResultText)
+    val inputFile = inputFileName
+    val inputText = FileUtil.loadFile(File(testDataPath + inputFile))
+    myFixture.configureByText(inputFile, inputText)
+    WriteCommandAction.runWriteCommandAction(project, {
+      CodeStyleManager.getInstance(project).reformat(myFixture.file as PsiElement)
+    })
+    myFixture.checkResultByFile(expectedOutputFileName)
   }
 
   private val inputFileName: String
@@ -36,8 +36,5 @@ class SolidityFormattingTest : SolLightPlatformCodeInsightFixtureTestCase() {
   fun testSpaceAfterReturns() = this.doTest()
   fun testMultisigWallet() = this.doTest()
 
-  override fun getTestDataPath(): String {
-    return "src/test/resources/fixtures/formatter/"
-  }
-
+  override fun getTestDataPath() = "src/test/resources/fixtures/formatter/"
 }

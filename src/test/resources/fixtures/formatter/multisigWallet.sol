@@ -10,7 +10,9 @@ import  "./DayLimit.sol";
 
 contract  MultisigWallet  is  Multisig,  Shareable,  DayLimit  {
 
+    // comment1
     struct  Transaction  {
+    // comment2
         address  to;
         uint  value;
         bytes  data;

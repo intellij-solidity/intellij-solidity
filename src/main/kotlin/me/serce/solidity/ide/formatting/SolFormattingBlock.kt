@@ -8,9 +8,9 @@ import com.intellij.psi.TokenType
 import com.intellij.psi.codeStyle.CodeStyleSettings
 import com.intellij.psi.formatter.FormatterUtil
 import com.intellij.psi.tree.IElementType
-import com.intellij.util.containers.ContainerUtil
 import me.serce.solidity.lang.core.SolidityTokenTypes.*
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 class SolFormattingBlock(private val astNode: ASTNode,
@@ -25,7 +25,7 @@ class SolFormattingBlock(private val astNode: ASTNode,
   override fun getSubBlocks(): List<Block> = nodeSubBlocks
 
   private fun buildSubBlocks(): List<Block> {
-    val blocks = ContainerUtil.newArrayList<Block>()
+    val blocks = ArrayList<Block>()
     var child = astNode.firstChildNode
     while (child != null) {
       val childType = child.elementType
@@ -53,12 +53,14 @@ class SolFormattingBlock(private val astNode: ASTNode,
     val childType = child.elementType
     val type = astNode.elementType
     val parentType = astNode.treeParent?.elementType
-    return when {
-      child is PsiComment && (type == CONTRACT_DEFINITION || type == BLOCK || type == FUNCTION_DEFINITION) -> Indent.getNormalIndent()
+    val result = when {
+      child is PsiComment && type in listOf(CONTRACT_DEFINITION, BLOCK, FUNCTION_DEFINITION, STRUCT_DEFINITION) -> Indent.getNormalIndent()
       childType.isContractPart() -> Indent.getNormalIndent()
+      type == STRUCT_DEFINITION && childType == VARIABLE_DECLARATION -> Indent.getNormalIndent()
       parentType == BLOCK -> Indent.getNormalIndent()
-      else -> return Indent.getNoneIndent()
+      else -> Indent.getNoneIndent()
     }
+    return result
   }
 
   private fun newChildIndent(childIndex: Int): Indent? = when {
