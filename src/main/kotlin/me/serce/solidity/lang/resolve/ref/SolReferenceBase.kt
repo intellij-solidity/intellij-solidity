@@ -33,7 +33,7 @@ abstract class SolReferenceBase<T : SolReferenceElement>(element: T) : PsiPolyVa
   // to please Kotlin 1.1 compiler
   override fun resolve(): SolElement? = PsiPolyVariantReferenceBase@super.resolve() as SolElement?
 
-  protected fun doRename(identifier: PsiElement, newName: String) {
+  protected open fun doRename(identifier: PsiElement, newName: String) {
     check(identifier.elementType == IDENTIFIER)
     identifier.replace(SolPsiFactory(identifier.project).createIdentifier(newName.replace(".sol", "")))
   }

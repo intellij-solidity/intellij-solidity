@@ -70,6 +70,14 @@ class RenameTest : SolTestBase() {
         }
     """)
 
+  fun testFileRename() {
+    val labFile = myFixture.configureByFile("imports/Lab.sol")
+    val importingFile = myFixture.configureByFile("imports/nested/ImportingFile.sol")
+
+    myFixture.renameElement(labFile, "AssetGatewayToken.sol")
+    myFixture.openFileInEditor(importingFile.virtualFile)
+    myFixture.checkResultByFile("imports/nested/ImportingFile_after.sol")
+  }
 
   private fun doTest(
     newName: String,
@@ -80,4 +88,6 @@ class RenameTest : SolTestBase() {
     myFixture.renameElementAtCaret(newName)
     myFixture.checkResult(after)
   }
+
+  override fun getTestDataPath() = "src/test/resources/fixtures/refactoring/rename/"
 }
