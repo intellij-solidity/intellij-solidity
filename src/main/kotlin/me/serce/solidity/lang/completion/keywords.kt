@@ -82,9 +82,9 @@ class SolKeywordCompletionContributor : CompletionContributor(), DumbAware {
     .inside(SolContractDefinition::class.java)
 }
 
-inline fun <reified I : PsiElement> psiElement(): PsiElementPattern.Capture<I> {
+private inline fun <reified I : PsiElement> psiElement(): PsiElementPattern.Capture<I> {
   return psiElement(I::class.java)
 }
 
-fun LookupElementBuilder.keywordPrioritised(): LookupElement = PrioritizedLookupElement.withPriority(this, KEYWORD_PRIORITY)
+private fun LookupElementBuilder.keywordPrioritised(): LookupElement = PrioritizedLookupElement.withPriority(this, KEYWORD_PRIORITY)
 
