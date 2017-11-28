@@ -1,6 +1,5 @@
 pragma solidity ^0.4.0;
 
-
 // I'm a contract level line comment
 contract comments {
     // I'm a function level line comment

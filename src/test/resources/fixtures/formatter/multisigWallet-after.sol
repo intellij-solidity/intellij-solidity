@@ -1,10 +1,8 @@
 pragma solidity ^0.4.8;
 
-
 import "./ownership/Multisig.sol";
 import "./ownership/Shareable.sol";
 import "./DayLimit.sol";
-
 
 contract MultisigWallet is Multisig, Shareable, DayLimit {
 
@@ -73,5 +71,5 @@ contract MultisigWallet is Multisig, Shareable, DayLimit {
         super.clearPending();
     }
 
-    mapping (bytes32 => Transaction) txs;
+    mapping(bytes32 => Transaction) txs;
 }
