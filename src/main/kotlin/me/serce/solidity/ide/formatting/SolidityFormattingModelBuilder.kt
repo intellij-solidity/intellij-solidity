@@ -34,7 +34,6 @@ class SolidityFormattingModelBuilder : FormattingModelBuilder {
 
   companion object {
     fun createSpacingBuilder(settings: CodeStyleSettings): SpacingBuilder {
-      val SOURCE_UNIT = TokenSet.create(CONTRACT_DEFINITION, IMPORT_DIRECTIVE, PRAGMA_DIRECTIVE)
       return SpacingBuilder(settings, SolidityLanguage)
         .after(TokenSet.create(LPAREN, LBRACE, LBRACKET)).none()
         // Some old versions do not support .before(TokenSet), so we use more verbose form
@@ -46,7 +45,8 @@ class SolidityFormattingModelBuilder : FormattingModelBuilder {
         .before(SEMICOLON).none()
         .around(BINARY_OPERATORS).spaces(1)
         .around(TokenSet.create(QUESTION, COLON, IS)).spaces(1)
-        .after(TokenSet.create(RETURNS, RETURN, IMPORT, MAPPING)).spaces(1)
+        .after(TokenSet.create(RETURNS, RETURN, IMPORT)).spaces(1)
+        .after(MAPPING).spaces(0)
         .afterInside(TokenSet.create(NOT, TILDE, INC, DEC, PLUS, MINUS), UNARY_EXPRESSION).none()
         .afterInside(DELETE, UNARY_EXPRESSION).spaces(1)
         .afterInside(SEMICOLON, FOR_STATEMENT).spaces(1)
@@ -74,10 +74,18 @@ class SolidityFormattingModelBuilder : FormattingModelBuilder {
         .afterInside(EXPRESSION, MEMBER_ACCESS_EXPRESSION).none()
         .beforeInside(IDENTIFIER, MEMBER_ACCESS_EXPRESSION).none()
         .between(IMPORT_DIRECTIVE, IMPORT_DIRECTIVE).blankLines(0)
-        .between(SOURCE_UNIT, SOURCE_UNIT).blankLines(2)
-        .between(SOURCE_UNIT, COMMENT).blankLines(2)
-        .between(TokenSet.create(FUNCTION_DEFINITION, EVENT_DEFINITION, STRUCT_DEFINITION, STATE_VARIABLE_DECLARATION),
-          TokenSet.create(FUNCTION_DEFINITION, EVENT_DEFINITION, STRUCT_DEFINITION, STATE_VARIABLE_DECLARATION)).blankLines(1)
+        // 1 line between pragma and import/contract definition
+        .between(PRAGMA_DIRECTIVE, TokenSet.create(IMPORT_DIRECTIVE, CONTRACT_DEFINITION)).blankLines(1)
+        // 1 line between pragma/import and contract definition
+        .between(TokenSet.create(PRAGMA_DIRECTIVE, IMPORT_DIRECTIVE), CONTRACT_DEFINITION).blankLines(1)
+        // 1 line between contracts
+        .between(CONTRACT_DEFINITION, CONTRACT_DEFINITION).blankLines(1)
+        // 0 lines between state variable declarations
+        .between(STATE_VARIABLE_DECLARATION, STATE_VARIABLE_DECLARATION).blankLines(0)
+        .between(
+          TokenSet.create(FUNCTION_DEFINITION, EVENT_DEFINITION, STRUCT_DEFINITION, STATE_VARIABLE_DECLARATION),
+          TokenSet.create(FUNCTION_DEFINITION, EVENT_DEFINITION, STRUCT_DEFINITION, STATE_VARIABLE_DECLARATION)
+        ).blankLines(1)
     }
   }
 }

@@ -7,6 +7,8 @@ import "./DayLimit.sol";
 
 
 contract MultisigWallet is Multisig, Shareable, DayLimit {
+    address randomVariable1;
+    address randomVariable2;
 
     // comment1
     struct Transaction {
@@ -73,5 +75,5 @@ contract MultisigWallet is Multisig, Shareable, DayLimit {
         super.clearPending();
     }
 
-    mapping (bytes32 => Transaction) txs;
+    mapping(bytes32 => Transaction) txs;
 }
