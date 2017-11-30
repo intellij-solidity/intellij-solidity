@@ -57,7 +57,8 @@ class SolFormattingBlock(private val astNode: ASTNode,
       child is PsiComment && type in listOf(CONTRACT_DEFINITION, BLOCK, FUNCTION_DEFINITION, STRUCT_DEFINITION) -> Indent.getNormalIndent()
       childType.isContractPart() -> Indent.getNormalIndent()
       type == STRUCT_DEFINITION && childType == VARIABLE_DECLARATION -> Indent.getNormalIndent()
-      parentType == BLOCK -> Indent.getNormalIndent()
+      // inside a block, list of parameters, etc..
+      parentType in listOf(BLOCK, PARAMETER_LIST, INDEXED_PARAMETER_LIST) -> Indent.getNormalIndent()
       else -> Indent.getNoneIndent()
     }
     return result

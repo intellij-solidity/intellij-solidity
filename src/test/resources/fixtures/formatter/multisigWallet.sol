@@ -10,7 +10,13 @@ import  "./DayLimit.sol";
 
 contract  MultisigWallet  is  Multisig,  Shareable,  DayLimit  {
 address randomVariable1;
-    address randomVariable2;
+address randomVariable2;
+    event Refunded(int a, uint256 b);
+    event Refunded2(
+    int a,
+    uint256 b,
+    int c
+    );
 
     // comment1
     struct  Transaction  {
@@ -61,7 +67,10 @@ address randomVariable1;
         }
     }
 
-    function  setDailyLimit(uint  _newLimit) onlymanyowners(sha3(msg.data))   external {
+    function  setDailyLimit(
+    uint  _newLimit,
+    uint  _newLimit
+    ) onlymanyowners(sha3(msg.data))   external {
         _setDailyLimit(_newLimit);
     }
 
