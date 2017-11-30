@@ -58,7 +58,7 @@ class SolFormattingBlock(private val astNode: ASTNode,
       childType.isContractPart() -> Indent.getNormalIndent()
       type == STRUCT_DEFINITION && childType == VARIABLE_DECLARATION -> Indent.getNormalIndent()
       // inside a block, list of parameters, etc..
-      parentType in listOf(BLOCK, PARAMETER_LIST, INDEXED_PARAMETER_LIST) -> Indent.getNormalIndent()
+      parentType in listOf(BLOCK, INLINE_ASSEMBLY_BLOCK, PARAMETER_LIST, INDEXED_PARAMETER_LIST) -> Indent.getNormalIndent()
       else -> Indent.getNoneIndent()
     }
     return result
