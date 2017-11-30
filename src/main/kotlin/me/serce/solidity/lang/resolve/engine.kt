@@ -104,18 +104,19 @@ object SolResolver {
       }
   }
 
-  fun lexicalDeclarations(place: SolElement, stop: (PsiElement) -> Boolean = { false }): Sequence<SolNamedElement> {
+  fun lexicalDeclarations(place: PsiElement, stop: (PsiElement) -> Boolean = { false }): Sequence<SolNamedElement> {
     val globalType = SolInternalTypeFactory.of(place.project).globalType
     return lexicalDeclarations(globalType.ref, place) + lexicalDeclRec(place, stop)
   }
 
-  private fun lexicalDeclRec(place: SolElement, stop: (PsiElement) -> Boolean): Sequence<SolNamedElement> {
+  private fun lexicalDeclRec(place: PsiElement, stop: (PsiElement) -> Boolean): Sequence<SolNamedElement> {
     return place.ancestors
+      .drop(1) // current element might not be a SolElement
       .takeWhileInclusive { it is SolElement && !stop(it) }
       .flatMap { lexicalDeclarations(it, place) }
   }
 
-  private fun lexicalDeclarations(scope: PsiElement, place: SolElement): Sequence<SolNamedElement> {
+  private fun lexicalDeclarations(scope: PsiElement, place: PsiElement): Sequence<SolNamedElement> {
     return when (scope) {
       is SolVariableDeclaration -> sequenceOf(scope)
       is SolVariableDefinition -> lexicalDeclarations(scope.firstChild, place)

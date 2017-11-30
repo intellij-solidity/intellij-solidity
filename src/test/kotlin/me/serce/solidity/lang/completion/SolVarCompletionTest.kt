@@ -12,11 +12,33 @@ class SolVarCompletionTest : SolCompletionTestBase() {
         }
   """)
 
+  fun testStateVarCompletionIncomplete() = checkCompletion(hashSetOf("owner1", "owner2"), """
+        contract B {
+            address owner1;
+            address owner2;
+
+            function doit() {
+                own/*caret*/
+            }
+        }
+  """)
+
   fun testGlobalVarCompletionTest() = checkCompletion(hashSetOf("msg", "now", "tx", "block"), """
         contract B {
 
             function doit() {
                 var var1 = /*caret*/;
+            }
+        }
+  """)
+
+  fun testVarCompletionTestIncomplete() = checkCompletion(hashSetOf("owner1", "owner2"), """
+        contract B {
+            address owner1;
+            address owner2;
+
+            function doit() {
+                var var1 = own/*caret*/
             }
         }
   """)

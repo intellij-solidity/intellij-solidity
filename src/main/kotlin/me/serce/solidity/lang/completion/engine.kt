@@ -17,7 +17,7 @@ import me.serce.solidity.lang.types.type
 val TYPED_COMPLETION_PRIORITY = 15.0
 
 object SolCompleter {
-  fun completeTypeName(element: SolUserDefinedTypeName): Array<out LookupElement> {
+  fun completeTypeName(element: PsiElement): Array<out LookupElement> {
     val project = element.project
     val allTypeNames = StubIndex.getInstance().getAllKeys(
       SolGotoClassIndex.KEY,
@@ -39,7 +39,7 @@ object SolCompleter {
       .toTypedArray()
   }
 
-  fun completeLiteral(element: SolVarLiteral): Array<out LookupElement> {
+  fun completeLiteral(element: PsiElement): Array<out LookupElement> {
     val declarations = SolResolver.lexicalDeclarations(element).take(25).toList()
     return declarations.createVarLookups()
   }

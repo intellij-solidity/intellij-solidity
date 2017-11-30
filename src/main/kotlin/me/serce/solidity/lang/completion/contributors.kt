@@ -5,11 +5,14 @@ import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.editor.EditorModificationUtil
 import com.intellij.openapi.project.DumbAware
+import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.patterns.PsiElementPattern
+import com.intellij.patterns.StandardPatterns
 import com.intellij.psi.PsiElement
 import com.intellij.util.ProcessingContext
 import me.serce.solidity.lang.core.SolidityFile
+import me.serce.solidity.lang.psi.SolBlock
 import me.serce.solidity.lang.psi.SolContractDefinition
 import me.serce.solidity.lang.psi.SolPrimaryExpression
 import me.serce.solidity.lang.psi.SolStatement
@@ -71,16 +74,64 @@ class SolKeywordCompletionContributor : CompletionContributor(), DumbAware {
     extend(CompletionType.BASIC, insideContract(),
       SolSimpleFunctionCompletionProvider("selfdestruct"))
   }
-
-  private fun rootDeclaration() = psiElement<PsiElement>()
-    .withParents(SolPrimaryExpression::class.java, SolidityFile::class.java)
-
-  private fun statement() = psiElement<PsiElement>()
-    .inside(SolStatement::class.java)
-
-  private fun insideContract() = psiElement<PsiElement>()
-    .inside(SolContractDefinition::class.java)
 }
+
+class SolContextCompletionContributor : CompletionContributor(), DumbAware {
+  init {
+    // beginning of a statement inside a block
+    extend(CompletionType.BASIC, startStatementInsideBlock(),
+      object : CompletionProvider<CompletionParameters>() {
+        override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext?, result: CompletionResultSet) {
+          val position = parameters.originalPosition
+          if (position != null) {
+            SolCompleter.completeLiteral(position)
+              .forEach(result::addElement)
+            SolCompleter.completeTypeName(position)
+              .forEach(result::addElement)
+          }
+        }
+      })
+
+    // new expression after '=' inside a block
+    extend(CompletionType.BASIC, eqExpressionInsideBlock(),
+      object : CompletionProvider<CompletionParameters>() {
+        override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext?, result: CompletionResultSet) {
+          val position = parameters.originalPosition
+          if (position != null) {
+            SolCompleter.completeLiteral(position)
+              .forEach(result::addElement)
+          }
+        }
+      })
+  }
+
+  private fun startStatementInsideBlock() = psiElement<PsiElement>()
+    .withParent(SolBlock::class.java)
+    .afterLeaf(
+      or(
+        // by some reason afterSibling doesn't work, it skips the intellijRulezzz marker
+        psiElement().withText(";"),
+        psiElement().withText("{")
+      )
+    )
+
+  private fun eqExpressionInsideBlock() = psiElement<PsiElement>()
+    .withParent(SolBlock::class.java)
+    .afterLeaf(
+        psiElement().withText("=")
+    )
+}
+
+private fun <E> or(vararg patterns: ElementPattern<E>) = StandardPatterns.or(*patterns)
+
+private fun rootDeclaration() = psiElement<PsiElement>()
+  .withParents(SolPrimaryExpression::class.java, SolidityFile::class.java)
+
+private fun statement() = psiElement<PsiElement>()
+  .inside(SolStatement::class.java)
+
+private fun insideContract() = psiElement<PsiElement>()
+  .inside(SolContractDefinition::class.java)
 
 private inline fun <reified I : PsiElement> psiElement(): PsiElementPattern.Capture<I> {
   return psiElement(I::class.java)
