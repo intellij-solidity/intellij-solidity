@@ -10,14 +10,6 @@ contract MultisigWallet is Multisig, Shareable, DayLimit {
     address randomVariable1;
     address randomVariable2;
 
-    event Refunded(int a, uint256 b);
-
-    event Refunded2(
-        int a,
-        uint256 b,
-        int c
-    );
-
     // comment1
     struct Transaction {
         // comment2

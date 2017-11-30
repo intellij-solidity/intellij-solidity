@@ -74,13 +74,15 @@ class SolidityFormattingModelBuilder : FormattingModelBuilder {
         .afterInside(EXPRESSION, MEMBER_ACCESS_EXPRESSION).none()
         .beforeInside(IDENTIFIER, MEMBER_ACCESS_EXPRESSION).none()
         .between(IMPORT_DIRECTIVE, IMPORT_DIRECTIVE).blankLines(0)
+        // 0 lines between event definitions
+        .between(EVENT_DEFINITION, EVENT_DEFINITION).blankLines(0)
         // 1 line between pragma and import/contract definition
         .between(PRAGMA_DIRECTIVE, TokenSet.create(IMPORT_DIRECTIVE, CONTRACT_DEFINITION)).blankLines(1)
         // 1 line between pragma/import and contract definition
         .between(TokenSet.create(PRAGMA_DIRECTIVE, IMPORT_DIRECTIVE), CONTRACT_DEFINITION).blankLines(1)
         // 1 line between contracts
         .between(CONTRACT_DEFINITION, CONTRACT_DEFINITION).blankLines(1)
-        // 0 lines between state variable declarations
+        // allow for 0 lines between state variable declarations
         .between(STATE_VARIABLE_DECLARATION, STATE_VARIABLE_DECLARATION).blankLines(0)
         .between(
           TokenSet.create(FUNCTION_DEFINITION, EVENT_DEFINITION, STRUCT_DEFINITION, STATE_VARIABLE_DECLARATION),

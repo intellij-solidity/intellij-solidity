@@ -30,6 +30,7 @@ class SolidityFormattingTest : SolLightPlatformCodeInsightFixtureTestCase() {
   fun testContract() = this.doTest()
   fun testLibrary() = this.doTest()
   fun testIndent() = this.doTest()
+  fun testEvents() = this.doTest()
   fun testStatementLineBreak() = this.doTest()
   fun testBlankLinesBetweenContracts() = this.doTest()
   fun testBlankLinesBetweenContractParts() = this.doTest()
