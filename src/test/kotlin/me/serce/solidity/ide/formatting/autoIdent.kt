@@ -4,6 +4,7 @@ class SolAutoIdentationTest: SolTypingTestBase() {
   override fun getTestDataPath() = "src/test/resources/fixtures/auto_ident/"
 
   fun testContract() = doTest()
+  fun testEnum() = doTest()
   fun testStruct() = doTest()
   fun testFunction() = doTest()
   fun testIf() = doTest()
