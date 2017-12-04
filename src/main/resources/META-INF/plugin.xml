@@ -17,6 +17,15 @@
 
     <change-notes><![CDATA[
       <p>
+        <b>v2.0.3</b>
+        <ul>
+          <li>Improvements to spacing rules, thanks @moodysalem</li>
+          <li>Highlighting improvements, thanks @idrabenia</li>
+          <li>Multiple formatting fixes</li>
+          <li>Autocompletion improvements for literals</li>
+          <li>Import resolving for rule-sets</li>
+          <li>Grammar fixes</li>
+        </ul>
         <b>v2.0.2</b>
         <ul>
           <li>Solidity color scheme panel</li>
@@ -24,15 +33,6 @@
           <li>Block indentation (please select a proper indent in Setting->Editor->Code Style->Solidity)</li>
           <li>Solidity grammar fixes</li>
           <li>Add support for interfaces and pure/view modifiers</li>
-        </ul>
-        <b>v2.0.1</b>
-        <ul>
-          <li>Go to implementation action</li>
-          <li>Parameter info hint</li>
-          <li>Highlighting fixes. Thanks, @dukei</li>
-          <li>Added support for scientific notation. Thanks, @dukei</li>
-          <li>Experimental "unprotected function" inspection</li>
-          <li>Update minimal IDE version requirement</li>
         </ul>
       </p>
     ]]>
