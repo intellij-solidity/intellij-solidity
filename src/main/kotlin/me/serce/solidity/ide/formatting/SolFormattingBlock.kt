@@ -66,7 +66,9 @@ class SolFormattingBlock(private val astNode: ASTNode,
       parentType in listOf(BLOCK, ENUM_DEFINITION, INLINE_ASSEMBLY_BLOCK, PARAMETER_LIST, INDEXED_PARAMETER_LIST) -> Indent.getNormalIndent()
 
       // all expressions inside parens should have indentation when lines are split
-      parentType in listOf(IF_STATEMENT, WHILE_STATEMENT, DO_WHILE_STATEMENT, FOR_STATEMENT) -> Indent.getNormalIndent()
+      parentType in listOf(IF_STATEMENT, WHILE_STATEMENT, DO_WHILE_STATEMENT, FOR_STATEMENT) && childType != BLOCK -> {
+        Indent.getNormalIndent()
+      }
 
       // all function calls
       parentType in listOf(FUNCTION_CALL_ARGUMENTS) -> Indent.getNormalIndent()
