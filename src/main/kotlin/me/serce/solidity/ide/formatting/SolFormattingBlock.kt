@@ -9,6 +9,7 @@ import com.intellij.psi.codeStyle.CodeStyleSettings
 import com.intellij.psi.formatter.FormatterUtil
 import com.intellij.psi.tree.IElementType
 import me.serce.solidity.lang.core.SolidityTokenTypes.*
+import me.serce.solidity.lang.psi.SolExpression
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -52,13 +53,24 @@ class SolFormattingBlock(private val astNode: ASTNode,
   private fun calcIndent(child: ASTNode): Indent {
     val childType = child.elementType
     val type = astNode.elementType
-    val parentType = astNode.treeParent?.elementType
+    val parent = astNode.treeParent
+    val parentType = parent?.elementType
     val result = when {
       child is PsiComment && type in listOf(CONTRACT_DEFINITION, BLOCK, FUNCTION_DEFINITION, STRUCT_DEFINITION) -> Indent.getNormalIndent()
       childType.isContractPart() -> Indent.getNormalIndent()
+
+      // fields inside structs
       type == STRUCT_DEFINITION && childType == VARIABLE_DECLARATION -> Indent.getNormalIndent()
+
       // inside a block, list of parameters, etc..
       parentType in listOf(BLOCK, INLINE_ASSEMBLY_BLOCK, PARAMETER_LIST, INDEXED_PARAMETER_LIST) -> Indent.getNormalIndent()
+
+      // all expressions inside parens should have indentation when lines are split
+      parentType in listOf(IF_STATEMENT, WHILE_STATEMENT, DO_WHILE_STATEMENT, FOR_STATEMENT) -> Indent.getNormalIndent()
+
+      // all function calls
+      parentType in listOf(FUNCTION_CALL_ARGUMENTS) -> Indent.getNormalIndent()
+
       else -> Indent.getNoneIndent()
     }
     return result

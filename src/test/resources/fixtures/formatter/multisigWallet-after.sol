@@ -28,7 +28,7 @@ contract MultisigWallet is Multisig, Shareable, DayLimit {
 
     function() payable {
         if (msg.value > 0)
-        Deposit(msg.sender, msg.value);
+            Deposit(msg.sender, msg.value);
     }
 
     function execute(address _to, uint _value, bytes _data) external onlyOwner returns (bytes32 _r) {

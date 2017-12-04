@@ -27,6 +27,7 @@ class SolidityFormattingTest : SolLightPlatformCodeInsightFixtureTestCase() {
     get() = this.getTestName(true) + "-after.sol"
 
   fun testAssembly() = this.doTest()
+  fun testInsideParens() = this.doTest()
   fun testLineComments() = this.doTest()
   fun testContract() = this.doTest()
   fun testLibrary() = this.doTest()
