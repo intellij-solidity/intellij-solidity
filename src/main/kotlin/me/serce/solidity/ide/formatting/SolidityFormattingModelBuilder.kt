@@ -54,6 +54,8 @@ class SolidityFormattingModelBuilder : FormattingModelBuilder {
         .beforeInside(PARAMETER_LIST, FUNCTION_DEFINITION).none()
         .beforeInside(IDENTIFIER, FUNCTION_DEFINITION).spaces(1)
         .aroundInside(FUNCTION_MODIFIER, FUNCTION_DEFINITION).spaces(1)
+        .aroundInside(EVENT_DEFINITION, FUNCTION_DEFINITION).spaces(1)
+        .aroundInside(STRUCT_DEFINITION, FUNCTION_DEFINITION).spaces(1)
         .aroundInside(TO, MAPPING_TYPE_NAME).spaces(1)
         .aroundInside(TokenSet.create(
           FUNCTION_CALL_EXPRESSION, CONSTANT, PAYABLE,
