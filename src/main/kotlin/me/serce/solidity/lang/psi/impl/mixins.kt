@@ -14,9 +14,6 @@ import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.resolve.ref.*
 import me.serce.solidity.lang.stubs.*
-import me.serce.solidity.lang.types.SolUnknown
-import me.serce.solidity.lang.types.inferExprType
-import me.serce.solidity.lang.types.type
 import java.util.*
 
 open class SolImportPathElement(node: ASTNode) : SolNamedElementImpl(node), SolReferenceElement {
@@ -92,7 +89,12 @@ abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefSt
   override fun getReference() = references.firstOrNull()
 
   override fun getReferences(): Array<SolReference> {
-    return modifiers.map { SolModifierReference(this, it) }.toTypedArray()
+    val result: List<SolReference> = modifiers.map { SolModifierReference(this, it) }
+    return if (isConstructor) {
+      result.plus(SolConstructorReference(this)).toTypedArray()
+    } else {
+      result.toTypedArray()
+    }
   }
 
   override fun getIcon(flags: Int) = SolidityIcons.FUNCTION
