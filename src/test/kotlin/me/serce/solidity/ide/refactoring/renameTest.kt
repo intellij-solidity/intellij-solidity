@@ -5,7 +5,9 @@ import org.intellij.lang.annotations.Language
 
 class RenameTest : SolTestBase() {
   fun testContractName() = doTest("Newname", """
-        contract Abcd {}
+        contract Abcd {
+            function Abcd() {}
+        }
 
         contract BBB {
             /*caret*/Abcd field;
@@ -16,7 +18,9 @@ class RenameTest : SolTestBase() {
             }
         }
     """, """
-        contract Newname {}
+        contract Newname {
+            function Newname() {}
+        }
 
         contract BBB {
             Newname field;
@@ -66,6 +70,18 @@ class RenameTest : SolTestBase() {
                BBB newname = myField;
                newname++;
                return newname;
+            }
+        }
+    """)
+
+  fun testConstructor() = doTest("Newname", """
+        contract BBB {
+            function /*caret*/BBB() {
+            }
+        }
+    """, """
+        contract Newname {
+            function Newname() {
             }
         }
     """)
