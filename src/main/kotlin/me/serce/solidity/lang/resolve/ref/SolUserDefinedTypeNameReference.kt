@@ -63,3 +63,9 @@ class SolFunctionCallReference (element: SolFunctionCallElement): SolReferenceBa
     }
   }
 }
+
+class SolConstructorReference(element: SolFunctionDefinition): SolReferenceBase<SolFunctionDefinition>(element) {
+  override fun singleResolve(): PsiElement? {
+    return element.contract
+  }
+}
