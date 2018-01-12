@@ -54,6 +54,9 @@
 
         <annotator language="Solidity" implementationClass="me.serce.solidity.ide.annotation.SolidityAnnotator"/>
 
+        <renamePsiElementProcessor implementation="me.serce.solidity.ide.refactoring.RenameContractProcessor"/>
+        <renamePsiElementProcessor implementation="me.serce.solidity.ide.refactoring.RenameConstructorProcessor"/>
+
         <!-- Commenter -->
         <lang.commenter language="Solidity" implementationClass="me.serce.solidity.ide.SolCommenter"/>
 
