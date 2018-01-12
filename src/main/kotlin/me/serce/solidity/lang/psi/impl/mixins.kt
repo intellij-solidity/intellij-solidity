@@ -89,12 +89,7 @@ abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefSt
   override fun getReference() = references.firstOrNull()
 
   override fun getReferences(): Array<SolReference> {
-    val result: List<SolReference> = modifiers.map { SolModifierReference(this, it) }
-    return if (isConstructor) {
-      result.plus(SolConstructorReference(this)).toTypedArray()
-    } else {
-      result.toTypedArray()
-    }
+    return modifiers.map { SolModifierReference(this, it) }.toTypedArray()
   }
 
   override fun getIcon(flags: Int) = SolidityIcons.FUNCTION
