@@ -416,10 +416,7 @@ AssemblyItem ::=
     | AssemblyFunctionDefinition
     | AssemblyFor
     | SubAssembly
-    | 'dataSize' '(' Identifier ')'
     | LinkerSymbol
-    | 'errorLabel'
-    | 'bytecodeSize'
     | NumberLiteral
     | StringLiteral
     | HexLiteral
