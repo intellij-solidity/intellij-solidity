@@ -400,11 +400,25 @@ ElementaryTypeName ::= address | bool | string | var | NumberType {
 
 NumberType ::= intNumType | uIntNumType | byteNumType | fixedNumType | uFixedNumType
 
+// http://solidity.readthedocs.io/en/develop/assembly.html#parsing-grammar
+
 InlineAssemblyBlock ::= '{' AssemblyItem* '}' {pin=1}
 
-AssemblyItem ::=  FunctionalAssemblyExpression | InlineAssemblyBlock | AssemblyLocalBinding | AssemblyAssignment | AssemblyLabel | NumberLiteral | StringLiteral | HexLiteral | Identifier
+AssemblyItem ::=
+    FunctionalAssemblyExpression
+    | InlineAssemblyBlock
+    | AssemblyLocalBinding
+    | AssemblyAssignment
+    | AssemblyIf
+    | AssemblyLabel
+    | NumberLiteral
+    | StringLiteral
+    | HexLiteral
+    | Identifier
+
 AssemblyLocalBinding ::= let Identifier ':=' (FunctionalAssemblyExpression | NumberLiteral | Identifier) {pin=1}
 AssemblyAssignment ::= Identifier ':=' (FunctionalAssemblyExpression | Identifier) | '=:' Identifier {pin=1}
 AssemblyLabel ::= Identifier ':'
+AssemblyIf ::= 'if' FunctionalAssemblyExpression InlineAssemblyBlock {pin=1}
 private AmbiguousAssemblyBytecode ::= 'return' | 'address' | 'byte'
 FunctionalAssemblyExpression ::= (AmbiguousAssemblyBytecode | Identifier) '(' AssemblyItem? ( ',' AssemblyItem )* ')'

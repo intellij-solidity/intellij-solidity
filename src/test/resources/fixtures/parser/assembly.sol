@@ -23,6 +23,12 @@ contract Foo {
         }
     }
 
+    function iffun() {
+        assembly {
+            if eq(value, 0) { revert(0, 0) }
+        }
+    }
+
     function fibo() {
         assembly {
             let n := calldataload(4)
