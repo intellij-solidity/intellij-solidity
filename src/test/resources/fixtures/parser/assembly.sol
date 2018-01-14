@@ -34,19 +34,36 @@ contract Foo {
     function switchfun() {
         assembly {
             switch exponent
-            case 0 { result := 1 }
-            case 1 { result := base }
-            default {
-            result := power(mul(base, base), div(exponent, 2))
-            switch mod(exponent, 2)
-            case 1 { result := mul(base, result) }
+                case 0 { result := 1 }
+                case 1 { result := base }
+                default {
+                    result := power(mul(base, base), div(exponent, 2))
+                    switch mod(exponent, 2)
+                    case 1 { result := mul(base, result) }
             }
+
+            let a := 3 switch a case 1 { a := 1 } case 2 { a := 5 } a := 9
+            let a := 2 switch calldataload(0) case 1 { a := 1 } case 2 { a := 5 }
         }
     }
 
     function switchfor() {
         assembly {
             for { let i := 0 } lt(i, x) { i := add(i, 1) } { y := mul(2, y) }
+        }
+    }
+
+    function funcalls() {
+        assembly {
+            function f(x) -> y { switch x case 0 { y := 1 } default { y := mul(x, f(sub(x, 1))) }   }
+            function f(x) -> y { a := 1 }
+            function f() -> x, y { let x, y := f() }
+            function f() -> x {} if f() { pop(f()) }
+            let r := 2 function f() -> x, y { x := 1 y := 2} let a, b := f() b := r
+            function f() -> z { let y := 2 }
+            function f(a, b) -> x, y, z { y := a }
+            function f() { g() } function g() { f() }
+            function f(r, s) -> x { function g(a) -> b { } x := g(2) } let x := f(2, 3)
         }
     }
 

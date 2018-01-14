@@ -428,15 +428,15 @@ AssemblyItem ::=
 FunctionalAssemblyExpression ::= (AmbiguousAssemblyBytecode | Identifier) '(' AssemblyItem? ( ',' AssemblyItem )* ')'
 AssemblyLocalDefinition ::= let IdentifierOrList ':=' FunctionalAssemblyAssignmentOrIdentifier {pin=1}
 FunctionalAssemblyAssignment ::= IdentifierOrList ':=' FunctionalAssemblyAssignmentOrIdentifier {pin=2}
-private IdentifierOrList ::= Identifier | '(' IdentifierList ')'
+private IdentifierOrList ::= IdentifierList | '(' IdentifierList ')'
 private IdentifierList ::= Identifier ( ',' Identifier)*
 AssemblyAssignment ::= '=:' Identifier {pin=1}
 LabelDefinition ::= Identifier ':'
 AssemblyIf ::= 'if' FunctionalAssemblyAssignmentOrIdentifier AssemblyBlock {pin=1}
 AssemblySwitch ::= 'switch' FunctionalAssemblyAssignmentOrIdentifier AssemblyCase* ( 'default' AssemblyBlock )? {pin=1}
 AssemblyCase ::= 'case' FunctionalAssemblyAssignmentOrIdentifier AssemblyBlock {pin=1}
-AssemblyFunctionDefinition ::= 'function' Identifier '(' IdentifierList? ')'
-    ( '->' '(' IdentifierList ')' )? AssemblyBlock {pin=1}
+AssemblyFunctionDefinition ::= 'function' Identifier '(' IdentifierOrList? ')'
+    ( '->' IdentifierOrList )? AssemblyBlock {pin=1}
 AssemblyFor ::= 'for' ( AssemblyBlock | FunctionalAssemblyExpression)
     FunctionalAssemblyExpression ( AssemblyBlock | FunctionalAssemblyExpression) AssemblyBlock {pin=1}
 SubAssembly ::= 'assembly' Identifier AssemblyBlock {pin=1}
