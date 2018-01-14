@@ -299,7 +299,7 @@ WhileStatement ::= while '(' Expression ')' Statement {pin = 1}
 PlaceholderStatement ::= '_'
 private SimpleStatement ::= VariableDefinition | ExpressionStatement
 ForStatement ::= for '(' (SimpleStatement)? ';' (Expression)? ';' (ExpressionStatement)? ')' Statement {pin=1}
-InlineAssemblyStatement ::= assembly InlineAssemblyBlock {pin=1}
+InlineAssemblyStatement ::= assembly AssemblyBlock {pin=1}
 DoWhileStatement ::= do Statement while '(' Expression ')' {pin=1}
 ContinueSt ::= continue
 BreakSt ::= break
@@ -402,23 +402,44 @@ NumberType ::= intNumType | uIntNumType | byteNumType | fixedNumType | uFixedNum
 
 // http://solidity.readthedocs.io/en/develop/assembly.html#parsing-grammar
 
-InlineAssemblyBlock ::= '{' AssemblyItem* '}' {pin=1}
+AssemblyBlock ::= '{' AssemblyItem* '}' {pin=1}
 
 AssemblyItem ::=
-    FunctionalAssemblyExpression
-    | InlineAssemblyBlock
-    | AssemblyLocalBinding
+    AssemblyBlock
+    | FunctionalAssemblyExpression
+    | AssemblyLocalDefinition
+    | FunctionalAssemblyAssignment
     | AssemblyAssignment
+    | LabelDefinition
     | AssemblyIf
-    | AssemblyLabel
+    | AssemblySwitch
+    | AssemblyFunctionDefinition
+    | AssemblyFor
+    | SubAssembly
+    | 'dataSize' '(' Identifier ')'
+    | LinkerSymbol
+    | 'errorLabel'
+    | 'bytecodeSize'
     | NumberLiteral
     | StringLiteral
     | HexLiteral
     | Identifier
 
-AssemblyLocalBinding ::= let Identifier ':=' (FunctionalAssemblyExpression | NumberLiteral | Identifier) {pin=1}
-AssemblyAssignment ::= Identifier ':=' (FunctionalAssemblyExpression | Identifier) | '=:' Identifier {pin=1}
-AssemblyLabel ::= Identifier ':'
-AssemblyIf ::= 'if' FunctionalAssemblyExpression InlineAssemblyBlock {pin=1}
-private AmbiguousAssemblyBytecode ::= 'return' | 'address' | 'byte'
 FunctionalAssemblyExpression ::= (AmbiguousAssemblyBytecode | Identifier) '(' AssemblyItem? ( ',' AssemblyItem )* ')'
+AssemblyLocalDefinition ::= let IdentifierOrList ':=' FunctionalAssemblyAssignmentOrIdentifier {pin=1}
+FunctionalAssemblyAssignment ::= IdentifierOrList ':=' FunctionalAssemblyAssignmentOrIdentifier {pin=2}
+private IdentifierOrList ::= Identifier | '(' IdentifierList ')'
+private IdentifierList ::= Identifier ( ',' Identifier)*
+AssemblyAssignment ::= '=:' Identifier {pin=1}
+LabelDefinition ::= Identifier ':'
+AssemblyIf ::= 'if' FunctionalAssemblyAssignmentOrIdentifier AssemblyBlock {pin=1}
+AssemblySwitch ::= 'switch' FunctionalAssemblyAssignmentOrIdentifier AssemblyCase* ( 'default' AssemblyBlock )? {pin=1}
+AssemblyCase ::= 'case' FunctionalAssemblyAssignmentOrIdentifier AssemblyBlock {pin=1}
+AssemblyFunctionDefinition ::= 'function' Identifier '(' IdentifierList? ')'
+    ( '->' '(' IdentifierList ')' )? AssemblyBlock {pin=1}
+AssemblyFor ::= 'for' ( AssemblyBlock | FunctionalAssemblyExpression)
+    FunctionalAssemblyExpression ( AssemblyBlock | FunctionalAssemblyExpression) AssemblyBlock {pin=1}
+SubAssembly ::= 'assembly' Identifier AssemblyBlock {pin=1}
+LinkerSymbol ::= 'linkerSymbol' '(' StringLiteral ')' {pin=1}
+private AmbiguousAssemblyBytecode ::= 'return' | 'address' | 'byte' | 'break' | 'continue' | 'function'
+private FunctionalAssemblyAssignmentOrIdentifier ::= FunctionalAssemblyExpression | NumberLiteral | Identifier
