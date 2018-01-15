@@ -1,5 +1,6 @@
 package me.serce.solidity.lang.resolve.ref
 
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiManager
 import com.intellij.psi.impl.source.tree.LeafElement
@@ -13,11 +14,25 @@ class SolImportPathReference(element: SolImportPathElement) : SolReferenceBase<S
       return null
     }
     val path = importText.substring(1, importText.length - 1)
-    val file = element.containingFile.virtualFile.findFileByRelativePath("../$path")
+    val virtualFile = element.containingFile.virtualFile
+    val file = if (path.startsWith(".")) {
+      virtualFile.findFileByRelativePath("../$path")
+    } else {
+      findNpmImportFile(virtualFile, path)
+    }
     if (file == null) {
       return null
     }
     return PsiManager.getInstance(element.project).findFile(file)
+  }
+
+  private fun findNpmImportFile(file: VirtualFile, path: String): VirtualFile? {
+    val test = file.findFileByRelativePath("node_modules/$path")
+    return when {
+        test != null -> test
+        file.parent != null -> findNpmImportFile(file.parent, path)
+        else -> null
+    }
   }
 
   override fun doRename(identifier: PsiElement, newName: String) {
