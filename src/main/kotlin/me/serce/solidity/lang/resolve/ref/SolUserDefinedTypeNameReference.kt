@@ -54,7 +54,7 @@ class SolFunctionCallReference (element: SolFunctionCallElement): SolReferenceBa
   override fun multiResolve(): List<PsiElement> {
     val contract: SolContractDefinition? = when {
       element.expressionList.isEmpty() -> element.ancestors.firstInstance<SolContractDefinition>()
-      else -> (element.expressionList.first().type as? SolContract)?.ref
+      else -> (element.expressionList.firstOrNull()?.type as? SolContract)?.ref
     }
 
     return when(contract) {

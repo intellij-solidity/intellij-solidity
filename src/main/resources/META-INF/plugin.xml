@@ -17,6 +17,15 @@
 
     <change-notes><![CDATA[
       <p>
+        <b>v2.0.4</b>
+        <ul>
+          <li>Support for new inline assembly features</li>
+          <li>Constructor renaming, thanks @0v1se</li>
+          <li>Fix for boolean array constructors, thanks @ZitRos</li>
+          <li>Allow for reporting exceptions from your IDE directly to maintainers, please click report if you catch an exception</li>
+          <li>Resolving bugfixes</li>
+          <li>Grammar fixes</li>
+        </ul>
         <b>v2.0.3</b>
         <ul>
           <li>Improvements to spacing rules, thanks @moodysalem</li>
@@ -25,14 +34,6 @@
           <li>Autocompletion improvements for literals</li>
           <li>Import resolving for rule-sets</li>
           <li>Grammar fixes</li>
-        </ul>
-        <b>v2.0.2</b>
-        <ul>
-          <li>Solidity color scheme panel</li>
-          <li>Solidity code style panel</li>
-          <li>Block indentation (please select a proper indent in Setting->Editor->Code Style->Solidity)</li>
-          <li>Solidity grammar fixes</li>
-          <li>Add support for interfaces and pure/view modifiers</li>
         </ul>
       </p>
     ]]>
@@ -128,6 +129,8 @@
                          enabledByDefault="true"
                          level="WARNING"
                          implementationClass="me.serce.solidity.ide.inspections.UnprotectedFunctionInspection"/>
+
+        <errorHandler implementation="me.serce.solidity.ide.SentryReportSubmitter"/>
     </extensions>
 
     <actions>
