@@ -14,16 +14,21 @@ class SolImportPathReference(element: SolImportPathElement) : SolReferenceBase<S
       return null
     }
     val path = importText.substring(1, importText.length - 1)
-    val virtualFile = element.containingFile.virtualFile
-    val file = if (path.startsWith(".")) {
-      virtualFile.findFileByRelativePath("../$path")
+    val file = findImportFile(element.containingFile.virtualFile, path)
+    if (file != null) {
+      return PsiManager.getInstance(element.project).findFile(file)
     } else {
-      findNpmImportFile(virtualFile, path)
-    }
-    if (file == null) {
       return null
     }
-    return PsiManager.getInstance(element.project).findFile(file)
+  }
+
+  private fun findImportFile(file: VirtualFile, path: String): VirtualFile? {
+    val directFile = file.findFileByRelativePath("../$path")
+    if (directFile != null) {
+      return directFile
+    } else {
+      return findNpmImportFile(file, path)
+    }
   }
 
   private fun findNpmImportFile(file: VirtualFile, path: String): VirtualFile? {
