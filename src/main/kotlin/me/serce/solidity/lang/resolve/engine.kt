@@ -1,6 +1,8 @@
 package me.serce.solidity.lang.resolve
 
+import com.intellij.openapi.util.RecursionManager
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
 import com.intellij.psi.stubs.StubIndex
 import me.serce.solidity.firstOrElse
 import me.serce.solidity.lang.psi.*
@@ -9,13 +11,31 @@ import me.serce.solidity.lang.stubs.SolModifierIndex
 import me.serce.solidity.lang.types.*
 
 object SolResolver {
-  fun resolveTypeName(element: SolReferenceElement): List<SolNamedElement> = StubIndex.getElements(
+  fun resolveTypeNameUsingImports(element: SolReferenceElement): Set<SolContractDefinition> =
+    resolveTypeNameUsingImports(element, element.containingFile)
+
+  private fun resolveTypeNameUsingImports(element: SolReferenceElement, file: PsiFile): Set<SolContractDefinition> =
+    RecursionManager.doPreventingRecursion(file, true) {
+      val inFile = file.children
+        .filterIsInstance<SolContractDefinition>()
+        .filter { it.name == element.name }
+
+      val imported = file.children
+        .filterIsInstance<SolImportDirective>()
+        .mapNotNull { it.importPath?.reference?.resolve() }
+        .map { it.containingFile }
+        .flatMap { resolveTypeNameUsingImports(element, it) }
+
+      inFile.plus(imported).toSet()
+    } ?: emptySet()
+
+  fun resolveTypeName(element: SolReferenceElement): Collection<SolNamedElement> = StubIndex.getElements(
     SolGotoClassIndex.KEY,
     element.referenceName,
     element.project,
     null,
     SolNamedElement::class.java
-  ).toList()
+  )
 
   fun resolveModifier(modifier: PsiElement): List<SolModifierDefinition> = StubIndex.getElements(
     SolModifierIndex.KEY,
@@ -71,7 +91,7 @@ object SolResolver {
       .flatMap { resolveContractMember(it, element) }
   }
 
-  fun resolveFunction(contract: SolContractDefinition, element: SolFunctionCallExpression): List<PsiElement> {
+  fun resolveFunction(contract: SolContractDefinition, element: SolFunctionCallExpression): Collection<PsiElement> {
     if (element.argumentsNumber() == 1) {
       val contracts = resolveTypeName(element)
       if (contracts.isNotEmpty()) {
