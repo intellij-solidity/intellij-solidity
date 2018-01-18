@@ -9,6 +9,7 @@ import com.intellij.openapi.diagnostic.SubmittedReportInfo.SubmissionStatus.*
 import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.util.Consumer
+import io.sentry.DefaultSentryClientFactory
 import io.sentry.Sentry
 import io.sentry.connection.ConnectionException
 import io.sentry.event.Event
@@ -20,7 +21,8 @@ import java.awt.Component
 class SentryReportSubmitter : ErrorReportSubmitter() {
 
   init {
-    val dsn = "https://abb831cb774a4db48b88ffcdfc9fac34:3fb72bd1d4fb490e926cb248a043daf2@sentry.io/261429"
+    val dsn = "https://abb831cb774a4db48b88ffcdfc9fac34:3fb72bd1d4fb490e926cb248a043daf2@sentry.io/261429" +
+      "?${DefaultSentryClientFactory.UNCAUGHT_HANDLER_ENABLED_OPTION}=false"
     Sentry.init(dsn)
   }
 
