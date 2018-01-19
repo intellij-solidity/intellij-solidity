@@ -16,6 +16,10 @@ inline fun <reified R> Sequence<Any?>.firstInstance(): R {
   return first { it is R} as R
 }
 
+inline fun <reified R> Sequence<Any?>.firstInstanceOrNull(): R? {
+  return firstOrNull { it is R} as? R
+}
+
 fun loadCodeSampleResource(ctx: Any, resource: String): String {
   val stream = ctx.javaClass.classLoader.getResourceAsStream(resource)
   // We need to convert line separators here, because IntelliJ always expects \n,

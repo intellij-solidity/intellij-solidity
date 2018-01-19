@@ -3,6 +3,7 @@ package me.serce.solidity.lang.resolve.ref
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import me.serce.solidity.firstInstance
+import me.serce.solidity.firstInstanceOrNull
 import me.serce.solidity.lang.completion.SolCompleter
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.psi.impl.SolFunctionCallElement
@@ -36,7 +37,7 @@ class SolModifierReference(element: SolFunctionDefinition, val modifierElement: 
   override fun getVariants() = SolCompleter.completeModifier(modifierElement)
 }
 
-class SolMemberAccessReference (element: SolMemberAccessExpression): SolReferenceBase<SolMemberAccessExpression>(element), SolReference {
+class SolMemberAccessReference(element: SolMemberAccessExpression) : SolReferenceBase<SolMemberAccessExpression>(element), SolReference {
   override fun calculateDefaultRangeInElement(): TextRange {
     return element.identifier?.parentRelativeRange ?: super.calculateDefaultRangeInElement()
   }
@@ -46,18 +47,18 @@ class SolMemberAccessReference (element: SolMemberAccessExpression): SolReferenc
   override fun getVariants() = SolCompleter.completeMemberAccess(element)
 }
 
-class SolFunctionCallReference (element: SolFunctionCallElement): SolReferenceBase<SolFunctionCallElement>(element), SolReference {
+class SolFunctionCallReference(element: SolFunctionCallElement) : SolReferenceBase<SolFunctionCallElement>(element), SolReference {
   override fun calculateDefaultRangeInElement(): TextRange {
     return element.referenceNameElement.parentRelativeRange
   }
 
   override fun multiResolve(): List<PsiElement> {
     val contract: SolContractDefinition? = when {
-      element.expressionList.isEmpty() -> element.ancestors.firstInstance<SolContractDefinition>()
+      element.expressionList.isEmpty() -> element.ancestors.firstInstanceOrNull<SolContractDefinition>()
       else -> (element.expressionList.firstOrNull()?.type as? SolContract)?.ref
     }
 
-    return when(contract) {
+    return when (contract) {
       null -> emptyList()
       else -> SolResolver.resolveFunction(contract, element)
     }
