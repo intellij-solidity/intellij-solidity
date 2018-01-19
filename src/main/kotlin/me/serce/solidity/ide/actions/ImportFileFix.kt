@@ -22,7 +22,7 @@ class ImportFileFix(val element: SolUserDefinedTypeName): HintAction, HighPriori
     val suggestion = SolResolver.resolveTypeName(element).firstOrNull()
     if (suggestion != null) {
       val importPath = buildImportPath(element.containingFile.virtualFile, suggestion.containingFile.virtualFile)
-      HintManager.getInstance().showQuestionHint(editor, QuickFixBundle.message("import.class.fix") + " $importPath", element.textOffset, element.getTextRange().getEndOffset(), ImportFileAction())
+      HintManager.getInstance().showQuestionHint(editor, QuickFixBundle.message("import.class.fix") + " $importPath", element.textOffset, element.getTextRange().getEndOffset(), ImportFileAction(element.containingFile, importPath))
       return true
     } else {
       return false

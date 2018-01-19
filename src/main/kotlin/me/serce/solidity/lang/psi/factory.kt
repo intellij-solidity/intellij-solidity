@@ -22,6 +22,11 @@ class SolPsiFactory(val project: Project) {
       ?: error("Failed to create struct: `$structBody`")
   }
 
+  fun createImportDirective(importPath: String): SolImportDirective {
+    return createFromText<SolImportDirective>("import \"$importPath\";")
+      ?: error("Failed to create struct: `$importPath`")
+  }
+
   fun createContract(@Language("Solidity") contractBody: String): SolContractDefinition {
     return createFromText<SolContractDefinition>(contractBody) ?: error("Failed to create contract: `$contractBody`")
   }
