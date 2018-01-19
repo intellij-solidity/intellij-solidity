@@ -56,6 +56,10 @@ class ImportFileFix(val element: SolUserDefinedTypeName): HintAction, HighPriori
     QuickFixBundle.message("import.class.fix")
 
   override fun invoke(project: Project, editor: Editor?, file: PsiFile?) {
-
+    val suggestion = SolResolver.resolveTypeName(element).firstOrNull()
+    if (suggestion != null) {
+      val importPath = buildImportPath(element.containingFile.virtualFile, suggestion.containingFile.virtualFile)
+      ImportFileAction(element.containingFile, importPath).execute()
+    }
   }
 }
