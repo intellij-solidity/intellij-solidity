@@ -43,6 +43,12 @@ class ImportFileFix(val element: SolUserDefinedTypeName): HintAction, HighPriori
   }
 
   override fun isAvailable(project: Project, editor: Editor?, file: PsiFile?): Boolean {
+    if (!element.isValid) {
+      return false
+    }
+    if (element.reference?.resolve() != null) {
+      return false
+    }
     return SolResolver.resolveTypeName(element).isNotEmpty()
   }
 
