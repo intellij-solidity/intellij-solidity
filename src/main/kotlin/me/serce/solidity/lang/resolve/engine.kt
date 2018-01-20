@@ -85,7 +85,7 @@ object SolResolver {
     val currentContractFunctions = contract.functionDefinitionList
       .filter {
         it.name == element.referenceName &&
-          it.parameterListList[0].parameterDefList.size == element.argumentsNumber()
+          it.parameterListList.firstOrNull()?.parameterDefList?.size == element.argumentsNumber()
       }
     val eventDefinitions = contract.eventDefinitionList
       .filter {
