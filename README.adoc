@@ -1,6 +1,7 @@
 = link:https://solidity.readthedocs.io/[Solidity] plugin for IntelliJ
 
 image:https://travis-ci.org/intellij-solidity/intellij-solidity.svg?branch=master["Build Status", link="https://travis-ci.org/intellij-solidity/intellij-solidity"]
+image:https://img.shields.io/jetbrains/plugin/d/9475-intellij-solidity.svg[JetBrains plugins]
 image:https://badges.gitter.im/intellij-solidity/intellij-solidity.svg[link="https://gitter.im/intellij-solidity/intellij-solidity?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge"]
 
 image:./logo/logo_256.png[link=https://plugins.jetbrains.com/idea/plugin/9475-intellij-solidity,width=128,height=128]
