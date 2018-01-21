@@ -73,9 +73,10 @@ abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefSt
   override val modifiers: List<PsiElement>
     get() = findChildrenByType<PsiElement>(FUNCTION_MODIFIER)
   override val parameters: List<SolParameterDef>
-    get() = findChildByType<SolParameterList>(PARAMETER_LIST)!!
-      .children
-      .filterIsInstance(SolParameterDef::class.java)
+    get() = findChildByType<SolParameterList>(PARAMETER_LIST)
+      ?.children
+      ?.filterIsInstance(SolParameterDef::class.java)
+      ?: emptyList()
   override val contract: SolContractDefinition
     get() = this.ancestors.asSequence()
       .filterIsInstance<SolContractDefinition>()
