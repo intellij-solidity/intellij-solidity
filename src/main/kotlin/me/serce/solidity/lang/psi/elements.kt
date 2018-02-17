@@ -19,7 +19,9 @@ interface SolFunctionDefElement : SolReferenceElement {
   val isConstructor: Boolean
 }
 
-interface SolEnumDefElement : SolNamedElement
+interface SolEnumDefElement : SolNamedElement {
+  val contract: SolContractDefinition
+}
 
 interface SolModifierElement : SolNamedElement {
   val contract: SolContractDefinition

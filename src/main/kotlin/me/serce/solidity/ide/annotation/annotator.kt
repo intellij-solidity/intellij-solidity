@@ -12,9 +12,9 @@ class SolidityAnnotator : Annotator {
   override fun annotate(element: PsiElement, holder: AnnotationHolder) {
     if (element is SolElement) {
       when {
-        element is SolUserDefinedTypeName && element.reference?.resolve() == null -> {
-          holder.createErrorAnnotation(element, null).let {
-            it.highlightType = ProblemHighlightType.LIKE_UNKNOWN_SYMBOL
+        element is SolUserDefinedTypeName && element.reference != null && element.reference?.resolve() == null -> {
+          holder.createWarningAnnotation(element, null).let {
+            it.highlightType = ProblemHighlightType.GENERIC_ERROR_OR_WARNING
             it.registerFix(ImportFileFix(element))
           }
         }
