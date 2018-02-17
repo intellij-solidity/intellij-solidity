@@ -10,8 +10,6 @@ import me.serce.solidity.lang.psi.SolVisitor
 
 
 class SelfdestructRenameInspection : LocalInspectionTool() {
-  override fun getDisplayName() = ""
-
   override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean, session: LocalInspectionToolSession): PsiElementVisitor {
     return object : SolVisitor() {
       override fun visitFunctionCallExpression(o: SolFunctionCallExpression) {
@@ -27,4 +25,6 @@ class SelfdestructRenameInspection : LocalInspectionTool() {
         RenameFix(expr, "selfdestruct"))
     }
   }
+
+  override fun getID(): String = "suicide_deprecated"
 }
