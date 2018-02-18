@@ -14,6 +14,6 @@ object SearchUtils {
     return elements.firstOrNull { it is SolContractDefinition } as? SolContractDefinition
   }
 
-  val runnableFilter = { psiMethod : SolFunctionDefinition -> !psiMethod.isConstructor && psiMethod.parameters.isEmpty() }
+  val runnableFilter = { psiMethod : SolFunctionDefinition -> !psiMethod.isConstructor /*&& psiMethod.parameters.isEmpty()*/ }
 
 }

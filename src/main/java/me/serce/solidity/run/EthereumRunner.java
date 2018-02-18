@@ -11,6 +11,7 @@ import java.math.BigInteger;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -68,9 +69,9 @@ public class EthereumRunner {
             StandaloneBlockchain init = init();
             SolidityContract contract = readAllContracts(mainContract, dir, init);
 
-            Object string = contract.callFunction(function).getReturnValue();
+            Object result = contract.callFunction(function).getReturnValue();
             System.out.println(String.format("Function '%s.%s' returned:", mainContract, args[1]));
-            System.out.println(string);
+            System.out.println(resultToString(result));
         } catch (Exception e) {
             System.err.println("\nException occurred: " + e.getMessage());
         } finally {
@@ -81,5 +82,9 @@ public class EthereumRunner {
             }
             System.exit(0);
         }
+    }
+
+    private static String resultToString(Object result) {
+        return result.getClass().isArray() ? Arrays.toString((Object[]) result) : result.toString();
     }
 }
