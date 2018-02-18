@@ -6,8 +6,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ComponentWithBrowseButton
 import com.intellij.ui.EditorTextField
 import com.intellij.ui.TextAccessor
-import me.serce.solidity.ide.run.SolidityFileType
-
+import me.serce.solidity.lang.SolidityFileType
 
 
 class EditorTextFieldWithBrowseButton(project: Project) : ComponentWithBrowseButton<EditorTextField>(createEditorTextField(project), null), TextAccessor {
@@ -19,14 +18,12 @@ class EditorTextFieldWithBrowseButton(project: Project) : ComponentWithBrowseBut
   override fun setText(text: String?) {
     childComponent.text = text ?: ""
   }
+}
 
-  companion object {
-    private fun createEditorTextField(project: Project): EditorTextField {
-      return if (project.isDefault) EditorTextField() else EditorTextField(createDocument(""), project, SolidityFileType)
-    }
+private fun createEditorTextField(project: Project): EditorTextField {
+  return if (project.isDefault) EditorTextField() else EditorTextField(createDocument(""), project, SolidityFileType)
+}
 
-    private fun createDocument(text: String): Document? {
-      return EditorFactory.getInstance().createDocument(text)
-    }
-  }
+private fun createDocument(text: String): Document? {
+  return EditorFactory.getInstance().createDocument(text)
 }

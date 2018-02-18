@@ -58,7 +58,7 @@ public class EthereumRunner {
     }
 
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
 
         String mainContract = args[0];
         String function = args[1];
@@ -72,7 +72,7 @@ public class EthereumRunner {
             System.out.println(String.format("Function '%s.%s' returned:", mainContract, args[1]));
             System.out.println(string);
         } catch (Exception e) {
-            System.out.println("Exception occurred: " + e.getMessage());
+            System.err.println("\nException occurred: " + e.getMessage());
         } finally {
             try {
                 Thread.sleep(1000);

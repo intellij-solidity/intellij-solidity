@@ -32,20 +32,19 @@ import javax.swing.JPanel
 class SolidityConfigurableEditorPanel(private val myProject: Project) : SettingsEditor<SolidityRunConfig>(), PanelWithAnchor {
 
   val moduleSelector: ConfigurationModuleSelector
-  private val myContractLocations = arrayOfNulls<LabeledComponent<EditorTextFieldWithBrowseButton>>(2)
+  private val myContractLocations : Array<LabeledComponent<EditorTextFieldWithBrowseButton>>
   private val myModel: SolidityConfigurationModel
   private val myBrowsers: Array<BrowseModuleValueActionListener<JComponent>>
-  private var myContract: LabeledComponent<EditorTextFieldWithBrowseButton>? = null
-  private var myFunction: LabeledComponent<EditorTextFieldWithBrowseButton>? = null
-  // Fields
-  private var myWholePanel: JPanel? = null
-  private var myModule: LabeledComponent<ModulesComboBox>? = null
-  private var myCommonJavaParameters: CommonJavaParametersPanel? = null
-  private var myJrePathEditor: JrePathEditor? = null
-  private var anchor: JComponent? = null
+  private lateinit var myContract: LabeledComponent<EditorTextFieldWithBrowseButton>
+  private lateinit var myFunction: LabeledComponent<EditorTextFieldWithBrowseButton>
+  private lateinit var myWholePanel: JPanel
+  private lateinit var myModule: LabeledComponent<ModulesComboBox>
+  private lateinit var myCommonJavaParameters: CommonJavaParametersPanel
+  private lateinit var myJrePathEditor: JrePathEditor
+  private lateinit var anchor: JComponent
 
   val modulesComponent: ModulesComboBox
-    get() = myModule!!.component
+    get() = myModule.component
 
   private val contractName: String
     get() =
@@ -54,10 +53,10 @@ class SolidityConfigurableEditorPanel(private val myProject: Project) : Settings
   init {
     myModel = SolidityConfigurationModel(myProject)
     moduleSelector = ConfigurationModuleSelector(myProject, modulesComponent)
-    myJrePathEditor!!.setDefaultJreSelector(DefaultJreSelector.fromModuleDependencies(modulesComponent, false))
-    myCommonJavaParameters!!.setModuleContext(moduleSelector.module)
-    myCommonJavaParameters!!.setHasModuleMacro()
-    myModule!!.component.addActionListener { _ -> myCommonJavaParameters!!.setModuleContext(moduleSelector.module) }
+    myJrePathEditor.setDefaultJreSelector(DefaultJreSelector.fromModuleDependencies(modulesComponent, false))
+    myCommonJavaParameters.setModuleContext(moduleSelector.module)
+    myCommonJavaParameters.setHasModuleMacro()
+    myModule.component.addActionListener { _ -> myCommonJavaParameters.setModuleContext(moduleSelector.module) }
     myBrowsers = arrayOf(ContractChooserActionListener(myProject), object : FunctionBrowser(myProject) {
 
       override val contractName: String
@@ -77,9 +76,7 @@ class SolidityConfigurableEditorPanel(private val myProject: Project) : Settings
         } else null
       }
     })
-
-    myContractLocations[SolidityConfigurationModel.CONTRACT] = myContract
-    myContractLocations[SolidityConfigurationModel.FUNCTION] = myFunction
+    myContractLocations = arrayOf(myContract, myFunction)
 
     // Done
 
@@ -87,11 +84,11 @@ class SolidityConfigurableEditorPanel(private val myProject: Project) : Settings
 
     installDocuments()
 
-    UIUtil.setEnabled(myCommonJavaParameters!!.programParametersComponent, false, true)
+    UIUtil.setEnabled(myCommonJavaParameters.programParametersComponent, false, true)
 
 //    setAnchor(mySearchForContractLabel)
-    myJrePathEditor!!.setAnchor(myModule!!.label)
-    myCommonJavaParameters!!.setAnchor(myModule!!.label)
+    myJrePathEditor.setAnchor(myModule.label)
+    myCommonJavaParameters.setAnchor(myModule.label)
 
     val model = DefaultComboBoxModel<String>()
     model.addElement("All")
@@ -105,17 +102,17 @@ class SolidityConfigurableEditorPanel(private val myProject: Project) : Settings
   public override fun applyEditorTo(configuration: SolidityRunConfig) {
     myModel.apply(configuration)
     applyHelpersTo(configuration)
-    configuration.alternativeJrePath = myJrePathEditor!!.jrePathOrName
-    configuration.isAlternativeJrePathEnabled = myJrePathEditor!!.isAlternativeJreSelected
+    configuration.alternativeJrePath = myJrePathEditor.jrePathOrName
+    configuration.isAlternativeJrePathEnabled = myJrePathEditor.isAlternativeJreSelected
 
-    myCommonJavaParameters!!.applyTo(configuration)
+    myCommonJavaParameters.applyTo(configuration)
   }
 
   public override fun resetEditorFrom(configuration: SolidityRunConfig) {
     myModel.reset(configuration)
-    myCommonJavaParameters!!.reset(configuration)
+    myCommonJavaParameters.reset(configuration)
     moduleSelector.reset(configuration)
-    myJrePathEditor!!
+    myJrePathEditor
       .setPathOrName(configuration.alternativeJrePath, configuration.isAlternativeJrePathEnabled)
   }
 
@@ -137,16 +134,16 @@ class SolidityConfigurableEditorPanel(private val myProject: Project) : Settings
   }
 
   fun getContractLocation(index: Int): LabeledComponent<EditorTextFieldWithBrowseButton> {
-    return myContractLocations[index]!!
+    return myContractLocations[index]
   }
 
   private fun createUIComponents() {
     myContract = LabeledComponent()
-    myContract!!.component = EditorTextFieldWithBrowseButton(myProject)
+    myContract.component = EditorTextFieldWithBrowseButton(myProject)
 
     myFunction = LabeledComponent()
     val textFieldWithBrowseButton = EditorTextFieldWithBrowseButton(myProject)
-    myFunction!!.component = textFieldWithBrowseButton
+    myFunction.component = textFieldWithBrowseButton
   }
 
   override fun getAnchor(): JComponent? {
@@ -154,17 +151,17 @@ class SolidityConfigurableEditorPanel(private val myProject: Project) : Settings
   }
 
   override fun setAnchor(anchor: JComponent?) {
-    this.anchor = anchor
-    myContract!!.anchor = anchor
-    myFunction!!.anchor = anchor
+    this.anchor = anchor!!
+    myContract.anchor = anchor
+    myFunction.anchor = anchor
   }
 
   public override fun createEditor(): JComponent {
-    return myWholePanel!!
+    return myWholePanel
   }
 
   private fun applyHelpersTo(currentState: SolidityRunConfig) {
-    myCommonJavaParameters!!.applyTo(currentState)
+    myCommonJavaParameters.applyTo(currentState)
     moduleSelector.applyTo(currentState)
   }
 

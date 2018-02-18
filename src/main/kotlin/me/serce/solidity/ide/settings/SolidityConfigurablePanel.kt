@@ -6,30 +6,30 @@ import com.intellij.openapi.util.io.FileUtil
 import javax.swing.JPanel
 
 class SolidityConfigurablePanel {
-  private var myEvmPathField: TextFieldWithBrowseButton? = null
-  private var myDbPathField: TextFieldWithBrowseButton? = null
+  private lateinit var myEvmPathField: TextFieldWithBrowseButton
+  private lateinit var myDbPathField: TextFieldWithBrowseButton
   internal var myEvmPathPanel: JPanel? = null
 
   init {
     val descriptor = FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor()
     descriptor.title = "Solidity EVM Configuration"
     descriptor.description = "Select path to EthereumJ VM library"
-    myEvmPathField!!.addBrowseFolderListener(descriptor.title, descriptor.description, null, descriptor)
+    myEvmPathField.addBrowseFolderListener(descriptor.title, descriptor.description, null, descriptor)
 
     val descriptor2 = FileChooserDescriptorFactory.createSingleFolderDescriptor()
     descriptor2.title = "Transaction Data Base"
     descriptor2.description = "Select path to EVM Data Base"
-    myDbPathField!!.addBrowseFolderListener(descriptor2.title, descriptor2.description, null, descriptor2)
+    myDbPathField.addBrowseFolderListener(descriptor2.title, descriptor2.description, null, descriptor2)
   }
 
   internal fun reset(settings: SoliditySettings) {
     val pathToEvm = settings.pathToEvm
     if (pathToEvm != null) {
-      myEvmPathField!!.text = FileUtil.toSystemDependentName(pathToEvm)
+      myEvmPathField.text = FileUtil.toSystemDependentName(pathToEvm)
     }
     val pathToDb = settings.pathToDb
     if (pathToDb != null) {
-      myDbPathField!!.text = FileUtil.toSystemDependentName(pathToDb)
+      myDbPathField.text = FileUtil.toSystemDependentName(pathToDb)
     }
   }
 

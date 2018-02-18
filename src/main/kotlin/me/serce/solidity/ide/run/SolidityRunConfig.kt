@@ -13,6 +13,7 @@ import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.options.SettingsEditor
 import com.intellij.openapi.options.SettingsEditorGroup
 import com.intellij.openapi.options.ShowSettingsUtil
+import com.intellij.util.xmlb.XmlSerializer
 import me.serce.solidity.ide.run.ui.SolidityConfigurableEditorPanel
 import me.serce.solidity.ide.settings.SoliditySettings
 import me.serce.solidity.ide.settings.SoliditySettingsConfigurable
@@ -22,7 +23,7 @@ import org.jdom.Element
 import java.util.*
 
 
-class SolidityRunConfig(configurationModule: SolidityRunConfigModule?, factory: ConfigurationFactory?) : ModuleBasedConfiguration<SolidityRunConfigModule>(configurationModule, factory), CommonJavaRunConfigurationParameters {
+class SolidityRunConfig(configurationModule: SolidityRunConfigModule?, factory: ConfigurationFactory?) : ModuleBasedConfiguration<SolidityRunConfigModule>(configurationModule, factory), CommonJavaRunConfigurationParameters, RunConfigurationWithSuppressedDefaultDebugAction {
 
   var myData: Data = Data()
 
@@ -30,20 +31,20 @@ class SolidityRunConfig(configurationModule: SolidityRunConfigModule?, factory: 
     return myData.envs;
   }
 
-  override fun setAlternativeJrePath(p0: String?) {
-    myData.ajre = p0
+  override fun setAlternativeJrePath(ajre: String?) {
+    myData.ajre = ajre
   }
 
   override fun isPassParentEnvs(): Boolean {
     return true
   }
 
-  override fun setProgramParameters(p0: String?) {
-    myData.programParameters = p0
+  override fun setProgramParameters(progParams: String?) {
+    myData.programParameters = progParams
   }
 
-  override fun setVMParameters(p0: String) {
-    myData.vmParameters = p0
+  override fun setVMParameters(vmParams: String?) {
+    myData.vmParameters = vmParams
   }
 
   override fun isAlternativeJrePathEnabled(): Boolean {
@@ -62,24 +63,24 @@ class SolidityRunConfig(configurationModule: SolidityRunConfigModule?, factory: 
     return myData.getWorkingDirectory()
   }
 
-  override fun setAlternativeJrePathEnabled(p0: Boolean) {
-    myData.ajreEnabled = p0
+  override fun setAlternativeJrePathEnabled(ajreEnabled: Boolean) {
+    myData.ajreEnabled = ajreEnabled
   }
 
   override fun getVMParameters(): String? {
     return myData.vmParameters
   }
 
-  override fun setWorkingDirectory(p0: String?) {
-    myData.setWorkingDirectory(p0)
+  override fun setWorkingDirectory(workingDir: String?) {
+    myData.setWorkingDirectory(workingDir)
   }
 
-  override fun setEnvs(p0: MutableMap<String, String>) {
+  override fun setEnvs(envs: Map<String, String>) {
     myData.envs.clear()
-    myData.envs.putAll(p0)
+    myData.envs.putAll(envs)
   }
 
-  override fun setPassParentEnvs(p0: Boolean) {
+  override fun setPassParentEnvs(passParentEnvs: Boolean) {
   }
 
   override fun getProgramParameters(): String? {
@@ -94,7 +95,7 @@ class SolidityRunConfig(configurationModule: SolidityRunConfigModule?, factory: 
     return ModuleManager.getInstance(project).modules.asList()
   }
 
-  override fun getState(p0: Executor, env: ExecutionEnvironment): RunProfileState? {
+  override fun getState(executor: Executor, env: ExecutionEnvironment): RunProfileState? {
     val state = SolidityRunState( env, this)
     state.consoleBuilder = TextConsoleBuilderFactory.getInstance().createBuilder(project)
     return state
@@ -108,23 +109,21 @@ class SolidityRunConfig(configurationModule: SolidityRunConfigModule?, factory: 
   }
 
 
-  @Suppress("DEPRECATION")
   override fun readExternal(element: Element?) {
     super.readExternal(element)
     JavaRunConfigurationExtensionManager.getInstance().readExternal(this, element!!)
-    com.intellij.openapi.util.DefaultJDOMExternalizer.readExternal(this, element)
-    com.intellij.openapi.util.DefaultJDOMExternalizer.readExternal(myData, element)
+    XmlSerializer.deserializeInto(this, element)
+    XmlSerializer.deserializeInto(myData, element)
 
     readModule(element)
     EnvironmentVariablesComponent.readExternal(element, envs)
   }
 
-  @Suppress("DEPRECATION")
   override fun writeExternal(element: Element?) {
     super.writeExternal(element)
     JavaRunConfigurationExtensionManager.getInstance().writeExternal(this, element!!)
-    com.intellij.openapi.util.DefaultJDOMExternalizer.writeExternal(this, element)
-    com.intellij.openapi.util.DefaultJDOMExternalizer.writeExternal(myData, element)
+    XmlSerializer.serializeInto(this, element)
+    XmlSerializer.serializeInto(myData, element)
     writeModule(element)
 
     EnvironmentVariablesComponent.writeExternal(element, envs)
@@ -173,19 +172,19 @@ class SolidityRunConfig(configurationModule: SolidityRunConfigModule?, factory: 
 
     fun getGetFunctionName(): String = functionName ?: ""
 
-    fun setContract(contract: SolContractDefinition?) {
-      contractName = contract?.name
+    fun setContract(contract: SolContractDefinition) {
+      contractName = contract.name
     }
 
     fun setFunction(methodLocation: SolFunctionDefinition) {
       setContract(methodLocation.contract)
-      functionName = methodLocation.name!!
+      functionName = methodLocation.name
     }
   }
 
   override fun checkConfiguration() {
     if (!SoliditySettings.instance.validateEvm()) {
-      throw RuntimeConfigurationError("Configure EVM", {ShowSettingsUtil.getInstance().editConfigurable(project, SoliditySettingsConfigurable(SoliditySettings.instance))})
+      throw RuntimeConfigurationError("EVM is not configured", {ShowSettingsUtil.getInstance().editConfigurable(project, SoliditySettingsConfigurable(SoliditySettings.instance))})
     }
     JavaParametersUtil.checkAlternativeJRE(this)
     val configurationModule = configurationModule

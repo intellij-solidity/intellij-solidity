@@ -21,10 +21,7 @@ open class ContractFilter(private val myScope: GlobalSearchScope) : IContractFil
 
   override fun isAccepted(aClass: SolContractDefinition): Boolean {
     return ReadAction.compute<Boolean, RuntimeException> {
-      if (aClass.name != null ) {
-        return@compute true
-      }
-      false
+      aClass.name != null
     }
   }
 

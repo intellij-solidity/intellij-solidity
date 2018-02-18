@@ -1,5 +1,6 @@
 package me.serce.solidity.ide.run
 
+import com.google.common.base.Strings
 import com.intellij.execution.actions.ConfigurationContext
 import com.intellij.execution.actions.RunConfigurationProducer
 import com.intellij.execution.lineMarker.ExecutorAction
@@ -30,6 +31,9 @@ class SolidityRunConfigProducer : RunConfigurationProducer<SolidityRunConfig>(So
     }
     val solFunctionDefinition = searchFunction(sourceElement.get()) ?: return false
     if (!SearchUtils.runnableFilter.invoke(solFunctionDefinition)) {
+      return false;
+    }
+    if (Strings.isNullOrEmpty(solFunctionDefinition.name)) {
       return false;
     }
     configuration.setModule(context.module)
