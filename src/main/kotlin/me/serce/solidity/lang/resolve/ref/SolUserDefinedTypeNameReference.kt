@@ -12,7 +12,7 @@ import me.serce.solidity.lang.types.SolContract
 import me.serce.solidity.lang.types.type
 
 class SolUserDefinedTypeNameReference(element: SolUserDefinedTypeName) : SolReferenceBase<SolUserDefinedTypeName>(element), SolReference {
-  override fun multiResolve() = SolResolver.resolveTypeName(element)
+  override fun multiResolve() = SolResolver.resolveTypeNameUsingImports(element)
 
   override fun getVariants() = SolCompleter.completeTypeName(element)
 }
@@ -52,7 +52,7 @@ class SolFunctionCallReference(element: SolFunctionCallElement) : SolReferenceBa
     return element.referenceNameElement.parentRelativeRange
   }
 
-  override fun multiResolve(): List<PsiElement> {
+  override fun multiResolve(): Collection<PsiElement> {
     val contract: SolContractDefinition? = when {
       element.expressionList.isEmpty() -> element.ancestors.firstInstanceOrNull<SolContractDefinition>()
       else -> (element.expressionList.firstOrNull()?.type as? SolContract)?.ref

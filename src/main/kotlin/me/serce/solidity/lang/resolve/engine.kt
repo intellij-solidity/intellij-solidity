@@ -1,6 +1,8 @@
 package me.serce.solidity.lang.resolve
 
+import com.intellij.openapi.util.RecursionManager
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
 import com.intellij.psi.stubs.StubIndex
 import me.serce.solidity.firstOrElse
 import me.serce.solidity.lang.psi.*
@@ -9,13 +11,53 @@ import me.serce.solidity.lang.stubs.SolModifierIndex
 import me.serce.solidity.lang.types.*
 
 object SolResolver {
-  fun resolveTypeName(element: SolReferenceElement): List<SolNamedElement> = StubIndex.getElements(
+  fun resolveTypeNameUsingImports(element: SolReferenceElement): Set<SolNamedElement> =
+    resolveContractUsingImports(element, element.containingFile) +
+      resolveEnum(element, element.containingFile) +
+      resolveStruct(element, element.containingFile)
+
+  private fun resolveContractUsingImports(element: SolReferenceElement, file: PsiFile): Set<SolContractDefinition> =
+    RecursionManager.doPreventingRecursion(file, true) {
+      val inFile = file.children
+        .filterIsInstance<SolContractDefinition>()
+        .filter { it.name == element.name }
+
+      val imported = file.children
+        .filterIsInstance<SolImportDirective>()
+        .mapNotNull { it.importPath?.reference?.resolve() }
+        .map { it.containingFile }
+        .flatMap { resolveContractUsingImports(element, it) }
+
+      (inFile + imported).toSet()
+    } ?: emptySet()
+
+  private fun resolveEnum(element: SolReferenceElement, file: PsiFile): Set<SolNamedElement> =
+    resolveInnerType<SolEnumDefinition>(element, file, { it.enumDefinitionList } )
+
+  private fun resolveStruct(element: SolReferenceElement, file: PsiFile): Set<SolNamedElement> =
+    resolveInnerType<SolStructDefinition>(element, file, { it.structDefinitionList } )
+
+  private fun <T : SolNamedElement> resolveInnerType(element: SolReferenceElement, file: PsiFile, f: (SolContractDefinition) -> List<T>): Set<T> =
+    RecursionManager.doPreventingRecursion(file, true) {
+      val contract = element.parentOfType<SolContractDefinition>()
+      if (contract == null) {
+        emptySet()
+      } else {
+        val supers = contract.collectSupers
+          .mapNotNull { it.reference?.resolve() }.filterIsInstance<SolContractDefinition>() + contract
+        supers.flatMap(f)
+          .filter { it.name == element.name }
+          .toSet()
+      }
+    } ?: emptySet()
+
+  fun resolveTypeName(element: SolReferenceElement): Collection<SolNamedElement> = StubIndex.getElements(
     SolGotoClassIndex.KEY,
     element.referenceName,
     element.project,
     null,
     SolNamedElement::class.java
-  ).toList()
+  )
 
   fun resolveModifier(modifier: PsiElement): List<SolModifierDefinition> = StubIndex.getElements(
     SolModifierIndex.KEY,
@@ -71,7 +113,7 @@ object SolResolver {
       .flatMap { resolveContractMember(it, element) }
   }
 
-  fun resolveFunction(contract: SolContractDefinition, element: SolFunctionCallExpression): List<PsiElement> {
+  fun resolveFunction(contract: SolContractDefinition, element: SolFunctionCallExpression): Collection<PsiElement> {
     if (element.argumentsNumber() == 1) {
       val contracts = resolveTypeName(element)
       if (contracts.isNotEmpty()) {

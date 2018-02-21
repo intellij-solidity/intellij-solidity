@@ -24,9 +24,7 @@ class SolidityAnnotator : Annotator {
     return when (element) {
       is SolNumberType -> element to SolColor.KEYWORD
       is SolElementaryTypeName -> element to SolColor.KEYWORD
-
       is SolUserDefinedTypeName -> element to SolColor.CONTRACT_REFERENCE
-
       else -> null
     }
   }

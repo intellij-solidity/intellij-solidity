@@ -31,10 +31,16 @@ abstract class SolEnumItemImplMixin : SolStubbedNamedElementImpl<SolEnumDefStub>
   constructor(node: ASTNode) : super(node)
   constructor(stub: SolEnumDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
 
+  override val contract: SolContractDefinition
+    get() = ancestors.firstInstance()
+
   override fun getIcon(flags: Int) = SolidityIcons.ENUM
 }
 
-abstract class SolEnumValueMixin(node: ASTNode) : SolNamedElementImpl(node), SolEnumValue
+abstract class SolEnumValueMixin(node: ASTNode) : SolNamedElementImpl(node), SolEnumValue {
+  override val contract: SolContractDefinition
+    get() = ancestors.firstInstance()
+}
 
 abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrLibDefStub>, SolContractDefinition {
   override val supers: List<SolUserDefinedTypeName>
@@ -98,7 +104,7 @@ abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefSt
 
 abstract class SolModifierDefMixin : SolStubbedNamedElementImpl<SolModifierDefStub>, SolModifierDefinition {
   override val contract: SolContractDefinition
-    get() = ancestors.firstInstance<SolContractDefinition>()
+    get() = ancestors.firstInstance()
 
   constructor(node: ASTNode) : super(node)
   constructor(stub: SolModifierDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
