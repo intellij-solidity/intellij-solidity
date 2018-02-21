@@ -130,6 +130,12 @@
                          level="WARNING"
                          implementationClass="me.serce.solidity.ide.inspections.UnprotectedFunctionInspection"/>
 
+        <localInspection language="Solidity" groupName="Solidity"
+                         displayName="Name can not be resolved"
+                         enabledByDefault="true"
+                         level="WARNING"
+                         implementationClass="me.serce.solidity.ide.inspections.ResolveNameInspection"/>
+
         <errorHandler implementation="me.serce.solidity.ide.SentryReportSubmitter"/>
     </extensions>
 
