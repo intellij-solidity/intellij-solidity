@@ -17,6 +17,13 @@
 
     <change-notes><![CDATA[
       <p>
+        <b>v2.0.5</b>
+        <ul>
+          <li>Added contract resolve error highlighting + import file fix, thanks @0v1se</li>
+          <li>truffle/npm import support, thanks @0v1se</li>
+          <li>Parameter bugfixes</li>
+          <li>Resolving bugfixes</li>
+        </ul>
         <b>v2.0.4</b>
         <ul>
           <li>Support for new inline assembly features</li>
@@ -24,15 +31,6 @@
           <li>Fix for boolean array constructors, thanks @ZitRos</li>
           <li>Allow for reporting exceptions from your IDE directly to maintainers, please click report if you catch an exception</li>
           <li>Resolving bugfixes</li>
-          <li>Grammar fixes</li>
-        </ul>
-        <b>v2.0.3</b>
-        <ul>
-          <li>Improvements to spacing rules, thanks @moodysalem</li>
-          <li>Highlighting improvements, thanks @idrabenia</li>
-          <li>Multiple formatting fixes</li>
-          <li>Autocompletion improvements for literals</li>
-          <li>Import resolving for rule-sets</li>
           <li>Grammar fixes</li>
         </ul>
       </p>
