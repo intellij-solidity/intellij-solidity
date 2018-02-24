@@ -186,6 +186,9 @@ class SolidityRunConfig(configurationModule: SolidityRunConfigModule?, factory: 
     if (!SoliditySettings.instance.validateEvm()) {
       throw RuntimeConfigurationError("EVM is not configured", {ShowSettingsUtil.getInstance().editConfigurable(project, SoliditySettingsConfigurable(SoliditySettings.instance))})
     }
+    if (configurationModule.module == null) {
+      throw RuntimeConfigurationError("Module is not specified")
+    }
     JavaParametersUtil.checkAlternativeJRE(this)
     val configurationModule = configurationModule
     val psiContract = SearchUtils.findContract(myData.getGetContractName(), configurationModule.project)

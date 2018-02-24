@@ -36,17 +36,19 @@ public class EthereumRunner {
         return blockchain;
     }
 
-    private static SolidityContract readAllContracts(String main, Path dir, EasyBlockchain init) throws IOException {
+    private static SolidityContract submitAllContracts(String main, List<String> dirs, EasyBlockchain init) throws IOException {
         List<Path> contracts = new ArrayList<>();
-        Files.walkFileTree(dir, new SimpleFileVisitor<Path>() {
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                if (file.toString().endsWith(".sol")) {
-                    contracts.add(file);
+        for (String dir : dirs) {
+            Files.walkFileTree(Paths.get(dir), new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                    if (file.toString().endsWith(".sol")) {
+                        contracts.add(file);
+                    }
+                    return FileVisitResult.CONTINUE;
                 }
-                return FileVisitResult.CONTINUE;
-            }
-        });
+            });
+        }
         System.out.print("Submitting contracts... ");
         StringBuilder sb = new StringBuilder();
         for (Path cp : contracts) {
@@ -63,17 +65,16 @@ public class EthereumRunner {
 
         String mainContract = args[0];
         String function = args[1];
-        Path dir = Paths.get(args[2]);
+        List<String> sources = Arrays.asList(args).subList(2, args.length);
 
         try {
             StandaloneBlockchain init = init();
-            SolidityContract contract = readAllContracts(mainContract, dir, init);
-
+            SolidityContract contract = submitAllContracts(mainContract, sources, init);
             Object result = contract.callFunction(function).getReturnValue();
             System.out.println(String.format("Function '%s.%s' returned:", mainContract, args[1]));
             System.out.println(resultToString(result));
         } catch (Exception e) {
-            System.err.println("\nException occurred: " + e.getMessage());
+            System.err.println("\nException occurred while calling contract: " + e.getMessage());
         } finally {
             try {
                 Thread.sleep(1000);
@@ -85,6 +86,9 @@ public class EthereumRunner {
     }
 
     private static String resultToString(Object result) {
+        if (result == null) {
+            return "null";
+        }
         return result.getClass().isArray() ? Arrays.toString((Object[]) result) : result.toString();
     }
 }
