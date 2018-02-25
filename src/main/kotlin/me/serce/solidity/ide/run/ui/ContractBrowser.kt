@@ -35,21 +35,21 @@ abstract class ContractBrowser(project: Project, private val myTitle: String) : 
   }
 
   private fun configureDialog(dialog: TreeContractChooser) {
-    val className = text
-    val psiContract = findContract(className) ?: return
+    val contractName = text
+    val psiContract = findContract(contractName) ?: return
     val directory = psiContract.containingFile.containingDirectory
     if (directory != null) dialog.selectDirectory(directory)
     dialog.select(psiContract)
   }
 
-  protected abstract fun findContract(className: String): SolContractDefinition?
+  protected abstract fun findContract(contractName: String): SolContractDefinition?
 
   class NoFilterException(val messageInfo: MessagesEx.MessageInfo) : Exception(messageInfo.message)
 }
 
 interface IContractFilter {
 
-  fun isAccepted(aClass: SolContractDefinition): Boolean
+  fun isAccepted(contract: SolContractDefinition): Boolean
 
   interface ContractFilterWithScope : IContractFilter {
     val scope: GlobalSearchScope

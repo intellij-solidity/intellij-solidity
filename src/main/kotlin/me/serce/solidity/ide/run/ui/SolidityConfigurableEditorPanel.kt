@@ -1,7 +1,6 @@
 package me.serce.solidity.ide.run.ui
 
 import com.intellij.application.options.ModulesComboBox
-import com.intellij.execution.ExecutionBundle
 import com.intellij.execution.configuration.BrowseModuleValueActionListener
 import com.intellij.execution.testframework.SourceScope
 import com.intellij.execution.ui.CommonJavaParametersPanel
@@ -43,7 +42,7 @@ class SolidityConfigurableEditorPanel(private val myProject: Project) : Settings
   private lateinit var myJrePathEditor: JrePathEditor
   private lateinit var anchor: JComponent
 
-  val modulesComponent: ModulesComboBox
+  private val modulesComponent: ModulesComboBox
     get() = myModule.component
 
   private val contractName: String
@@ -65,7 +64,7 @@ class SolidityConfigurableEditorPanel(private val myProject: Project) : Settings
       override val moduleSelector: ConfigurationModuleSelector
         get() = this@SolidityConfigurableEditorPanel.moduleSelector
 
-      override fun getFilter(contractClass: SolContractDefinition?): Condition<SolFunctionDefinition> {
+      override fun getFilter(contract: SolContractDefinition?): Condition<SolFunctionDefinition> {
         return Condition { psiMethod -> SearchUtils.runnableFilter.invoke(psiMethod) }
       }
     }, object : BrowseModuleValueActionListener<JComponent>(myProject) {
@@ -86,9 +85,8 @@ class SolidityConfigurableEditorPanel(private val myProject: Project) : Settings
 
     UIUtil.setEnabled(myCommonJavaParameters.programParametersComponent, false, true)
 
-//    setAnchor(mySearchForContractLabel)
-    myJrePathEditor.setAnchor(myModule.label)
-    myCommonJavaParameters.setAnchor(myModule.label)
+    myJrePathEditor.anchor = myModule.label
+    myCommonJavaParameters.anchor = myModule.label
 
     val model = DefaultComboBoxModel<String>()
     model.addElement("All")
@@ -133,7 +131,7 @@ class SolidityConfigurableEditorPanel(private val myProject: Project) : Settings
     }
   }
 
-  fun getContractLocation(index: Int): LabeledComponent<EditorTextFieldWithBrowseButton> {
+  private fun getContractLocation(index: Int): LabeledComponent<EditorTextFieldWithBrowseButton> {
     return myContractLocations[index]
   }
 
@@ -173,17 +171,16 @@ class SolidityConfigurableEditorPanel(private val myProject: Project) : Settings
         return ContractFilter.create(SourceScope.wholeProject(project))
       } catch (ignore: ContractFilter.NoContractException) {
         throw ContractBrowser.NoFilterException(MessagesEx.MessageInfo(project,
-          ignore.message,
-          ExecutionBundle.message("cannot.browse.test.inheritors.dialog.title")))
+          ignore.message, "Can't Browse Inheritors"))
       }
 
     }
   }
 
-  private open inner class ContractClassBrowser(project: Project) : ContractBrowser(project, ExecutionBundle.message("choose.test.class.dialog.title")) {
+  private open inner class ContractClassBrowser(project: Project) : ContractBrowser(project, "Choose Contract to execute") {
 
-    override fun findContract(className: String): SolContractDefinition? {
-      return SearchUtils.findContract(className, myProject)
+    override fun findContract(contractName: String): SolContractDefinition? {
+      return SearchUtils.findContract(contractName, myProject)
     }
 
     @Throws(ContractBrowser.NoFilterException::class)

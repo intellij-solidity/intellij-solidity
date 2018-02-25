@@ -57,7 +57,7 @@ class SoliditySettings : PersistentStateComponent<SoliditySettings> {
     }
   }
 
-  fun <T> Stream<T>.toList(): List<T> {
+  private fun <T> Stream<T>.toList(): List<T> {
     return this.collect(Collectors.toList())
   }
 

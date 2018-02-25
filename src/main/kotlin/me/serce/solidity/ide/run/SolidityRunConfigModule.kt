@@ -4,5 +4,4 @@ import com.intellij.execution.configurations.RunConfigurationModule
 import com.intellij.openapi.project.Project
 
 
-class SolidityRunConfigModule(p : Project) : RunConfigurationModule(p) {
-}
+class SolidityRunConfigModule(p : Project) : RunConfigurationModule(p)

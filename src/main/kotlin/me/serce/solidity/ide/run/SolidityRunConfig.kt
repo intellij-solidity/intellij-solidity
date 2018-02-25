@@ -25,10 +25,10 @@ import java.util.*
 
 class SolidityRunConfig(configurationModule: SolidityRunConfigModule?, factory: ConfigurationFactory?) : ModuleBasedConfiguration<SolidityRunConfigModule>(configurationModule, factory), CommonJavaRunConfigurationParameters, RunConfigurationWithSuppressedDefaultDebugAction {
 
-  var myData: Data = Data()
+  private var myData: Data = Data()
 
   override fun getEnvs(): Map<String, String> {
-    return myData.envs;
+    return myData.envs
   }
 
   override fun setAlternativeJrePath(ajre: String?) {
@@ -84,7 +84,7 @@ class SolidityRunConfig(configurationModule: SolidityRunConfigModule?, factory: 
   }
 
   override fun getProgramParameters(): String? {
-    return myData.programParameters;
+    return myData.programParameters
   }
 
   override fun getAlternativeJrePath(): String? {
@@ -148,9 +148,9 @@ class SolidityRunConfig(configurationModule: SolidityRunConfigModule?, factory: 
     @JvmField
     var envs: MutableMap<String, String> = LinkedHashMap()
     @JvmField
-    var ajreEnabled = false;
+    var ajreEnabled = false
     @JvmField
-    var ajre: String? = null;
+    var ajre: String? = null
 
     public override fun clone(): Data {
       try {
@@ -191,9 +191,12 @@ class SolidityRunConfig(configurationModule: SolidityRunConfigModule?, factory: 
     }
     JavaParametersUtil.checkAlternativeJRE(this)
     val configurationModule = configurationModule
-    val psiContract = SearchUtils.findContract(myData.getGetContractName(), configurationModule.project)
-    if (psiContract != null && myData.functionName != null && psiContract.functionDefinitionList.none { it.name == myData.functionName }) {
-      throw RuntimeConfigurationWarning("Can't find method '${myData.functionName}' within contract '${psiContract.name}'" )
+    val psiContract = SearchUtils.findContract(myData.getGetContractName(), configurationModule.project, configurationModule.module)
+    if (psiContract == null) {
+      throw RuntimeConfigurationError("Can't find contract ${myData.contractName} within module ${configurationModule.moduleName}")
+    }
+    if (myData.functionName != null && psiContract.functionDefinitionList.none { it.name == myData.functionName }) {
+      throw RuntimeConfigurationError("Can't find method '${myData.functionName}' within contract '${psiContract.name}'" )
     }
     ProgramParametersUtil.checkWorkingDirectoryExist(this, project, configurationModule.module)
     JavaRunConfigurationExtensionManager.checkConfigurationIsValid(this)

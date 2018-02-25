@@ -1,6 +1,5 @@
 package me.serce.solidity.ide.run.ui
 
-import com.intellij.execution.ExecutionBundle
 import com.intellij.ide.structureView.impl.StructureNodeRenderer
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.openapi.util.Condition
@@ -49,7 +48,7 @@ class FunctionListDialog(private val myContract: SolContractDefinition, filter: 
 
     ScrollingUtil.ensureSelectionExists(myList)
     TreeUIHelper.getInstance().installListSpeedSearch(myList)
-    title = ExecutionBundle.message("choose.test.method.dialog.title")
+    title = "Choose Function to execute"
     init()
   }
 
@@ -72,9 +71,9 @@ class FunctionListDialog(private val myContract: SolContractDefinition, filter: 
 
 private val METHOD_NAME_COMPARATOR = comparator@ { f1 : SolFunctionDefinition, f2 : SolFunctionDefinition ->
   if (f1.name == null ) {
-    return@comparator 1;
+    return@comparator 1
   }
   if (f2.name == null) {
-    return@comparator -1;
+    return@comparator -1
   }
   f1.name!!.compareTo(f2.name!!, ignoreCase = true) }

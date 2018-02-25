@@ -2,7 +2,6 @@ package me.serce.solidity.ide.run.ui
 
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.lookup.LookupElementBuilder
-import com.intellij.execution.ExecutionBundle
 import com.intellij.execution.configuration.BrowseModuleValueActionListener
 import com.intellij.execution.ui.ConfigurationModuleSelector
 import com.intellij.openapi.project.Project
@@ -19,18 +18,18 @@ abstract class FunctionBrowser(project: Project) : BrowseModuleValueActionListen
 
   protected abstract val contractName: String
   protected abstract val moduleSelector: ConfigurationModuleSelector
-  protected abstract fun getFilter(contractClass: SolContractDefinition?): Condition<SolFunctionDefinition>
+  protected abstract fun getFilter(contract: SolContractDefinition?): Condition<SolFunctionDefinition>
 
   override fun showDialog(): String? {
     if (contractName.trim().isEmpty()) {
-      Messages.showMessageDialog(field, ExecutionBundle.message("set.class.name.message"),
-        ExecutionBundle.message("cannot.browse.method.dialog.title"), Messages.getInformationIcon())
+      Messages.showMessageDialog(field, "Set contract name first",
+        "Cannot Browse Functions", Messages.getInformationIcon())
       return null
     }
     val contract = SearchUtils.findContract(contractName, project)
     if (contract == null) {
-      Messages.showMessageDialog(field, ExecutionBundle.message("class.does.not.exists.error.message", contractName),
-        ExecutionBundle.message("cannot.browse.method.dialog.title"),
+      Messages.showMessageDialog(field, "Class $contractName does not exist",
+        "Cannot Browse Functions",
         Messages.getInformationIcon())
       return null
     }
@@ -47,17 +46,14 @@ abstract class FunctionBrowser(project: Project) : BrowseModuleValueActionListen
   fun installCompletion(field: EditorTextField) {
     object : TextFieldCompletionProvider() {
       override fun addCompletionVariants(text: String, offset: Int, prefix: String, result: CompletionResultSet) {
-        val className = contractName
-        if (className.trim().isEmpty()) {
+        if (contractName.trim().isEmpty()) {
           return
         }
-        val contract = SearchUtils.findContract(className, project) ?: return
+        val contract = SearchUtils.findContract(contractName, project) ?: return
         val filter = getFilter(contract)
-        for (psiMethod in contract.functionDefinitionList) {
-          if (filter.value(psiMethod)) {
-            result.addElement(LookupElementBuilder.create(psiMethod.name!!))
-          }
-        }
+        contract.functionDefinitionList
+          .filter { filter.value(it) }
+          .forEach { result.addElement(LookupElementBuilder.create(it.name!!)) }
       }
     }.apply(field)
   }

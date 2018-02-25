@@ -29,32 +29,32 @@ class SolidityConfigurationModel(private val myProject: Project) {
   }
 
   fun apply(configuration: SolidityRunConfig) {
-    val shouldUpdateName = configuration.isGeneratedName()
+    val shouldUpdateName = configuration.isGeneratedName
     applyTo(configuration.getPersistentData())
-    if (shouldUpdateName && !JavaExecutionUtil.isNewName(configuration.getName())) {
+    if (shouldUpdateName && !JavaExecutionUtil.isNewName(configuration.name)) {
       configuration.setGeneratedName()
     }
   }
 
   private fun applyTo(data: SolidityRunConfig.Data) {
-    val className = getContractTextValue(CONTRACT)
+    val contractName = getContractTextValue(CONTRACT)
       try {
         data.functionName = getContractTextValue(FUNCTION)
-        val contract = if (!myProject.isDefault && !StringUtil.isEmptyOrSpaces(className)) findPsiContract(className, myProject) else null
+        val contract = if (!myProject.isDefault && !StringUtil.isEmptyOrSpaces(contractName)) findPsiContract(contractName, myProject) else null
         if (contract != null && contract.isValid) {
           data.setContract(contract)
         } else {
-          data.contractName = className
+          data.contractName = contractName
         }
       } catch (e: ProcessCanceledException) {
-        data.contractName = className
+        data.contractName = contractName
       } catch (e: IndexNotReadyException) {
-        data.contractName = className
+        data.contractName = contractName
       }
   }
 
-  private fun findPsiContract(className: String, myProject: Project): SolContractDefinition? {
-    return SearchUtils.findContract(className, myProject)
+  private fun findPsiContract(contractName: String, myProject: Project): SolContractDefinition? {
+    return SearchUtils.findContract(contractName, myProject)
   }
 
 

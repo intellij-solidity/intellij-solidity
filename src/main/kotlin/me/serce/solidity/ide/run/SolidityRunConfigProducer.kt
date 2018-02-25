@@ -19,7 +19,7 @@ import me.serce.solidity.lang.psi.elementType
 class SolidityRunConfigProducer : RunConfigurationProducer<SolidityRunConfig>(SolidityConfigurationType.getInstance()) {
   override fun isConfigurationFromContext(configuration: SolidityRunConfig?, context: ConfigurationContext?): Boolean {
     val funcName = configuration?.getPersistentData()?.functionName ?: return false
-    val contrName = configuration.getPersistentData().contractName ?: return false;
+    val contrName = configuration.getPersistentData().contractName ?: return false
     val psiElement = context?.location?.psiElement ?: return false
     val func = searchFunction(psiElement) ?: return false
     return funcName == func.name && contrName == func.contract.name
@@ -31,10 +31,10 @@ class SolidityRunConfigProducer : RunConfigurationProducer<SolidityRunConfig>(So
     }
     val solFunctionDefinition = searchFunction(sourceElement.get()) ?: return false
     if (!SearchUtils.runnableFilter.invoke(solFunctionDefinition)) {
-      return false;
+      return false
     }
     if (Strings.isNullOrEmpty(solFunctionDefinition.name)) {
-      return false;
+      return false
     }
     configuration.setModule(context.module)
     configuration.getPersistentData().setFunction(solFunctionDefinition)
@@ -47,10 +47,10 @@ class SolidityRunConfigProducer : RunConfigurationProducer<SolidityRunConfig>(So
 
 private fun searchFunction(sourceElement: PsiElement?): SolFunctionDefinition? {
   var get = sourceElement
-  while (get != null && !(get is SolFunctionDefinition)) {
+  while (get != null && get !is SolFunctionDefinition) {
     get = get.parent
   }
-  return if (get == null || !(get is SolFunctionDefinition)) null else get
+  return if (get == null || get !is SolFunctionDefinition) null else get
 }
 
 class SolidityRunLineMarkerProvider : RunLineMarkerContributor() {

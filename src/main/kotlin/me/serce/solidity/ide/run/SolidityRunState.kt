@@ -1,7 +1,9 @@
 package me.serce.solidity.ide.run
 
+import com.intellij.execution.ExecutionException
 import com.intellij.execution.application.BaseJavaApplicationCommandLineState
 import com.intellij.execution.configurations.JavaParameters
+import com.intellij.execution.configurations.RuntimeConfigurationError
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.execution.util.JavaParametersUtil
 import com.intellij.openapi.roots.ModuleRootManager
@@ -13,6 +15,11 @@ import java.io.File
 
 class SolidityRunState(environment: ExecutionEnvironment?, configuration: SolidityRunConfig) : BaseJavaApplicationCommandLineState<SolidityRunConfig>(environment, configuration) {
   override fun createJavaParameters(): JavaParameters {
+    try {
+      configuration.checkConfiguration()
+    } catch (e: RuntimeConfigurationError) {
+      throw ExecutionException(e)
+    }
     val params = JavaParameters()
     val jreHome = if (myConfiguration.isAlternativeJrePathEnabled) myConfiguration.alternativeJrePath else null
     params.jdk = JavaParametersUtil.createProjectJdk(myConfiguration.project, jreHome)
