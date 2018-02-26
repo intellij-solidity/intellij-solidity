@@ -1,8 +1,14 @@
 package me.serce.solidity.ide.settings
 
+import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
+import com.intellij.openapi.fileTypes.FileType
+import com.intellij.openapi.options.ConfigurationException
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.openapi.util.io.FileUtil
+import com.intellij.openapi.vfs.VirtualFile
+import java.nio.file.Files
+import javax.swing.Icon
 import javax.swing.JPanel
 
 class SolidityConfigurablePanel {
@@ -11,7 +17,7 @@ class SolidityConfigurablePanel {
   internal var myEvmPathPanel: JPanel? = null
 
   init {
-    val descriptor = FileChooserDescriptorFactory.createSingleFileOrFolderDescriptor()
+    val descriptor = FileChooserDescriptor(false, true, true, true, false, false)
     descriptor.title = "Solidity EVM Configuration"
     descriptor.description = "Select path to EthereumJ VM library"
     myEvmPathField.addBrowseFolderListener(descriptor.title, descriptor.description, null, descriptor)
@@ -34,7 +40,11 @@ class SolidityConfigurablePanel {
   }
 
   internal fun apply(settings: SoliditySettings) {
-    settings.pathToEvm = fromPath(myEvmPathField)
+    val evmPath = fromPath(myEvmPathField)
+    if (!SoliditySettings.validateEvm(evmPath)) {
+      throw ConfigurationException("Incorrect EVM path")
+    }
+    settings.pathToEvm = evmPath
     settings.pathToDb = fromPath(myDbPathField)
   }
 

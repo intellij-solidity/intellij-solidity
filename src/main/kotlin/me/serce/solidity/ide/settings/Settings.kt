@@ -15,7 +15,6 @@ import java.net.URLClassLoader
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.stream.Collectors
-import java.util.stream.Stream
 import javax.swing.JComponent
 
 
@@ -33,35 +32,35 @@ class SoliditySettings : PersistentStateComponent<SoliditySettings> {
   }
 
   fun validateEvm(): Boolean {
-    return !pathToEvm.isNullOrBlank() && checkJars()
-  }
-
-  private fun checkJars(): Boolean {
-    val p = Paths.get(pathToEvm)
-
-    val files = when  {
-      p.isDirectory() -> Files.list(p).toList()
-      p.isFile() && p.toString().endsWith(".jar") -> listOf(p)
-      else -> return false
-    }.toMutableList()
-    val ethJar = files.indexOfFirst { it.fileName.toString().contains("ethereumj") }
-    if (ethJar > 0) {
-      files[ethJar] = files[0].also { files[0] = files[ethJar] }
-    }
-    val cl = URLClassLoader(files.map { it.toUri().toURL() }.toTypedArray())
-    try {
-      Class.forName("org.ethereum.util.blockchain.StandaloneBlockchain", false, cl)
-      return true
-    } catch (e: ClassNotFoundException) {
-      return false
-    }
-  }
-
-  private fun <T> Stream<T>.toList(): List<T> {
-    return this.collect(Collectors.toList())
+    return Companion.validateEvm(pathToEvm)
   }
 
   companion object {
+
+    fun validateEvm(pathToEvm: String?): Boolean {
+        return !pathToEvm.isNullOrBlank() && checkJars(pathToEvm!!)
+    }
+
+    private fun checkJars(pathToEvm: String): Boolean {
+      val p = Paths.get(pathToEvm)
+
+      val files = when  {
+        p.isDirectory() -> Files.list(p).collect(Collectors.toList())
+        p.isFile() && p.toString().endsWith(".jar") -> listOf(p)
+        else -> return false
+      }.toMutableList()
+      val ethJar = files.indexOfFirst { it.fileName.toString().contains("ethereumj") }
+      if (ethJar > 0) {
+        files[ethJar] = files[0].also { files[0] = files[ethJar] }
+      }
+      val cl = URLClassLoader(files.map { it.toUri().toURL() }.toTypedArray())
+      try {
+        Class.forName("org.ethereum.util.blockchain.StandaloneBlockchain", false, cl)
+        return true
+      } catch (e: ClassNotFoundException) {
+        return false
+      }
+    }
 
     val instance: SoliditySettings
       get() = ServiceManager.getService(SoliditySettings::class.java)

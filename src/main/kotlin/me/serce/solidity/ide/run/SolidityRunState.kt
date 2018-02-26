@@ -8,9 +8,11 @@ import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.execution.util.JavaParametersUtil
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.util.PathUtil
+import com.intellij.util.io.isDirectory
 import me.serce.solidity.ide.settings.SoliditySettings
 import me.serce.solidity.run.EthereumRunner
 import java.io.File
+import java.nio.file.Paths
 
 
 class SolidityRunState(environment: ExecutionEnvironment?, configuration: SolidityRunConfig) : BaseJavaApplicationCommandLineState<SolidityRunConfig>(environment, configuration) {
@@ -34,7 +36,11 @@ class SolidityRunState(environment: ExecutionEnvironment?, configuration: Solidi
 
     params.configureByModule(configuration.configurationModule.module, JavaParameters.JDK_AND_CLASSES)
     params.classPath.add(PathUtil.getJarPathForClass(EthereumRunner::class.java))
-    params.classPath.add(SoliditySettings.instance.pathToEvm + File.separator + "*")
+    var evmPath = SoliditySettings.instance.pathToEvm
+    if (Paths.get(evmPath).isDirectory()) {
+      evmPath += File.separator + "*"
+    }
+    params.classPath.add(evmPath)
     if (!SoliditySettings.instance.pathToDb.isNullOrBlank()) {
       params.vmParametersList.add("-Devm.database.dir=${SoliditySettings.instance.pathToDb}")
     }
