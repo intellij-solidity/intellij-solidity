@@ -73,7 +73,7 @@ public class EthereumRunner {
             Object result = contract.callFunction(function).getReturnValue();
             System.out.println(String.format("Function '%s.%s' returned:", mainContract, args[1]));
             System.out.println(resultToString(result));
-        } catch (Exception e) {
+        } catch (Throwable e) {
             System.err.println("\nException occurred while calling contract: " + e.getMessage());
         } finally {
             try {
