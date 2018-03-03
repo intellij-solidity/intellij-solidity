@@ -43,6 +43,9 @@
     <depends>com.intellij.modules.lang</depends>
 
     <extensions defaultExtensionNs="com.intellij">
+        <configurationType implementation="me.serce.solidity.ide.run.SolidityConfigurationType" />
+        <applicationService serviceImplementation="me.serce.solidity.ide.run.SolidityRunConfigurationExtensionManager"/>
+
         <fileTypeFactory implementation="me.serce.solidity.lang.SolidityFileTypeFactory"/>
 
         <lang.parserDefinition language="Solidity"
@@ -135,6 +138,10 @@
                          implementationClass="me.serce.solidity.ide.inspections.ResolveNameInspection"/>
 
         <errorHandler implementation="me.serce.solidity.ide.SentryReportSubmitter"/>
+        <runConfigurationProducer implementation="me.serce.solidity.ide.run.SolidityRunConfigProducer"/>
+        <runLineMarkerContributor language="Solidity" implementationClass="me.serce.solidity.ide.run.SolidityRunLineMarkerProvider"/>
+        <applicationService serviceInterface="me.serce.solidity.ide.settings.SoliditySettings" serviceImplementation="me.serce.solidity.ide.settings.SoliditySettings"/>
+        <applicationConfigurable groupId="language" displayName="Solidity" id="preferences.Solidity" instance="me.serce.solidity.ide.settings.SoliditySettingsConfigurable"/>`
     </extensions>
 
     <actions>
