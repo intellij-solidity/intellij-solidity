@@ -11,6 +11,6 @@ class RenameConstructorProcessor : RenamePsiElementProcessor() {
   }
 
   override fun prepareRenaming(element: PsiElement?, newName: String?, allRenames: MutableMap<PsiElement, String>?, scope: SearchScope?) {
-     allRenames?.put((element as SolFunctionDefinition).parent, newName!!)
+    allRenames?.put((element as SolFunctionDefinition).parent, newName!!)
   }
 }

@@ -5,7 +5,8 @@ import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.diagnostic.ErrorReportSubmitter
 import com.intellij.openapi.diagnostic.IdeaLoggingEvent
 import com.intellij.openapi.diagnostic.SubmittedReportInfo
-import com.intellij.openapi.diagnostic.SubmittedReportInfo.SubmissionStatus.*
+import com.intellij.openapi.diagnostic.SubmittedReportInfo.SubmissionStatus.FAILED
+import com.intellij.openapi.diagnostic.SubmittedReportInfo.SubmissionStatus.NEW_ISSUE
 import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.util.Consumer
@@ -16,7 +17,6 @@ import io.sentry.event.Event
 import io.sentry.event.EventBuilder
 import io.sentry.event.interfaces.ExceptionInterface
 import java.awt.Component
-
 
 class SentryReportSubmitter : ErrorReportSubmitter() {
 
@@ -30,10 +30,12 @@ class SentryReportSubmitter : ErrorReportSubmitter() {
 
   override fun getReportActionText() = "Submit error to IntelliJ Solidity maintainers"
 
-  override fun submit(events: Array<out IdeaLoggingEvent>,
-                      additionalInfo: String?,
-                      parentComponent: Component,
-                      consumer: Consumer<SubmittedReportInfo>): Boolean {
+  override fun submit(
+    events: Array<out IdeaLoggingEvent>,
+    additionalInfo: String?,
+    parentComponent: Component,
+    consumer: Consumer<SubmittedReportInfo>
+  ): Boolean {
     val ijEvent = events.firstOrNull()
     if (ijEvent == null) {
       return true

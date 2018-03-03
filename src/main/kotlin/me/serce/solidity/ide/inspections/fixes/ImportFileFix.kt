@@ -14,7 +14,7 @@ import me.serce.solidity.lang.psi.SolReferenceElement
 import me.serce.solidity.lang.psi.SolUserDefinedTypeName
 import me.serce.solidity.lang.resolve.SolResolver
 
-class ImportFileFix(element: SolUserDefinedTypeName): LocalQuickFixOnPsiElement(element), HintAction, LocalQuickFix {
+class ImportFileFix(element: SolUserDefinedTypeName) : LocalQuickFixOnPsiElement(element), HintAction, LocalQuickFix {
   override fun startInWriteAction(): Boolean = false
 
   override fun getFamilyName(): String =

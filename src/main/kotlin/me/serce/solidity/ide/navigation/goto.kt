@@ -11,20 +11,22 @@ import me.serce.solidity.lang.psi.SolNamedElement
 import me.serce.solidity.lang.stubs.SolGotoClassIndex
 import me.serce.solidity.lang.stubs.SolNamedElementIndex
 
-
 abstract class SolNavigationContributorBase<T>(
   private val indexKey: StubIndexKey<String, T>,
-  private val clazz: Class<T>) : ChooseByNameContributor, GotoClassContributor where T : NavigationItem, T : SolNamedElement {
+  private val clazz: Class<T>
+) : ChooseByNameContributor, GotoClassContributor where T : NavigationItem, T : SolNamedElement {
 
   override fun getNames(project: Project?, includeNonProjectItems: Boolean): Array<out String> = when (project) {
     null -> emptyArray()
     else -> StubIndex.getInstance().getAllKeys(indexKey, project).toTypedArray()
   }
 
-  override fun getItemsByName(name: String?,
-                              pattern: String?,
-                              project: Project?,
-                              includeNonProjectItems: Boolean): Array<out NavigationItem> {
+  override fun getItemsByName(
+    name: String?,
+    pattern: String?,
+    project: Project?,
+    includeNonProjectItems: Boolean
+  ): Array<out NavigationItem> {
 
     if (project == null || name == null) {
       return emptyArray()
@@ -42,10 +44,8 @@ abstract class SolNavigationContributorBase<T>(
   override fun getQualifiedNameSeparator(): String = "."
 }
 
-
 class SolClassNavigationContributor
   : SolNavigationContributorBase<SolNamedElement>(SolGotoClassIndex.KEY, SolNamedElement::class.java)
 
 class SolSymbolNavigationContributor
   : SolNavigationContributorBase<SolNamedElement>(SolNamedElementIndex.KEY, SolNamedElement::class.java)
-

@@ -7,7 +7,6 @@ import com.intellij.psi.search.GlobalSearchScope
 import me.serce.solidity.ide.run.ui.IContractFilter
 import me.serce.solidity.lang.psi.SolContractDefinition
 
-
 open class ContractFilter(private val myScope: GlobalSearchScope) : IContractFilter.ContractFilterWithScope {
   class NoContractException : CantRunException("No contracts found")
 
@@ -27,5 +26,4 @@ open class ContractFilter(private val myScope: GlobalSearchScope) : IContractFil
 
   override val scope: GlobalSearchScope
     get() = myScope
-
 }

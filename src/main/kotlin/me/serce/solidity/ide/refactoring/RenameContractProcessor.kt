@@ -5,7 +5,7 @@ import com.intellij.psi.search.SearchScope
 import com.intellij.refactoring.rename.RenamePsiElementProcessor
 import me.serce.solidity.lang.psi.SolContractDefinition
 
-class RenameContractProcessor: RenamePsiElementProcessor() {
+class RenameContractProcessor : RenamePsiElementProcessor() {
   override fun canProcessElement(element: PsiElement): Boolean {
     return element is SolContractDefinition
   }

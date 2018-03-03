@@ -4,7 +4,6 @@ import com.intellij.extapi.psi.ASTWrapperPsiElement
 import com.intellij.extapi.psi.StubBasedPsiElementBase
 import com.intellij.ide.projectView.PresentationData
 import com.intellij.lang.ASTNode
-import com.intellij.navigation.ItemPresentation
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNameIdentifierOwner
 import com.intellij.psi.stubs.IStubElementType
@@ -37,7 +36,6 @@ abstract class SolNamedElementImpl(node: ASTNode) : SolElementImpl(node), SolNam
   override fun getTextOffset(): Int = nameIdentifier?.textOffset ?: super.getTextOffset()
 }
 
-
 abstract class SolStubbedElementImpl<StubT : StubElement<*>> : StubBasedPsiElementBase<StubT>, SolElement {
 
   constructor(node: ASTNode) : super(node)
@@ -49,7 +47,6 @@ abstract class SolStubbedElementImpl<StubT : StubElement<*>> : StubBasedPsiEleme
   // FQN isn't needed in paring tests
   override fun toString(): String = "${javaClass.simpleName}($elementType)"
 }
-
 
 abstract class SolStubbedNamedElementImpl<S> :
   SolStubbedElementImpl<S>,

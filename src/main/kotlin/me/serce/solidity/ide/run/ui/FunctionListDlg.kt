@@ -69,11 +69,12 @@ class FunctionListDialog(private val myContract: SolContractDefinition, filter: 
   }
 }
 
-private val METHOD_NAME_COMPARATOR = comparator@ { f1 : SolFunctionDefinition, f2 : SolFunctionDefinition ->
-  if (f1.name == null ) {
+private val METHOD_NAME_COMPARATOR = comparator@ { f1: SolFunctionDefinition, f2: SolFunctionDefinition ->
+  if (f1.name == null) {
     return@comparator 1
   }
   if (f2.name == null) {
     return@comparator -1
   }
-  f1.name!!.compareTo(f2.name!!, ignoreCase = true) }
+  f1.name!!.compareTo(f2.name!!, ignoreCase = true)
+}

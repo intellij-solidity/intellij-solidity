@@ -48,11 +48,11 @@ fun factory(name: String): SolStubElementType<*, *> = when (name) {
   else -> error("Unknown element $name")
 }
 
-
-class SolEnumDefStub(parent: StubElement<*>?,
-                     elementType: IStubElementType<*, *>,
-                     override val name: String?)
-  : StubBase<SolEnumDefinition>(parent, elementType), SolNamedStub {
+class SolEnumDefStub(
+  parent: StubElement<*>?,
+  elementType: IStubElementType<*, *>,
+  override val name: String?
+) : StubBase<SolEnumDefinition>(parent, elementType), SolNamedStub {
 
   object Type : SolStubElementType<SolEnumDefStub, SolEnumDefinition>("ENUM_DEFINITION") {
     override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?) =
@@ -71,10 +71,11 @@ class SolEnumDefStub(parent: StubElement<*>?,
   }
 }
 
-class SolFunctionDefStub(parent: StubElement<*>?,
-                         elementType: IStubElementType<*, *>,
-                         override val name: String?)
-  : StubBase<SolFunctionDefinition>(parent, elementType), SolNamedStub {
+class SolFunctionDefStub(
+  parent: StubElement<*>?,
+  elementType: IStubElementType<*, *>,
+  override val name: String?
+) : StubBase<SolFunctionDefinition>(parent, elementType), SolNamedStub {
 
   object Type : SolStubElementType<SolFunctionDefStub, SolFunctionDefinition>("FUNCTION_DEFINITION") {
     override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?) =
@@ -93,10 +94,11 @@ class SolFunctionDefStub(parent: StubElement<*>?,
   }
 }
 
-class SolModifierDefStub(parent: StubElement<*>?,
-                         elementType: IStubElementType<*, *>,
-                         override val name: String?)
-  : StubBase<SolModifierDefinition>(parent, elementType), SolNamedStub {
+class SolModifierDefStub(
+  parent: StubElement<*>?,
+  elementType: IStubElementType<*, *>,
+  override val name: String?
+) : StubBase<SolModifierDefinition>(parent, elementType), SolNamedStub {
 
   object Type : SolStubElementType<SolModifierDefStub, SolModifierDefinition>("MODIFIER_DEFINITION") {
     override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?) =
@@ -115,10 +117,11 @@ class SolModifierDefStub(parent: StubElement<*>?,
   }
 }
 
-class SolStructDefStub(parent: StubElement<*>?,
-                         elementType: IStubElementType<*, *>,
-                         override val name: String?)
-  : StubBase<SolStructDefinition>(parent, elementType), SolNamedStub {
+class SolStructDefStub(
+  parent: StubElement<*>?,
+  elementType: IStubElementType<*, *>,
+  override val name: String?
+) : StubBase<SolStructDefinition>(parent, elementType), SolNamedStub {
 
   object Type : SolStubElementType<SolStructDefStub, SolStructDefinition>("STRUCT_DEFINITION") {
     override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?) =
@@ -137,10 +140,11 @@ class SolStructDefStub(parent: StubElement<*>?,
   }
 }
 
-class SolStateVarDeclStub(parent: StubElement<*>?,
-                          elementType: IStubElementType<*, *>,
-                          override val name: String?)
-  : StubBase<SolStateVariableDeclaration>(parent, elementType), SolNamedStub {
+class SolStateVarDeclStub(
+  parent: StubElement<*>?,
+  elementType: IStubElementType<*, *>,
+  override val name: String?
+) : StubBase<SolStateVariableDeclaration>(parent, elementType), SolNamedStub {
 
   object Type : SolStubElementType<SolStateVarDeclStub, SolStateVariableDeclaration>("STATE_VARIABLE_DECLARATION") {
     override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?) =
@@ -159,11 +163,11 @@ class SolStateVarDeclStub(parent: StubElement<*>?,
   }
 }
 
-
-class SolContractOrLibDefStub(parent: StubElement<*>?,
-                              elementType: IStubElementType<*, *>,
-                              override val name: String?)
-  : StubBase<SolContractDefinition>(parent, elementType), SolNamedStub {
+class SolContractOrLibDefStub(
+  parent: StubElement<*>?,
+  elementType: IStubElementType<*, *>,
+  override val name: String?
+) : StubBase<SolContractDefinition>(parent, elementType), SolNamedStub {
 
   object Type : SolStubElementType<SolContractOrLibDefStub, SolContractDefinition>("CONTRACT_DEFINITION") {
     override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?) =
@@ -182,13 +186,15 @@ class SolContractOrLibDefStub(parent: StubElement<*>?,
   }
 }
 
-class SolTypeRefStub(parent: StubElement<*>?,
-                     elementType: IStubElementType<*, *>)
-  : StubBase<SolTypeName>(parent, elementType) {
+class SolTypeRefStub(
+  parent: StubElement<*>?,
+  elementType: IStubElementType<*, *>
+) : StubBase<SolTypeName>(parent, elementType) {
 
-  class Type<T : SolTypeName>(val debugName: String,
-                              private val psiFactory: (SolTypeRefStub, IStubElementType<*, *>) -> T)
-    : SolStubElementType<SolTypeRefStub, T>(debugName) {
+  class Type<T : SolTypeName>(
+    val debugName: String,
+    private val psiFactory: (SolTypeRefStub, IStubElementType<*, *>) -> T
+  ) : SolStubElementType<SolTypeRefStub, T>(debugName) {
     override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?) =
       SolTypeRefStub(parentStub, this)
 

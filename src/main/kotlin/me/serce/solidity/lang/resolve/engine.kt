@@ -32,10 +32,10 @@ object SolResolver {
     } ?: emptySet()
 
   private fun resolveEnum(element: SolReferenceElement, file: PsiFile): Set<SolNamedElement> =
-    resolveInnerType<SolEnumDefinition>(element, file, { it.enumDefinitionList } )
+    resolveInnerType<SolEnumDefinition>(element, file, { it.enumDefinitionList })
 
   private fun resolveStruct(element: SolReferenceElement, file: PsiFile): Set<SolNamedElement> =
-    resolveInnerType<SolStructDefinition>(element, file, { it.structDefinitionList } )
+    resolveInnerType<SolStructDefinition>(element, file, { it.structDefinitionList })
 
   private fun <T : SolNamedElement> resolveInnerType(element: SolReferenceElement, file: PsiFile, f: (SolContractDefinition) -> List<T>): Set<T> =
     RecursionManager.doPreventingRecursion(file, true) {
@@ -143,7 +143,7 @@ object SolResolver {
         .map { resolveFunRec(it, element) }
         .filter { it.isNotEmpty() }
         .firstOrElse(emptyList())
-      }
+    }
   }
 
   fun lexicalDeclarations(place: PsiElement, stop: (PsiElement) -> Boolean = { false }): Sequence<SolNamedElement> {

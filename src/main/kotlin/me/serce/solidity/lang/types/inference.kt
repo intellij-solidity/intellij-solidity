@@ -5,9 +5,10 @@ import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiModificationTracker
 import me.serce.solidity.firstOrElse
-import me.serce.solidity.lang.types.SolArray.*
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.resolve.SolResolver
+import me.serce.solidity.lang.types.SolArray.SolDynamicArray
+import me.serce.solidity.lang.types.SolArray.SolStaticArray
 
 private fun getSolType(type: SolTypeName?): SolType {
   return when (type) {
@@ -73,8 +74,7 @@ fun inferDeclType(decl: SolNamedElement): SolType {
           is SolVariableDefinition -> inferExprType(parent.expression)
           else -> SolUnknown
         }
-      } else
-        getSolType(decl.typeName)
+      } else getSolType(decl.typeName)
     }
     is SolContractDefinition -> SolContract(decl)
     is SolStructDefinition -> SolStruct(decl)

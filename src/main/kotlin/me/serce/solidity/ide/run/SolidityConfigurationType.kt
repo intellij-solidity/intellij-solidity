@@ -8,11 +8,10 @@ import com.intellij.openapi.project.Project
 import me.serce.solidity.ide.SolidityIcons
 import javax.swing.Icon
 
-
 class SolidityConfigurationType : ConfigurationTypeBase("SolidityConfigurationType", "Solidity", "Run Solidity Contract", SolidityIcons.FILE_ICON) {
-    init {
-        addFactory(configurationFactory())
-    }
+  init {
+    addFactory(configurationFactory())
+  }
 
   private fun configurationFactory(): ConfigurationFactory {
     return object : ConfigurationFactory(this) {
@@ -31,5 +30,4 @@ class SolidityConfigurationType : ConfigurationTypeBase("SolidityConfigurationTy
       return ConfigurationTypeUtil.findConfigurationType<SolidityConfigurationType>(SolidityConfigurationType::class.java)
     }
   }
-
 }

@@ -6,7 +6,9 @@ import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.psi.PsiElement
 import com.intellij.psi.stubs.StubIndex
 import me.serce.solidity.ide.SolidityIcons
-import me.serce.solidity.lang.psi.*
+import me.serce.solidity.lang.psi.SolContractDefinition
+import me.serce.solidity.lang.psi.SolMemberAccessExpression
+import me.serce.solidity.lang.psi.SolNamedElement
 import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.stubs.SolGotoClassIndex
 import me.serce.solidity.lang.stubs.SolModifierIndex
@@ -63,7 +65,6 @@ object SolCompleter {
     return map {
       LookupElementBuilder.create(it, it.name ?: "")
         .withIcon(SolidityIcons.STATE_VAR)
-
     }.toTypedArray().map {
       PrioritizedLookupElement.withPriority(it, TYPED_COMPLETION_PRIORITY)
     }.toTypedArray()

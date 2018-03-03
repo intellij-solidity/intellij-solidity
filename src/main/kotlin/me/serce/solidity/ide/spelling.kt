@@ -42,7 +42,3 @@ object StringExpressionTokenizer : EscapeSequenceTokenizer<LeafPsiElement>() {
   }
 }
 
-
-
-
-

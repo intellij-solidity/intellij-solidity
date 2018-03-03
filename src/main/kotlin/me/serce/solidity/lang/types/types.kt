@@ -68,7 +68,7 @@ data class SolEnum(val ref: SolEnumDefinition) : SolType {
   override fun toString() = ref.name ?: ref.text ?: "$ref"
 }
 
-data class SolMapping(val from: SolType, val to: SolType): SolType {
+data class SolMapping(val from: SolType, val to: SolType) : SolType {
   override fun toString(): String {
     return "mapping($from => $to)"
   }
@@ -84,7 +84,6 @@ sealed class SolArray(val type: SolType) : SolType {
   }
 }
 
-
 private val INTENAL_INDICATOR = "_sol1_s"
 
 fun internalise(name: String): String = "$name$INTENAL_INDICATOR"
@@ -92,6 +91,6 @@ fun internalise(name: String): String = "$name$INTENAL_INDICATOR"
 fun isInternal(name: String): Boolean = name.endsWith(INTENAL_INDICATOR)
 
 fun deInternalise(name: String): String = when {
-    name.endsWith(INTENAL_INDICATOR) -> name.removeSuffix(INTENAL_INDICATOR)
-    else -> name
+  name.endsWith(INTENAL_INDICATOR) -> name.removeSuffix(INTENAL_INDICATOR)
+  else -> name
 }

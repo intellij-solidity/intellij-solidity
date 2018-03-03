@@ -8,7 +8,6 @@ import me.serce.solidity.ide.inspections.fixes.RenameFix
 import me.serce.solidity.lang.psi.SolFunctionCallExpression
 import me.serce.solidity.lang.psi.SolVisitor
 
-
 class SelfdestructRenameInspection : LocalInspectionTool() {
   override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean, session: LocalInspectionToolSession): PsiElementVisitor {
     return object : SolVisitor() {

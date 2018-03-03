@@ -9,7 +9,6 @@ import me.serce.solidity.lang.SolidityFileType
 import me.serce.solidity.lang.core.SolidityTokenTypes
 import org.intellij.lang.annotations.Language
 
-
 class SolPsiFactory(val project: Project) {
   fun createIdentifier(name: String): PsiElement {
     return createFromText<SolContractDefinition>("contract $name {}")?.identifier

@@ -15,7 +15,6 @@ import me.serce.solidity.lang.core.SolElementType
 import me.serce.solidity.lang.psi.SolFunctionDefinition
 import me.serce.solidity.lang.psi.elementType
 
-
 class SolidityRunConfigProducer : RunConfigurationProducer<SolidityRunConfig>(SolidityConfigurationType.getInstance()) {
   override fun isConfigurationFromContext(configuration: SolidityRunConfig?, context: ConfigurationContext?): Boolean {
     val funcName = configuration?.getPersistentData()?.functionName ?: return false
@@ -41,8 +40,6 @@ class SolidityRunConfigProducer : RunConfigurationProducer<SolidityRunConfig>(So
     configuration.name = solFunctionDefinition.contract.name + "." + solFunctionDefinition.name
     return true
   }
-
-
 }
 
 private fun searchFunction(sourceElement: PsiElement?): SolFunctionDefinition? {
@@ -67,5 +64,4 @@ class SolidityRunLineMarkerProvider : RunLineMarkerContributor() {
     }
     return null
   }
-
 }

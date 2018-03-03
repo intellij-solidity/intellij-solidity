@@ -22,7 +22,6 @@ import me.serce.solidity.lang.psi.SolFunctionDefinition
 import org.jdom.Element
 import java.util.*
 
-
 class SolidityRunConfig(configurationModule: SolidityRunConfigModule?, factory: ConfigurationFactory?) : ModuleBasedConfiguration<SolidityRunConfigModule>(configurationModule, factory), CommonJavaRunConfigurationParameters, RunConfigurationWithSuppressedDefaultDebugAction {
 
   private var myData: Data = Data()
@@ -96,7 +95,7 @@ class SolidityRunConfig(configurationModule: SolidityRunConfigModule?, factory: 
   }
 
   override fun getState(executor: Executor, env: ExecutionEnvironment): RunProfileState? {
-    val state = SolidityRunState( env, this)
+    val state = SolidityRunState(env, this)
     state.consoleBuilder = TextConsoleBuilderFactory.getInstance().createBuilder(project)
     return state
   }
@@ -107,7 +106,6 @@ class SolidityRunConfig(configurationModule: SolidityRunConfigModule?, factory: 
     group.addEditor(ExecutionBundle.message("logs.tab.title", *arrayOfNulls(0)), LogConfigurationPanel())
     return group
   }
-
 
   override fun readExternal(element: Element?) {
     super.readExternal(element)
@@ -128,7 +126,6 @@ class SolidityRunConfig(configurationModule: SolidityRunConfigModule?, factory: 
 
     EnvironmentVariablesComponent.writeExternal(element, envs)
   }
-
 
   fun getPersistentData(): Data {
     return myData
@@ -184,7 +181,7 @@ class SolidityRunConfig(configurationModule: SolidityRunConfigModule?, factory: 
 
   override fun checkConfiguration() {
     if (!SoliditySettings.instance.validateEvm()) {
-      throw RuntimeConfigurationError("EVM is not configured", {ShowSettingsUtil.getInstance().editConfigurable(project, SoliditySettingsConfigurable(SoliditySettings.instance))})
+      throw RuntimeConfigurationError("EVM is not configured", { ShowSettingsUtil.getInstance().editConfigurable(project, SoliditySettingsConfigurable(SoliditySettings.instance)) })
     }
     if (configurationModule.module == null) {
       throw RuntimeConfigurationError("Module is not specified")
@@ -196,7 +193,7 @@ class SolidityRunConfig(configurationModule: SolidityRunConfigModule?, factory: 
       throw RuntimeConfigurationError("Can't find contract ${myData.contractName} within module ${configurationModule.moduleName}")
     }
     if (myData.functionName != null && psiContract.functionDefinitionList.none { it.name == myData.functionName }) {
-      throw RuntimeConfigurationError("Can't find method '${myData.functionName}' within contract '${psiContract.name}'" )
+      throw RuntimeConfigurationError("Can't find method '${myData.functionName}' within contract '${psiContract.name}'")
     }
     ProgramParametersUtil.checkWorkingDirectoryExist(this, project, configurationModule.module)
     JavaRunConfigurationExtensionManager.checkConfigurationIsValid(this)

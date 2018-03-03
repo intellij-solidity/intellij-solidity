@@ -17,7 +17,6 @@ import java.nio.file.Paths
 import java.util.stream.Collectors
 import javax.swing.JComponent
 
-
 @State(name = "SoliditySettings", storages = arrayOf(Storage("other.xml")))
 class SoliditySettings : PersistentStateComponent<SoliditySettings> {
   var pathToEvm: String? = null
@@ -38,13 +37,13 @@ class SoliditySettings : PersistentStateComponent<SoliditySettings> {
   companion object {
 
     fun validateEvm(pathToEvm: String?): Boolean {
-        return !pathToEvm.isNullOrBlank() && checkJars(pathToEvm!!)
+      return !pathToEvm.isNullOrBlank() && checkJars(pathToEvm!!)
     }
 
     private fun checkJars(pathToEvm: String): Boolean {
       val p = Paths.get(pathToEvm)
 
-      val files = when  {
+      val files = when {
         p.isDirectory() -> Files.list(p).collect(Collectors.toList())
         p.isFile() && p.toString().endsWith(".jar") -> listOf(p)
         else -> return false
@@ -104,7 +103,5 @@ class SoliditySettingsConfigurable(private val mySettings: SoliditySettings) : S
   override fun getId(): String {
     return helpTopic
   }
-
 }
-
 

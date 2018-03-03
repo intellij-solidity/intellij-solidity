@@ -13,7 +13,6 @@ class SolGotoClassIndex : StringStubIndexExtension<SolNamedElement>() {
   override fun getKey(): StubIndexKey<String, SolNamedElement> = KEY
 }
 
-
 class SolModifierIndex : StringStubIndexExtension<SolNamedElement>() {
   companion object {
     val KEY: StubIndexKey<String, SolNamedElement> = StubIndexKey.createIndexKey(SolModifierIndex::class.java.canonicalName)
@@ -22,7 +21,6 @@ class SolModifierIndex : StringStubIndexExtension<SolNamedElement>() {
   override fun getVersion(): Int = SolidityFileStub.Type.stubVersion
   override fun getKey(): StubIndexKey<String, SolNamedElement> = KEY
 }
-
 
 class SolNamedElementIndex : StringStubIndexExtension<SolNamedElement>() {
   companion object {

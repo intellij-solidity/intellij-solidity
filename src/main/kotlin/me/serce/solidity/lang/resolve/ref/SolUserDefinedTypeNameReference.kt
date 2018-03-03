@@ -23,7 +23,6 @@ class SolVarLiteralReference(element: SolVarLiteral) : SolReferenceBase<SolVarLi
   override fun getVariants() = SolCompleter.completeLiteral(element)
 }
 
-
 class SolModifierReference(element: SolFunctionDefinition, val modifierElement: PsiElement) : SolReferenceBase<SolFunctionDefinition>(element), SolReference {
   override fun calculateDefaultRangeInElement() = modifierElement.parentRelativeRange
 

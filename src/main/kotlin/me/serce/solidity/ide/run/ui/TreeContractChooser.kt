@@ -10,17 +10,18 @@ import me.serce.solidity.lang.psi.SolContractDefinition
 import java.util.*
 import javax.swing.tree.DefaultMutableTreeNode
 
-
 class TreeContractChooser(title: String, project: Project, scope: GlobalSearchScope, contractFilter: IContractFilter, initialClass: SolContractDefinition?) : AbstractTreeClassChooserDialog<SolContractDefinition>(title, project, scope, SolContractDefinition::class.java, createFilter(contractFilter), initialClass), TreeChooser<SolContractDefinition> {
   override fun getSelectedFromTreeUserObject(node: DefaultMutableTreeNode): SolContractDefinition? {
     return null // need implement?
   }
 
-  override fun getClassesByName(name: String,
-                                checkBoxState: Boolean,
-                                pattern: String,
-                                searchScope: GlobalSearchScope): List<SolContractDefinition> {
-    val findContract = SearchUtils.findContract(name, project) ?: return  Collections.emptyList()
+  override fun getClassesByName(
+    name: String,
+    checkBoxState: Boolean,
+    pattern: String,
+    searchScope: GlobalSearchScope
+  ): List<SolContractDefinition> {
+    val findContract = SearchUtils.findContract(name, project) ?: return Collections.emptyList()
     return Collections.singletonList(findContract)
   }
 }
@@ -32,4 +33,3 @@ private fun createFilter(contractFilter: IContractFilter?): TreeChooser.Filter<S
     TreeChooser.Filter { element -> ReadAction.compute<Boolean, RuntimeException> { contractFilter.isAccepted(element) } }
   }
 }
-

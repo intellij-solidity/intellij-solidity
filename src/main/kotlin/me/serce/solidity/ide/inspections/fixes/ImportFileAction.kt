@@ -23,9 +23,11 @@ import javax.swing.Icon
 import javax.swing.JPanel
 import javax.swing.ListCellRenderer
 
-class ImportFileAction(val editor: Editor,
-                       private val file: PsiFile,
-                       private val suggestions: Set<PsiFile>) : QuestionAction {
+class ImportFileAction(
+  val editor: Editor,
+  private val file: PsiFile,
+  private val suggestions: Set<PsiFile>
+) : QuestionAction {
 
   val project: Project
     get() = file.project
@@ -118,4 +120,3 @@ class ImportFileAction(val editor: Editor,
     }
   }
 }
-

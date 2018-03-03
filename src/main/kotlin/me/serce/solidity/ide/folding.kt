@@ -6,8 +6,7 @@ import com.intellij.lang.folding.FoldingDescriptor
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.project.DumbAware
 import me.serce.solidity.lang.core.SolidityTokenTypes
-
-import java.util.ArrayList
+import java.util.*
 
 class SolidityFoldingBuilder : FoldingBuilder, DumbAware {
   override fun buildFoldRegions(node: ASTNode, document: Document): Array<FoldingDescriptor> {
@@ -32,9 +31,11 @@ class SolidityFoldingBuilder : FoldingBuilder, DumbAware {
 
   companion object {
 
-    private fun collectDescriptorsRecursively(node: ASTNode,
-                                              document: Document,
-                                              descriptors: MutableList<FoldingDescriptor>) {
+    private fun collectDescriptorsRecursively(
+      node: ASTNode,
+      document: Document,
+      descriptors: MutableList<FoldingDescriptor>
+    ) {
       val type = node.elementType
       if ((type === SolidityTokenTypes.BLOCK) && spanMultipleLines(node, document)) {
         descriptors.add(FoldingDescriptor(node, node.textRange))

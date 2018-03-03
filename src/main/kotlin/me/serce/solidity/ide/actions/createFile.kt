@@ -16,8 +16,11 @@ class SolCreateFileAction : CreateFileFromTemplateAction(CAPTION, "", SolidityIc
 
   override fun getActionName(directory: PsiDirectory?, newName: String?, templateName: String?) = CAPTION
 
-  override fun buildDialog(project: Project?, directory: PsiDirectory?,
-                           builder: CreateFileFromTemplateDialog.Builder) {
+  override fun buildDialog(
+    project: Project?,
+    directory: PsiDirectory?,
+    builder: CreateFileFromTemplateDialog.Builder
+  ) {
     builder.setTitle(CAPTION)
       .addKind("Smart contract", SolidityIcons.FILE_ICON, "Solidity Contract")
       .addKind("Solidity library", SolidityIcons.FILE_ICON, "Solidity Library")
@@ -33,8 +36,7 @@ class SolCreateFileAction : CreateFileFromTemplateAction(CAPTION, "", SolidityIc
         override fun getErrorText(inputString: String): String? {
           return if (!StringUtil.isEmpty(inputString) && FileUtil.sanitizeFileName(inputString, false) == inputString)
             null
-          else
-            "'$inputString' is not a valid Solidity module name"
+          else "'$inputString' is not a valid Solidity module name"
         }
       })
   }

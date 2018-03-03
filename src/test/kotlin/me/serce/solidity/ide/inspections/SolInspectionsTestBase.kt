@@ -8,19 +8,25 @@ abstract class SolInspectionsTestBase(val inspection: LocalInspectionTool) : Sol
 
   protected fun enableInspection() = myFixture.enableInspections(inspection.javaClass)
 
-  protected fun checkByText(@Language("Solidity") text: String,
-                            checkWarn: Boolean = true,
-                            checkInfo: Boolean = false,
-                            checkWeakWarn: Boolean = false) {
+  protected fun checkByText(
+    @Language("Solidity") text: String,
+    checkWarn: Boolean = true,
+    checkInfo: Boolean = false,
+    checkWeakWarn: Boolean = false
+  ) {
     myFixture.configureByText("main.sol", prepare(text))
     enableInspection()
     myFixture.checkHighlighting(checkWarn, checkInfo, checkWeakWarn)
   }
 
-  protected fun checkFixByText(fixName: String, before: String, after: String,
-                               checkWarn: Boolean = true,
-                               checkInfo: Boolean = false,
-                               checkWeakWarn: Boolean = false) {
+  protected fun checkFixByText(
+    fixName: String,
+    before: String,
+    after: String,
+    checkWarn: Boolean = true,
+    checkInfo: Boolean = false,
+    checkWeakWarn: Boolean = false
+  ) {
     myFixture.configureByText("main.sol", before)
     enableInspection()
     myFixture.checkHighlighting(checkWarn, checkInfo, checkWeakWarn)

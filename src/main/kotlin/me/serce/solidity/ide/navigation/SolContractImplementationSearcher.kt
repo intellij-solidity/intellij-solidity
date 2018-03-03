@@ -25,7 +25,6 @@ class SolContractImplementationSearcher : QueryExecutorBase<PsiElement, SearchPa
   }
 }
 
-
 fun SolContractDefinition.findAllImplementations(): HashSet<SolContractDefinition> {
   val implementations = HashSet<SolContractDefinition>()
   val implQueue = ArrayDeque<SolContractDefinition>(MAX_IMPLEMENTATIONS)
@@ -49,4 +48,3 @@ fun SolContractDefinition.findImplementations(): Query<SolContractDefinition> {
     .mapQuery { it.parent }
     .filterIsInstanceQuery<SolContractDefinition>()
 }
-

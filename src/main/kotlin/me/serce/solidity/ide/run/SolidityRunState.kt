@@ -14,7 +14,6 @@ import me.serce.solidity.run.EthereumRunner
 import java.io.File
 import java.nio.file.Paths
 
-
 class SolidityRunState(environment: ExecutionEnvironment?, configuration: SolidityRunConfig) : BaseJavaApplicationCommandLineState<SolidityRunConfig>(environment, configuration) {
   override fun createJavaParameters(): JavaParameters {
     try {
@@ -46,6 +45,4 @@ class SolidityRunState(environment: ExecutionEnvironment?, configuration: Solidi
     }
     return params
   }
-
-
 }

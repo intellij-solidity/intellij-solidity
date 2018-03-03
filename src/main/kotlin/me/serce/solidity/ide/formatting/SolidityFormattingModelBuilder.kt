@@ -3,16 +3,14 @@ package me.serce.solidity.ide.formatting
 import com.intellij.formatting.*
 import com.intellij.lang.ASTNode
 import com.intellij.openapi.util.TextRange
-import com.intellij.psi.*
-import com.intellij.formatting.FormattingModelProvider
-import com.intellij.psi.codeStyle.CodeStyleSettings
-import com.intellij.formatting.SpacingBuilder
-import me.serce.solidity.lang.SolidityLanguage
-import me.serce.solidity.lang.core.SolidityTokenTypes.*
+import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
+import com.intellij.psi.codeStyle.CodeStyleSettings
 import com.intellij.psi.tree.TokenSet
+import me.serce.solidity.lang.SolidityLanguage
 import me.serce.solidity.lang.core.SolidityParserDefinition.Companion.BINARY_OPERATORS
 import me.serce.solidity.lang.core.SolidityParserDefinition.Companion.CONTROL_STRUCTURES
+import me.serce.solidity.lang.core.SolidityTokenTypes.*
 
 /**
  * Ideally we should fully implement this

@@ -9,17 +9,17 @@ import com.intellij.psi.codeStyle.CodeStyleSettings
 import com.intellij.psi.formatter.FormatterUtil
 import com.intellij.psi.tree.IElementType
 import me.serce.solidity.lang.core.SolidityTokenTypes.*
-import me.serce.solidity.lang.psi.SolExpression
 import java.util.*
 import kotlin.collections.ArrayList
 
-
-class SolFormattingBlock(private val astNode: ASTNode,
-                         private val alignment: Alignment?,
-                         private val indent: Indent,
-                         private val wrap: Wrap?,
-                         private val codeStyleSettings: CodeStyleSettings,
-                         private val spacingBuilder: SpacingBuilder) : ASTBlock {
+class SolFormattingBlock(
+  private val astNode: ASTNode,
+  private val alignment: Alignment?,
+  private val indent: Indent,
+  private val wrap: Wrap?,
+  private val codeStyleSettings: CodeStyleSettings,
+  private val spacingBuilder: SpacingBuilder
+) : ASTBlock {
   private val nodeSubBlocks: List<Block> by lazy { buildSubBlocks() }
   private val isNodeIncomplete: Boolean by lazy { FormatterUtil.isIncomplete(node) }
 
@@ -59,18 +59,18 @@ class SolFormattingBlock(private val astNode: ASTNode,
       child is PsiComment && type in listOf(CONTRACT_DEFINITION, BLOCK, ENUM_DEFINITION, FUNCTION_DEFINITION, STRUCT_DEFINITION) -> Indent.getNormalIndent()
       childType.isContractPart() -> Indent.getNormalIndent()
 
-      // fields inside structs
+    // fields inside structs
       type == STRUCT_DEFINITION && childType == VARIABLE_DECLARATION -> Indent.getNormalIndent()
 
-      // inside a block, list of parameters, etc..
+    // inside a block, list of parameters, etc..
       parentType in listOf(BLOCK, ENUM_DEFINITION, ASSEMBLY_BLOCK, PARAMETER_LIST, INDEXED_PARAMETER_LIST) -> Indent.getNormalIndent()
 
-      // all expressions inside parens should have indentation when lines are split
+    // all expressions inside parens should have indentation when lines are split
       parentType in listOf(IF_STATEMENT, WHILE_STATEMENT, DO_WHILE_STATEMENT, FOR_STATEMENT) && childType != BLOCK -> {
         Indent.getNormalIndent()
       }
 
-      // all function calls
+    // all function calls
       parentType in listOf(FUNCTION_CALL_ARGUMENTS) -> Indent.getNormalIndent()
 
       else -> Indent.getNoneIndent()
@@ -89,7 +89,6 @@ class SolFormattingBlock(private val astNode: ASTNode,
     }
     else -> Indent.getNoneIndent()
   }
-
 
   override fun getNode(): ASTNode = astNode
   override fun getTextRange(): TextRange = astNode.textRange
@@ -119,4 +118,3 @@ class SolFormattingBlock(private val astNode: ASTNode,
     ENUM_DEFINITION
   )
 }
-

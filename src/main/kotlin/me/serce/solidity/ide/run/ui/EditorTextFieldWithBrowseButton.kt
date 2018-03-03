@@ -8,7 +8,6 @@ import com.intellij.ui.EditorTextField
 import com.intellij.ui.TextAccessor
 import me.serce.solidity.lang.SolidityFileType
 
-
 class EditorTextFieldWithBrowseButton(project: Project) : ComponentWithBrowseButton<EditorTextField>(createEditorTextField(project), null), TextAccessor {
 
   override fun getText(): String {

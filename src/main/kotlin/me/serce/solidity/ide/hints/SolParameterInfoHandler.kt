@@ -104,7 +104,6 @@ class SolParameterInfoHandler : ParameterInfoHandler<PsiElement, SolArgumentsDes
   override fun tracksParameterIndex() = true
 
   override fun couldShowInLookup() = true
-
 }
 
 class SolArgumentsDescription(val arguments: Array<String>) {

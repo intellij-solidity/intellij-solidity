@@ -61,7 +61,6 @@ class SolExpressionTypeProviderTest : SolTestBase() {
     """
   }
 
-
   fun testStateVar() = checkPrimitiveTypes { value, type ->
     """
       contract A {
@@ -161,7 +160,6 @@ class SolExpressionTypeProviderTest : SolTestBase() {
         }
     """)
   }
-
 
   fun testArrays() {
     val cases = listOf(

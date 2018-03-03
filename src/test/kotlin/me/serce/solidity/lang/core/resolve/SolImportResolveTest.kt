@@ -26,8 +26,8 @@ class SolImportResolveTest : SolResolveTestBase() {
   }
 
   fun testImportPathResolveNpm() {
-    val file1 = myFixture.configureByFile("node_modules/util/contracts/TestImport.sol");
-    myFixture.configureByFile("contracts/ImportUsage.sol");
+    val file1 = myFixture.configureByFile("node_modules/util/contracts/TestImport.sol")
+    myFixture.configureByFile("contracts/ImportUsage.sol")
 
     val (refElement) = findElementAndDataInEditor<SolNamedElement>("^")
 

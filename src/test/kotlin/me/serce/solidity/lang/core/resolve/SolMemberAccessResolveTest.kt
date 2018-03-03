@@ -17,7 +17,6 @@ class SolMemberAccessResolveTest : SolResolveTestBase() {
       }
   """)
 
-
   fun testResolveContractMember() = checkByCode("""
       contract C {
           int public prop;

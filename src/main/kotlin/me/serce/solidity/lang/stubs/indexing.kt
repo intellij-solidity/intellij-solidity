@@ -2,7 +2,6 @@ package me.serce.solidity.lang.stubs
 
 import com.intellij.psi.stubs.IndexSink
 
-
 fun IndexSink.indexEnumDef(stub: SolEnumDefStub) {
   indexNamedStub(stub)
   indexGotoClass(stub)
@@ -30,7 +29,6 @@ fun IndexSink.indexModifierDef(stub: SolModifierDefStub) {
 fun IndexSink.indexStateVarDecl(stub: SolStateVarDeclStub) {
   indexNamedStub(stub)
 }
-
 
 private fun IndexSink.indexModifier(stub: SolModifierDefStub) {
   stub.name?.let {

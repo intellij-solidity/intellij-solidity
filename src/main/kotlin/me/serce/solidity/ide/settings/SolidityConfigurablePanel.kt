@@ -2,13 +2,9 @@ package me.serce.solidity.ide.settings
 
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
-import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.options.ConfigurationException
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.openapi.util.io.FileUtil
-import com.intellij.openapi.vfs.VirtualFile
-import java.nio.file.Files
-import javax.swing.Icon
 import javax.swing.JPanel
 
 class SolidityConfigurablePanel {

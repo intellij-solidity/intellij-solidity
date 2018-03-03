@@ -34,9 +34,9 @@ class SolImportPathReference(element: SolImportPathElement) : SolReferenceBase<S
   private fun findNpmImportFile(file: VirtualFile, path: String): VirtualFile? {
     val test = file.findFileByRelativePath("node_modules/$path")
     return when {
-        test != null -> test
-        file.parent != null -> findNpmImportFile(file.parent, path)
-        else -> null
+      test != null -> test
+      file.parent != null -> findNpmImportFile(file.parent, path)
+      else -> null
     }
   }
 

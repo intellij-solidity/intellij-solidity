@@ -13,12 +13,10 @@ import me.serce.solidity.lang.psi.SolContractDefinition
 import javax.swing.text.BadLocationException
 import javax.swing.text.PlainDocument
 
-
 class SolidityConfigurationModel(private val myProject: Project) {
 
   private var myListener: SolidityConfigurableEditorPanel? = null
   private val myContractDocuments = arrayOfNulls<Any>(2)
-
 
   fun setListener(listener: SolidityConfigurableEditorPanel) {
     myListener = listener
@@ -38,25 +36,24 @@ class SolidityConfigurationModel(private val myProject: Project) {
 
   private fun applyTo(data: SolidityRunConfig.Data) {
     val contractName = getContractTextValue(CONTRACT)
-      try {
-        data.functionName = getContractTextValue(FUNCTION)
-        val contract = if (!myProject.isDefault && !StringUtil.isEmptyOrSpaces(contractName)) findPsiContract(contractName, myProject) else null
-        if (contract != null && contract.isValid) {
-          data.setContract(contract)
-        } else {
-          data.contractName = contractName
-        }
-      } catch (e: ProcessCanceledException) {
-        data.contractName = contractName
-      } catch (e: IndexNotReadyException) {
+    try {
+      data.functionName = getContractTextValue(FUNCTION)
+      val contract = if (!myProject.isDefault && !StringUtil.isEmptyOrSpaces(contractName)) findPsiContract(contractName, myProject) else null
+      if (contract != null && contract.isValid) {
+        data.setContract(contract)
+      } else {
         data.contractName = contractName
       }
+    } catch (e: ProcessCanceledException) {
+      data.contractName = contractName
+    } catch (e: IndexNotReadyException) {
+      data.contractName = contractName
+    }
   }
 
   private fun findPsiContract(contractName: String, myProject: Project): SolContractDefinition? {
     return SearchUtils.findContract(contractName, myProject)
   }
-
 
   private fun getContractTextValue(index: Int): String {
     return getDocumentText(index, myContractDocuments)
@@ -81,12 +78,10 @@ class SolidityConfigurationModel(private val myProject: Project) {
       } catch (e: BadLocationException) {
         throw RuntimeException(e)
       }
-
     } else {
       WriteCommandAction.runWriteCommandAction(myProject) { (document as Document).replaceString(0, document.textLength, text) }
     }
   }
-
 
   companion object {
     const val CONTRACT = 0
@@ -100,10 +95,8 @@ class SolidityConfigurationModel(private val myProject: Project) {
         } catch (e: BadLocationException) {
           throw RuntimeException(e)
         }
-
       }
       return (document as Document).text
     }
   }
 }
-

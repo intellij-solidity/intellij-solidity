@@ -3,9 +3,7 @@ package me.serce.solidity.lang.core
 import com.intellij.core.CoreApplicationEnvironment
 import com.intellij.lang.LanguageExtensionPoint
 import com.intellij.openapi.extensions.Extensions
-import com.intellij.rt.execution.junit.FileComparisonFailure
 import com.intellij.testFramework.ParsingTestCase
-import org.junit.Assert
 
 abstract class SolidityParsingTestBase(baseDir: String) : ParsingTestCase(baseDir, "sol", true, SolidityParserDefinition()) {
 

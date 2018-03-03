@@ -7,7 +7,6 @@ import com.intellij.psi.search.GlobalSearchScope
 import me.serce.solidity.lang.psi.SolContractDefinition
 import javax.swing.JComponent
 
-
 abstract class ContractBrowser(project: Project, private val myTitle: String) : BrowseModuleValueActionListener<JComponent>(project) {
 
   @Throws(NoFilterException::class)

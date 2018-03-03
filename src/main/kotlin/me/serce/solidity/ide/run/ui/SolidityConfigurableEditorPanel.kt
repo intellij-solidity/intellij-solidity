@@ -27,11 +27,10 @@ import javax.swing.DefaultComboBoxModel
 import javax.swing.JComponent
 import javax.swing.JPanel
 
-
 class SolidityConfigurableEditorPanel(private val myProject: Project) : SettingsEditor<SolidityRunConfig>(), PanelWithAnchor {
 
   val moduleSelector: ConfigurationModuleSelector
-  private val myContractLocations : Array<LabeledComponent<EditorTextFieldWithBrowseButton>>
+  private val myContractLocations: Array<LabeledComponent<EditorTextFieldWithBrowseButton>>
   private val myModel: SolidityConfigurationModel
   private val myBrowsers: Array<BrowseModuleValueActionListener<JComponent>>
   private lateinit var myContract: LabeledComponent<EditorTextFieldWithBrowseButton>
@@ -173,7 +172,6 @@ class SolidityConfigurableEditorPanel(private val myProject: Project) : Settings
         throw ContractBrowser.NoFilterException(MessagesEx.MessageInfo(project,
           ignore.message, "Can't Browse Inheritors"))
       }
-
     }
   }
 

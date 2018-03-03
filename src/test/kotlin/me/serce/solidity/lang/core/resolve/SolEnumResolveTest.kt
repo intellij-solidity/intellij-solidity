@@ -77,5 +77,4 @@ class SolEnumResolveTest : SolResolveTestBase() {
         }
   """)
 */
-
 }

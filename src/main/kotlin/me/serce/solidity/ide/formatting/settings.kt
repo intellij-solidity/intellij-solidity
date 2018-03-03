@@ -34,7 +34,6 @@ class SolCodeStyleSettingsProvider : CodeStyleSettingsProvider() {
 
 class SolCodeStyleSettings(container: CodeStyleSettings) : CustomCodeStyleSettings("SolCodeStyleSettings", container)
 
-
 class SolLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider() {
   override fun getLanguage(): Language = SolidityLanguage
 

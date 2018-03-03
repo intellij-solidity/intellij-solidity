@@ -57,5 +57,4 @@ abstract class FunctionBrowser(project: Project) : BrowseModuleValueActionListen
       }
     }.apply(field)
   }
-
 }

@@ -73,5 +73,4 @@ class SolHighlighter : SyntaxHighlighterBase() {
   }
 }
 
-
 private inline fun <reified T : Any?> T?.asArray(): Array<out T> = if (this == null) emptyArray() else arrayOf(this)

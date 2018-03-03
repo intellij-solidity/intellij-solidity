@@ -118,7 +118,7 @@ class SolContextCompletionContributor : CompletionContributor(), DumbAware {
   private fun eqExpressionInsideBlock() = psiElement<PsiElement>()
     .withParent(SolBlock::class.java)
     .afterLeaf(
-        psiElement().withText("=")
+      psiElement().withText("=")
     )
 }
 
@@ -138,4 +138,3 @@ private inline fun <reified I : PsiElement> psiElement(): PsiElementPattern.Capt
 }
 
 private fun LookupElementBuilder.keywordPrioritised(): LookupElement = PrioritizedLookupElement.withPriority(this, KEYWORD_PRIORITY)
-

@@ -22,7 +22,7 @@ abstract class SolResolveTestBase : SolTestBase() {
     assertTrue("Failed to resolve ${refElement.text}", references.isNotEmpty())
     val target = findElementInEditor<SolNamedElement>("x")
 
-    if(references.size ==  1) {
+    if (references.size == 1) {
       assertEquals(target, references.first())
     } else {
       assertTrue(references.contains(target))
@@ -48,7 +48,5 @@ abstract class SolResolveTestBase : SolTestBase() {
 
     assertEquals(target, resolved)
   }
-
 }
-
 
