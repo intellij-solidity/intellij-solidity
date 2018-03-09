@@ -13,6 +13,7 @@ import com.intellij.util.xmlb.XmlSerializerUtil
 import org.jetbrains.annotations.Nls
 import java.net.URLClassLoader
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.stream.Collectors
 import javax.swing.JComponent
@@ -36,18 +37,29 @@ class SoliditySettings : PersistentStateComponent<SoliditySettings> {
 
   companion object {
 
-    fun validateEvm(pathToEvm: String?): Boolean {
-      return !pathToEvm.isNullOrBlank() && checkJars(pathToEvm!!)
-    }
+    fun getUrls(path: String?) : List<Path> {
+      if (path.isNullOrBlank()) {
+        return emptyList()
+      }
+      val p = Paths.get(path)
 
-    private fun checkJars(pathToEvm: String): Boolean {
-      val p = Paths.get(pathToEvm)
-
-      val files = when {
+      val files : List<Path> = when {
         p.isDirectory() -> Files.list(p).collect(Collectors.toList())
         p.isFile() && p.toString().endsWith(".jar") -> listOf(p)
-        else -> return false
-      }.toMutableList()
+        else -> return emptyList()
+      }
+      return files
+    }
+
+    fun validateEvm(path: String?): Boolean {
+      return checkJars(path)
+    }
+
+    private fun checkJars(path: String?): Boolean {
+      val files = getUrls(path).toMutableList()
+      
+      if (files.isEmpty()) return false
+
       val ethJar = files.indexOfFirst { it.fileName.toString().contains("ethereumj") }
       if (ethJar > 0) {
         files[ethJar] = files[0].also { files[0] = files[ethJar] }

@@ -8,6 +8,6 @@ import me.serce.solidity.lang.SolidityFileType
 class SolidityCompileFactory : CompilerFactory {
   override fun createCompilers(compilerManager: CompilerManager): Array<Compiler> {
     compilerManager.addCompilableFileType(SolidityFileType)
-    return arrayOf(SolidityIdeCompiler());
+    return arrayOf(SolidityIdeCompiler);
   }
 }
