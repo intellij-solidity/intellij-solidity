@@ -8,14 +8,13 @@ import org.ethereum.util.blockchain.StandaloneBlockchain;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
 
-
+// NOTE: java 7 language level
 public class EthereumRunner {
 
     private static StandaloneBlockchain init() {
@@ -36,27 +35,15 @@ public class EthereumRunner {
         return blockchain;
     }
 
-    private static SolidityContract submitAllContracts(String main, List<String> dirs, EasyBlockchain init) throws IOException {
-        List<Path> contracts = new ArrayList<>();
-        for (String dir : dirs) {
-            Files.walkFileTree(Paths.get(dir), new SimpleFileVisitor<Path>() {
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-                    if (file.toString().endsWith(".sol")) {
-                        contracts.add(file);
-                    }
-                    return FileVisitResult.CONTINUE;
-                }
-            });
-        }
+    private static SolidityContract submitAllContracts(String main, List<String> compiledContracts, EasyBlockchain init) throws IOException {
         System.out.print("Submitting contracts... ");
         StringBuilder sb = new StringBuilder();
-        for (Path cp : contracts) {
-            sb.append(new String(Files.readAllBytes(cp)));
+        for (String cc : compiledContracts) {
+            sb.append(new String(Files.readAllBytes(Paths.get(cc))));
         }
-        SolidityContract res = init.submitNewContract(sb.toString(), main);
+        SolidityContract res = init.submitNewContractFromJson(sb.toString(), main);
 
-        System.out.println(" Done");
+        System.out.println(" Done.");
         return res;
     }
 
@@ -65,11 +52,11 @@ public class EthereumRunner {
 
         String mainContract = args[0];
         String function = args[1];
-        List<String> sources = Arrays.asList(args).subList(2, args.length);
+        List<String> compiledContracts = Arrays.asList(args).subList(2, args.length);
 
         try {
             StandaloneBlockchain init = init();
-            SolidityContract contract = submitAllContracts(mainContract, sources, init);
+            SolidityContract contract = submitAllContracts(mainContract, compiledContracts, init);
             Object result = contract.callFunction(function).getReturnValue();
             System.out.println(String.format("Function '%s.%s' returned:", mainContract, args[1]));
             System.out.println(resultToString(result));

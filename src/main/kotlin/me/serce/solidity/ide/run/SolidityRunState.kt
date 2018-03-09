@@ -6,7 +6,7 @@ import com.intellij.execution.configurations.JavaParameters
 import com.intellij.execution.configurations.RuntimeConfigurationError
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.execution.util.JavaParametersUtil
-import com.intellij.openapi.roots.ModuleRootManager
+import com.intellij.openapi.compiler.CompilerPaths
 import com.intellij.util.PathUtil
 import com.intellij.util.io.isDirectory
 import me.serce.solidity.ide.settings.SoliditySettings
@@ -26,12 +26,11 @@ class SolidityRunState(environment: ExecutionEnvironment?, configuration: Solidi
     params.jdk = JavaParametersUtil.createProjectJdk(myConfiguration.project, jreHome)
     setupJavaParameters(params)
     params.mainClass = EthereumRunner::class.qualifiedName
-    val sourceRoots = ModuleRootManager.getInstance(configuration.configurationModule.module!!).sourceRoots
-    val srcPaths = sourceRoots.map { it.path }
-    val mainContract = configuration.getPersistentData().contractName!!
-    params.programParametersList.add(mainContract)
+    val outputPath = CompilerPaths.getModuleOutputPath(configuration.configurationModule.module!!, false)!!;
+    val mainContract = configuration.getPersistentData().getGetContractName()
+    params.programParametersList.add("$mainContract")
     params.programParametersList.add(configuration.getPersistentData().functionName)
-    params.programParametersList.addAll(srcPaths)
+    params.programParametersList.add(File(outputPath, mainContract).absolutePath)
 
     params.configureByModule(configuration.configurationModule.module, JavaParameters.JDK_AND_CLASSES)
     params.classPath.add(PathUtil.getJarPathForClass(EthereumRunner::class.java))

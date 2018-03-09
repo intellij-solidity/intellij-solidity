@@ -141,7 +141,8 @@
         <runConfigurationProducer implementation="me.serce.solidity.ide.run.SolidityRunConfigProducer"/>
         <runLineMarkerContributor language="Solidity" implementationClass="me.serce.solidity.ide.run.SolidityRunLineMarkerProvider"/>
         <applicationService serviceInterface="me.serce.solidity.ide.settings.SoliditySettings" serviceImplementation="me.serce.solidity.ide.settings.SoliditySettings"/>
-        <applicationConfigurable groupId="language" displayName="Solidity" id="preferences.Solidity" instance="me.serce.solidity.ide.settings.SoliditySettingsConfigurable"/>`
+        <applicationConfigurable groupId="language" displayName="Solidity" id="preferences.Solidity" instance="me.serce.solidity.ide.settings.SoliditySettingsConfigurable"/>
+        <compilerFactory implementation="me.serce.solidity.ide.run.compile.SolidityCompileFactory"/>
     </extensions>
 
     <actions>
