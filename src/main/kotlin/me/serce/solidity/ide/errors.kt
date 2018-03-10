@@ -21,7 +21,8 @@ import java.awt.Component
 class SentryReportSubmitter : ErrorReportSubmitter() {
 
   init {
-    val dsn = "https://abb831cb774a4db48b88ffcdfc9fac34:3fb72bd1d4fb490e926cb248a043daf2@sentry.io/261429" +
+    // IntelliJ Solidity N
+    val dsn = "https://4cf4758bb74b408a82c9c4f200b63837:45584ba1888b405f80c886e163031be0@sentry.io/301677" +
       "?${DefaultSentryClientFactory.UNCAUGHT_HANDLER_ENABLED_OPTION}=false"
     Sentry.init(dsn)
   }
