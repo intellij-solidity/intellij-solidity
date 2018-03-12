@@ -44,7 +44,7 @@ class SentryReportSubmitter : ErrorReportSubmitter() {
     if (pluginVersion.endsWith("-SNAPSHOT")) {
       // do not report errors from dev-versions. If someone uses a dev version, he will
       // be able to report the issue and all related info as a github issue or even fix it.
-      consumer.consume(SubmittedReportInfo(null, "Error submission is disable in dev version", FAILED))
+      consumer.consume(SubmittedReportInfo(null, "Error submission is disabled in dev versions", FAILED))
       return false
     }
     val error = ijEvent.throwable
