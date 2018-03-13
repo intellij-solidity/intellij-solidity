@@ -143,6 +143,7 @@ PRAGMAALL=[\^a-zA-Z_0-9\.\"\']*
   "continue"              { return CONTINUE; }
   "break"                 { return BREAK; }
   "throw"                 { return THROW; }
+  "emit"                  { return EMIT; }
   "delete"                { return DELETE; }
   "new"                   { return NEW; }
   "wei"                   { return WEI; }

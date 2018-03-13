@@ -280,7 +280,7 @@ private UnfinishedBlock ::= '{' Statement* {
 }
 Block ::= UnfinishedBlock '}'
 
-private FinishedStatement ::= DoWhileStatement | PlaceholderStatement | ContinueSt | BreakSt | ReturnSt | ThrowSt | SimpleStatement {
+private FinishedStatement ::= DoWhileStatement | PlaceholderStatement | ContinueSt | BreakSt | ReturnSt | ThrowSt | EmitStatement | SimpleStatement {
     recoverWhile = UntilSemicolonRecover
 }
 Statement ::= IfStatement | WhileStatement | ForStatement | Block | InlineAssemblyStatement | TupleStatement | ReturnTupleStatement | FinishedStatement ';'
@@ -305,6 +305,7 @@ ContinueSt ::= continue
 BreakSt ::= break
 ReturnSt ::= return Expression? {pin=1}
 ThrowSt ::= throw
+EmitStatement ::= emit FunctionCallExpression {pin=1}
 SeqExpression ::= '(' ','? Expression (',' Expression)* ','? ')'
 VariableDefinition ::= VariableDeclaration ( '=' Expression )?
 
