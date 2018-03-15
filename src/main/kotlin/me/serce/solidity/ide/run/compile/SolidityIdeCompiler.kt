@@ -7,12 +7,9 @@ import com.intellij.openapi.vfs.VirtualFile
 import me.serce.solidity.ide.settings.SoliditySettings
 import me.serce.solidity.ide.settings.SoliditySettingsListener
 import me.serce.solidity.lang.SolidityFileType
-import org.ethereum.solidity.compiler.SolidityCompiler
 import java.io.DataInput
 import java.io.File
 import java.net.URLClassLoader
-import java.nio.file.Files
-import java.nio.file.Paths
 
 object SolidityIdeCompiler : SourceInstrumentingCompiler {
   private var solcBridge: Class<*>? = null
@@ -63,31 +60,21 @@ object SolidityIdeCompiler : SourceInstrumentingCompiler {
     }
 
     val modules = context!!.compileScope.affectedModules
-    val fileWithModule = items
+    val fileByModule = items
       .map { Pair(it, modules.find { m -> m.moduleScope.contains(it.file) } ?: return@map null) }
       .filterNotNull()
-      .toList()
+      .groupBy { it.second }
 
-    val sources = fileWithModule.map { File(it.first.file.path) }
-    val method = solcBridge!!.getMethod("compile", List::class.java)
-    method.isAccessible = true
-    @Suppress("unchecked_cast")
-    val compile = (method.invoke(null, sources) as List<List<Any>>).map { Pair(it.component1() as Boolean, it.component2() as String) }
+    val compiled = fileByModule.map {
+      Pair(it.value, Solc.compile(it.value.map { File(it.first.file.path) }, File(CompilerPaths.getModuleOutputDirectory(it.key, false)!!.path)))
+    }.groupBy { it.second.success }
 
-    return compile
-      .mapIndexed { i, r ->
-        if (!r.first) {
-          val module = fileWithModule[i].second
-          val item = fileWithModule[i].first
-          Files.write(Paths.get(CompilerPaths.getModuleOutputPath(module, false), item.file.name), r.second.toByteArray())
-          return@mapIndexed item
-        } else {
-          context.addMessage(CompilerMessageCategory.ERROR, r.second, null, -1, -1)
-          return@mapIndexed null
-        }
-      }
-      .filterNotNull()
-      .toTypedArray()
+    compiled[false]?.forEach {
+      it.second.messages.split("\n").forEach {
+        context.addMessage(CompilerMessageCategory.ERROR, it, null, -1, -1) }
+    }
+    val success = compiled[true] ?: return emptyArray()
+    return success.flatMap { it.first }.map { it.first }.toTypedArray()
   }
 
   override fun validateConfiguration(scope: CompileScope?): Boolean {
@@ -96,18 +83,6 @@ object SolidityIdeCompiler : SourceInstrumentingCompiler {
 
   override fun getDescription(): String {
     return "Solidity Language Compiler (Solc)"
-  }
-}
-
-private class SolcBridge {
-  companion object {
-    val solc = SolidityCompiler(null)
-    @JvmStatic
-    fun compile(sources: List<File>): List<List<Any>> {
-      return sources
-        .map { solc.compileSrc(it, false, true, SolidityCompiler.Options.ABI, SolidityCompiler.Options.BIN) }
-        .map { listOf(it.isFailed, if (it.isFailed) it.errors else it.output) }
-    }
   }
 }
 
