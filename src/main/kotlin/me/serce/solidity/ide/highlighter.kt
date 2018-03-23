@@ -47,7 +47,7 @@ class SolHighlighter : SyntaxHighlighterBase() {
     ).mapValues { it.value.textAttributesKey }
 
     private fun keywords() = setOf<IElementType>(
-      IMPORT, AS, PRAGMA, NEW, DELETE,
+      IMPORT, AS, PRAGMA, NEW, DELETE, EMIT,
       CONTRACT, LIBRARY, INTERFACE, IS, STRUCT, FUNCTION, ENUM,
       PUBLIC, PRIVATE, INTERNAL, EXTERNAL, CONSTANT, PAYABLE, PURE, VIEW,
       IF, ELSE, FOR, WHILE, DO, BREAK, CONTINUE, THROW, USING, RETURN, RETURNS,

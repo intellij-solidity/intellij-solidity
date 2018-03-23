@@ -4,7 +4,7 @@ import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.lang.parameterInfo.*
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
-import me.serce.solidity.firstInstance
+import me.serce.solidity.firstInstanceOrNull
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.resolve.SolResolver
 
@@ -119,7 +119,11 @@ class SolArgumentsDescription(val arguments: Array<String>) {
 
   companion object {
     fun findDescription(element: SolFunctionCallExpression): SolArgumentsDescription? {
-      val resolved = SolResolver.resolveFunction(element.ancestors.firstInstance<SolContractDefinition>(), element)
+      val contract = element.ancestors.firstInstanceOrNull<SolContractDefinition>()
+      if (contract == null) {
+        return null
+      }
+      val resolved = SolResolver.resolveFunction(contract, element)
       val argumentDefList = resolved.filterIsInstance<SolFunctionDefinition>().firstOrNull()?.parameterListList?.firstOrNull()?.parameterDefList
       if (argumentDefList == null) {
         return null

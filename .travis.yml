@@ -15,3 +15,6 @@ before_script:
   - uname -a
 script:
   - ./gradlew clean build check
+  - ./gradlew jacocoTestReport
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
