@@ -28,9 +28,9 @@ class SolidityRunState(environment: ExecutionEnvironment?, configuration: Solidi
     params.mainClass = EthereumRunner::class.qualifiedName
     val outputPath = CompilerPaths.getModuleOutputPath(configuration.configurationModule.module!!, false)!!;
     val mainContract = configuration.getPersistentData().getGetContractName()
-    params.programParametersList.add("$mainContract")
+    params.programParametersList.add(mainContract)
     params.programParametersList.add(configuration.getPersistentData().functionName)
-    params.programParametersList.add(File(outputPath, mainContract).absolutePath)
+    params.programParametersList.add(File(outputPath).absolutePath)
 
     params.configureByModule(configuration.configurationModule.module, JavaParameters.JDK_AND_CLASSES)
     params.classPath.add(PathUtil.getJarPathForClass(EthereumRunner::class.java))

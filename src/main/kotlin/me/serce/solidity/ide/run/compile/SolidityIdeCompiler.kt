@@ -1,35 +1,14 @@
 package me.serce.solidity.ide.run.compile
 
-import com.intellij.ide.plugins.cl.PluginClassLoader
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.compiler.*
 import com.intellij.openapi.vfs.VirtualFile
-import me.serce.solidity.ide.settings.SoliditySettings
-import me.serce.solidity.ide.settings.SoliditySettingsListener
 import me.serce.solidity.lang.SolidityFileType
 import java.io.DataInput
 import java.io.File
-import java.net.URLClassLoader
 
-object SolidityIdeCompiler : SourceInstrumentingCompiler {
-  private var solcBridge: Class<*>? = null
-
-  init {
-    ApplicationManager.getApplication().messageBus.connect().subscribe(SoliditySettingsListener.TOPIC, object : SoliditySettingsListener {
-      override fun settingsChanged() {
-        updateSolcBridge()
-      }
-    })
-    updateSolcBridge()
-  }
-
-  private fun updateSolcBridge() {
-    val evm = SoliditySettings.instance.pathToEvm
-    solcBridge = if (!evm.isNullOrBlank()) {
-      val cl = URLClassLoader(SoliditySettings.getUrls(evm).map { it.toUri().toURL() }.toTypedArray() + (SolidityIdeCompiler::class.java.classLoader as PluginClassLoader).baseUrls)
-      Class.forName("me.serce.solidity.ide.run.compile.SolcBridge", false, cl)
-    } else null
-  }
+object SolidityIdeCompiler : Validator {
+// extends Validator to be run after the regular (javac) compiler,
+// otherwise the last one will erase all the compiled contract files
 
   private class MyProcessingItem(val myValidityState: ValidityState, val myFile: VirtualFile) : FileProcessingCompiler.ProcessingItem {
     override fun getValidityState(): ValidityState? {
@@ -46,7 +25,7 @@ object SolidityIdeCompiler : SourceInstrumentingCompiler {
   }
 
   override fun getProcessingItems(context: CompileContext?): Array<FileProcessingCompiler.ProcessingItem> {
-    if (solcBridge == null) {
+    if (!Solc.isEnabled()) {
       return FileProcessingCompiler.ProcessingItem.EMPTY_ARRAY
     }
     val scope = context?.compileScope ?: return FileProcessingCompiler.ProcessingItem.EMPTY_ARRAY
@@ -78,7 +57,7 @@ object SolidityIdeCompiler : SourceInstrumentingCompiler {
   }
 
   override fun validateConfiguration(scope: CompileScope?): Boolean {
-    return solcBridge != null
+    return Solc.isEnabled()
   }
 
   override fun getDescription(): String {

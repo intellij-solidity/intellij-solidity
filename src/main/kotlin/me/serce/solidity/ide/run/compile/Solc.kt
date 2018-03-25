@@ -18,13 +18,13 @@ object Solc  {
   init {
       ApplicationManager.getApplication().messageBus.connect().subscribe(SoliditySettingsListener.TOPIC, object : SoliditySettingsListener {
         override fun settingsChanged() {
-          updateSolcBridge()
+          updateSolcExecutable()
         }
       })
-    updateSolcBridge()
+    updateSolcExecutable()
   }
 
-  private fun updateSolcBridge() {
+  private fun updateSolcExecutable() {
     val evm = SoliditySettings.instance.pathToEvm
     solcExecutable = if (!evm.isNullOrBlank()) {
       val classLoader = URLClassLoader(SoliditySettings.getUrls(evm).map { it.toUri().toURL() }.toTypedArray())
@@ -58,6 +58,10 @@ object Solc  {
     val solcExec = files.first()
     solcExec.setExecutable(true)
     return solcExec
+  }
+
+  fun isEnabled() : Boolean {
+    return solcExecutable != null
   }
 
   fun compile(sources : List<File>, output : File) : SolcResult {
