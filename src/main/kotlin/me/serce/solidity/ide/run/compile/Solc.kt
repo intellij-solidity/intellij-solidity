@@ -69,7 +69,7 @@ object Solc  {
     if (solc == null) {
       throw IllegalStateException("No solc instance was found")
     }
-    val pb = ProcessBuilder(arrayListOf(solc.canonicalPath, "--abi", "--bin", "-o", output.absolutePath) + sources.map { it.absolutePath })
+    val pb = ProcessBuilder(arrayListOf(solc.canonicalPath, "--abi", "--bin", "--overwrite", "-o", output.absolutePath) + sources.map { it.absolutePath })
     pb
       .directory(solc.parentFile)
       .environment().put("LD_LIBRARY_PATH", solc.parentFile.canonicalPath)
