@@ -19,6 +19,7 @@ object SolcMessageProcessor {
     var curLevel = unsorted
     var curPattern : MatchResult? = null
     for (line in messages.split("\n")) {
+      if (line.isBlank()) continue
       val link = linkPattern.find(line)
       if (link != null) {
         val levelStartInd = link.range.endInclusive + 1
