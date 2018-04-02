@@ -1,5 +1,6 @@
 package me.serce.solidity.ide.settings
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.options.ConfigurationException
@@ -37,11 +38,12 @@ class SolidityConfigurablePanel {
 
   internal fun apply(settings: SoliditySettings) {
     val evmPath = fromPath(myEvmPathField)
-    if (!SoliditySettings.validateEvm(evmPath)) {
+    if (evmPath.isNotBlank() && !SoliditySettings.validateEvm(evmPath)) {
       throw ConfigurationException("Incorrect EVM path")
     }
     settings.pathToEvm = evmPath
     settings.pathToDb = fromPath(myDbPathField)
+    ApplicationManager.getApplication().messageBus.syncPublisher(SoliditySettingsListener.TOPIC).settingsChanged()
   }
 
   private fun fromPath(textField: TextFieldWithBrowseButton?) = FileUtil.toSystemIndependentName(textField!!.text.trim())

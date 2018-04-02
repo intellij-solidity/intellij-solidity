@@ -135,6 +135,8 @@ class SolidityRunConfig(configurationModule: SolidityRunConfigModule?, factory: 
     @JvmField
     var contractName: String? = null
     @JvmField
+    var contractFile: String? = null
+    @JvmField
     var functionName: String? = null
     @JvmField
     var vmParameters: String? = null
@@ -170,7 +172,8 @@ class SolidityRunConfig(configurationModule: SolidityRunConfigModule?, factory: 
     fun getGetFunctionName(): String = functionName ?: ""
 
     fun setContract(contract: SolContractDefinition) {
-      contractName = contract.name
+      this.contractName = contract.name
+      this.contractFile = contract.containingFile.virtualFile.path
     }
 
     fun setFunction(methodLocation: SolFunctionDefinition) {
@@ -191,6 +194,9 @@ class SolidityRunConfig(configurationModule: SolidityRunConfigModule?, factory: 
     val psiContract = SearchUtils.findContract(myData.getGetContractName(), configurationModule.project, configurationModule.module)
     if (psiContract == null) {
       throw RuntimeConfigurationError("Can't find contract ${myData.contractName} within module ${configurationModule.moduleName}")
+    }
+    if (psiContract.containingFile.virtualFile.path != myData.contractFile) {
+      throw RuntimeConfigurationError("Can't find contract ${myData.contractName} within file ${myData.contractFile}")
     }
     if (myData.functionName != null && psiContract.functionDefinitionList.none { it.name == myData.functionName }) {
       throw RuntimeConfigurationError("Can't find method '${myData.functionName}' within contract '${psiContract.name}'")
