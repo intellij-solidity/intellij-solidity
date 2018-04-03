@@ -45,7 +45,7 @@ class ImportFileAction(
   }
 
   private fun chooseFileToImport() {
-    val step = object : BaseListPopupStep<PsiFile>(QuickFixBundle.message("class.to.import.chooser.title"), suggestions.toMutableList()) {
+    val step = object : BaseListPopupStep<PsiFile>("File to import", suggestions.toMutableList()) {
       override fun isAutoSelectionEnabled(): Boolean {
         return false
       }
