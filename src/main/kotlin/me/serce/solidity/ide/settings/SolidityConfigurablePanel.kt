@@ -6,12 +6,14 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.options.ConfigurationException
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.openapi.util.io.FileUtil
+import javax.swing.JButton
 import javax.swing.JPanel
 
 class SolidityConfigurablePanel {
   private lateinit var myEvmPathField: TextFieldWithBrowseButton
   private lateinit var myDbPathField: TextFieldWithBrowseButton
-  internal var myEvmPathPanel: JPanel? = null
+  private lateinit var downloadBtn: JButton
+  internal lateinit var myEvmPathPanel: JPanel
 
   init {
     val descriptor = FileChooserDescriptor(false, true, true, true, false, false)
@@ -23,6 +25,13 @@ class SolidityConfigurablePanel {
     descriptor2.title = "Transaction Data Base"
     descriptor2.description = "Select path to EVM Data Base"
     myDbPathField.addBrowseFolderListener(descriptor2.title, descriptor2.description, null, descriptor2)
+
+    downloadBtn.addActionListener {
+      val dir = EvmDownloader.download(myEvmPathPanel)
+      if (dir.isNotEmpty()) {
+        myEvmPathField.text = dir
+      }
+    }
   }
 
   internal fun reset(settings: SoliditySettings) {
