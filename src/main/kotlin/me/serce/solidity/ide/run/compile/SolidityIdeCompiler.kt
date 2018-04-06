@@ -1,7 +1,6 @@
 package me.serce.solidity.ide.run.compile
 
 import com.intellij.openapi.compiler.*
-import com.intellij.openapi.vfs.VirtualFile
 import me.serce.solidity.lang.SolidityFileType
 import java.io.DataInput
 import java.io.File
@@ -10,35 +9,25 @@ object SolidityIdeCompiler : Validator {
 // extends Validator to be run after the regular (javac) compiler,
 // otherwise the last one will erase all the compiled contract files
 
-  private class MyProcessingItem(val myValidityState: ValidityState, val myFile: VirtualFile) : FileProcessingCompiler.ProcessingItem {
-    override fun getValidityState(): ValidityState? {
-      return myValidityState
-    }
-
-    override fun getFile(): VirtualFile {
-      return myFile
-    }
-  }
-
   override fun createValidityState(`in`: DataInput?): ValidityState {
     return TimestampValidityState.load(`in`)
   }
 
-  override fun getProcessingItems(context: CompileContext?): Array<FileProcessingCompiler.ProcessingItem> {
+  override fun getProcessingItems(context: CompileContext): Array<FileProcessingCompiler.ProcessingItem> {
     if (!Solc.isEnabled()) {
       return FileProcessingCompiler.ProcessingItem.EMPTY_ARRAY
     }
-    val scope = context?.compileScope ?: return FileProcessingCompiler.ProcessingItem.EMPTY_ARRAY
-    val files = scope.getFiles(SolidityFileType, true).filterNotNull()
-    return files.map { MyProcessingItem(TimestampValidityState(it.modificationStamp), it.canonicalFile!!) }.toTypedArray()
+    return collectProcessingItems(context)
   }
 
-  override fun process(context: CompileContext?, items: Array<out FileProcessingCompiler.ProcessingItem>?): Array<FileProcessingCompiler.ProcessingItem> {
-    if (items == null) {
-      return FileProcessingCompiler.ProcessingItem.EMPTY_ARRAY
-    }
+  fun collectProcessingItems(context: CompileContext): Array<FileProcessingCompiler.ProcessingItem> {
+    val scope = context.compileScope
+    val files = scope.getFiles(SolidityFileType, true).filterNotNull()
+    return files.map { SolProcessingItem(TimestampValidityState(it.modificationStamp), it.canonicalFile!!) }.toTypedArray()
+  }
 
-    val modules = context!!.compileScope.affectedModules
+  override fun process(context: CompileContext, items: Array<FileProcessingCompiler.ProcessingItem>): Array<FileProcessingCompiler.ProcessingItem> {
+    val modules = context.compileScope.affectedModules
     val fileByModule = items
       .map { Pair(it, modules.find { m -> m.moduleScope.contains(it.file) } ?: return@map null) }
       .filterNotNull()
