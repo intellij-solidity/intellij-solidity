@@ -1,5 +1,6 @@
 package me.serce.solidity.ide.interop
 
+import com.intellij.compiler.impl.CompilerUtil
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.compiler.*
@@ -86,17 +87,24 @@ object JavaStubProcessor : SourceInstrumentingCompiler {
     if (srcRoot.findChild(JavaStubGenerator.packageName) == null) {
       WriteCommandAction.runWriteCommandAction(project) { srcRoot.createChildDirectory(this, JavaStubGenerator.packageName) }
     }
-    ApplicationManager.getApplication().runReadAction {
+    val dir = ApplicationManager.getApplication().runReadAction(Computable {
       val stubsDir = Paths.get(srcRoot.canonicalPath, JavaStubGenerator.packageName)
       contracts.forEach {
         writeClass(stubsDir, it.name!!, JavaStubGenerator.convert(it))
       }
 
-      val output = File(CompilerPaths.getModuleOutputDirectory(module, false)!!.path)
-      Solc.compile(contracts.map { File(it.containingFile.virtualFile.canonicalPath) }, output)
+      val outputPath = CompilerPaths.getModuleOutputDirectory(module, false);
+
+      val outputDir = if (outputPath != null) File(outputPath.path) else {
+        // todo workaround - fix it properly
+        val moduleOutDir = Paths.get(project.basePath, "out", "production", module.name).toFile()
+        moduleOutDir.mkdirs()
+        moduleOutDir
+      }
+      Solc.compile(contracts.map { File(it.containingFile.virtualFile.canonicalPath) }, outputDir)
 
       val namedContract = contracts.map { it.name to it }.toMap()
-      val infos = Files.walk(output.toPath()).map {
+      val infos = Files.walk(outputDir.toPath()).map {
         val cm = ContractUtils.readContract(it) ?: return@map null
         val contract = namedContract[FileUtil.getNameWithoutExtension(it.toFile())] ?: return@map null
         JavaStubGenerator.CompiledContractDefinition(cm, contract)
@@ -106,7 +114,9 @@ object JavaStubProcessor : SourceInstrumentingCompiler {
       @Suppress("UNCHECKED_CAST")
       val repo = JavaStubGenerator.generateRepo(infos as List<JavaStubGenerator.CompiledContractDefinition>)
       writeClass(stubsDir, JavaStubGenerator.repoClassName, repo)
-    }
+      stubsDir
+    })
+    CompilerUtil.refreshIODirectories(listOf(dir.toFile()))
   }
 
   private fun generateSrcDir(modules: Array<out Module>, project: Project) {
@@ -116,7 +126,7 @@ object JavaStubProcessor : SourceInstrumentingCompiler {
       }
       WriteCommandAction.runWriteCommandAction(project) {
         val moduleDir = it.moduleFile!!.parent
-        val childDirectory = moduleDir.createChildDirectory(this, genDir)
+        val childDirectory = moduleDir.findChild(genDir) ?: moduleDir.createChildDirectory(this, genDir)
         val model = ModuleRootManager.getInstance(it).modifiableModel
         model.addContentEntry(childDirectory).addSourceFolder(childDirectory, false)
         model.commit()

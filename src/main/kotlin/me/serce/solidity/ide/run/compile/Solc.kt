@@ -45,7 +45,9 @@ object Solc  {
     val tmpDir = File(System.getProperty("java.io.tmpdir"), "solc")
     tmpDir.mkdirs()
 
-    val someClass = classLoader.loadClass("org.ethereum.solidity.compiler.SourceArtifact")
+    // for some reason, we have to load any class to be able to read any resource from the jar
+    val someClass = classLoader.loadClass("org.ethereum.util.blockchain.StandaloneBlockchain")
+    
     val fileList = StreamUtil.readText(someClass.getResourceAsStream("$solcResDir/file.list"), Charset.defaultCharset())
     val files = fileList.split("\n")
       .map { it.trim() }
@@ -66,7 +68,7 @@ object Solc  {
 
   fun compile(sources : List<File>, output : File) : SolcResult {
     val solc = solcExecutable ?: throw IllegalStateException("No solc instance was found")
-    val pb = ProcessBuilder(arrayListOf(solc.canonicalPath, "--abi", "--bin", "-o", output.absolutePath) + sources.map { it.absolutePath })
+    val pb = ProcessBuilder(arrayListOf(solc.canonicalPath, "--abi", "--bin", "--overwrite", "-o", output.absolutePath) + sources.map { it.absolutePath })
     pb
       .directory(solc.parentFile)
       .environment().put("LD_LIBRARY_PATH", solc.parentFile.canonicalPath)
