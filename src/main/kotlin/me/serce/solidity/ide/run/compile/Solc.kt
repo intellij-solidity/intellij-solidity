@@ -26,7 +26,7 @@ object Solc  {
 
   private fun updateSolcExecutable() {
     val evm = SoliditySettings.instance.pathToEvm
-    solcExecutable = if (!evm.isNullOrBlank()) {
+    solcExecutable = if (!evm.isBlank()) {
       val classLoader = URLClassLoader(SoliditySettings.getUrls(evm).map { it.toUri().toURL() }.toTypedArray())
       extractSolc(classLoader)
     } else null
@@ -65,10 +65,7 @@ object Solc  {
   }
 
   fun compile(sources : List<File>, output : File) : SolcResult {
-    val solc = solcExecutable
-    if (solc == null) {
-      throw IllegalStateException("No solc instance was found")
-    }
+    val solc = solcExecutable ?: throw IllegalStateException("No solc instance was found")
     val pb = ProcessBuilder(arrayListOf(solc.canonicalPath, "--abi", "--bin", "-o", output.absolutePath) + sources.map { it.absolutePath })
     pb
       .directory(solc.parentFile)

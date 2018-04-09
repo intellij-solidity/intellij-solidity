@@ -20,8 +20,11 @@ import javax.swing.JComponent
 
 @State(name = "SoliditySettings", storages = arrayOf(Storage("other.xml")))
 class SoliditySettings : PersistentStateComponent<SoliditySettings> {
-  var pathToEvm: String? = null
-  var pathToDb: String? = null
+  var pathToEvm: String = ""
+  var pathToDb: String = ""
+  var useSolcJ: Boolean = true
+  var generateJavaStubs: Boolean = false
+  var dependenciesAutoRefresh: Boolean = true
 
   override fun getState(): SoliditySettings? {
     return this
@@ -37,8 +40,8 @@ class SoliditySettings : PersistentStateComponent<SoliditySettings> {
 
   companion object {
 
-    fun getUrls(path: String?) : List<Path> {
-      if (path.isNullOrBlank()) {
+    fun getUrls(path: String): List<Path> {
+      if (path.isBlank()) {
         return emptyList()
       }
       val p = Paths.get(path)
@@ -51,11 +54,11 @@ class SoliditySettings : PersistentStateComponent<SoliditySettings> {
       return files
     }
 
-    fun validateEvm(path: String?): Boolean {
+    fun validateEvm(path: String): Boolean {
       return checkJars(path)
     }
 
-    private fun checkJars(path: String?): Boolean {
+    private fun checkJars(path: String): Boolean {
       val files = getUrls(path).toMutableList()
       
       if (files.isEmpty()) return false

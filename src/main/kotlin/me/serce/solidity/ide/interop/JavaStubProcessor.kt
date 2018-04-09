@@ -7,14 +7,22 @@ import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ModuleRootManager
 import com.intellij.openapi.roots.ProjectFileIndex
+import com.intellij.openapi.util.Computable
+import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiManager
+import me.serce.solidity.ide.run.compile.Solc
 import me.serce.solidity.ide.run.compile.SolidityIdeCompiler
+import me.serce.solidity.ide.settings.SoliditySettings
 import me.serce.solidity.lang.core.SolidityFile
 import me.serce.solidity.lang.psi.SolContractDefinition
+import me.serce.solidity.run.ContractUtils
 import java.io.DataInput
+import java.io.File
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.Paths
+import java.util.stream.Collectors
 
 
 object JavaStubProcessor : SourceInstrumentingCompiler {
@@ -32,7 +40,7 @@ object JavaStubProcessor : SourceInstrumentingCompiler {
   }
 
   override fun getProcessingItems(context: CompileContext): Array<FileProcessingCompiler.ProcessingItem> {
-    return SolidityIdeCompiler.collectProcessingItems(context)
+    return if (SoliditySettings.instance.generateJavaStubs && Solc.isEnabled()) SolidityIdeCompiler.collectProcessingItems(context) else FileProcessingCompiler.ProcessingItem.EMPTY_ARRAY
   }
 
   override fun process(context: CompileContext, items: Array<FileProcessingCompiler.ProcessingItem>): Array<FileProcessingCompiler.ProcessingItem> {
@@ -41,23 +49,23 @@ object JavaStubProcessor : SourceInstrumentingCompiler {
     return items
   }
 
-  fun generate(modules: Array<out Module>, project: Project, items: List<VirtualFile>) {
-    DependencyConfigurator.refreshDependencies(project)
-    modules.forEach {
-      val moduleDir = it.moduleFile!!.parent
-      if (moduleDir.findChild("gen") != null) {
-        return@forEach
-      }
-      ApplicationManager.getApplication().invokeAndWait {
-        val childDirectory = moduleDir.createChildDirectory(this, "gen")
-        val model = ModuleRootManager.getInstance(it).modifiableModel
-        model.addContentEntry(childDirectory).addSourceFolder(childDirectory.createChildDirectory(this, "src"), false)
-        model.commit()
-      }
-    }
+  private val genDir = "src-gen"
 
+  fun generate(modules: Array<out Module>, project: Project, items: List<VirtualFile>) {
+    generateSrcDir(modules, project)
+
+    val contracts = collectContracts(project, items)
+
+    contracts.forEach { m, cs ->
+      val module = m ?: return@forEach
+      processModule(module, project, cs)
+    }
+  }
+
+
+  private fun collectContracts(project: Project, items: List<VirtualFile>): Map<Module?, List<SolContractDefinition>> {
     val psiManager = PsiManager.getInstance(project)
-    ApplicationManager.getApplication().runReadAction {
+    return ApplicationManager.getApplication().runReadAction(Computable {
       items.asSequence()
         .map { psiManager.findFile(it) }
         .filter { it is SolidityFile }
@@ -66,15 +74,61 @@ object JavaStubProcessor : SourceInstrumentingCompiler {
         .filter { it is SolContractDefinition }
         .filterNotNull()
         .map { it as SolContractDefinition }
-        .map { Pair(it, JavaStubGenerator.convert(it)) }
-        .forEach {
-          val module = ProjectFileIndex.getInstance(project).getModuleForFile(it.first.containingFile.virtualFile) ?: return@forEach
-          val srcRoot = module.moduleFile?.parent?.findChild("gen")?.findChild("src") ?: return@forEach
-          if (srcRoot.findChild("stubs") == null) {
-            WriteCommandAction.runWriteCommandAction(project, { srcRoot.createChildDirectory(this, "stubs") })
-          }
-          Files.write(Paths.get(srcRoot.canonicalPath, "stubs", "${it.first.name}.java"), it.second.toByteArray())
+        .filterNot { it.name.isNullOrBlank() }
+        .groupBy {
+          ProjectFileIndex.getInstance(project).getModuleForFile(it.containingFile.virtualFile)
         }
+    })!!
+  }
+
+  private fun processModule(module: Module, project: Project, contracts: List<SolContractDefinition>) {
+    val srcRoot = findGenSourceRoot(module) ?: return
+    if (srcRoot.findChild(JavaStubGenerator.packageName) == null) {
+      WriteCommandAction.runWriteCommandAction(project) { srcRoot.createChildDirectory(this, JavaStubGenerator.packageName) }
+    }
+    ApplicationManager.getApplication().runReadAction {
+      val stubsDir = Paths.get(srcRoot.canonicalPath, JavaStubGenerator.packageName)
+      contracts.forEach {
+        writeClass(stubsDir, it.name!!, JavaStubGenerator.convert(it))
       }
+
+      val output = File(CompilerPaths.getModuleOutputDirectory(module, false)!!.path)
+      Solc.compile(contracts.map { File(it.containingFile.virtualFile.canonicalPath) }, output)
+
+      val namedContract = contracts.map { it.name to it }.toMap()
+      val infos = Files.walk(output.toPath()).map {
+        val cm = ContractUtils.readContract(it) ?: return@map null
+        val contract = namedContract[FileUtil.getNameWithoutExtension(it.toFile())] ?: return@map null
+        JavaStubGenerator.CompiledContractDefinition(cm, contract)
+      }.filter { it != null }
+        .collect(Collectors.toList())
+
+      @Suppress("UNCHECKED_CAST")
+      val repo = JavaStubGenerator.generateRepo(infos as List<JavaStubGenerator.CompiledContractDefinition>)
+      writeClass(stubsDir, JavaStubGenerator.repoClassName, repo)
+    }
+  }
+
+  private fun generateSrcDir(modules: Array<out Module>, project: Project) {
+    modules.forEach {
+      if (findGenSourceRoot(it) != null) {
+        return@forEach
+      }
+      WriteCommandAction.runWriteCommandAction(project) {
+        val moduleDir = it.moduleFile!!.parent
+        val childDirectory = moduleDir.createChildDirectory(this, genDir)
+        val model = ModuleRootManager.getInstance(it).modifiableModel
+        model.addContentEntry(childDirectory).addSourceFolder(childDirectory, false)
+        model.commit()
+      }
+    }
+  }
+
+  private fun findGenSourceRoot(module: Module): VirtualFile? {
+    return ModuleRootManager.getInstance(module).sourceRoots.firstOrNull { it.name == genDir }
+  }
+
+  private fun writeClass(stubsDir: Path, className: String, content: String) {
+    Files.write(Paths.get(stubsDir.toString(), "$className.java"), content.toByteArray())
   }
 }

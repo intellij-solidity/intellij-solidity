@@ -7,15 +7,15 @@ import org.ethereum.util.blockchain.EasyBlockchain;
 import org.ethereum.util.blockchain.SolidityContract;
 import org.ethereum.util.blockchain.StandaloneBlockchain;
 
-import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static me.serce.solidity.run.ContractUtils.rethrow;
 
 
 public class EthereumRunner {
@@ -46,22 +46,18 @@ public class EthereumRunner {
                 .filter(p -> Files.isDirectory(p))
                 .flatMap(p -> rethrow(() -> Files.walk(p)))
                 .forEach(file -> {
-                    String fullName = file.getFileName().toString();
-                    if (fullName.endsWith(".abi")) {
+                            SolContractMetadata solCm = ContractUtils.readContract(file);
+                            if (solCm != null) {
+                                CompilationResult.ContractMetadata cm = solCm.toEvmMetadata();
+                                SolidityContract contract = init.submitNewContract(cm);
+                                String fullName = file.getFileName().toString();
                         String fileName = fullName.substring(0, fullName.indexOf(".abi"));
-                        List<File> files = Arrays.asList(file.getParent().toFile().listFiles());
-                        File bin = new File(file.getParent().toFile(), fileName + ".bin");
-                        if (files.contains(bin)) {
-                            CompilationResult.ContractMetadata cm = new CompilationResult.ContractMetadata();
-                            cm.abi = readFile(file);
-                            cm.bin = readFile(bin.toPath());
-                            SolidityContract contract = init.submitNewContract(cm);
-                            if (fileName.equals(main)) {
-                                res.set(contract);
+                                if (fileName.equals(main)) {
+                                    res.set(contract);
+                                }
                             }
                         }
-                    }
-                });
+                );
         System.out.println(" Done.");
         return res.get();
     }
@@ -101,19 +97,4 @@ public class EthereumRunner {
         return result.getClass().isArray() ? Arrays.toString((Object[]) result) : result.toString();
     }
 
-    private static String readFile(Path file) {
-        return rethrow(() -> new String(Files.readAllBytes(file)));
-    }
-
-    interface ThrowableSupplier<R> {
-        R get() throws IOException;
-    }
-
-    private static <R> R rethrow(ThrowableSupplier<R> block) {
-        try {
-            return block.get();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

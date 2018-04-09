@@ -1,6 +1,7 @@
 package me.serce.solidity.ide.run.compile
 
 import com.intellij.openapi.compiler.*
+import me.serce.solidity.ide.settings.SoliditySettings
 import me.serce.solidity.lang.SolidityFileType
 import java.io.DataInput
 import java.io.File
@@ -14,7 +15,7 @@ object SolidityIdeCompiler : Validator {
   }
 
   override fun getProcessingItems(context: CompileContext): Array<FileProcessingCompiler.ProcessingItem> {
-    if (!Solc.isEnabled()) {
+    if (!SoliditySettings.instance.useSolcJ || !Solc.isEnabled()) {
       return FileProcessingCompiler.ProcessingItem.EMPTY_ARRAY
     }
     return collectProcessingItems(context)
