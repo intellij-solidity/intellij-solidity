@@ -4,6 +4,9 @@ import com.intellij.openapi.util.RecursionManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.stubs.StubIndex
+import com.intellij.psi.util.CachedValueProvider
+import com.intellij.psi.util.CachedValuesManager
+import com.intellij.psi.util.PsiModificationTracker
 import me.serce.solidity.firstOrElse
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.stubs.SolGotoClassIndex
@@ -12,9 +15,12 @@ import me.serce.solidity.lang.types.*
 
 object SolResolver {
   fun resolveTypeNameUsingImports(element: SolReferenceElement): Set<SolNamedElement> =
-    resolveContractUsingImports(element, element.containingFile) +
-      resolveEnum(element, element.containingFile) +
-      resolveStruct(element, element.containingFile)
+    CachedValuesManager.getCachedValue(element) {
+      val result = resolveContractUsingImports(element, element.containingFile) +
+        resolveEnum(element, element.containingFile) +
+        resolveStruct(element, element.containingFile)
+      CachedValueProvider.Result.create(result, PsiModificationTracker.MODIFICATION_COUNT)
+    }
 
   private fun resolveContractUsingImports(element: SolReferenceElement, file: PsiFile): Set<SolContractDefinition> =
     RecursionManager.doPreventingRecursion(file, true) {
