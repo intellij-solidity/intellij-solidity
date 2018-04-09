@@ -18,7 +18,7 @@ class ImportFileFix(element: SolUserDefinedTypeName) : LocalQuickFixOnPsiElement
   override fun startInWriteAction(): Boolean = false
 
   override fun getFamilyName(): String =
-    QuickFixBundle.message("import.class.fix")
+    "Import file"
 
   override fun showHint(editor: Editor): Boolean {
     val element = startElement as SolUserDefinedTypeName?
@@ -26,9 +26,9 @@ class ImportFileFix(element: SolUserDefinedTypeName) : LocalQuickFixOnPsiElement
       val suggestions = SolResolver.resolveTypeName(element).map { it.containingFile }.toSet()
       val fixText: String? = if (suggestions.size == 1) {
         val importPath = buildImportPath(element.containingFile.virtualFile, suggestions.first().virtualFile)
-        QuickFixBundle.message("import.class.fix") + " $importPath"
+        "$familyName $importPath"
       } else if (suggestions.isNotEmpty()) {
-        QuickFixBundle.message("import.class.fix")
+        familyName
       } else {
         null
       }
@@ -59,7 +59,7 @@ class ImportFileFix(element: SolUserDefinedTypeName) : LocalQuickFixOnPsiElement
   }
 
   override fun getText(): String =
-    QuickFixBundle.message("import.class.fix")
+    familyName
 
   override fun invoke(project: Project, file: PsiFile, element: PsiElement, endElement: PsiElement) {
     val suggestions = SolResolver.resolveTypeName(element as SolReferenceElement).map { it.containingFile }.toSet()
