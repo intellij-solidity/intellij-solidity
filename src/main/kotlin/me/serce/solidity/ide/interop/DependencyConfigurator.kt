@@ -21,7 +21,7 @@ import java.io.File
 
 object DependencyConfigurator {
 
-  private val libName = "ethereumj"
+  private const val libName = "ethereumj"
 
   init {
     ApplicationManager.getApplication().messageBus.connect().subscribe(SoliditySettingsListener.TOPIC, object : SoliditySettingsListener {

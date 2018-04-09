@@ -5,7 +5,7 @@ import com.intellij.openapi.compiler.CompilerMessageCategory
 
 object SolcMessageProcessor {
 
-  private val unsorted = "unsorted"
+  private const val unsorted = "unsorted"
 
   private val levels = mapOf(
     "Error:" to CompilerMessageCategory.ERROR,

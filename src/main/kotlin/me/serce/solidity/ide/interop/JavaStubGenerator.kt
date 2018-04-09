@@ -28,7 +28,7 @@ object JavaStubGenerator {
     } else ""
     val methodName = function.name
     return "" +
-      "\tpublic Object $methodName(${params}) {\n" +
+      "\tpublic Object $methodName($params) {\n" +
       "\t\treturn contract.callFunction(\"$methodName\"$paramNames).getReturnValue();\n" +
       "\t}\n"
   }

@@ -26,7 +26,7 @@ class SolidityRunState(environment: ExecutionEnvironment?, configuration: Solidi
     params.jdk = JavaParametersUtil.createProjectJdk(myConfiguration.project, jreHome)
     setupJavaParameters(params)
     params.mainClass = EthereumRunner::class.qualifiedName
-    val outputPath = CompilerPaths.getModuleOutputPath(configuration.configurationModule.module!!, false)!!;
+    val outputPath = CompilerPaths.getModuleOutputPath(configuration.configurationModule.module!!, false)!!
     val mainContract = configuration.getPersistentData().getGetContractName()
     params.programParametersList.add(mainContract)
     params.programParametersList.add(configuration.getPersistentData().functionName)
@@ -39,7 +39,7 @@ class SolidityRunState(environment: ExecutionEnvironment?, configuration: Solidi
       evmPath += File.separator + "*"
     }
     params.classPath.add(evmPath)
-    if (!SoliditySettings.instance.pathToDb.isNullOrBlank()) {
+    if (!SoliditySettings.instance.pathToDb.isBlank()) {
       params.vmParametersList.add("-Devm.database.dir=${SoliditySettings.instance.pathToDb}")
     }
     return params

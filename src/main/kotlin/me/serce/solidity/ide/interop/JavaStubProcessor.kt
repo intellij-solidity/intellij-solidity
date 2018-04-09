@@ -50,7 +50,7 @@ object JavaStubProcessor : SourceInstrumentingCompiler {
     return items
   }
 
-  private val genDir = "src-gen"
+  private const val genDir = "src-gen"
 
   fun generate(modules: Array<out Module>, project: Project, items: List<VirtualFile>) {
     generateSrcDir(modules, project)
@@ -93,7 +93,7 @@ object JavaStubProcessor : SourceInstrumentingCompiler {
         writeClass(stubsDir, it.name!!, JavaStubGenerator.convert(it))
       }
 
-      val outputPath = CompilerPaths.getModuleOutputDirectory(module, false);
+      val outputPath = CompilerPaths.getModuleOutputDirectory(module, false)
 
       val outputDir = if (outputPath != null) File(outputPath.path) else {
         // todo workaround - fix it properly

@@ -11,6 +11,6 @@ class SolidityCompileFactory : CompilerFactory {
   override fun createCompilers(compilerManager: CompilerManager): Array<Compiler> {
     compilerManager.addCompilableFileType(SolidityFileType)
     DependencyConfigurator.toString()
-    return arrayOf(SolidityIdeCompiler, JavaStubProcessor);
+    return arrayOf(SolidityIdeCompiler, JavaStubProcessor)
   }
 }
