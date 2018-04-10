@@ -1,12 +1,15 @@
 package me.serce.solidity.ide.run.compile
 
 import com.intellij.notification.NotificationGroup
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.compiler.CompileContext
 import com.intellij.openapi.compiler.CompilerMessageCategory
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.MessageType
 import com.intellij.openapi.vfs.VirtualFileManager
+import me.serce.solidity.ide.settings.SoliditySettings
+import me.serce.solidity.ide.settings.SoliditySettingsConfigurable
 
 object SolcMessageProcessor {
 
@@ -93,7 +96,7 @@ object SolcMessageProcessor {
     val notification = (if (result.success) NotificationGroup.logOnlyGroup(notificationGroupId) else NotificationGroup.balloonGroup(notificationGroupId)).createNotification(
       title, message,
       messageType.toNotificationType()
-    ) { n, hlu ->
+    ) { _, hlu ->
       val url = hlu.url ?: return@createNotification
       val split = url.toString().split("?")
       var urlPart = split[0]
@@ -106,6 +109,14 @@ object SolcMessageProcessor {
     }
       .setImportant(false)
     notification.notify(project)
+  }
+
+  fun showNoEvmMessage(project: Project) {
+    NotificationGroup.balloonGroup(notificationGroupId)
+      .createNotification("SolcJ compiler is not found", "<a href=\"#\">Please configure EthereumJ bundle</a>", NotificationType.INFORMATION)
+      { _, _ ->
+        SoliditySettingsConfigurable(SoliditySettings.instance).getQuickFix(project).run()
+      }.notify(project)
   }
 }
 

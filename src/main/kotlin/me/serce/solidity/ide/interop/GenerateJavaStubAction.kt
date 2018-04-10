@@ -11,6 +11,8 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.vfs.VirtualFile
+import me.serce.solidity.ide.run.compile.SolcMessageProcessor
+import me.serce.solidity.ide.settings.SoliditySettings
 import me.serce.solidity.lang.SolidityFileType
 import java.util.*
 
@@ -18,6 +20,10 @@ class GenerateJavaStubAction : AnAction() {
 
   override fun actionPerformed(e: AnActionEvent) {
     val project = e.project ?: return
+    if (SoliditySettings.instance.pathToEvm.isEmpty()) {
+      SolcMessageProcessor.showNoEvmMessage(project)
+      return
+    }
     ProgressManager.getInstance().run(object : Task.Backgroundable(project, "Generating java stubs") {
       override fun run(indicator: ProgressIndicator) {
         ApplicationManager.getApplication().invokeAndWait { FileDocumentManager.getInstance().saveAllDocuments() }

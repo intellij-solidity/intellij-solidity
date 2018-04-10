@@ -7,6 +7,8 @@ import com.intellij.openapi.components.Storage
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.options.ConfigurationException
 import com.intellij.openapi.options.SearchableConfigurable
+import com.intellij.openapi.options.ShowSettingsUtil
+import com.intellij.openapi.project.Project
 import com.intellij.util.io.isDirectory
 import com.intellij.util.io.isFile
 import com.intellij.util.xmlb.XmlSerializerUtil
@@ -117,6 +119,10 @@ class SoliditySettingsConfigurable(private val mySettings: SoliditySettings) : S
 
   override fun getId(): String {
     return helpTopic
+  }
+
+  fun getQuickFix(project: Project): Runnable {
+    return Runnable { ShowSettingsUtil.getInstance().editConfigurable(project, this) }
   }
 }
 
