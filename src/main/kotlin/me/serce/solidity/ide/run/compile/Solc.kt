@@ -76,9 +76,9 @@ object Solc  {
     if (!start.waitFor(30, TimeUnit.SECONDS)) {
       return SolcResult(false, "Failed to wait for compilation in 30 seconds")
     }
-    val input = StreamUtil.readText(start.inputStream, Charset.defaultCharset())
+    val output = StreamUtil.readText(start.inputStream, Charset.defaultCharset())
     val error = StreamUtil.readText(start.errorStream, Charset.defaultCharset())
-    val messages = "$input\n$error"
+    val messages = "$output\n$error"
     return SolcResult(start.exitValue() == 0, messages)
   }
 }

@@ -151,12 +151,18 @@
                 text="Smart contract" description="Create new solidity contract">
             <add-to-group group-id="NewGroup" anchor="after" relative-to-action="NewDir"/>
         </action>
-        <action id="Solidity.GenerateJavaStub"
-                class="me.serce.solidity.ide.interop.GenerateJavaStubAction"
-                text="_Generate Java Stubs" description="Generate Java Stubs">
-            <add-to-group group-id="BuildMenu" anchor="first"/>
-            <keyboard-shortcut keymap="$default" first-keystroke="shift ctrl S"/>
-        </action>
+
+        <group id="myGroupId">
+            <separator/>
+            <action id="Solidity.GenerateJavaStub"
+                    class="me.serce.solidity.ide.interop.GenerateJavaStubAction"
+                    text="_Generate Java Stubs" description="Generate Java Stubs">
+
+                <keyboard-shortcut keymap="$default" first-keystroke="shift ctrl S"/>
+            </action>
+            <separator/>
+            <add-to-group group-id="BuildMenu" relative-to-action="CompileProject" anchor="before"/>
+        </group>
     </actions>
 
     <application-components>

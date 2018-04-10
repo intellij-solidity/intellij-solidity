@@ -21,7 +21,7 @@ class GenerateJavaStubAction : AnAction() {
         val fileIndex = ProjectRootManager.getInstance(project).fileIndex
         val files = ArrayList<VirtualFile>()
         fileIndex.iterateContent(CompilerContentIterator(SolidityFileType, fileIndex, true, files))
-        JavaStubProcessor.generate(ModuleManager.getInstance(project).modules, project, files)
+        JavaStubProcessor.generate(ModuleManager.getInstance(project).modules, project, files, true)
       }
     })
   }
