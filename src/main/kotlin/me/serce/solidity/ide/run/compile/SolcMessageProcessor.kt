@@ -1,7 +1,10 @@
 package me.serce.solidity.ide.run.compile
 
+import com.intellij.notification.NotificationGroup
 import com.intellij.openapi.compiler.CompileContext
 import com.intellij.openapi.compiler.CompilerMessageCategory
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.MessageType
 
 object SolcMessageProcessor {
 
@@ -22,8 +25,7 @@ object SolcMessageProcessor {
   fun process(messages: String, context: CompileContext) {
     var curLevel = unsorted
     var curPattern: MatchResult? = null
-    messages.split(lineSeparator)
-      .filterNot { it.isBlank() || it == spanningLines }
+    messagesStream(messages)
       .forEach { line ->
         val link = linkPattern.find(line)
         if (link != null) {
@@ -39,6 +41,31 @@ object SolcMessageProcessor {
           context.addMessage(levels[curLevel], line, null, -1, -1)
         }
       }
+  }
+
+  private fun messagesStream(messages: String) =
+    messages.split(lineSeparator)
+      .filterNot { it.isBlank() || it == spanningLines }
+
+  fun showNotification(result: SolcResult, project: Project) {
+    val title: String
+    val message: String
+    val messageType: MessageType
+    if (result.success) {
+      title = "Solidity compilation completed"
+      messageType = MessageType.INFO
+      message = "successfully"
+    } else {
+      title = "Solidity compilation failed"
+      messageType = MessageType.ERROR
+      message = messagesStream(result.messages).filter { it.contains("Error:") }.joinToString("\n")
+    }
+    val notification = NotificationGroup.balloonGroup("Solidity Compiler").createNotification(
+      title, message,
+      messageType.toNotificationType(),
+      null
+    ).setImportant(false)
+    notification.notify(project)
   }
 }
 

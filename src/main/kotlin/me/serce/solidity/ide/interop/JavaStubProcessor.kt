@@ -1,9 +1,6 @@
 package me.serce.solidity.ide.interop
 
 import com.intellij.compiler.impl.CompilerUtil
-import com.intellij.notification.Notification
-import com.intellij.notification.NotificationType
-import com.intellij.notification.Notifications
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.compiler.*
@@ -15,8 +12,8 @@ import com.intellij.openapi.util.Computable
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiManager
-import me.serce.solidity.ide.SolidityIcons
 import me.serce.solidity.ide.run.compile.Solc
+import me.serce.solidity.ide.run.compile.SolcMessageProcessor
 import me.serce.solidity.ide.run.compile.SolidityIdeCompiler
 import me.serce.solidity.ide.settings.SoliditySettings
 import me.serce.solidity.lang.core.SolidityFile
@@ -107,10 +104,7 @@ object JavaStubProcessor : SourceInstrumentingCompiler {
       }
       val solcResult = Solc.compile(contracts.map { File(it.containingFile.virtualFile.canonicalPath) }, outputDir)
       if (notifications) {
-        val n = if (solcResult.success)
-          Notification("Compiler", SolidityIcons.CONTRACT, "Solidity compilation completed", null, null, NotificationType.INFORMATION, null)
-        else Notification("Compiler", SolidityIcons.CONTRACT, "Solidity compilation failed", null, solcResult.messages, NotificationType.ERROR, null)
-        Notifications.Bus.notify(n, project)
+        SolcMessageProcessor.showNotification(solcResult, project)
       }
 
       val namedContract = contracts.map { it.name to it }.toMap()

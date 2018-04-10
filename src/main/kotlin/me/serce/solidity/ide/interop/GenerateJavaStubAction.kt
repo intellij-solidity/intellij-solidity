@@ -3,6 +3,8 @@ package me.serce.solidity.ide.interop
 import com.intellij.compiler.impl.CompilerContentIterator
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
@@ -18,6 +20,7 @@ class GenerateJavaStubAction : AnAction() {
     val project = e.project ?: return
     ProgressManager.getInstance().run(object : Task.Backgroundable(project, "Generating java stubs") {
       override fun run(indicator: ProgressIndicator) {
+        ApplicationManager.getApplication().invokeAndWait { FileDocumentManager.getInstance().saveAllDocuments() }
         val fileIndex = ProjectRootManager.getInstance(project).fileIndex
         val files = ArrayList<VirtualFile>()
         fileIndex.iterateContent(CompilerContentIterator(SolidityFileType, fileIndex, true, files))
