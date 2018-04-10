@@ -74,13 +74,14 @@ object Solc  {
       .environment().put("LD_LIBRARY_PATH", solc.parentFile.canonicalPath)
     val start = pb.start()
     if (!start.waitFor(30, TimeUnit.SECONDS)) {
-      return SolcResult(false, "Failed to wait for compilation in 30 seconds")
+      return SolcResult(false, "Failed to wait for compilation in 30 seconds", -1)
     }
     val output = StreamUtil.readText(start.inputStream, Charset.defaultCharset())
     val error = StreamUtil.readText(start.errorStream, Charset.defaultCharset())
     val messages = "$output\n$error"
-    return SolcResult(start.exitValue() == 0, messages)
+    val exitValue = start.exitValue()
+    return SolcResult(exitValue == 0, messages, exitValue)
   }
 }
 
-class SolcResult(val success : Boolean, val messages : String )
+class SolcResult(val success: Boolean, val messages: String, val exitCode: Int)

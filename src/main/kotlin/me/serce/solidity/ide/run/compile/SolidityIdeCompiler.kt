@@ -36,7 +36,7 @@ object SolidityIdeCompiler : Validator {
 
     val compiled = fileByModule.map {
       Pair(it.value, Solc.compile(it.value.map { File(it.first.file.path) }, File(CompilerPaths.getModuleOutputDirectory(it.key, false)!!.path)))
-    }.onEach { SolcMessageProcessor.process(it.second.messages, context) }
+    }.onEach { SolcMessageProcessor.process(it.second, context) }
       .groupBy { it.second.success }
 
     val success = compiled[true] ?: return emptyArray()

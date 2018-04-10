@@ -2,6 +2,7 @@ package me.serce.solidity.ide.interop
 
 import com.intellij.psi.PsiElement
 import me.serce.solidity.lang.psi.*
+import java.lang.reflect.Array
 import java.math.BigDecimal
 import java.math.BigInteger
 import kotlin.reflect.KClass
@@ -27,9 +28,15 @@ object SolToJavaTypeConverter {
       }
       is SolBytesArrayTypeName -> ByteArray::class
       is SolFunctionTypeName -> ByteArray::class
-      is SolArrayTypeName -> Array<Any>::class
+      is SolArrayTypeName -> {
+        SolToJavaTypeConverter.arrayType(getClass(type.typeName))
+      }
       else -> default
     }
+  }
+
+  private fun arrayType(tt: KClass<out Any>): KClass<out Any> {
+    return Array.newInstance(tt.javaObjectType, 0)::class
   }
 
   private val intBitsRegex = Regex("u?int(\\d{0,3})")

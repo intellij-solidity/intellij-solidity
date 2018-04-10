@@ -25,7 +25,7 @@ object SolcMessageProcessor {
 
   private val lineSeparator = System.getProperty("line.separator")
 
-  private class Message(
+  private data class Message(
     val level: CompilerMessageCategory = defaultLevel,
     val url: String? = null,
     val lineNum: Int = -1,
@@ -33,15 +33,16 @@ object SolcMessageProcessor {
     val content: MutableList<String> = mutableListOf()
   )
 
-  fun process(messages: String, context: CompileContext) {
-    parseMessages(messages).forEach {
+  fun process(solcResult: SolcResult, context: CompileContext) {
+    parseMessages(solcResult).forEach {
       context.addMessage(it.level, it.content.joinToString("\n"), it.url, it.lineNum, it.columnNum)
     }
   }
 
-  private fun parseMessages(messages: String): List<Message> {
+  private fun parseMessages(solcResult: SolcResult): List<Message> {
     val result = mutableListOf(Message())
-    messagesStream(messages)
+    solcResult.messages.split(lineSeparator)
+      .filterNot { it.isBlank() || it == spanningLines }
       .forEach { line ->
         val link = linkPattern.find(line)
         if (link != null) {
@@ -59,15 +60,18 @@ object SolcMessageProcessor {
         }
         result.last().content.add(line)
       }
+    if (!solcResult.success && result.none { it.level == CompilerMessageCategory.ERROR }) {
+      if (result.size == 1) {
+        result[0] = result[0].copy(level = CompilerMessageCategory.ERROR)
+      } else {
+        result.add(Message(CompilerMessageCategory.ERROR).copy(content = mutableListOf("Solc returned error code: ${solcResult.exitCode}")))
+      }
+    }
     return result
   }
 
-  private fun messagesStream(messages: String) =
-    messages.split(lineSeparator)
-      .filterNot { it.isBlank() || it == spanningLines }
-
   fun showNotification(result: SolcResult, project: Project) {
-    val messages = parseMessages(result.messages)
+    val messages = parseMessages(result)
     val title: String
     val message: String
     val messageType: MessageType
@@ -80,13 +84,17 @@ object SolcMessageProcessor {
       messageType = MessageType.ERROR
       message = messages
         .filter { it.level == CompilerMessageCategory.ERROR }
-        .joinToString("\n") { "<a href='${it.url}?${it.lineNum},${it.columnNum}'>${it.content.first()}</a>\n${it.content.drop(1).joinToString("\n")}" }
+        .joinToString("\n") {
+          return@joinToString if (it.url != null)
+            "<a href='${it.url}?${it.lineNum},${it.columnNum}'>${it.content.first()}</a>\n${it.content.drop(1).joinToString("\n")}"
+          else it.content.joinToString("\n")
+        }
     }
     val notification = (if (result.success) NotificationGroup.logOnlyGroup(notificationGroupId) else NotificationGroup.balloonGroup(notificationGroupId)).createNotification(
       title, message,
       messageType.toNotificationType()
     ) { n, hlu ->
-      val url = hlu.url
+      val url = hlu.url ?: return@createNotification
       val split = url.toString().split("?")
       var urlPart = split[0]
       if (!urlPart.contains("://")) urlPart = urlPart.replaceFirst(":/", ":///")
