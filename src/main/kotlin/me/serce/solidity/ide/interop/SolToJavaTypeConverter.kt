@@ -16,16 +16,23 @@ object SolToJavaTypeConverter {
   }
 
   private fun getClass(type: SolTypeName): KClass<out Any> {
-    // todo support other solidity types once they get introduced
     return when (type) {
-      is SolElementaryTypeName -> {
-        val numberType = type.numberType ?: return default
-        if (numberType.byteNumType != null) return ByteArray::class
-        if (numberType.intNumType != null) return processIntType(numberType.intNumType, true)
-        if (numberType.uIntNumType != null) return processIntType(numberType.uIntNumType, false)
-        if (numberType.fixedNumType != null || numberType.uFixedNumType != null) return BigDecimal::class
-        return default
-      }
+      is SolElementaryTypeName -> ({
+        val numberType = type.numberType
+        if (numberType != null) when {
+          numberType.byteNumType != null -> ByteArray::class
+          numberType.intNumType != null -> processIntType(numberType.intNumType, true)
+          numberType.uIntNumType != null -> processIntType(numberType.uIntNumType, false)
+          numberType.fixedNumType != null || numberType.uFixedNumType != null -> BigDecimal::class
+          else -> default
+        } else when (type.text) {
+          "string" -> String::class
+          "address" -> ByteArray::class
+          "bool" -> Boolean::class
+          "var" -> default
+          else -> default
+        }
+      })()
       is SolBytesArrayTypeName -> ByteArray::class
       is SolFunctionTypeName -> ByteArray::class
       is SolArrayTypeName -> {
