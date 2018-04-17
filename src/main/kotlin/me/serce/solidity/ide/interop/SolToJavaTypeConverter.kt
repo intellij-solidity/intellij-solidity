@@ -18,14 +18,15 @@ object SolToJavaTypeConverter {
   private fun getClass(type: SolTypeName): KClass<out Any> {
     return when (type) {
       is SolElementaryTypeName -> ({
-        val numberType = type.numberType
-        if (numberType != null) when {
-          numberType.byteNumType != null -> ByteArray::class
-          numberType.intNumType != null -> processIntType(numberType.intNumType, true)
-          numberType.uIntNumType != null -> processIntType(numberType.uIntNumType, false)
-          numberType.fixedNumType != null || numberType.uFixedNumType != null -> BigDecimal::class
-          else -> default
-        } else when (type.text) {
+        type.numberType?.let { numberType ->
+          when {
+            numberType.byteNumType != null -> ByteArray::class
+            numberType.intNumType != null -> processIntType(numberType.intNumType, true)
+            numberType.uIntNumType != null -> processIntType(numberType.uIntNumType, false)
+            numberType.fixedNumType != null || numberType.uFixedNumType != null -> BigDecimal::class
+            else -> default
+          }
+        } ?: when (type.text) {
           "string" -> String::class
           "address" -> ByteArray::class
           "bool" -> Boolean::class
