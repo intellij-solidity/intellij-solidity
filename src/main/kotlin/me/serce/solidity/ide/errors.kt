@@ -37,10 +37,7 @@ class SentryReportSubmitter : ErrorReportSubmitter() {
     parentComponent: Component,
     consumer: Consumer<SubmittedReportInfo>
   ): Boolean {
-    val ijEvent = events.firstOrNull()
-    if (ijEvent == null) {
-      return true
-    }
+    val ijEvent = events.firstOrNull() ?: return true
     if (pluginVersion.endsWith("-SNAPSHOT")) {
       // do not report errors from dev-versions. If someone uses a dev version, he will
       // be able to report the issue and all related info as a github issue or even fix it.

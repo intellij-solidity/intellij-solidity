@@ -139,6 +139,7 @@ ContractDefinition ::= ( contract | library | interface ) Identifier
 
 private ContractPart ::= StateVariableDeclaration | UsingForDeclaration
              | StructDefinition | ModifierDefinition | FunctionDefinition | EventDefinition | EnumDefinition
+             | ConstructorDefinition
 
 InheritanceSpecifier ::= UserDefinedTypeName ( '(' Expression ( ',' Expression )* ')' )?
 
@@ -172,8 +173,14 @@ ModifierDefinition ::= modifier Identifier ParameterList? Block {
 
 FunctionModifier ::= StateMutability | external | public | internal | private | Identifier
 
+ConstructorDefinition ::= constructor ParameterList
+                         ( FunctionCallExpression | FunctionModifier )*
+                         Block {
+    pin = 1
+}
+
 FunctionDefinition ::= function Identifier? ParameterList
-                     ( FunctionCallExpression | FunctionModifier)*
+                     ( FunctionCallExpression | FunctionModifier )*
                      ( returns ParameterList )? ( ';' | Block ) {
     pin = 1
     implements = "me.serce.solidity.lang.psi.SolFunctionDefElement"

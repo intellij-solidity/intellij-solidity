@@ -20,7 +20,7 @@ class SolColorSettingsPage : ColorSettingsPage {
   override fun getIcon() = SolidityIcons.FILE_ICON
   override fun getAttributeDescriptors() = ATTRIBUTES
   override fun getColorDescriptors(): Array<ColorDescriptor> = ColorDescriptor.EMPTY_ARRAY
-  override fun getHighlighter() = SolHighlighter()
+  override fun getHighlighter() = SolHighlighter
   override fun getAdditionalHighlightingTagToDescriptorMap() = ANNOTATOR_TAGS
   override fun getDemoText() = DEMO_TEXT
 }
