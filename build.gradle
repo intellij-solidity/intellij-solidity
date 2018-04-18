@@ -8,7 +8,7 @@ buildscript {
 }
 
 plugins {
-    id "org.jetbrains.intellij" version "0.1.8"
+    id "org.jetbrains.intellij" version "0.3.1"
     id 'net.researchgate.release' version '2.4.0'
 }
 
@@ -40,8 +40,8 @@ clean.doFirst {
 intellij {
     pluginName 'Intellij-Solidity'
 
-    version '2016.3.2'
-    downloadSources Boolean.valueOf(true)
+    version '2018.1'
+    downloadSources true
     updateSinceUntilBuild = false
 
     sandboxDirectory project.rootDir.canonicalPath + "/.sandbox"
