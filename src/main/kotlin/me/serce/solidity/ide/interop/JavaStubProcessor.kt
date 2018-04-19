@@ -70,12 +70,9 @@ object JavaStubProcessor : SourceInstrumentingCompiler {
     return ApplicationManager.getApplication().runReadAction(Computable {
       items.asSequence()
         .map { psiManager.findFile(it) }
-        .filter { it is SolidityFile }
-        .filterNotNull()
+        .filterIsInstance(SolidityFile::class.java)
         .flatMap { it.children.asSequence() }
-        .filter { it is SolContractDefinition }
-        .filterNotNull()
-        .map { it as SolContractDefinition }
+        .filterIsInstance(SolContractDefinition::class.java)
         .filterNot { it.name.isNullOrBlank() }
         .groupBy {
           ProjectFileIndex.getInstance(project).getModuleForFile(it.containingFile.virtualFile)

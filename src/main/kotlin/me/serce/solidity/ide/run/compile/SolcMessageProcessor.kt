@@ -98,13 +98,16 @@ object SolcMessageProcessor {
       messageType.toNotificationType()
     ) { _, hlu ->
       val url = hlu.url ?: return@createNotification
-      val split = url.toString().split("?")
-      var urlPart = split[0]
-      if (!urlPart.contains("://")) urlPart = urlPart.replaceFirst(":/", ":///")
-      val file = VirtualFileManager.getInstance().findFileByUrl(urlPart) ?: return@createNotification
+
+      val (urlPart, filePart) = url.toString().split("?", limit = 2)
+      val (lineNum, colNum) = filePart.split(",", limit = 2)
+      // VirtualFileManager can't handle urls without '//' schema part
+      val urlPartFixed = if (!urlPart.contains("://")) urlPart.replaceFirst(":/", ":///") else urlPart
+
+      val file = VirtualFileManager.getInstance().findFileByUrl(urlPartFixed) ?: return@createNotification
       val open = OpenFileDescriptor(project, file,
-        Math.max(0, split[1].split(",")[0].toInt() - 1),
-        Math.max(0, split[1].split(",")[1].toInt() - 1))
+        Math.max(0, lineNum.toInt() - 1),
+        Math.max(0, colNum.toInt() - 1))
       open.navigate(true)
     }
       .setImportant(false)

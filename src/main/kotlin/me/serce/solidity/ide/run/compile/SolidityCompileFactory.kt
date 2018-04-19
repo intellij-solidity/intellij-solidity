@@ -10,7 +10,7 @@ import me.serce.solidity.lang.SolidityFileType
 class SolidityCompileFactory : CompilerFactory {
   override fun createCompilers(compilerManager: CompilerManager): Array<Compiler> {
     compilerManager.addCompilableFileType(SolidityFileType)
-    DependencyConfigurator.toString()
+    DependencyConfigurator // to initialize the object and set a project listener
     return arrayOf(SolidityIdeCompiler, JavaStubProcessor)
   }
 }
