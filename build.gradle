@@ -20,6 +20,9 @@ apply plugin: 'idea'
 apply plugin: 'jacoco'
 
 sourceCompatibility = 1.8
+compileKotlin {
+    kotlinOptions.jvmTarget = 1.8
+}
 
 idea {
     module {
