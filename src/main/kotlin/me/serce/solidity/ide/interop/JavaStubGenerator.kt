@@ -3,12 +3,15 @@ package me.serce.solidity.ide.interop
 import me.serce.solidity.lang.psi.SolContractDefinition
 import me.serce.solidity.lang.psi.SolFunctionDefinition
 import me.serce.solidity.run.SolContractMetadata
+import java.io.ByteArrayOutputStream
+import java.util.*
+import java.util.zip.GZIPOutputStream
 
 object JavaStubGenerator {
   const val packageName = "stubs" // only a single level package is supported currently in generator
   const val repoClassName = "ContractsRepository"
 
-  const val autoGenComment = "// Auto-generated code"
+  const val autoGenComment = "// This is a generated file. Not intended for manual editing."
 
 
   private fun contractStubTemplate(className: String, functions: List<SolFunctionDefinition>): String =
@@ -92,6 +95,18 @@ public class $repoClassName {
       return blockchain;
   }
 
+  private static String gunzip(byte[] data) throws java.io.IOException {
+    try (java.util.zip.GZIPInputStream inputStream = new java.util.zip.GZIPInputStream(new java.io.ByteArrayInputStream(data));
+         java.io.ByteArrayOutputStream result = new java.io.ByteArrayOutputStream()) {
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = inputStream.read(buffer)) != -1) {
+                result.write(buffer, 0, length);
+            }
+            return result.toString("UTF-8");
+    }
+  }
+
 ${contracts.joinToString("\n") { submitContractTemplate(it) }}
 }"""
 
@@ -105,14 +120,21 @@ ${contracts.joinToString("\n") { submitContractTemplate(it) }}
     public $name submit$name($params) {
         CompilationResult.ContractMetadata metadata = new CompilationResult.ContractMetadata();
         try {
-           metadata.abi = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get("${contract.metadata.abiFile.absolutePath.replace("\\", "\\\\")}")));
-           metadata.bin = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get("${contract.metadata.binFile.absolutePath.replace("\\", "\\\\")}")));
+           metadata.abi = gunzip(new byte[]{${gzip(contract.metadata.abi)}});
+           metadata.bin = gunzip(new byte[]{${gzip(contract.metadata.bin)}});
         } catch (Exception e) {
            throw new RuntimeException(e);
         }
         return new $name(blockchain.submitNewContract(metadata$paramRefs));
     }
 """
+  }
+
+  private fun gzip(content: String): String {
+    val baos = ByteArrayOutputStream()
+    GZIPOutputStream(baos).bufferedWriter().use { it.write(content) }
+    val toString = Arrays.toString(baos.toByteArray())
+    return toString.substring(1, toString.length - 1)
   }
 
   private fun stringifyParams(function: SolFunctionDefinition?) =
