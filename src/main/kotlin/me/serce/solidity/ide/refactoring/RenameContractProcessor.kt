@@ -10,9 +10,9 @@ class RenameContractProcessor : RenamePsiElementProcessor() {
     return element is SolContractDefinition
   }
 
-  override fun prepareRenaming(element: PsiElement?, newName: String?, allRenames: MutableMap<PsiElement, String>?, scope: SearchScope?) {
+  override fun prepareRenaming(element: PsiElement, newName: String, allRenames: MutableMap<PsiElement, String>, scope: SearchScope) {
     (element as SolContractDefinition).functionDefinitionList
       .filter { it.isConstructor }
-      .forEach { allRenames?.put(it, newName!!) }
+      .forEach { allRenames[it] = newName }
   }
 }

@@ -121,6 +121,7 @@ PRAGMAALL=[\^a-zA-Z_0-9\.\"\']*
   "for"                   { return FOR; }
   "struct"                { return STRUCT; }
   "modifier"              { return MODIFIER; }
+  "constructor"           { return CONSTRUCTOR; }
   "external"              { return EXTERNAL; }
   "function"              { return FUNCTION; }
   "returns"               { return RETURNS; }

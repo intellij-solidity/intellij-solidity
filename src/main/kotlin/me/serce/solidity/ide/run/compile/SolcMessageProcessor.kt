@@ -29,9 +29,9 @@ object SolcMessageProcessor {
       }
       if (curPattern != null) {
         val mGroups = curPattern.groupValues
-        context.addMessage(levels[if (link != null)  curLevel else unsorted], line, "file://${mGroups[1]}", mGroups[2].toInt(), mGroups[3].toInt())
+        context.addMessage(levels[if (link != null) curLevel else unsorted]!!, line, "file://${mGroups[1]}", mGroups[2].toInt(), mGroups[3].toInt())
       } else {
-        context.addMessage(levels[curLevel], line, null, -1, -1)
+        context.addMessage(levels[curLevel]!!, line, null, -1, -1)
       }
     }
   }
