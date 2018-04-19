@@ -39,7 +39,7 @@ abstract class SolLightPlatformCodeInsightFixtureTestCase : LightPlatformCodeIns
 
   protected fun setUpProjectSdk() {
     ApplicationManager.getApplication().runWriteAction {
-      val sdk = projectDescriptor.sdk
+      val sdk = projectDescriptor.sdk ?: return@runWriteAction
       ProjectJdkTable.getInstance().addJdk(sdk)
       ProjectRootManager.getInstance(myFixture.project).projectSdk = sdk
     }

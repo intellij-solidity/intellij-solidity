@@ -21,7 +21,7 @@ import me.serce.solidity.lang.psi.SolFunctionDefinition
 import org.jdom.Element
 import java.util.*
 
-class SolidityRunConfig(configurationModule: SolidityRunConfigModule?, factory: ConfigurationFactory?) : ModuleBasedConfiguration<SolidityRunConfigModule>(configurationModule, factory), CommonJavaRunConfigurationParameters, RunConfigurationWithSuppressedDefaultDebugAction {
+class SolidityRunConfig(configurationModule: SolidityRunConfigModule, factory: ConfigurationFactory) : ModuleBasedConfiguration<SolidityRunConfigModule>(configurationModule, factory), CommonJavaRunConfigurationParameters, RunConfigurationWithSuppressedDefaultDebugAction {
 
   private var myData: Data = Data()
 
@@ -106,9 +106,9 @@ class SolidityRunConfig(configurationModule: SolidityRunConfigModule?, factory: 
     return group
   }
 
-  override fun readExternal(element: Element?) {
+  override fun readExternal(element: Element) {
     super.readExternal(element)
-    JavaRunConfigurationExtensionManager.getInstance().readExternal(this, element!!)
+    JavaRunConfigurationExtensionManager.getInstance().readExternal(this, element)
     XmlSerializer.deserializeInto(this, element)
     XmlSerializer.deserializeInto(myData, element)
 
@@ -116,9 +116,9 @@ class SolidityRunConfig(configurationModule: SolidityRunConfigModule?, factory: 
     EnvironmentVariablesComponent.readExternal(element, envs)
   }
 
-  override fun writeExternal(element: Element?) {
+  override fun writeExternal(element: Element) {
     super.writeExternal(element)
-    JavaRunConfigurationExtensionManager.getInstance().writeExternal(this, element!!)
+    JavaRunConfigurationExtensionManager.getInstance().writeExternal(this, element)
     XmlSerializer.serializeInto(this, element)
     XmlSerializer.serializeInto(myData, element)
     writeModule(element)
@@ -191,9 +191,7 @@ class SolidityRunConfig(configurationModule: SolidityRunConfigModule?, factory: 
     JavaParametersUtil.checkAlternativeJRE(this)
     val configurationModule = configurationModule
     val psiContract = SearchUtils.findContract(myData.getGetContractName(), configurationModule.project, configurationModule.module)
-    if (psiContract == null) {
-      throw RuntimeConfigurationError("Can't find contract ${myData.contractName} within module ${configurationModule.moduleName}")
-    }
+      ?: throw RuntimeConfigurationError("Can't find contract ${myData.contractName} within module ${configurationModule.moduleName}")
     if (psiContract.containingFile.virtualFile.path != myData.contractFile) {
       throw RuntimeConfigurationError("Can't find contract ${myData.contractName} within file ${myData.contractFile}")
     }

@@ -41,7 +41,7 @@ intellij {
     pluginName 'Intellij-Solidity'
 
     version '2016.3.2'
-    downloadSources Boolean.valueOf(true)
+    downloadSources true
     updateSinceUntilBuild = false
 
     sandboxDirectory project.rootDir.canonicalPath + "/.sandbox"

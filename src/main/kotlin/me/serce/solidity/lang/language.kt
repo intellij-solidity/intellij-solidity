@@ -23,8 +23,8 @@ class SolidityFileTypeFactory : FileTypeFactory() {
 
 object SolidityFileType : LanguageFileType(SolidityLanguage) {
   object DEFAULTS {
-    val EXTENSION = "sol"
-    val DESCRIPTION = "Solidity file"
+    const val EXTENSION = "sol"
+    const val DESCRIPTION = "Solidity file"
   }
 
   override fun getName() = DEFAULTS.DESCRIPTION

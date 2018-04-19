@@ -5,7 +5,7 @@ Solidity File
     PsiElement(Identifier)('A')
     PsiWhiteSpace(' ')
     PsiElement({)('{')
-  PsiErrorElement:<expression>, <type name>, byteNumType, contract, enum, event, fixedNumType, function, import, intNumType, interface, library, modifier, pragma, struct, uIntNumType, using or '}' expected, got 'fixed40x40'
+  PsiErrorElement:<expression>, <type name>, byteNumType, constructor, contract, enum, event, fixedNumType, function, import, intNumType, interface, library, modifier, pragma, struct, uIntNumType, using or '}' expected, got 'fixed40x40'
     <empty list>
   PsiWhiteSpace('\n  ')
   SolPrimaryExpressionImpl(PRIMARY_EXPRESSION)
