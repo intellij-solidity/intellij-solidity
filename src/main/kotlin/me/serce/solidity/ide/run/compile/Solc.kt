@@ -5,6 +5,7 @@ import com.intellij.openapi.util.SystemInfoRt
 import com.intellij.openapi.util.io.StreamUtil
 import me.serce.solidity.ide.settings.SoliditySettings
 import me.serce.solidity.ide.settings.SoliditySettingsListener
+import org.jetbrains.concurrency.runAsync
 import java.io.File
 import java.net.URLClassLoader
 import java.nio.charset.Charset
@@ -26,7 +27,7 @@ object Solc  {
 
   private fun updateSolcExecutable() {
     val evm = SoliditySettings.instance.pathToEvm
-    solcExecutable = if (!evm.isNullOrBlank()) {
+    solcExecutable = if (!evm.isBlank()) {
       val classLoader = URLClassLoader(SoliditySettings.getUrls(evm).map { it.toUri().toURL() }.toTypedArray())
       extractSolc(classLoader)
     } else null
@@ -45,7 +46,9 @@ object Solc  {
     val tmpDir = File(System.getProperty("java.io.tmpdir"), "solc")
     tmpDir.mkdirs()
 
-    val someClass = classLoader.loadClass("org.ethereum.solidity.compiler.SourceArtifact")
+    // for some reason, we have to load any class to be able to read any resource from the jar
+    val someClass = classLoader.loadClass("org.ethereum.util.blockchain.StandaloneBlockchain")
+    
     val fileList = StreamUtil.readText(someClass.getResourceAsStream("$solcResDir/file.list"), Charset.defaultCharset())
     val files = fileList.split("\n")
       .map { it.trim() }
@@ -64,23 +67,24 @@ object Solc  {
     return solcExecutable != null
   }
 
-  fun compile(sources : List<File>, output : File) : SolcResult {
-    val solc = solcExecutable
-    if (solc == null) {
-      throw IllegalStateException("No solc instance was found")
-    }
-    val pb = ProcessBuilder(arrayListOf(solc.canonicalPath, "--abi", "--bin", "--overwrite", "-o", output.absolutePath) + sources.map { it.absolutePath })
+  fun compile(sources: List<File>, outputDir: File): SolcResult {
+    val solc = solcExecutable ?: throw IllegalStateException("No solc instance was found")
+    val pb = ProcessBuilder(arrayListOf(solc.canonicalPath, "--abi", "--bin", "--overwrite", "-o", outputDir.absolutePath) + sources.map { it.absolutePath.replace('\\', '/') })
     pb
       .directory(solc.parentFile)
       .environment().put("LD_LIBRARY_PATH", solc.parentFile.canonicalPath)
-    val start = pb.start()
-    if (!start.waitFor(30, TimeUnit.SECONDS)) {
-      return SolcResult(false, "Failed to wait for compilation in 30 seconds")
+    val solcProc = pb.start()
+    val outputPromise = runAsync { StreamUtil.readText(solcProc.inputStream, Charset.defaultCharset()) }
+    val errorPromise = runAsync { StreamUtil.readText(solcProc.errorStream, Charset.defaultCharset()) }
+    if (!solcProc.waitFor(30, TimeUnit.SECONDS)) {
+      solcProc.destroyForcibly()
+      return SolcResult(false, "Failed to wait for solc to complete in 30 seconds", -1)
     }
-    val input = StreamUtil.readText(start.inputStream, Charset.defaultCharset())
-    val error = StreamUtil.readText(start.errorStream, Charset.defaultCharset())
-    val messages = "$input\n$error"
-    return SolcResult(start.exitValue() == 0, messages)
+    val output = outputPromise.blockingGet(500)
+    val error = errorPromise.blockingGet(500)
+    val messages = "$output\n$error"
+    val exitValue = solcProc.exitValue()
+    return SolcResult(exitValue == 0, messages, exitValue)
   }
 }
 
