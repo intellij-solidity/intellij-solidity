@@ -25,7 +25,7 @@ public class $className {
 	$className(SolidityContract contract) {
 		this.contract = contract;
 	}
-${functions.joinToString("\n") { funcStubTemplate(it) }}
+${functions.filter { it.name != null }.joinToString("\n") { funcStubTemplate(it) }}
 }"""
 
   private fun funcStubTemplate(function: SolFunctionDefinition): String {

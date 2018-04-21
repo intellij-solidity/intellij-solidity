@@ -5,6 +5,7 @@ import com.intellij.openapi.util.SystemInfoRt
 import com.intellij.openapi.util.io.StreamUtil
 import me.serce.solidity.ide.settings.SoliditySettings
 import me.serce.solidity.ide.settings.SoliditySettingsListener
+import org.jetbrains.concurrency.runAsync
 import java.io.File
 import java.net.URLClassLoader
 import java.nio.charset.Charset
@@ -66,20 +67,23 @@ object Solc  {
     return solcExecutable != null
   }
 
-  fun compile(sources : List<File>, output : File) : SolcResult {
+  fun compile(sources: List<File>, outputDir: File): SolcResult {
     val solc = solcExecutable ?: throw IllegalStateException("No solc instance was found")
-    val pb = ProcessBuilder(arrayListOf(solc.canonicalPath, "--abi", "--bin", "--overwrite", "-o", output.absolutePath) + sources.map { it.absolutePath })
+    val pb = ProcessBuilder(arrayListOf(solc.canonicalPath, "--abi", "--bin", "--overwrite", "-o", outputDir.absolutePath) + sources.map { it.absolutePath.replace('\\', '/') })
     pb
       .directory(solc.parentFile)
       .environment().put("LD_LIBRARY_PATH", solc.parentFile.canonicalPath)
-    val start = pb.start()
-    if (!start.waitFor(30, TimeUnit.SECONDS)) {
-      return SolcResult(false, "Failed to wait for compilation in 30 seconds", -1)
+    val solcProc = pb.start()
+    val outputPromise = runAsync { StreamUtil.readText(solcProc.inputStream, Charset.defaultCharset()) }
+    val errorPromise = runAsync { StreamUtil.readText(solcProc.errorStream, Charset.defaultCharset()) }
+    if (!solcProc.waitFor(30, TimeUnit.SECONDS)) {
+      solcProc.destroyForcibly()
+      return SolcResult(false, "Failed to wait for solc to complete in 30 seconds", -1)
     }
-    val output = StreamUtil.readText(start.inputStream, Charset.defaultCharset())
-    val error = StreamUtil.readText(start.errorStream, Charset.defaultCharset())
+    val output = outputPromise.blockingGet(500)
+    val error = errorPromise.blockingGet(500)
     val messages = "$output\n$error"
-    val exitValue = start.exitValue()
+    val exitValue = solcProc.exitValue()
     return SolcResult(exitValue == 0, messages, exitValue)
   }
 }
