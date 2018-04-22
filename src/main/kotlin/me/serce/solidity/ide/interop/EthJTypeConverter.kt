@@ -7,7 +7,7 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import kotlin.reflect.KClass
 
-object SolToJavaTypeConverter {
+object EthJTypeConverter {
   val default = Any::class
 
   fun convert(type: SolTypeName): String {
@@ -37,7 +37,7 @@ object SolToJavaTypeConverter {
       is SolBytesArrayTypeName -> ByteArray::class
       is SolFunctionTypeName -> ByteArray::class
       is SolArrayTypeName -> {
-        SolToJavaTypeConverter.arrayType(getClass(type.typeName))
+        arrayType(getClass(type.typeName))
       }
       else -> default
     }

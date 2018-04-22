@@ -1,22 +1,44 @@
 package me.serce.solidity.ide.interop
 
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.command.WriteCommandAction
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Computable
+import com.intellij.openapi.vfs.VfsUtil
+import com.intellij.openapi.vfs.VirtualFile
+import me.serce.solidity.ide.settings.SoliditySettings
 import me.serce.solidity.lang.psi.SolContractDefinition
 import me.serce.solidity.lang.psi.SolFunctionDefinition
-import me.serce.solidity.run.SolContractMetadata
 import java.io.ByteArrayOutputStream
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.util.*
 import java.util.zip.GZIPOutputStream
 
-object JavaStubGenerator {
-  const val packageName = "stubs" // only a single level package is supported currently in generator
-  const val repoClassName = "ContractsRepository"
+object EthJStubGenerator : Sol2JavaGenerator {
 
-  const val autoGenComment = "// This is a generated file. Not intended for manual editing."
+  override fun generate(project: Project, dir: VirtualFile, contracts: List<CompiledContractDefinition>) {
+    val output = WriteCommandAction.runWriteCommandAction(project, Computable {
+      VfsUtil.createDirectoryIfMissing(dir, SoliditySettings.instance.basePackage.replace(".", "/"))
+    }).path
+    ApplicationManager.getApplication().runReadAction {
+      val repo = EthJStubGenerator.generateRepo(contracts)
+      writeClass(output, repoClassName, repo)
+      contracts.map { it.contract }.forEach {
+        writeClass(output, it.name!!, convert(it))
+      }
+    }
+  }
 
+  private const val repoClassName = "ContractsRepository"
+
+  private const val autoGenComment = "// This is a generated file. Not intended for manual editing."
+
+  private fun getPackageName(): String = SoliditySettings.instance.basePackage
 
   private fun contractStubTemplate(className: String, functions: List<SolFunctionDefinition>): String =
     """$autoGenComment
-package $packageName;
+package ${getPackageName()};
 
 import org.ethereum.util.blockchain.SolidityContract;
 
@@ -48,7 +70,7 @@ ${functions.filter { it.name != null }.joinToString("\n") { funcStubTemplate(it)
 
   private fun contractRepoTemplate(contracts: List<CompiledContractDefinition>): String =
     """$autoGenComment
-package $packageName;
+package ${getPackageName()};
 
 import org.ethereum.config.SystemProperties;
 import org.ethereum.config.blockchain.FrontierConfig;
@@ -138,15 +160,18 @@ ${contracts.joinToString("\n") { submitContractTemplate(it) }}
   }
 
   private fun stringifyParams(function: SolFunctionDefinition?) =
-    function?.parameters?.joinToString(", ") { "${SolToJavaTypeConverter.convert(it.typeName)} ${it.name}" } ?: ""
+    function?.parameters?.joinToString(", ") { "${EthJTypeConverter.convert(it.typeName)} ${it.name}" } ?: ""
 
-  fun convert(contract: SolContractDefinition): String {
+  private fun convert(contract: SolContractDefinition): String {
     return contractStubTemplate(contract.name!!, contract.functionDefinitionList.filter { !it.isConstructor })
   }
 
-  fun generateRepo(contracts: List<CompiledContractDefinition>): String {
+  private fun generateRepo(contracts: List<CompiledContractDefinition>): String {
     return contractRepoTemplate(contracts)
   }
 
-  data class CompiledContractDefinition(val metadata: SolContractMetadata, val contract: SolContractDefinition)
+  private fun writeClass(stubsDir: String, className: String, content: String) {
+    Files.write(Paths.get(stubsDir, "$className.java"), content.toByteArray())
+  }
+
 }

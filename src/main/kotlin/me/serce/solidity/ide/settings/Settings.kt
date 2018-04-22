@@ -12,6 +12,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.util.io.isDirectory
 import com.intellij.util.io.isFile
 import com.intellij.util.xmlb.XmlSerializerUtil
+import me.serce.solidity.ide.interop.Sol2JavaGenerationStyle
 import org.jetbrains.annotations.Nls
 import java.net.URLClassLoader
 import java.nio.file.Files
@@ -27,6 +28,8 @@ class SoliditySettings : PersistentStateComponent<SoliditySettings> {
   var useSolcJ: Boolean = true
   var generateJavaStubs: Boolean = false
   var dependenciesAutoRefresh: Boolean = true
+  var basePackage: String = "com.myfirm.mypackage"
+  var genStyle: Sol2JavaGenerationStyle = Sol2JavaGenerationStyle.WEB3J
 
   override fun getState(): SoliditySettings? {
     return this

@@ -22,8 +22,6 @@ import me.serce.solidity.run.ContractUtils
 import java.io.DataInput
 import java.io.File
 import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
 import java.util.stream.Collectors
 
 
@@ -82,42 +80,26 @@ object JavaStubProcessor : SourceInstrumentingCompiler {
 
   private fun processModule(module: Module, project: Project, contracts: List<SolContractDefinition>, notifications: Boolean) {
     val srcRoot = findGenSourceRoot(module) ?: return
-    if (srcRoot.findChild(JavaStubGenerator.packageName) == null) {
-      WriteCommandAction.runWriteCommandAction(project) { srcRoot.createChildDirectory(this, JavaStubGenerator.packageName) }
+    val outputDir = SolidityIdeCompiler.getOutputDir(module)
+
+    val solcResult = Solc.compile(contracts.map { File(it.containingFile.virtualFile.canonicalPath) }, outputDir)
+    if (notifications) {
+      SolcMessageProcessor.showNotification(solcResult, project)
     }
-    val dir = ApplicationManager.getApplication().runReadAction(Computable {
-      val stubsDir = Paths.get(srcRoot.canonicalPath, JavaStubGenerator.packageName)
-      contracts.forEach {
-        writeClass(stubsDir, it.name!!, JavaStubGenerator.convert(it))
-      }
+    if (!solcResult.success) return
 
-      val outputPath = CompilerPaths.getModuleOutputDirectory(module, false)
+    val namedContract = contracts.map { it.name to it }.toMap()
+    val infos = Files.walk(outputDir.toPath()).map {
+      val cm = ContractUtils.readContract(it) ?: return@map null
+      val contract = namedContract[FileUtil.getNameWithoutExtension(it.toFile())] ?: return@map null
+      CompiledContractDefinition(cm, contract)
+    }.filter { it != null }
+      .collect(Collectors.toList())
+    @Suppress("UNCHECKED_CAST")
+    val compiledContracts = infos as List<CompiledContractDefinition>
 
-      val outputDir = if (outputPath != null) File(outputPath.path) else {
-        // todo workaround - fix it properly
-        val moduleOutDir = Paths.get(project.basePath, "out", "production", module.name).toFile()
-        moduleOutDir.mkdirs()
-        moduleOutDir
-      }
-      val solcResult = Solc.compile(contracts.map { File(it.containingFile.virtualFile.canonicalPath) }, outputDir)
-      if (notifications) {
-        SolcMessageProcessor.showNotification(solcResult, project)
-      }
-
-      val namedContract = contracts.map { it.name to it }.toMap()
-      val infos = Files.walk(outputDir.toPath()).map {
-        val cm = ContractUtils.readContract(it) ?: return@map null
-        val contract = namedContract[FileUtil.getNameWithoutExtension(it.toFile())] ?: return@map null
-        JavaStubGenerator.CompiledContractDefinition(cm, contract)
-      }.filter { it != null }
-        .collect(Collectors.toList())
-
-      @Suppress("UNCHECKED_CAST")
-      val repo = JavaStubGenerator.generateRepo(infos as List<JavaStubGenerator.CompiledContractDefinition>)
-      writeClass(stubsDir, JavaStubGenerator.repoClassName, repo)
-      stubsDir
-    })
-    CompilerUtil.refreshIODirectories(listOf(dir.toFile()))
+    SoliditySettings.instance.genStyle.generator.generate(project, srcRoot, compiledContracts)
+    CompilerUtil.refreshIODirectories(listOf(File(srcRoot.path)))
   }
 
   private fun generateSrcDir(modules: Array<out Module>, project: Project) {
@@ -139,7 +121,5 @@ object JavaStubProcessor : SourceInstrumentingCompiler {
     return ModuleRootManager.getInstance(module).sourceRoots.firstOrNull { it.name == genDir }
   }
 
-  private fun writeClass(stubsDir: Path, className: String, content: String) {
-    Files.write(Paths.get(stubsDir.toString(), "$className.java"), content.toByteArray())
-  }
+
 }

@@ -7,9 +7,8 @@ import com.intellij.openapi.options.ConfigurationException
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.ui.DocumentAdapter
-import javax.swing.JButton
-import javax.swing.JCheckBox
-import javax.swing.JPanel
+import me.serce.solidity.ide.interop.Sol2JavaGenerationStyle
+import javax.swing.*
 
 class SolidityConfigurablePanel {
   internal lateinit var myEvmPathPanel: JPanel
@@ -21,6 +20,9 @@ class SolidityConfigurablePanel {
   private lateinit var useSolcJ: JCheckBox
   private lateinit var generateJavaStubs: JCheckBox
   private lateinit var dependecyAutoRefresh: JCheckBox
+  private lateinit var web3jBtn: JRadioButton
+  private lateinit var ethJNativeBtn: JRadioButton
+  private lateinit var basePackageField: JTextField
 
   init {
     val descriptor = FileChooserDescriptor(false, true, true, true, false, false)
@@ -41,15 +43,22 @@ class SolidityConfigurablePanel {
     }
     myEvmPathField.textField.document.addDocumentListener(object : DocumentAdapter() {
       override fun textChanged(e: javax.swing.event.DocumentEvent?) {
-        updateCheckboxes()
+        updateControlAvailability()
         if (myEvmPathField.textField.text.isNotEmpty()) useSolcJ.isSelected = true
       }
     })
   }
 
-  private fun updateCheckboxes() {
+  private fun updateControlAvailability() {
     val enabled = myEvmPathField.textField.text.isNotEmpty()
-    checkboxPanel.components.forEach { it.isEnabled = enabled }
+    checkboxPanel.setEnabledAll(enabled)
+  }
+
+  private fun JPanel.setEnabledAll(enabled: Boolean) {
+    this.components.forEach {
+      if (it is JPanel) it.setEnabledAll(enabled)
+      it.isEnabled = enabled
+    }
   }
 
   internal fun reset(settings: SoliditySettings) {
@@ -58,7 +67,12 @@ class SolidityConfigurablePanel {
     useSolcJ.isSelected = settings.useSolcJ
     generateJavaStubs.isSelected = settings.generateJavaStubs
     dependecyAutoRefresh.isSelected = settings.dependenciesAutoRefresh
-    updateCheckboxes()
+    basePackageField.text = settings.basePackage
+    when (settings.genStyle) {
+      Sol2JavaGenerationStyle.WEB3J -> web3jBtn.isSelected = true
+      Sol2JavaGenerationStyle.ETHJ -> ethJNativeBtn.isSelected = true
+    }
+    updateControlAvailability()
   }
 
   internal fun apply(settings: SoliditySettings) {
@@ -70,15 +84,24 @@ class SolidityConfigurablePanel {
     settings.pathToDb = fromPath(myDbPathField)
     settings.useSolcJ = useSolcJ.isSelected
     settings.generateJavaStubs = generateJavaStubs.isSelected
+    settings.basePackage = basePackageField.text
+    settings.genStyle = generationStyle()
     ApplicationManager.getApplication().messageBus.syncPublisher(SoliditySettingsListener.TOPIC).settingsChanged()
+  }
+
+  private fun generationStyle(): Sol2JavaGenerationStyle = when {
+    web3jBtn.isSelected -> Sol2JavaGenerationStyle.WEB3J
+    ethJNativeBtn.isSelected -> Sol2JavaGenerationStyle.ETHJ
+    else -> throw IllegalStateException("Incorrect gen style option")
   }
 
   private fun fromPath(textField: TextFieldWithBrowseButton) = FileUtil.toSystemIndependentName(textField.text.trim())
 
-  internal fun isModified(settings: SoliditySettings): Boolean {
-    return fromPath(myEvmPathField) != settings.pathToEvm.trim() ||
+  internal fun isModified(settings: SoliditySettings): Boolean =
+    fromPath(myEvmPathField) != settings.pathToEvm.trim() ||
       fromPath(myDbPathField) != settings.pathToDb.trim() ||
       useSolcJ.isSelected != settings.useSolcJ ||
-      generateJavaStubs.isSelected != settings.generateJavaStubs
-  }
+      generateJavaStubs.isSelected != settings.generateJavaStubs ||
+      basePackageField.text != settings.basePackage ||
+      generationStyle() != settings.genStyle
 }
