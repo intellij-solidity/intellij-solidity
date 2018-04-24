@@ -27,7 +27,7 @@ object Solc  {
 
   private fun updateSolcExecutable() {
     val evm = SoliditySettings.instance.pathToEvm
-    solcExecutable = if (!evm.isBlank()) {
+    solcExecutable = if (!evm.isNullOrBlank()) {
       val classLoader = URLClassLoader(SoliditySettings.getUrls(evm).map { it.toUri().toURL() }.toTypedArray())
       extractSolc(classLoader)
     } else null
@@ -88,4 +88,4 @@ object Solc  {
   }
 }
 
-class SolcResult(val success : Boolean, val messages : String )
+class SolcResult(val success: Boolean, val messages: String, val exitCode: Int)
