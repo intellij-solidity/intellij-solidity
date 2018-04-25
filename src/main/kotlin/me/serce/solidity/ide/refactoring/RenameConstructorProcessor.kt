@@ -10,7 +10,7 @@ class RenameConstructorProcessor : RenamePsiElementProcessor() {
     return element is SolFunctionDefinition && element.isConstructor
   }
 
-  override fun prepareRenaming(element: PsiElement?, newName: String?, allRenames: MutableMap<PsiElement, String>?, scope: SearchScope?) {
-    allRenames?.put((element as SolFunctionDefinition).parent, newName!!)
+  override fun prepareRenaming(element: PsiElement, newName: String, allRenames: MutableMap<PsiElement, String>, scope: SearchScope) {
+    allRenames[(element as SolFunctionDefinition).parent] = newName
   }
 }

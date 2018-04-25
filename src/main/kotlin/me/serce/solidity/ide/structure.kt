@@ -9,7 +9,7 @@ import me.serce.solidity.lang.core.SolidityFile
 import me.serce.solidity.lang.psi.*
 
 class SolPsiStructureViewFactory : PsiStructureViewFactory {
-  override fun getStructureViewBuilder(psiFile: PsiFile?): StructureViewBuilder {
+  override fun getStructureViewBuilder(psiFile: PsiFile): StructureViewBuilder {
     val solFile = psiFile as SolidityFile
     return object : TreeBasedStructureViewBuilder() {
       override fun createStructureViewModel(editor: Editor?): StructureViewModel {

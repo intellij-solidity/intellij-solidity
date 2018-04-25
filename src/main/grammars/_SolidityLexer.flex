@@ -23,6 +23,7 @@ import static me.serce.solidity.lang.core.SolidityTokenTypes.*;
 %unicode
 
 %state PRAGMA_OPEN
+%state PRAGMA_REST
 
 EOL=\R
 WHITE_SPACE=\s+
@@ -120,6 +121,7 @@ PRAGMAALL=[\^a-zA-Z_0-9\.\"\']*
   "for"                   { return FOR; }
   "struct"                { return STRUCT; }
   "modifier"              { return MODIFIER; }
+  "constructor"           { return CONSTRUCTOR; }
   "external"              { return EXTERNAL; }
   "function"              { return FUNCTION; }
   "returns"               { return RETURNS; }
@@ -183,7 +185,16 @@ PRAGMAALL=[\^a-zA-Z_0-9\.\"\']*
 <PRAGMA_OPEN> {
   {WHITE_SPACE}           { return WHITE_SPACE; }
 
-  {IDENTIFIER}            { return IDENTIFIER; }
+  {IDENTIFIER}            {
+                            yybegin(PRAGMA_REST);
+                            return IDENTIFIER;
+                          }
+
+  <<EOF>>                 { yybegin(YYINITIAL); }
+}
+
+<PRAGMA_REST> {
+  {WHITE_SPACE}           { return WHITE_SPACE; }
 
   {PRAGMAALL}             {
                             yybegin(YYINITIAL);

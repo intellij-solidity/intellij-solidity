@@ -10,7 +10,12 @@ import javax.swing.Icon
 
 class SolidityConfigurationType : ConfigurationTypeBase("SolidityConfigurationType", "Solidity", "Run Solidity Contract", SolidityIcons.FILE_ICON) {
   init {
-    addFactory(configurationFactory())
+    try {
+      Class.forName("com.intellij.execution.CommonJavaRunConfigurationParameters");
+      addFactory(configurationFactory())
+    }catch ( e : ClassNotFoundException) {
+      // IDE does not have java support, skipping configuration factory initialization
+    }
   }
 
   private fun configurationFactory(): ConfigurationFactory {
