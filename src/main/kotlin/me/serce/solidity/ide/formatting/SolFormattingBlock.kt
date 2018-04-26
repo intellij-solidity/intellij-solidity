@@ -56,7 +56,14 @@ class SolFormattingBlock(
     val parent = astNode.treeParent
     val parentType = parent?.elementType
     val result = when {
-      child is PsiComment && type in listOf(CONTRACT_DEFINITION, BLOCK, ENUM_DEFINITION, FUNCTION_DEFINITION, STRUCT_DEFINITION) -> Indent.getNormalIndent()
+      child is PsiComment && type in listOf(
+        CONTRACT_DEFINITION,
+        BLOCK,
+        ENUM_DEFINITION,
+        FUNCTION_DEFINITION,
+        CONSTRUCTOR_DEFINITION,
+        STRUCT_DEFINITION
+      ) -> Indent.getNormalIndent()
       childType.isContractPart() -> Indent.getNormalIndent()
 
     // fields inside structs
@@ -114,6 +121,7 @@ class SolFormattingBlock(
     STRUCT_DEFINITION,
     MODIFIER_DEFINITION,
     FUNCTION_DEFINITION,
+    CONSTRUCTOR_DEFINITION,
     EVENT_DEFINITION,
     ENUM_DEFINITION
   )
