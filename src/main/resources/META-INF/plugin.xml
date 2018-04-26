@@ -17,21 +17,23 @@
 
     <change-notes><![CDATA[
       <p>
+        <b>v2.1.0</b>
+        <ul>
+          <li>Contracts can be executed from IDE!, thanks @mbolotov (Check out Solidity settings)</li>
+          <li>Contracts can be compiled from IDE, thanks @mbolotov</li>
+          <li>Support for the "emit" keyword</li>
+          <li>Support for "constructor" syntax, thanks @ice1000</li>
+          <li>Performance improvements, thanks @0v1se</li>
+          <li>Messages bugfixes, thanks @0v1se</li>
+          <li>Parameter info bugfixes</li>
+          <li>Formatting bugfixes</li>
+        </ul>
         <b>v2.0.5</b>
         <ul>
           <li>Added contract resolve error highlighting + import file fix, thanks @0v1se</li>
           <li>truffle/npm import support, thanks @0v1se</li>
           <li>Parameter bugfixes</li>
           <li>Resolving bugfixes</li>
-        </ul>
-        <b>v2.0.4</b>
-        <ul>
-          <li>Support for new inline assembly features</li>
-          <li>Constructor renaming, thanks @0v1se</li>
-          <li>Fix for boolean array constructors, thanks @ZitRos</li>
-          <li>Allow for reporting exceptions from your IDE directly to maintainers, please click report if you catch an exception</li>
-          <li>Resolving bugfixes</li>
-          <li>Grammar fixes</li>
         </ul>
       </p>
     ]]>
