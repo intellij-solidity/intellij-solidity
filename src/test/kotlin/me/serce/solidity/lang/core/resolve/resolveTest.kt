@@ -1,14 +1,13 @@
 package me.serce.solidity.lang.core.resolve
 
+import com.intellij.psi.PsiElement
 import me.serce.solidity.lang.psi.SolNamedElement
 import me.serce.solidity.utils.SolTestBase
 import org.intellij.lang.annotations.Language
 
 abstract class SolResolveTestBase : SolTestBase() {
   protected fun checkByCode(@Language("Solidity") code: String) {
-    InlineFile(code)
-
-    val (refElement, data) = findElementAndDataInEditor<SolNamedElement>("^")
+    val (refElement, data) = resolveInCode<SolNamedElement>(code)
 
     if (data == "unresolved") {
       val resolved = refElement.reference?.resolve()
@@ -27,6 +26,11 @@ abstract class SolResolveTestBase : SolTestBase() {
     } else {
       assertTrue(references.contains(target))
     }
+  }
+
+  protected inline fun <reified T : PsiElement> resolveInCode(@Language("Solidity") code: String): Pair<T, String> {
+    InlineFile(code)
+    return findElementAndDataInEditor<T>("^")
   }
 
   protected fun assertCode() {

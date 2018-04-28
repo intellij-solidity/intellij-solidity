@@ -11,7 +11,6 @@ import me.serce.solidity.firstInstance
 import me.serce.solidity.ide.SolidityIcons
 import me.serce.solidity.lang.core.SolidityTokenTypes.*
 import me.serce.solidity.lang.psi.*
-import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.resolve.ref.*
 import me.serce.solidity.lang.stubs.*
 import java.util.*
@@ -45,21 +44,18 @@ abstract class SolEnumValueMixin(node: ASTNode) : SolNamedElementImpl(node), Sol
 abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrLibDefStub>, SolContractDefinition {
   override val supers: List<SolUserDefinedTypeName>
     get() = findChildrenByType<SolInheritanceSpecifier>(INHERITANCE_SPECIFIER)
-      .map { it.children.filterIsInstance(SolUserDefinedTypeName::class.java).firstOrNull() }
-      .filterNotNull()
+      .mapNotNull { it.children.filterIsInstance(SolUserDefinedTypeName::class.java).firstOrNull() }
+
   override val collectSupers: Collection<SolUserDefinedTypeName>
     get() = CachedValuesManager.getCachedValue(this) {
       val collectedSupers = RecursionManager.doPreventingRecursion(this, true) {
         val collectedSupers = LinkedHashSet<SolUserDefinedTypeName>()
-        val deque: Deque<SolUserDefinedTypeName> = ArrayDeque()
-        deque.addAll(supers)
-        while (deque.isNotEmpty()) {
-          val sup: SolUserDefinedTypeName = deque.poll()
-          collectedSupers.add(sup)
-          val typeNames = SolResolver.resolveTypeName(sup).filterIsInstance<SolUserDefinedTypeName>()
-          deque.addAll(typeNames)
-        }
-
+        collectedSupers.addAll(supers)
+        collectedSupers.addAll(
+          supers.mapNotNull { it.reference?.resolve() }
+            .filterIsInstance<SolContractOrLibElement>()
+            .flatMap { it.collectSupers }
+        )
         collectedSupers
       }
       CachedValueProvider.Result.create(collectedSupers, PsiModificationTracker.MODIFICATION_COUNT)
