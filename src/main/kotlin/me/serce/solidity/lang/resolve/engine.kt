@@ -45,15 +45,20 @@ object SolResolver {
 
   private fun <T : SolNamedElement> resolveInnerType(element: SolReferenceElement, file: PsiFile, f: (SolContractDefinition) -> List<T>): Set<T> =
     RecursionManager.doPreventingRecursion(file, true) {
-      val contract = element.parentOfType<SolContractDefinition>()
-      if (contract == null) {
+      val inheritanceSpecifier = element.parentOfType<SolInheritanceSpecifier>()
+      if (inheritanceSpecifier != null) {
         emptySet()
       } else {
-        val supers = contract.collectSupers
-          .mapNotNull { it.reference?.resolve() }.filterIsInstance<SolContractDefinition>() + contract
-        supers.flatMap(f)
-          .filter { it.name == element.name }
-          .toSet()
+        val contract = element.parentOfType<SolContractDefinition>()
+        if (contract == null) {
+          emptySet()
+        } else {
+          val supers = contract.collectSupers
+            .mapNotNull { it.reference?.resolve() }.filterIsInstance<SolContractDefinition>() + contract
+          supers.flatMap(f)
+            .filter { it.name == element.name }
+            .toSet()
+        }
       }
     } ?: emptySet()
 

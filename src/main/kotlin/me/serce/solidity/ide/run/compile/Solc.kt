@@ -3,8 +3,11 @@ package me.serce.solidity.ide.run.compile
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.util.SystemInfoRt
 import com.intellij.openapi.util.io.StreamUtil
+import com.intellij.util.concurrency.AppExecutorUtil
 import me.serce.solidity.ide.settings.SoliditySettings
 import me.serce.solidity.ide.settings.SoliditySettingsListener
+import org.jetbrains.concurrency.AsyncPromise
+import org.jetbrains.concurrency.Promise
 import org.jetbrains.concurrency.runAsync
 import java.io.File
 import java.net.URLClassLoader
@@ -48,7 +51,7 @@ object Solc  {
 
     // for some reason, we have to load any class to be able to read any resource from the jar
     val someClass = classLoader.loadClass("org.ethereum.util.blockchain.StandaloneBlockchain")
-    
+
     val fileList = StreamUtil.readText(someClass.getResourceAsStream("$solcResDir/file.list"), Charset.defaultCharset())
     val files = fileList.split("\n")
       .map { it.trim() }
@@ -74,8 +77,8 @@ object Solc  {
       .directory(solc.parentFile)
       .environment().put("LD_LIBRARY_PATH", solc.parentFile.canonicalPath)
     val solcProc = pb.start()
-    val outputPromise = runAsync { StreamUtil.readText(solcProc.inputStream, Charset.defaultCharset()) }
-    val errorPromise = runAsync { StreamUtil.readText(solcProc.errorStream, Charset.defaultCharset()) }
+    val outputPromise = runAsync2 { StreamUtil.readText(solcProc.inputStream, Charset.defaultCharset()) }
+    val errorPromise = runAsync2 { StreamUtil.readText(solcProc.errorStream, Charset.defaultCharset()) }
     if (!solcProc.waitFor(30, TimeUnit.SECONDS)) {
       solcProc.destroyForcibly()
       return SolcResult(false, "Failed to wait for solc to complete in 30 seconds", -1)
@@ -86,6 +89,21 @@ object Solc  {
     val exitValue = solcProc.exitValue()
     return SolcResult(exitValue == 0, messages, exitValue)
   }
+}
+
+inline fun <T> runAsync2(crossinline runnable: () -> T): Promise<T> {
+  val promise = AsyncPromise<T>()
+  AppExecutorUtil.getAppExecutorService().execute {
+    val result = try {
+      runnable()
+    }
+    catch (e: Throwable) {
+      promise.setError(e)
+      return@execute
+    }
+    promise.setResult(result)
+  }
+  return promise
 }
 
 class SolcResult(val success: Boolean, val messages: String, val exitCode: Int)

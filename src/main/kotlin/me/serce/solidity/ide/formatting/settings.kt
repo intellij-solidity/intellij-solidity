@@ -5,10 +5,7 @@ import com.intellij.application.options.IndentOptionsEditor
 import com.intellij.application.options.SmartIndentOptionsEditor
 import com.intellij.application.options.TabbedLanguageCodeStylePanel
 import com.intellij.lang.Language
-import com.intellij.psi.codeStyle.CodeStyleSettings
-import com.intellij.psi.codeStyle.CodeStyleSettingsProvider
-import com.intellij.psi.codeStyle.CustomCodeStyleSettings
-import com.intellij.psi.codeStyle.LanguageCodeStyleSettingsProvider
+import com.intellij.psi.codeStyle.*
 import me.serce.solidity.lang.SolidityLanguage
 import me.serce.solidity.loadCodeSampleResource
 
@@ -42,6 +39,12 @@ class SolLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider()
       SettingsType.INDENT_SETTINGS -> INDENT_SAMPLE
       else -> ""
     }
+
+  override fun getDefaultCommonSettings(): CommonCodeStyleSettings {
+    val settings = CommonCodeStyleSettings(SolidityLanguage)
+    settings.initIndentOptions()
+    return settings
+  }
 
   override fun getIndentOptionsEditor(): IndentOptionsEditor? = SmartIndentOptionsEditor()
 

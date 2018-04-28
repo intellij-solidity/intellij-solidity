@@ -2,6 +2,7 @@ package me.serce.solidity.ide.run.compile
 
 import com.intellij.openapi.compiler.*
 import com.intellij.openapi.module.Module
+import com.intellij.openapi.module.Module
 import me.serce.solidity.ide.settings.SoliditySettings
 import me.serce.solidity.lang.SolidityFileType
 import java.io.DataInput
