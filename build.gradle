@@ -53,6 +53,7 @@ intellij {
 
 grammarKit {
     grammarKitRelease = '1.5.0'
+    jflexRelease = '1.7.0'
 }
 
 repositories {
@@ -78,9 +79,6 @@ dependencies {
     }
 
     testCompile group: 'junit', name: 'junit', version: '4.11'
-
-    lexer files('lib/jflex-1.7.0-SNAPSHOT.jar') //'de.jflex:jflex:1.6.1'
-    parser files('lib/grammar-kit-1.5.0.jar')
 }
 
 release {
@@ -93,46 +91,28 @@ release {
 task codegen(dependsOn: ['lexer', 'parser']) {}
 tasks.compileKotlin.dependsOn codegen
 
-task lexer(type: JavaExec) {
+task lexer(type: org.jetbrains.grammarkit.tasks.GenerateLexer) {
     def lexerName = "_SolidityLexer"
-    def pkg = "me/serce/solidity"
-    def src = "$project.projectDir/src/main/grammars/${lexerName}.flex"
-    def dst = "gen/$pkg"
-    new File(dst).mkdirs()
-
-    main = 'jflex.Main'
-    classpath configurations.lexer
-    args = ['--skel', 'src/main/grammars/idea-flex.skeleton', '-d', dst, src]
-
-    inputs.file file(src)
-    outputs.dir file("$dst")
-}
-
-task parser(type: org.jetbrains.grammarkit.tasks.GenerateParser) {
-    source = "$project.projectDir/src/main/grammars/solidity.bnf"
-    targetRoot = 'gen'
-    pathToParser = 'me/serce/solidity/SolidityParser.java'
-    pathToPsiRoot = 'me/serce/solidity/psi'
+    source = "$project.projectDir/src/main/grammars/${lexerName}.flex"
+    targetDir = "gen/me/serce/solidity"
+    targetClass = "$lexerName"
+    skeleton = 'src/main/grammars/idea-flex.skeleton'
     purgeOldFiles = true
 }
 
-//task parser(type: JavaExec) {
-//    def pkg = 'me/serce/solidity/lang'
-//    def dstRoot = "gen"
-//    def src = "$project.projectDir/src/main/grammars/solidity.bnf"
-//    def dst = "$dstRoot/$pkg"
-//    doFirst {
-//        delete file(dst)
-//    }
-//
-//    main = 'org.intellij.grammar.Main'
-//    classpath(configurations.compile + configurations.parser)
-//
-//    args = [dstRoot, file(src)]
-//
-//    inputs.file file(src)
-//    outputs.dir dst
-//}
+task parser(type: org.jetbrains.grammarkit.tasks.GenerateParser) {
+    dependsOn lexer
+
+    def pkg = 'me/serce/solidity'
+    source = "$project.projectDir/src/main/grammars/solidity.bnf"
+    targetRoot = 'gen'
+    pathToParser = "$pkg/SolidityParser.java"
+    pathToPsiRoot = "$pkg/psi"
+    purgeOldFiles = true
+
+    outputs.dir(new File("$targetRoot/$pkg"))
+}
+
 
 // codecov
 
