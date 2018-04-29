@@ -1,19 +1,22 @@
 buildscript {
     repositories {
         jcenter()
+        maven { url 'https://jitpack.io'}
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "com.github.JetBrains:gradle-grammar-kit-plugin:2018.1.1"
     }
 }
 
 plugins {
-    id "org.jetbrains.intellij" version "0.1.8"
+    id 'org.jetbrains.intellij' version '0.3.1'
     id 'net.researchgate.release' version '2.4.0'
 }
 
 
 apply plugin: 'java'
+apply plugin: 'org.jetbrains.grammarkit'
 apply plugin: 'kotlin'
 apply plugin: 'org.jetbrains.intellij'
 apply plugin: 'idea'
@@ -51,6 +54,11 @@ intellij {
     systemProperties = ['compiler.process.debug.port': '21232']
 }
 
+grammarKit {
+    grammarKitRelease = '1.5.0'
+    jflexRelease = '1.7.0'
+}
+
 repositories {
     jcenter()
 }
@@ -77,9 +85,6 @@ dependencies {
     compile group: 'org.web3j', name: 'codegen', version: '3.3.1'
 
     testCompile group: 'junit', name: 'junit', version: '4.11'
-
-    lexer files('lib/jflex-1.7.0-SNAPSHOT.jar') //'de.jflex:jflex:1.6.1'
-    parser files('lib/grammar-kit-1.5.0.jar')
 }
 
 release {
@@ -92,38 +97,28 @@ release {
 task codegen(dependsOn: ['lexer', 'parser']) {}
 tasks.compileKotlin.dependsOn codegen
 
-task lexer(type: JavaExec) {
+task lexer(type: org.jetbrains.grammarkit.tasks.GenerateLexer) {
     def lexerName = "_SolidityLexer"
-    def pkg = "me/serce/solidity"
-    def src = "$project.projectDir/src/main/grammars/${lexerName}.flex"
-    def dst = "gen/$pkg"
-    new File(dst).mkdirs()
-
-    main = 'jflex.Main'
-    classpath configurations.lexer
-    args = ['--skel', 'src/main/grammars/idea-flex.skeleton', '-d', dst, src]
-
-    inputs.file file(src)
-    outputs.dir file("$dst/${lexerName}.java")
+    source = "$project.projectDir/src/main/grammars/${lexerName}.flex"
+    targetDir = "gen/me/serce/solidity"
+    targetClass = "$lexerName"
+    skeleton = 'src/main/grammars/idea-flex.skeleton'
+    purgeOldFiles = true
 }
 
-task parser(type: JavaExec) {
-    def pkg = 'me/serce/solidity/lang'
-    def dstRoot = "gen"
-    def src = "$project.projectDir/src/main/grammars/solidity.bnf"
-    def dst = "$dstRoot/$pkg"
-    doFirst {
-        delete file(dst)
-    }
+task parser(type: org.jetbrains.grammarkit.tasks.GenerateParser) {
+    dependsOn lexer
 
-    main = 'org.intellij.grammar.Main'
-    classpath(configurations.compile + configurations.parser)
+    def pkg = 'me/serce/solidity'
+    source = "$project.projectDir/src/main/grammars/solidity.bnf"
+    targetRoot = 'gen'
+    pathToParser = "$pkg/SolidityParser.java"
+    pathToPsiRoot = "$pkg/psi"
+    purgeOldFiles = true
 
-    args = [dstRoot, file(src)]
-
-    inputs.file file(src)
-    outputs.dir dst
+    outputs.dir(new File("$targetRoot/$pkg"))
 }
+
 
 // codecov
 
