@@ -62,6 +62,7 @@ class SolidityConfigurablePanel {
     if (!hasJavaSupport) {
       warningLabel.icon = AllIcons.General.BalloonWarning
       warningLabel.text = noJavaWarning
+      useSolcJ.isVisible = false
     } else {
       warningLabel.isVisible = false
     }
@@ -75,7 +76,6 @@ class SolidityConfigurablePanel {
     val enabled = myEvmPathField.textField.text.isNotEmpty()
     checkboxPanel.setAll({ it.isEnabled = enabled })
     if (!hasJavaSupport) {
-      useSolcJ.isEnabled = false
       useSolcJ.isSelected = false
     }
   }
