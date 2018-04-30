@@ -97,9 +97,7 @@ object SolidityCompiler {
   }
 
   private fun generateSrcDir(modules: Array<out Module>, project: Project) {
-    modules.asSequence()
-      .filter { it.moduleFile != null }
-      .forEach {
+    modules.forEach {
         WriteCommandAction.runWriteCommandAction(project) {
           val model = ModuleRootManager.getInstance(it).modifiableModel
           val ce = model.contentEntries.first() ?: model.addContentEntry(project.baseDir)
