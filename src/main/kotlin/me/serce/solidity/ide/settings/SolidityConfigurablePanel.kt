@@ -1,5 +1,6 @@
 package me.serce.solidity.ide.settings
 
+import com.intellij.icons.AllIcons
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
@@ -8,6 +9,8 @@ import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.ui.DocumentAdapter
 import me.serce.solidity.ide.interop.Sol2JavaGenerationStyle
+import me.serce.solidity.ide.run.hasJavaSupport
+import java.awt.Component
 import javax.swing.*
 
 class SolidityConfigurablePanel {
@@ -18,11 +21,17 @@ class SolidityConfigurablePanel {
 
   private lateinit var checkboxPanel: JPanel
   private lateinit var useSolcJ: JCheckBox
+  private lateinit var javaInteropPanel: JPanel
   private lateinit var generateJavaStubs: JCheckBox
   private lateinit var dependecyAutoRefresh: JCheckBox
   private lateinit var web3jBtn: JRadioButton
   private lateinit var ethJNativeBtn: JRadioButton
   private lateinit var basePackageField: JTextField
+
+  private lateinit var warningPanel: JPanel
+  private lateinit var warningLabel: JLabel
+
+  private val noJavaWarning = "Current IDE platform does not support running Solidity"
 
   init {
     val descriptor = FileChooserDescriptor(false, true, true, true, false, false)
@@ -47,18 +56,37 @@ class SolidityConfigurablePanel {
         if (myEvmPathField.textField.text.isNotEmpty()) useSolcJ.isSelected = true
       }
     })
+    generateJavaStubs.addActionListener {
+      updateInteropControlsAvailability()
+    }
+    if (!hasJavaSupport) {
+      warningLabel.icon = AllIcons.General.BalloonWarning
+      warningLabel.text = noJavaWarning
+    } else {
+      warningLabel.isVisible = false
+    }
+  }
+
+  private fun updateInteropControlsAvailability() {
+    javaInteropPanel.setAll({ it.isEnabled = generateJavaStubs.isSelected }, except = generateJavaStubs)
   }
 
   private fun updateControlAvailability() {
     val enabled = myEvmPathField.textField.text.isNotEmpty()
-    checkboxPanel.setEnabledAll(enabled)
+    checkboxPanel.setAll({ it.isEnabled = enabled })
+    if (!hasJavaSupport) {
+      useSolcJ.isEnabled = false
+      useSolcJ.isSelected = false
+    }
   }
 
-  private fun JPanel.setEnabledAll(enabled: Boolean) {
-    this.components.forEach {
-      if (it is JPanel) it.setEnabledAll(enabled)
-      it.isEnabled = enabled
-    }
+  private fun JPanel.setAll(action: (Component) -> Unit, vararg except: Component) {
+    this.components.asSequence()
+      .filterNot { except.contains(it) }
+      .forEach {
+        (it as? JPanel)?.setAll(action, *except)
+        action(it)
+      }
   }
 
   internal fun reset(settings: SoliditySettings) {
@@ -73,6 +101,7 @@ class SolidityConfigurablePanel {
       Sol2JavaGenerationStyle.ETHJ -> ethJNativeBtn.isSelected = true
     }
     updateControlAvailability()
+    updateInteropControlsAvailability()
   }
 
   internal fun apply(settings: SoliditySettings) {

@@ -1,13 +1,10 @@
 package me.serce.solidity.ide.run.compile
 
 import com.intellij.openapi.compiler.*
-import com.intellij.openapi.module.Module
-import com.intellij.openapi.module.Module
 import me.serce.solidity.ide.settings.SoliditySettings
 import me.serce.solidity.lang.SolidityFileType
 import java.io.DataInput
 import java.io.File
-import java.nio.file.Paths
 
 object SolidityIdeCompiler : Validator {
 // extends Validator to be run after the regular (javac) compiler,
@@ -38,7 +35,7 @@ object SolidityIdeCompiler : Validator {
       .groupBy { it.second }
 
     val compiled = fileByModule.map {
-      Pair(it.value, Solc.compile(it.value.map { File(it.first.file.path) }, getOutputDir(it.key)))
+      Pair(it.value, Solc.compile(it.value.map { File(it.first.file.path) }, SolidityCompiler.getOutputDir(it.key)))
     }.onEach { SolcMessageProcessor.process(it.second, context) }
       .groupBy { it.second.success }
 
@@ -46,17 +43,7 @@ object SolidityIdeCompiler : Validator {
     return success.flatMap { it.first }.map { it.first }.toTypedArray()
   }
 
-  fun getOutputDir(module: Module): File {
-    val outputPath = CompilerPaths.getModuleOutputDirectory(module, false)
 
-    val outputDir = if (outputPath != null) File(outputPath.path) else {
-      // todo workaround - fix it properly
-      val moduleOutDir = Paths.get(module.project.basePath, "out", "production", module.name).toFile()
-      moduleOutDir.mkdirs()
-      moduleOutDir
-    }
-    return outputDir
-  }
 
   override fun validateConfiguration(scope: CompileScope?): Boolean {
     return Solc.isEnabled()

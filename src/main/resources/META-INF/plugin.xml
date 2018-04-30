@@ -156,9 +156,9 @@
 
         <group id="myGroupId">
             <separator/>
-            <action id="Solidity.GenerateJavaStub"
-                    class="me.serce.solidity.ide.interop.GenerateJavaStubAction"
-                    text="_Generate Java Stubs" description="Generate Java Stubs">
+            <action id="Solidity.Compile"
+                    class="me.serce.solidity.ide.run.compile.SolCompileAction"
+                    text="Compile _Solidity" description="Compile Solidity files">
 
                 <keyboard-shortcut keymap="$default" first-keystroke="shift ctrl S"/>
             </action>

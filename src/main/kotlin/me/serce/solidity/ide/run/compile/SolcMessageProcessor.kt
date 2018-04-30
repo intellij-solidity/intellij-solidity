@@ -13,11 +13,11 @@ import me.serce.solidity.ide.settings.SoliditySettingsConfigurable
 
 object SolcMessageProcessor {
 
-  private val defaultLevel = CompilerMessageCategory.INFORMATION
+  private val defaultLevel = MessageType.INFO
 
   private val levels = mapOf(
-    "Error:" to CompilerMessageCategory.ERROR,
-    "Warning:" to CompilerMessageCategory.WARNING
+    "Warning:" to MessageType.WARNING,
+    "Error:" to MessageType.ERROR
   )
 
   private val linkPattern = "(.+\\.sol):(\\d+):(\\d+):".toRegex()
@@ -29,7 +29,7 @@ object SolcMessageProcessor {
   private val lineSeparator = System.getProperty("line.separator")
 
   private data class Message(
-    val level: CompilerMessageCategory = defaultLevel,
+    val level: MessageType = defaultLevel,
     val url: String? = null,
     val lineNum: Int = -1,
     val columnNum: Int = -1,
@@ -38,7 +38,16 @@ object SolcMessageProcessor {
 
   fun process(solcResult: SolcResult, context: CompileContext) {
     parseMessages(solcResult).forEach {
-      context.addMessage(it.level, it.content.joinToString("\n"), it.url, it.lineNum, it.columnNum)
+      context.addMessage(it.level.toCompilationCategory(), it.content.joinToString("\n"), it.url, it.lineNum, it.columnNum)
+    }
+  }
+
+  fun MessageType.toCompilationCategory(): CompilerMessageCategory {
+    return when (this) {
+      MessageType.ERROR -> CompilerMessageCategory.ERROR
+      MessageType.WARNING -> CompilerMessageCategory.WARNING
+      MessageType.INFO -> CompilerMessageCategory.INFORMATION
+      else -> throw IllegalArgumentException("Unsupported type: $this")
     }
   }
 
@@ -63,11 +72,11 @@ object SolcMessageProcessor {
         }
         result.last().content.add(line)
       }
-    if (!solcResult.success && result.none { it.level == CompilerMessageCategory.ERROR }) {
+    if (!solcResult.success && result.none { it.level == MessageType.ERROR }) {
       if (result.size == 1) {
-        result[0] = result[0].copy(level = CompilerMessageCategory.ERROR)
+        result[0] = result[0].copy(level = MessageType.ERROR)
       } else {
-        result.add(Message(CompilerMessageCategory.ERROR).copy(content = mutableListOf("Solc returned error code: ${solcResult.exitCode}")))
+        result.add(Message(MessageType.ERROR).copy(content = mutableListOf("Solc returned error code: ${solcResult.exitCode}")))
       }
     }
     return result
@@ -86,7 +95,7 @@ object SolcMessageProcessor {
       title = "Solidity compilation failed"
       messageType = MessageType.ERROR
       message = messages
-        .filter { it.level == CompilerMessageCategory.ERROR }
+        .filter { it.level == MessageType.ERROR }
         .joinToString("\n") {
           return@joinToString if (it.url != null)
             "<a href='${it.url}?${it.lineNum},${it.columnNum}'>${it.content.first()}</a>\n${it.content.drop(1).joinToString("\n")}"

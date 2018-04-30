@@ -1,6 +1,6 @@
 package me.serce.solidity.ide.interop
 
-import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Computable
@@ -21,7 +21,7 @@ object EthJStubGenerator : Sol2JavaGenerator {
     val output = WriteCommandAction.runWriteCommandAction(project, Computable {
       VfsUtil.createDirectoryIfMissing(dir, SoliditySettings.instance.basePackage.replace(".", "/"))
     }).path
-    ApplicationManager.getApplication().runReadAction {
+    runReadAction {
       val repo = EthJStubGenerator.generateRepo(contracts)
       writeClass(output, repoClassName, repo)
       contracts.map { it.contract }.forEach {
