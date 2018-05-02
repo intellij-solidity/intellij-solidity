@@ -50,12 +50,12 @@ object DependencyConfigurator {
   private fun refreshProject(project: Project) {
     ProgressManager.getInstance().run(object : Task.Backgroundable(project, "Generating java stubs") {
       override fun run(indicator: ProgressIndicator) {
-        updateDepenedencies(project)
+        updateDependencies(project)
       }
     })
   }
 
-  private fun updateDepenedencies(project: Project) {
+  private fun updateDependencies(project: Project) {
     val jarFilePath = SoliditySettings.instance.pathToEvm
     ModuleManager.getInstance(project).modules
       .forEach { module ->
