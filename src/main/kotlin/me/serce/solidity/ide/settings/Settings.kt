@@ -30,6 +30,7 @@ class SoliditySettings : PersistentStateComponent<SoliditySettings> {
   var dependenciesAutoRefresh: Boolean = true
   var basePackage: String = "com.myfirm.mypackage"
   var genStyle: Sol2JavaGenerationStyle = Sol2JavaGenerationStyle.WEB3J
+  var genOutputPath: String = "src-gen"
 
   override fun getState(): SoliditySettings? {
     return this

@@ -22,8 +22,6 @@ import java.nio.file.Paths
 import java.util.stream.Collectors
 
 object SolidityCompiler {
-  private const val genDir = "src-gen"
-
   fun generate(params: SolCompileParams) {
     if (params.stubs) generateSrcDir(params.module, params.project)
 
@@ -101,7 +99,7 @@ object SolidityCompiler {
         WriteCommandAction.runWriteCommandAction(project) {
           val model = ModuleRootManager.getInstance(it).modifiableModel
           val ce = model.contentEntries.first() ?: model.addContentEntry(project.baseDir)
-          val genDir = VfsUtil.createDirectoryIfMissing(ce.file, genDir)
+          val genDir = VfsUtil.createDirectoryIfMissing(ce.file, SoliditySettings.instance.genOutputPath)
           if (ce.sourceFolderFiles.none { it.path == genDir.path }) ce.addSourceFolder(genDir, false)
           model.commit()
         }
@@ -109,7 +107,7 @@ object SolidityCompiler {
   }
 
   private fun findGenSourceRoot(module: Module): VirtualFile? {
-    return ModuleRootManager.getInstance(module).sourceRoots.firstOrNull { it.name == genDir }
+    return ModuleRootManager.getInstance(module).sourceRoots.firstOrNull { it.name == SoliditySettings.instance.genOutputPath }
   }
 }
 

@@ -27,6 +27,7 @@ class SolidityConfigurablePanel {
   private lateinit var web3jBtn: JRadioButton
   private lateinit var ethJNativeBtn: JRadioButton
   private lateinit var basePackageField: JTextField
+  private lateinit var genOutputPath: JTextField
 
   private lateinit var warningPanel: JPanel
   private lateinit var warningLabel: JLabel
@@ -100,6 +101,7 @@ class SolidityConfigurablePanel {
       Sol2JavaGenerationStyle.WEB3J -> web3jBtn.isSelected = true
       Sol2JavaGenerationStyle.ETHJ -> ethJNativeBtn.isSelected = true
     }
+    genOutputPath.text = FileUtil.toSystemDependentName(settings.genOutputPath)
     updateControlAvailability()
     updateInteropControlsAvailability()
   }
@@ -109,13 +111,23 @@ class SolidityConfigurablePanel {
     if (evmPath.isNotBlank() && !SoliditySettings.validateEvm(evmPath)) {
       throw ConfigurationException("Incorrect EVM path")
     }
+    checkText(basePackageField, "Base package")
+    checkText(genOutputPath, "Stubs output folder")
+
     settings.pathToEvm = evmPath
     settings.pathToDb = fromPath(myDbPathField)
     settings.useSolcJ = useSolcJ.isSelected
     settings.generateJavaStubs = generateJavaStubs.isSelected
     settings.basePackage = basePackageField.text
     settings.genStyle = generationStyle()
+    settings.genOutputPath = genOutputPath.text
     ApplicationManager.getApplication().messageBus.syncPublisher(SoliditySettingsListener.TOPIC).settingsChanged()
+  }
+
+  private fun checkText(field: JTextField, fieldName: String) {
+    if (field.text.isBlank()) {
+      throw ConfigurationException("$fieldName can't be empty")
+    }
   }
 
   private fun generationStyle(): Sol2JavaGenerationStyle = when {
@@ -132,5 +144,6 @@ class SolidityConfigurablePanel {
       useSolcJ.isSelected != settings.useSolcJ ||
       generateJavaStubs.isSelected != settings.generateJavaStubs ||
       basePackageField.text != settings.basePackage ||
-      generationStyle() != settings.genStyle
+      generationStyle() != settings.genStyle ||
+      genOutputPath.text != settings.genOutputPath.trim()
 }
