@@ -37,7 +37,7 @@ object SolcMessageProcessor {
   )
 
   fun process(solcResult: SolcResult, context: CompileContext) {
-    parseMessages(solcResult).forEach {
+    parseMessages(solcResult, context.project).forEach {
       context.addMessage(it.level.toCompilationCategory(), it.content.joinToString("\n"), it.url, it.lineNum, it.columnNum)
     }
   }
@@ -51,7 +51,7 @@ object SolcMessageProcessor {
     }
   }
 
-  private fun parseMessages(solcResult: SolcResult): List<Message> {
+  private fun parseMessages(solcResult: SolcResult, project: Project): List<Message> {
     val result = mutableListOf(Message())
     solcResult.messages.split(lineSeparator)
       .filterNot { it.isBlank() || it == spanningLines }
@@ -64,7 +64,7 @@ object SolcMessageProcessor {
           val mGroups = link.groupValues
           val curMessage = Message(
             levels[curLevel] ?: defaultLevel,
-            "file://${mGroups[1]}",
+            "${project.baseDir}/${mGroups[1]}",
             mGroups[2].toIntOrNull() ?: -1,
             mGroups[3].toIntOrNull() ?: -1
           )
@@ -83,7 +83,7 @@ object SolcMessageProcessor {
   }
 
   fun showNotification(result: SolcResult, project: Project) {
-    val messages = parseMessages(result)
+    val messages = parseMessages(result, project)
     val title: String
     val message: String
     val messageType: MessageType

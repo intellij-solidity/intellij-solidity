@@ -74,7 +74,7 @@ object SolidityCompiler {
     val outputDir = getOutputDir(module)
 
     val sources = runReadAction { contracts.map { File(it.containingFile.virtualFile.canonicalPath) } }
-    val solcResult = Solc.compile(sources, outputDir)
+    val solcResult = Solc.compile(sources, outputDir, project.baseDir)
     if (notifications) {
       SolcMessageProcessor.showNotification(solcResult, project)
     }
