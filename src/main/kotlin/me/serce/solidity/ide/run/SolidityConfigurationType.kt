@@ -10,11 +10,8 @@ import javax.swing.Icon
 
 class SolidityConfigurationType : ConfigurationTypeBase("SolidityConfigurationType", "Solidity", "Run Solidity Contract", SolidityIcons.FILE_ICON) {
   init {
-    try {
-      Class.forName("com.intellij.execution.CommonJavaRunConfigurationParameters");
+    if (hasJavaSupport) {
       addFactory(configurationFactory())
-    }catch ( e : ClassNotFoundException) {
-      // IDE does not have java support, skipping configuration factory initialization
     }
   }
 
@@ -35,4 +32,11 @@ class SolidityConfigurationType : ConfigurationTypeBase("SolidityConfigurationTy
       return ConfigurationTypeUtil.findConfigurationType<SolidityConfigurationType>(SolidityConfigurationType::class.java)
     }
   }
+}
+
+val hasJavaSupport = try {
+  Class.forName("com.intellij.execution.CommonJavaRunConfigurationParameters")
+  true
+} catch (e: ClassNotFoundException) {
+  false
 }

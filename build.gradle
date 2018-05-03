@@ -23,6 +23,9 @@ apply plugin: 'idea'
 apply plugin: 'jacoco'
 
 sourceCompatibility = 1.8
+compileKotlin {
+    kotlinOptions.jvmTarget = 1.8
+}
 
 idea {
     module {
@@ -74,9 +77,12 @@ dependencies {
     }
 
     // https://mvnrepository.com/artifact/org.ethereum/ethereumj-core
-    compileOnly( group: 'org.ethereum', name: 'ethereumj-core', version: '1.5.0-RELEASE') {
+    compileOnly( group: 'org.ethereum', name: 'ethereumj-core', version: '1.7.0-RELEASE') {
         exclude group: 'org.ethereum', module: 'solcJ-all'
+        exclude group: 'org.ethereum', module: 'rocksdbjni'
     }
+
+    compile group: 'org.web3j', name: 'codegen', version: '3.3.1'
 
     testCompile group: 'junit', name: 'junit', version: '4.11'
 }

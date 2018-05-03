@@ -153,6 +153,18 @@
                 text="Smart contract" description="Create new solidity contract">
             <add-to-group group-id="NewGroup" anchor="after" relative-to-action="NewDir"/>
         </action>
+
+        <group id="myGroupId">
+            <separator/>
+            <action id="Solidity.Compile"
+                    class="me.serce.solidity.ide.run.compile.SolCompileAction"
+                    text="Compile _Solidity" description="Compile Solidity files">
+
+                <keyboard-shortcut keymap="$default" first-keystroke="shift ctrl S"/>
+            </action>
+            <separator/>
+            <add-to-group group-id="BuildMenu" relative-to-action="CompileProject" anchor="before"/>
+        </group>
     </actions>
 
     <application-components>

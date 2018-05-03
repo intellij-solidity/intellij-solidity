@@ -1,6 +1,5 @@
 package me.serce.solidity.ide.inspections.fixes
 
-import com.intellij.codeInsight.daemon.QuickFixBundle
 import com.intellij.codeInsight.hint.QuestionAction
 import com.intellij.ide.util.DefaultPsiElementCellRenderer
 import com.intellij.openapi.application.ApplicationManager

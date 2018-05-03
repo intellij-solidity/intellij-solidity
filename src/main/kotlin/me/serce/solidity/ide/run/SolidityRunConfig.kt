@@ -12,7 +12,6 @@ import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.options.SettingsEditor
 import com.intellij.openapi.options.SettingsEditorGroup
-import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.util.xmlb.XmlSerializer
 import me.serce.solidity.ide.run.ui.SolidityConfigurableEditorPanel
 import me.serce.solidity.ide.settings.SoliditySettings
@@ -184,7 +183,7 @@ class SolidityRunConfig(configurationModule: SolidityRunConfigModule, factory: C
 
   override fun checkConfiguration() {
     if (!SoliditySettings.instance.validateEvm()) {
-      throw RuntimeConfigurationError("EVM is not configured", { ShowSettingsUtil.getInstance().editConfigurable(project, SoliditySettingsConfigurable(SoliditySettings.instance)) })
+      throw RuntimeConfigurationError("EVM is not configured", SoliditySettingsConfigurable(SoliditySettings.instance).getQuickFix(project))
     }
     if (configurationModule.module == null) {
       throw RuntimeConfigurationError("Module is not specified")

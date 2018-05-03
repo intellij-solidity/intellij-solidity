@@ -10,9 +10,9 @@ import java.io.File
 import javax.swing.JComponent
 
 object EvmDownloader {
-  private val evmUrl = "https://bintray.com/ethereum/maven/download_file?file_path=org%2Fethereum%2Fethereumj-core%2F1.7.1-RELEASE%2Fethereumj-core-1.7.1-RELEASE.zip"
+  private const val evmUrl = "https://bintray.com/ethereum/maven/download_file?file_path=org%2Fethereum%2Fethereumj-core%2F1.7.1-RELEASE%2Fethereumj-core-1.7.1-RELEASE.zip"
 
-  private val localName = "evm.zip"
+  private const val localName = "evm.zip"
 
   fun download(anchor: JComponent): String {
     val s = DownloadableFileService.getInstance()
