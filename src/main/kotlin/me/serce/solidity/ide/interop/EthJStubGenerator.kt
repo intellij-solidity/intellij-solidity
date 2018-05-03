@@ -10,6 +10,7 @@ import me.serce.solidity.ide.settings.SoliditySettings
 import me.serce.solidity.lang.psi.SolContractDefinition
 import me.serce.solidity.lang.psi.SolFunctionDefinition
 import java.io.ByteArrayOutputStream
+import java.lang.reflect.Modifier
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
@@ -36,6 +37,11 @@ object EthJStubGenerator : Sol2JavaGenerator {
 
   private fun getPackageName(): String = SoliditySettings.instance.basePackage
 
+  private val objNames = Any::class.java.declaredMethods.asSequence()
+    .filter { !Modifier.isPrivate(it.modifiers) }
+    .map { it.name }
+    .toSet()
+
   private fun contractStubTemplate(className: String, functions: List<SolFunctionDefinition>): String =
     """$autoGenComment
 package ${getPackageName()};
@@ -55,11 +61,14 @@ ${functions.filter { it.name != null }.joinToString("\n") { funcStubTemplate(it)
     val paramRefs = paramRefs(function)
     val methodName = function.name
     return """
-  public Object $methodName($params) {
+  public Object ${methodName(methodName)}($params) {
 		return contract.callFunction("$methodName"$paramRefs).getReturnValue();
 	}
 """
   }
+
+  private fun methodName(name: String?) =
+    if (objNames.contains(name)) "_$name" else name
 
   private fun paramRefs(function: SolFunctionDefinition?): String {
     val parameters = function?.parameters ?: return ""
@@ -117,8 +126,9 @@ public class $repoClassName {
       return blockchain;
   }
 
-  private static String gunzip(byte[] data) throws java.io.IOException {
-    try (java.util.zip.GZIPInputStream inputStream = new java.util.zip.GZIPInputStream(new java.io.ByteArrayInputStream(data));
+  private static String unzip(String data) throws java.io.IOException {
+    byte[] bytes = java.util.Base64.getDecoder().decode(data);
+    try (java.util.zip.GZIPInputStream inputStream = new java.util.zip.GZIPInputStream(new java.io.ByteArrayInputStream(bytes));
          java.io.ByteArrayOutputStream result = new java.io.ByteArrayOutputStream()) {
             byte[] buffer = new byte[1024];
             int length;
@@ -142,8 +152,8 @@ ${contracts.joinToString("\n") { submitContractTemplate(it) }}
     public $name submit$name($params) {
         CompilationResult.ContractMetadata metadata = new CompilationResult.ContractMetadata();
         try {
-           metadata.abi = gunzip(new byte[]{${gzip(contract.metadata.abi)}});
-           metadata.bin = gunzip(new byte[]{${gzip(contract.metadata.bin)}});
+           metadata.abi = unzip("${zip(contract.metadata.abi)}");
+           metadata.bin = unzip("${zip(contract.metadata.bin)}");
         } catch (Exception e) {
            throw new RuntimeException(e);
         }
@@ -152,15 +162,18 @@ ${contracts.joinToString("\n") { submitContractTemplate(it) }}
 """
   }
 
-  private fun gzip(content: String): String {
+  private fun zip(content: String): String {
     val baos = ByteArrayOutputStream()
     GZIPOutputStream(baos).bufferedWriter().use { it.write(content) }
-    val toString = Arrays.toString(baos.toByteArray())
-    return toString.substring(1, toString.length - 1)
+    return Base64.getEncoder().encodeToString(baos.toByteArray())
   }
 
-  private fun stringifyParams(function: SolFunctionDefinition?) =
-    function?.parameters?.joinToString(", ") { "${EthJTypeConverter.convert(it.typeName)} ${it.name}" } ?: ""
+  private fun stringifyParams(function: SolFunctionDefinition?): String {
+    var paramCounter = 0
+    return function?.parameters?.joinToString(", ") {
+      "${EthJTypeConverter.convert(it.typeName)} ${it.name ?: "param${paramCounter++}"}"
+    } ?: ""
+  }
 
   private fun convert(contract: SolContractDefinition): String {
     return contractStubTemplate(contract.name!!, contract.functionDefinitionList.filter { !it.isConstructor })
