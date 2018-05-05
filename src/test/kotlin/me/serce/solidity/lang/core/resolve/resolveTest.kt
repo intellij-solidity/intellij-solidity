@@ -30,27 +30,18 @@ abstract class SolResolveTestBase : SolTestBase() {
 
   protected inline fun <reified T : PsiElement> resolveInCode(@Language("Solidity") code: String): Pair<T, String> {
     InlineFile(code)
-    return findElementAndDataInEditor<T>("^")
+    return findElementAndDataInEditor("^")
   }
 
-  protected fun assertCode() {
-    val (refElement, data) = findElementAndDataInEditor<SolNamedElement>("^")
-
-    if (data == "unresolved") {
-      val resolved = refElement.reference?.resolve()
-      check(resolved == null) {
-        "$refElement `${refElement.text}`should be unresolved, was resolved to\n$resolved `${resolved?.text}`"
-      }
-      return
-    }
-
+  protected fun testResolveBetweenFiles(file1: InlineFile, file2: InlineFile) {
+    myFixture.openFileInEditor(file2.psiFile.virtualFile)
+    val (refElement, _) = findElementAndDataInEditor<SolNamedElement>("^")
     val resolved = checkNotNull(refElement.reference?.resolve()) {
-      "Failed to resolve ${refElement.text}"
+      "failed to resolve ${refElement.name}"
     }
-
-    val target = findElementInEditor<SolNamedElement>("x")
-
-    assertEquals(target, resolved)
+    myFixture.openFileInEditor(file1.psiFile.virtualFile)
+    val (resElement, _) = findElementAndDataInEditor<SolNamedElement>("x")
+    assertEquals(resElement, resolved)
   }
 }
 

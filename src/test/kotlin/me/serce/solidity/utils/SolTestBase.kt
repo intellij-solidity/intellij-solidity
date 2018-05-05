@@ -2,15 +2,17 @@ package me.serce.solidity.utils
 
 import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
 import com.intellij.psi.util.PsiTreeUtil
 import org.intellij.lang.annotations.Language
 
 abstract class SolTestBase : SolLightPlatformCodeInsightFixtureTestCase() {
   inner class InlineFile(@Language("Solidity") private val code: String, val name: String = "ctr.sol") {
+    val psiFile: PsiFile
     private val hasCaretMarker = "/*caret*/" in code
 
     init {
-      myFixture.configureByText(name, replaceCaretMarker(code))
+      psiFile = myFixture.configureByText(name, replaceCaretMarker(code))
     }
 
     fun withCaret() {

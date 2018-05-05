@@ -22,43 +22,37 @@ class SolContractResolveTest : SolResolveTestBase() {
         }
   """)
 
-  fun testResolveSymbolAliases() {
-    val aFile = InlineFile(
-      code = "contract a {}",
+  fun testResolveSymbolAliases() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+          contract a {}
+                 //x
+      """,
       name = "a.sol"
-    )
-
+    ),
     InlineFile("""
           import {a as A} from "./a.sol";
 
           contract b is A {}
                       //^
     """)
+  )
 
-    val (refElement, _) = findElementAndDataInEditor<SolNamedElement>("^")
-    val resolved = refElement.reference?.resolve()
-    assertNotNull(resolved)
-    assertEquals(aFile.name, resolved?.containingFile?.name)
-  }
-
-  fun testResolveUsingImpor2t() {
-    val aFile = InlineFile(
-      code = "contract a {}",
+  fun testResolveUsingImport() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+          contract a {}
+                 //x
+      """,
       name = "a.sol"
-    )
-
+    ),
     InlineFile("""
           import "./a.sol";
 
           contract b is a {}
                       //^
     """)
-
-    val (refElement, _) = findElementAndDataInEditor<SolNamedElement>("^")
-    val resolved = refElement.reference?.resolve()
-    assertNotNull(resolved)
-    assertEquals(aFile.name, resolved?.containingFile?.name)
-  }
+  )
 
   fun testNotImported() {
     InlineFile(
