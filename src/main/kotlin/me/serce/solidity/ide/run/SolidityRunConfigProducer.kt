@@ -52,6 +52,8 @@ private fun searchFunction(sourceElement: PsiElement?): SolFunctionDefinition? {
 
 class SolidityRunLineMarkerProvider : RunLineMarkerContributor() {
   override fun getInfo(e: PsiElement): RunLineMarkerContributor.Info? {
+    if (!hasJavaSupport) return null
+
     val elementType = e.elementType
     if (elementType is SolElementType && elementType.name == "Identifier") {
       val searchFunction = e.parent ?: return null

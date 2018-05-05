@@ -24,6 +24,10 @@ class SolidityConfigurationType : ConfigurationTypeBase("SolidityConfigurationTy
       override fun getIcon(): Icon {
         return SolidityIcons.FUNCTION
       }
+
+      override fun isApplicable(project: Project): Boolean {
+        return hasJavaSupport
+      }
     }
   }
 
