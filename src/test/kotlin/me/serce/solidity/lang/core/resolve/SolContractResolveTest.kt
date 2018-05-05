@@ -1,6 +1,5 @@
 package me.serce.solidity.lang.core.resolve
 
-import junit.framework.Assert
 import me.serce.solidity.lang.psi.SolNamedElement
 
 class SolContractResolveTest : SolResolveTestBase() {
@@ -23,10 +22,29 @@ class SolContractResolveTest : SolResolveTestBase() {
         }
   """)
 
-  fun testResolveUsingImport() {
-    InlineFile(
-      name = "a.sol",
-      code = "contract a {}"
+  fun testResolveSymbolAliases() {
+    val aFile = InlineFile(
+      code = "contract a {}",
+      name = "a.sol"
+    )
+
+    InlineFile("""
+          import {a as A} from "./a.sol";
+
+          contract b is A {}
+                      //^
+    """)
+
+    val (refElement, _) = findElementAndDataInEditor<SolNamedElement>("^")
+    val resolved = refElement.reference?.resolve()
+    assertNotNull(resolved)
+    assertEquals(aFile.name, resolved?.containingFile?.name)
+  }
+
+  fun testResolveUsingImpor2t() {
+    val aFile = InlineFile(
+      code = "contract a {}",
+      name = "a.sol"
     )
 
     InlineFile("""
@@ -38,8 +56,8 @@ class SolContractResolveTest : SolResolveTestBase() {
 
     val (refElement, _) = findElementAndDataInEditor<SolNamedElement>("^")
     val resolved = refElement.reference?.resolve()
-    Assert.assertNotNull(resolved)
-    Assert.assertEquals(resolved?.containingFile?.name, "a.sol")
+    assertNotNull(resolved)
+    assertEquals(aFile.name, resolved?.containingFile?.name)
   }
 
   fun testNotImported() {
@@ -56,6 +74,6 @@ class SolContractResolveTest : SolResolveTestBase() {
     """)
 
     val (refElement, _) = findElementAndDataInEditor<SolNamedElement>("^")
-    Assert.assertNull(refElement.reference?.resolve())
+    assertNull(refElement.reference?.resolve())
   }
 }

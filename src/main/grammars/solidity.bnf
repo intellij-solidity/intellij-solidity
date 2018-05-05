@@ -111,7 +111,8 @@ ImportAlias ::= Identifier {
     implements = "me.serce.solidity.lang.psi.SolNamedElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolImportAliasMixin"
 }
-private ImportRuleSet ::= UserDefinedTypeName (as ImportAlias)? ( ',' UserDefinedTypeName (as ImportAlias)? )* {
+ImportAliasedPair ::= UserDefinedTypeName (as ImportAlias)?
+private ImportRuleSet ::= ImportAliasedPair ( ',' ImportAliasedPair )* {
     recoverWhile = ClosedBracketRecover
 }
 ImportPath ::= StringLiteral {
