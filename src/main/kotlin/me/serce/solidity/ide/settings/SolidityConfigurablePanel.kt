@@ -9,15 +9,21 @@ import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.ui.DocumentAdapter
 import me.serce.solidity.ide.interop.Sol2JavaGenerationStyle
+import me.serce.solidity.ide.run.compile.Solc
 import me.serce.solidity.ide.run.hasJavaSupport
 import java.awt.Component
 import javax.swing.*
+import javax.swing.event.DocumentEvent
 
 class SolidityConfigurablePanel {
-  internal lateinit var myEvmPathPanel: JPanel
-  private lateinit var myEvmPathField: TextFieldWithBrowseButton
-  private lateinit var myDbPathField: TextFieldWithBrowseButton
+  internal lateinit var mainPanel: JPanel
+  private lateinit var evmPath: TextFieldWithBrowseButton
+  private lateinit var evmDbPath: TextFieldWithBrowseButton
   private lateinit var downloadBtn: JButton
+  private lateinit var useSolcEthereum: JCheckBox
+  private lateinit var standaloneSolc: TextFieldWithBrowseButton
+
+  private lateinit var solcVersion: JLabel
 
   private lateinit var checkboxPanel: JPanel
   private lateinit var useSolcJ: JCheckBox
@@ -29,34 +35,54 @@ class SolidityConfigurablePanel {
   private lateinit var basePackageField: JTextField
   private lateinit var genOutputPath: JTextField
 
-  private lateinit var warningPanel: JPanel
   private lateinit var warningLabel: JLabel
 
   private val noJavaWarning = "Current IDE platform does not support running Solidity"
 
   init {
-    val descriptor = FileChooserDescriptor(false, true, true, true, false, false)
-    descriptor.title = "Solidity EVM Configuration"
-    descriptor.description = "Select path to EthereumJ VM library"
-    myEvmPathField.addBrowseFolderListener(descriptor.title, descriptor.description, null, descriptor)
+    val ethDescriptor = FileChooserDescriptor(false, true, true, true, false, false)
+    ethDescriptor.title = "Solidity EVM Configuration"
+    ethDescriptor.description = "Select path to EthereumJ VM library"
+    evmPath.addBrowseFolderListener(ethDescriptor.title, ethDescriptor.description, null, ethDescriptor)
 
-    val descriptor2 = FileChooserDescriptorFactory.createSingleFolderDescriptor()
-    descriptor2.title = "Transaction Data Base"
-    descriptor2.description = "Select path to EVM Data Base"
-    myDbPathField.addBrowseFolderListener(descriptor2.title, descriptor2.description, null, descriptor2)
+    val ethDbDescriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor()
+    ethDbDescriptor.title = "Transaction Data Base"
+    ethDbDescriptor.description = "Select path to EVM Data Base"
+    evmDbPath.addBrowseFolderListener(ethDbDescriptor.title, ethDbDescriptor.description, null, ethDbDescriptor)
+
+    useSolcJ.addActionListener {
+
+    }
 
     downloadBtn.addActionListener {
-      val dir = EvmDownloader.download(myEvmPathPanel)
+      val dir = EvmDownloader.download(mainPanel)
       if (dir.isNotEmpty()) {
-        myEvmPathField.text = dir
+        evmPath.text = dir
       }
     }
-    myEvmPathField.textField.document.addDocumentListener(object : DocumentAdapter() {
+    evmPath.textField.document.addDocumentListener(object : DocumentAdapter() {
       override fun textChanged(e: javax.swing.event.DocumentEvent?) {
+        updateSolcControlAvailablility()
         updateControlAvailability()
-        if (myEvmPathField.textField.text.isNotEmpty()) useSolcJ.isSelected = true
       }
     })
+
+    val solcDescriptor = FileChooserDescriptorFactory.createSingleFileDescriptor()
+    solcDescriptor.title = "Standalone Solc installation"
+    solcDescriptor.description = "Select path to Solidity compiler"
+    standaloneSolc.addBrowseFolderListener(solcDescriptor.title, solcDescriptor.description, null, solcDescriptor)
+
+    standaloneSolc.textField.document.addDocumentListener(object : DocumentAdapter() {
+      override fun textChanged(e: DocumentEvent?) {
+        updateSolcControlAvailablility()
+        updateControlAvailability()
+      }
+    })
+
+    useSolcEthereum.addActionListener {
+      updateSolcControlAvailablility()
+    }
+
     generateJavaStubs.addActionListener {
       updateInteropControlsAvailability()
     }
@@ -70,15 +96,20 @@ class SolidityConfigurablePanel {
   }
 
   private fun updateInteropControlsAvailability() {
-    javaInteropPanel.setAll({ it.isEnabled = generateJavaStubs.isSelected }, except = generateJavaStubs)
+    javaInteropPanel.setAll({ it.isEnabled = generateJavaStubs.isSelected }, generateJavaStubs)
   }
 
   private fun updateControlAvailability() {
-    val enabled = myEvmPathField.textField.text.isNotEmpty()
+    val enabled = evmPath.textField.text.isNotEmpty() && useSolcEthereum.isSelected || standaloneSolc.text.isNotEmpty()
     checkboxPanel.setAll({ it.isEnabled = enabled })
     if (!hasJavaSupport) {
       useSolcJ.isSelected = false
     }
+  }
+
+  private fun updateSolcControlAvailablility() {
+    standaloneSolc.isEnabled = !useSolcEthereum.isSelected
+    useSolcEthereum.isEnabled = evmPath.text.isNotBlank()
   }
 
   private fun JPanel.setAll(action: (Component) -> Unit, vararg except: Component) {
@@ -91,8 +122,10 @@ class SolidityConfigurablePanel {
   }
 
   internal fun reset(settings: SoliditySettings) {
-    myEvmPathField.text = FileUtil.toSystemDependentName(settings.pathToEvm)
-    myDbPathField.text = FileUtil.toSystemDependentName(settings.pathToDb)
+    evmPath.text = FileUtil.toSystemDependentName(settings.pathToEvm)
+    evmDbPath.text = FileUtil.toSystemDependentName(settings.pathToDb)
+    standaloneSolc.text = FileUtil.toSystemDependentName(settings.solcPath)
+    useSolcEthereum.isSelected = settings.useSolcEthereum
     useSolcJ.isSelected = settings.useSolcJ
     generateJavaStubs.isSelected = settings.generateJavaStubs
     dependecyAutoRefresh.isSelected = settings.dependenciesAutoRefresh
@@ -104,10 +137,11 @@ class SolidityConfigurablePanel {
     genOutputPath.text = FileUtil.toSystemDependentName(settings.genOutputPath)
     updateControlAvailability()
     updateInteropControlsAvailability()
+    solcVersion.text = Solc.getVersion()
   }
 
   internal fun apply(settings: SoliditySettings) {
-    val evmPath = fromPath(myEvmPathField)
+    val evmPath = fromPath(evmPath)
     if (evmPath.isNotBlank() && !SoliditySettings.validateEvm(evmPath)) {
       throw ConfigurationException("Incorrect EVM path")
     }
@@ -115,13 +149,21 @@ class SolidityConfigurablePanel {
     checkText(genOutputPath, "Stubs output folder")
 
     settings.pathToEvm = evmPath
-    settings.pathToDb = fromPath(myDbPathField)
+    settings.pathToDb = fromPath(evmDbPath)
+    settings.solcPath = fromPath(standaloneSolc)
+    settings.useSolcEthereum = useSolcEthereum.isSelected
     settings.useSolcJ = useSolcJ.isSelected
     settings.generateJavaStubs = generateJavaStubs.isSelected
     settings.basePackage = basePackageField.text
     settings.genStyle = generationStyle()
     settings.genOutputPath = genOutputPath.text
     ApplicationManager.getApplication().messageBus.syncPublisher(SoliditySettingsListener.TOPIC).settingsChanged()
+    val version = Solc.getVersion()
+    if (version.isNotBlank()) {
+      solcVersion.text = version
+    } else {
+      throw ConfigurationException("Unable to determine solc version")
+    }
   }
 
   private fun checkText(field: JTextField, fieldName: String) {
@@ -139,8 +181,10 @@ class SolidityConfigurablePanel {
   private fun fromPath(textField: TextFieldWithBrowseButton) = FileUtil.toSystemIndependentName(textField.text.trim())
 
   internal fun isModified(settings: SoliditySettings): Boolean =
-    fromPath(myEvmPathField) != settings.pathToEvm.trim() ||
-      fromPath(myDbPathField) != settings.pathToDb.trim() ||
+    fromPath(evmPath) != settings.pathToEvm.trim() ||
+      fromPath(evmDbPath) != settings.pathToDb.trim() ||
+      fromPath(standaloneSolc) != settings.solcPath.trim() ||
+      useSolcEthereum.isSelected != settings.useSolcEthereum ||
       useSolcJ.isSelected != settings.useSolcJ ||
       generateJavaStubs.isSelected != settings.generateJavaStubs ||
       basePackageField.text != settings.basePackage ||
