@@ -17,6 +17,7 @@ import javax.swing.event.DocumentEvent
 
 class SolidityConfigurablePanel {
   internal lateinit var mainPanel: JPanel
+  private lateinit var compilePanel: JPanel
   private lateinit var evmPath: TextFieldWithBrowseButton
   private lateinit var evmDbPath: TextFieldWithBrowseButton
   private lateinit var downloadBtn: JButton
@@ -51,7 +52,8 @@ class SolidityConfigurablePanel {
     evmDbPath.addBrowseFolderListener(ethDbDescriptor.title, ethDbDescriptor.description, null, ethDbDescriptor)
 
     useSolcJ.addActionListener {
-
+      val enabled = useSolcJ.isSelected
+      compilePanel.setAll({ it.isEnabled = enabled }, useSolcJ)
     }
 
     downloadBtn.addActionListener {
@@ -63,7 +65,7 @@ class SolidityConfigurablePanel {
     evmPath.textField.document.addDocumentListener(object : DocumentAdapter() {
       override fun textChanged(e: javax.swing.event.DocumentEvent?) {
         updateSolcControlAvailablility()
-        updateControlAvailability()
+        updateJavaInteropControlAvailability()
       }
     })
 
@@ -75,7 +77,7 @@ class SolidityConfigurablePanel {
     standaloneSolc.textField.document.addDocumentListener(object : DocumentAdapter() {
       override fun textChanged(e: DocumentEvent?) {
         updateSolcControlAvailablility()
-        updateControlAvailability()
+        updateJavaInteropControlAvailability()
       }
     })
 
@@ -96,10 +98,11 @@ class SolidityConfigurablePanel {
   }
 
   private fun updateInteropControlsAvailability() {
-    javaInteropPanel.setAll({ it.isEnabled = generateJavaStubs.isSelected }, generateJavaStubs)
+    val enabled = generateJavaStubs.isSelected
+    javaInteropPanel.setAll({ it.isEnabled = enabled }, generateJavaStubs)
   }
 
-  private fun updateControlAvailability() {
+  private fun updateJavaInteropControlAvailability() {
     val enabled = evmPath.textField.text.isNotEmpty() && useSolcEthereum.isSelected || standaloneSolc.text.isNotEmpty()
     checkboxPanel.setAll({ it.isEnabled = enabled })
     if (!hasJavaSupport) {
@@ -135,7 +138,7 @@ class SolidityConfigurablePanel {
       Sol2JavaGenerationStyle.ETHJ -> ethJNativeBtn.isSelected = true
     }
     genOutputPath.text = FileUtil.toSystemDependentName(settings.genOutputPath)
-    updateControlAvailability()
+    updateJavaInteropControlAvailability()
     updateInteropControlsAvailability()
     solcVersion.text = Solc.getVersion()
   }
@@ -158,11 +161,14 @@ class SolidityConfigurablePanel {
     settings.genStyle = generationStyle()
     settings.genOutputPath = genOutputPath.text
     ApplicationManager.getApplication().messageBus.syncPublisher(SoliditySettingsListener.TOPIC).settingsChanged()
-    val version = Solc.getVersion()
-    if (version.isNotBlank()) {
-      solcVersion.text = version
-    } else {
-      throw ConfigurationException("Unable to determine solc version")
+
+    if (useSolcJ.isSelected) {
+      val version = Solc.getVersion()
+      if (version.isNotBlank()) {
+        solcVersion.text = version
+      } else {
+        throw ConfigurationException("No solc installation found")
+      }
     }
   }
 
