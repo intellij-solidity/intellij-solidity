@@ -5,8 +5,8 @@ import me.serce.solidity.lang.psi.SolNamedElement
 class SolImportResolveTest : SolResolveTestBase() {
   fun testImportPathResolve() {
     val file1 = InlineFile(
-      name = "Ownable.sol",
-      code = "contract a {}"
+      code = "contract a {}",
+      name = "Ownable.sol"
     )
 
     InlineFile("""
@@ -40,8 +40,8 @@ class SolImportResolveTest : SolResolveTestBase() {
 
   fun testResolveFrom() {
     val file1 = InlineFile(
-      name = "Ownable.sol",
-      code = "contract A {}"
+      code = "contract A {}",
+      name = "Ownable.sol"
     )
 
     InlineFile("""
