@@ -26,7 +26,6 @@ class SolidityConfigurablePanel {
 
   private lateinit var solcVersion: JLabel
 
-  private lateinit var checkboxPanel: JPanel
   private lateinit var useSolcJ: JCheckBox
   private lateinit var javaInteropPanel: JPanel
   private lateinit var generateJavaStubs: JCheckBox
@@ -52,8 +51,7 @@ class SolidityConfigurablePanel {
     evmDbPath.addBrowseFolderListener(ethDbDescriptor.title, ethDbDescriptor.description, null, ethDbDescriptor)
 
     useSolcJ.addActionListener {
-      val enabled = useSolcJ.isSelected
-      compilePanel.setAll({ it.isEnabled = enabled }, useSolcJ)
+      updateCompileAvailablility()
     }
 
     downloadBtn.addActionListener {
@@ -65,7 +63,6 @@ class SolidityConfigurablePanel {
     evmPath.textField.document.addDocumentListener(object : DocumentAdapter() {
       override fun textChanged(e: javax.swing.event.DocumentEvent?) {
         updateSolcControlAvailablility()
-        updateJavaInteropControlAvailability()
       }
     })
 
@@ -77,7 +74,6 @@ class SolidityConfigurablePanel {
     standaloneSolc.textField.document.addDocumentListener(object : DocumentAdapter() {
       override fun textChanged(e: DocumentEvent?) {
         updateSolcControlAvailablility()
-        updateJavaInteropControlAvailability()
       }
     })
 
@@ -97,22 +93,18 @@ class SolidityConfigurablePanel {
     }
   }
 
+  private fun updateCompileAvailablility() {
+    val enabled = useSolcJ.isSelected
+    compilePanel.setAll({ it.isEnabled = enabled }, useSolcJ)
+  }
+
   private fun updateInteropControlsAvailability() {
     val enabled = generateJavaStubs.isSelected
     javaInteropPanel.setAll({ it.isEnabled = enabled }, generateJavaStubs)
   }
 
-  private fun updateJavaInteropControlAvailability() {
-    val enabled = evmPath.textField.text.isNotEmpty() && useSolcEthereum.isSelected || standaloneSolc.text.isNotEmpty()
-    checkboxPanel.setAll({ it.isEnabled = enabled })
-    if (!hasJavaSupport) {
-      useSolcJ.isSelected = false
-    }
-  }
-
   private fun updateSolcControlAvailablility() {
     standaloneSolc.isEnabled = !useSolcEthereum.isSelected
-    useSolcEthereum.isEnabled = evmPath.text.isNotBlank()
   }
 
   private fun JPanel.setAll(action: (Component) -> Unit, vararg except: Component) {
@@ -138,7 +130,7 @@ class SolidityConfigurablePanel {
       Sol2JavaGenerationStyle.ETHJ -> ethJNativeBtn.isSelected = true
     }
     genOutputPath.text = FileUtil.toSystemDependentName(settings.genOutputPath)
-    updateJavaInteropControlAvailability()
+    updateCompileAvailablility()
     updateInteropControlsAvailability()
     solcVersion.text = Solc.getVersion()
   }
