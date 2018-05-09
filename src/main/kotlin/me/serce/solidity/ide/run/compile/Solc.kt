@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit
 
 object Solc  {
   private var solcExecutable : File? = null
+  private var classLoader: URLClassLoader? = null
 
   init {
       ApplicationManager.getApplication().messageBus.connect().subscribe(SoliditySettingsListener.TOPIC, object : SoliditySettingsListener {
@@ -31,10 +32,18 @@ object Solc  {
 
   private fun updateSolcExecutable() {
     val evm = SoliditySettings.instance.pathToEvm
-    solcExecutable = if (!evm.isBlank()) {
-      val classLoader = URLClassLoader(SoliditySettings.getUrls(evm).map { it.toUri().toURL() }.toTypedArray())
-      extractSolc(classLoader)
-    } else null
+    val standaloneSolc = SoliditySettings.instance.solcPath
+    solcExecutable = when {
+      evm.isNotBlank() && SoliditySettings.instance.useSolcEthereum -> {
+        classLoader?.apply { close() }
+        classLoader = URLClassLoader(SoliditySettings.getUrls(evm).map { it.toUri().toURL() }.toTypedArray())
+        extractSolc(classLoader!!)
+      }
+      standaloneSolc.isNotBlank() && !SoliditySettings.instance.useSolcEthereum -> {
+        File(standaloneSolc)
+      }
+      else -> null
+    }
   }
 
   private fun extractSolc(classLoader: URLClassLoader): File {
@@ -69,6 +78,24 @@ object Solc  {
 
   fun isEnabled() : Boolean {
     return solcExecutable != null
+  }
+
+  fun getVersion(): String {
+    solcExecutable?.apply {
+      val output: String
+      try {
+        val proc = ProcessBuilder(absolutePath, "--version")
+          .redirectOutput(ProcessBuilder.Redirect.PIPE)
+          .start()
+        proc.waitFor(10, TimeUnit.SECONDS)
+        output = proc.inputStream.bufferedReader().readText()
+      } catch (e: Exception) {
+        return ""
+      }
+      val prefix = "Version: "
+      return output.split("\n").firstOrNull { it.startsWith(prefix) }?.substring(prefix.length) ?: ""
+    }
+    return ""
   }
 
   fun compile(sources: List<File>, outputDir: File, baseDir: VirtualFile): SolcResult {

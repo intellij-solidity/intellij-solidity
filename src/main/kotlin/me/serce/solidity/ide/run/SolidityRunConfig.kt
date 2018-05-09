@@ -182,7 +182,7 @@ class SolidityRunConfig(configurationModule: SolidityRunConfigModule, factory: C
   }
 
   override fun checkConfiguration() {
-    if (!SoliditySettings.instance.validateEvm()) {
+    if (!SoliditySettings.instance.useSolcJ || !SoliditySettings.instance.validateEvm()) {
       throw RuntimeConfigurationError("EVM is not configured", SoliditySettingsConfigurable(SoliditySettings.instance).getQuickFix(project))
     }
     if (configurationModule.module == null) {

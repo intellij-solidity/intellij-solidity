@@ -25,7 +25,9 @@ import javax.swing.JComponent
 class SoliditySettings : PersistentStateComponent<SoliditySettings> {
   var pathToEvm: String = ""
   var pathToDb: String = ""
-  var useSolcJ: Boolean = true
+  var solcPath: String = ""
+  var useSolcEthereum: Boolean = true
+  var useSolcJ: Boolean = false
   var generateJavaStubs: Boolean = false
   var dependenciesAutoRefresh: Boolean = true
   var basePackage: String = "com.myfirm.mypackage"
@@ -41,7 +43,7 @@ class SoliditySettings : PersistentStateComponent<SoliditySettings> {
   }
 
   fun validateEvm(): Boolean {
-    return Companion.validateEvm(pathToEvm)
+    return validateEvm(pathToEvm)
   }
 
   companion object {
@@ -101,7 +103,7 @@ class SoliditySettingsConfigurable(private val mySettings: SoliditySettings) : S
 
   override fun createComponent(): JComponent? {
     myPanel = SolidityConfigurablePanel()
-    return myPanel!!.myEvmPathPanel
+    return myPanel!!.mainPanel
   }
 
   override fun isModified(): Boolean {
