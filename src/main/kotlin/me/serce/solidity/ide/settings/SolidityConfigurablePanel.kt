@@ -51,7 +51,7 @@ class SolidityConfigurablePanel {
     evmDbPath.addBrowseFolderListener(ethDbDescriptor.title, ethDbDescriptor.description, null, ethDbDescriptor)
 
     useSolcJ.addActionListener {
-      updateCompileAvailablility()
+      updateCompileAvailability()
     }
 
     downloadBtn.addActionListener {
@@ -62,7 +62,7 @@ class SolidityConfigurablePanel {
     }
     evmPath.textField.document.addDocumentListener(object : DocumentAdapter() {
       override fun textChanged(e: javax.swing.event.DocumentEvent?) {
-        updateSolcControlAvailablility()
+        updateSolcControlAvailability()
       }
     })
 
@@ -73,12 +73,12 @@ class SolidityConfigurablePanel {
 
     standaloneSolc.textField.document.addDocumentListener(object : DocumentAdapter() {
       override fun textChanged(e: DocumentEvent?) {
-        updateSolcControlAvailablility()
+        updateSolcControlAvailability()
       }
     })
 
     useSolcEthereum.addActionListener {
-      updateSolcControlAvailablility()
+      updateSolcControlAvailability()
     }
 
     generateJavaStubs.addActionListener {
@@ -87,13 +87,12 @@ class SolidityConfigurablePanel {
     if (!hasJavaSupport) {
       warningLabel.icon = AllIcons.General.BalloonWarning
       warningLabel.text = noJavaWarning
-      useSolcJ.isVisible = false
     } else {
       warningLabel.isVisible = false
     }
   }
 
-  private fun updateCompileAvailablility() {
+  private fun updateCompileAvailability() {
     val enabled = useSolcJ.isSelected
     compilePanel.setAll({ it.isEnabled = enabled }, useSolcJ)
   }
@@ -103,7 +102,7 @@ class SolidityConfigurablePanel {
     javaInteropPanel.setAll({ it.isEnabled = enabled }, generateJavaStubs)
   }
 
-  private fun updateSolcControlAvailablility() {
+  private fun updateSolcControlAvailability() {
     standaloneSolc.isEnabled = !useSolcEthereum.isSelected
   }
 
@@ -130,20 +129,15 @@ class SolidityConfigurablePanel {
       Sol2JavaGenerationStyle.ETHJ -> ethJNativeBtn.isSelected = true
     }
     genOutputPath.text = FileUtil.toSystemDependentName(settings.genOutputPath)
-    updateCompileAvailablility()
+    updateCompileAvailability()
     updateInteropControlsAvailability()
     solcVersion.text = Solc.getVersion()
   }
 
   internal fun apply(settings: SoliditySettings) {
-    val evmPath = fromPath(evmPath)
-    if (evmPath.isNotBlank() && !SoliditySettings.validateEvm(evmPath)) {
-      throw ConfigurationException("Incorrect EVM path")
-    }
-    checkText(basePackageField, "Base package")
-    checkText(genOutputPath, "Stubs output folder")
+    validateSettings()
 
-    settings.pathToEvm = evmPath
+    settings.pathToEvm = fromPath(evmPath)
     settings.pathToDb = fromPath(evmDbPath)
     settings.solcPath = fromPath(standaloneSolc)
     settings.useSolcEthereum = useSolcEthereum.isSelected
@@ -152,16 +146,28 @@ class SolidityConfigurablePanel {
     settings.basePackage = basePackageField.text
     settings.genStyle = generationStyle()
     settings.genOutputPath = genOutputPath.text
+
     ApplicationManager.getApplication().messageBus.syncPublisher(SoliditySettingsListener.TOPIC).settingsChanged()
+  }
+
+  private fun validateSettings() {
+    val evmPath = fromPath(evmPath)
+    if (evmPath.isNotBlank() && !SoliditySettings.validateEvm(evmPath)) {
+      throw ConfigurationException("Incorrect EVM path")
+    }
 
     if (useSolcJ.isSelected) {
       val version = Solc.getVersion()
-      if (version.isNotBlank()) {
-        solcVersion.text = version
-      } else {
+      solcVersion.text = version
+      if (version.isBlank()) {
         throw ConfigurationException("No solc installation found")
       }
+    } else if (generateJavaStubs.isSelected) {
+      throw ConfigurationException("Solc must be enabled to generate java stubs")
     }
+
+    checkText(basePackageField, "Base package")
+    checkText(genOutputPath, "Stubs output folder")
   }
 
   private fun checkText(field: JTextField, fieldName: String) {
