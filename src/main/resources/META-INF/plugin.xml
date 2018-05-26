@@ -85,7 +85,7 @@
                         implementationClass="me.serce.solidity.ide.formatting.SolidityFormattingModelBuilder"/>
 
         <codeInsight.lineMarkerProvider language="Solidity"
-                                        implementationClass="me.serce.solidity.ide.annotation.SolContractLineMarkerProvider"/>
+                                        implementationClass="me.serce.solidity.ide.annotation.SolidityLineMarkerProvider"/>
 
 
         <internalFileTemplate name="Solidity Contract"/>
