@@ -19,13 +19,13 @@ class GoToImplementationTest : SolTestBase() {
   fun testFindImplementations() = testImplementations("""
       contract A/*caret*/ { }
       contract B is A { }
-  """, setOf("A", "B"))
+  """, setOf("B"))
 
   fun testFindMultipleImplementations() = testImplementations("""
       contract A/*caret*/ { }
       contract B is A { }
       contract C is B { }
-  """, setOf("A", "B", "C"))
+  """, setOf("B", "C"))
 
   private fun testImplementations(@Language("Solidity") code: String, options: Set<String>) {
     InlineFile(code).withCaret()
