@@ -10,7 +10,7 @@ import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.types.SolArray.SolDynamicArray
 import me.serce.solidity.lang.types.SolArray.SolStaticArray
 
-private fun getSolType(type: SolTypeName?): SolType {
+fun getSolType(type: SolTypeName?): SolType {
   return when (type) {
     is SolElementaryTypeName -> {
       val text = type.firstChild.text

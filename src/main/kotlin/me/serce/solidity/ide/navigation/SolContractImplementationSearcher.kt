@@ -38,6 +38,7 @@ fun SolContractDefinition.findAllImplementations(): HashSet<SolContractDefinitio
       .filterQuery(Condition { !implementations.contains(it) })
       .forEach(implQueue::add)
   }
+  implementations.remove(this)
   return implementations
 }
 
@@ -46,5 +47,5 @@ fun SolContractDefinition.findImplementations(): Query<SolContractDefinition> {
     .mapQuery { it.element.parent }
     .filterIsInstanceQuery<SolInheritanceSpecifier>()
     .mapQuery { it.parent }
-    .filterIsInstanceQuery<SolContractDefinition>()
+    .filterIsInstanceQuery()
 }
