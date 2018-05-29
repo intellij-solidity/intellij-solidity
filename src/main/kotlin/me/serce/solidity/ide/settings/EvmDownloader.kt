@@ -3,7 +3,6 @@ package me.serce.solidity.ide.settings
 import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.progress.ProgressManager
-import com.intellij.openapi.project.ProjectManager
 import com.intellij.platform.templates.github.ZipUtil
 import com.intellij.util.download.DownloadableFileService
 import java.io.File
@@ -17,15 +16,14 @@ object EvmDownloader {
   fun download(anchor: JComponent): String {
     val s = DownloadableFileService.getInstance()
     val createDownloader = s.createDownloader(listOf(s.createFileDescription(evmUrl, localName)), "EthereumJ VM bundle")
-    val first = ProjectManager.getInstance().openProjects.first()
     val chooseFile = FileChooser.chooseFile(FileChooserDescriptorFactory.createSingleFolderDescriptor().withTitle("Select destination folder for EVM installation"),
-      anchor, first, null)
+      anchor, null, null)
       ?: return ""
-    val downloaded = createDownloader.downloadWithProgress(chooseFile.path, first, anchor)?.first()?.first ?: return ""
+    val downloaded = createDownloader.downloadWithProgress(chooseFile.path, null, anchor)?.first()?.first ?: return ""
     val zipArchive = File(downloaded.path.removeSuffix("!/"))
     ProgressManager.getInstance().runProcessWithProgressSynchronously({
       ZipUtil.unzip(ProgressManager.getInstance().progressIndicator, File(chooseFile.path), zipArchive, null, null, true)
-    }, "Unzipping", false, first)
+    }, "Unzipping", false, null)
 
     zipArchive.delete()
     return File(chooseFile.path, "lib").absolutePath
