@@ -12,6 +12,7 @@ import me.serce.solidity.ide.interop.Sol2JavaGenerationStyle
 import me.serce.solidity.ide.run.compile.Solc
 import me.serce.solidity.ide.run.hasJavaSupport
 import java.awt.Component
+import java.io.File
 import javax.swing.*
 import javax.swing.event.DocumentEvent
 
@@ -157,7 +158,8 @@ class SolidityConfigurablePanel {
     }
 
     if (useSolcJ.isSelected) {
-      val version = Solc.getVersion()
+      val executable = if (useSolcEthereum.isSelected) Solc.extractSolc(evmPath) else File(fromPath(standaloneSolc))
+      val version = Solc.getVersion(executable)
       solcVersion.text = version
       if (version.isBlank()) {
         throw ConfigurationException("No solc installation found")
