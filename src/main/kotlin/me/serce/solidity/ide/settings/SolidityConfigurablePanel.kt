@@ -38,7 +38,7 @@ class SolidityConfigurablePanel {
 
   private lateinit var warningLabel: JLabel
 
-  private val noJavaWarning = "Current IDE platform does not support running Solidity"
+  private val noJavaWarning = "Current IDE platform does not support execution of Solidity contracts"
 
   init {
     val ethDescriptor = FileChooserDescriptor(false, true, true, true, false, false)
