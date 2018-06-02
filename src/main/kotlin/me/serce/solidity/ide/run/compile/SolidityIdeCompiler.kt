@@ -11,7 +11,7 @@ object SolidityIdeCompiler : Validator {
 // otherwise the last one will erase all the compiled contract files
 
   override fun createValidityState(`in`: DataInput?): ValidityState {
-    return TimestampValidityState.load(`in`)
+    return EmptyValidityState()
   }
 
   override fun getProcessingItems(context: CompileContext): Array<FileProcessingCompiler.ProcessingItem> {
@@ -24,7 +24,8 @@ object SolidityIdeCompiler : Validator {
   fun collectProcessingItems(context: CompileContext): Array<FileProcessingCompiler.ProcessingItem> {
     val scope = context.compileScope
     val files = scope.getFiles(SolidityFileType, true).filterNotNull()
-    return files.map { SolProcessingItem(TimestampValidityState(it.modificationStamp), it.canonicalFile!!) }.toTypedArray()
+    // todo enable incremental compilation (need to handle import links correctly)
+    return files.map { SolProcessingItem(EmptyValidityState(), it.canonicalFile!!) }.toTypedArray()
   }
 
   override fun process(context: CompileContext, items: Array<FileProcessingCompiler.ProcessingItem>): Array<FileProcessingCompiler.ProcessingItem> {
