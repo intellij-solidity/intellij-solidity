@@ -21,6 +21,8 @@ import java.util.concurrent.TimeUnit
 object Solc  {
   private var solcExecutable : File? = null
 
+  private val log = logger<Solc>()
+
   init {
       ApplicationManager.getApplication().messageBus.connect().subscribe(SoliditySettingsListener.TOPIC, object : SoliditySettingsListener {
         override fun settingsChanged() {
@@ -63,7 +65,7 @@ object Solc  {
         val someClass = classLoader.loadClass("org.ethereum.util.blockchain.StandaloneBlockchain")
 
         val fileListStream = someClass.getResourceAsStream("$solcResDir/file.list") ?: run {
-          logger<Solc>().error("can't read file list")
+          log.error("can't read file list")
           return null
         }
 
@@ -80,7 +82,7 @@ object Solc  {
         solcExec.setExecutable(true)
         return solcExec
       } catch (e: Exception) {
-        logger<Solc>().error("exception occurred while extracting solc", e)
+        log.error("exception occurred while extracting solc", e)
         return null
       }
     }
