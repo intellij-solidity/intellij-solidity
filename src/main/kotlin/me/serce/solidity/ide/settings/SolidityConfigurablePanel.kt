@@ -12,6 +12,7 @@ import me.serce.solidity.ide.interop.Sol2JavaGenerationStyle
 import me.serce.solidity.ide.run.compile.Solc
 import me.serce.solidity.ide.run.hasJavaSupport
 import java.awt.Component
+import java.io.File
 import javax.swing.*
 import javax.swing.event.DocumentEvent
 
@@ -29,7 +30,7 @@ class SolidityConfigurablePanel {
   private lateinit var useSolcJ: JCheckBox
   private lateinit var javaInteropPanel: JPanel
   private lateinit var generateJavaStubs: JCheckBox
-  private lateinit var dependecyAutoRefresh: JCheckBox
+  private lateinit var dependencyAutoRefresh: JCheckBox
   private lateinit var web3jBtn: JRadioButton
   private lateinit var ethJNativeBtn: JRadioButton
   private lateinit var basePackageField: JTextField
@@ -37,7 +38,7 @@ class SolidityConfigurablePanel {
 
   private lateinit var warningLabel: JLabel
 
-  private val noJavaWarning = "Current IDE platform does not support running Solidity"
+  private val noJavaWarning = "Current IDE platform does not support execution of Solidity contracts"
 
   init {
     val ethDescriptor = FileChooserDescriptor(false, true, true, true, false, false)
@@ -122,7 +123,7 @@ class SolidityConfigurablePanel {
     useSolcEthereum.isSelected = settings.useSolcEthereum
     useSolcJ.isSelected = settings.useSolcJ
     generateJavaStubs.isSelected = settings.generateJavaStubs
-    dependecyAutoRefresh.isSelected = settings.dependenciesAutoRefresh
+    dependencyAutoRefresh.isSelected = settings.dependenciesAutoRefresh
     basePackageField.text = settings.basePackage
     when (settings.genStyle) {
       Sol2JavaGenerationStyle.WEB3J -> web3jBtn.isSelected = true
@@ -131,6 +132,7 @@ class SolidityConfigurablePanel {
     genOutputPath.text = FileUtil.toSystemDependentName(settings.genOutputPath)
     updateCompileAvailability()
     updateInteropControlsAvailability()
+    updateSolcControlAvailability()
     solcVersion.text = Solc.getVersion()
   }
 
@@ -146,6 +148,7 @@ class SolidityConfigurablePanel {
     settings.basePackage = basePackageField.text
     settings.genStyle = generationStyle()
     settings.genOutputPath = genOutputPath.text
+    settings.dependenciesAutoRefresh = dependencyAutoRefresh.isSelected
 
     ApplicationManager.getApplication().messageBus.syncPublisher(SoliditySettingsListener.TOPIC).settingsChanged()
   }
@@ -157,7 +160,8 @@ class SolidityConfigurablePanel {
     }
 
     if (useSolcJ.isSelected) {
-      val version = Solc.getVersion()
+      val executable = if (useSolcEthereum.isSelected) Solc.extractSolc(evmPath) else File(fromPath(standaloneSolc))
+      val version = Solc.getVersion(executable)
       solcVersion.text = version
       if (version.isBlank()) {
         throw ConfigurationException("No solc installation found")
@@ -193,5 +197,6 @@ class SolidityConfigurablePanel {
       generateJavaStubs.isSelected != settings.generateJavaStubs ||
       basePackageField.text != settings.basePackage ||
       generationStyle() != settings.genStyle ||
-      genOutputPath.text != settings.genOutputPath.trim()
+      genOutputPath.text != settings.genOutputPath.trim() ||
+      dependencyAutoRefresh.isSelected != settings.dependenciesAutoRefresh
 }

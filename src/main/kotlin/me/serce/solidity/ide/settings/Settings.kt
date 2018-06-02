@@ -29,7 +29,7 @@ class SoliditySettings : PersistentStateComponent<SoliditySettings> {
   var useSolcEthereum: Boolean = true
   var useSolcJ: Boolean = false
   var generateJavaStubs: Boolean = false
-  var dependenciesAutoRefresh: Boolean = true
+  var dependenciesAutoRefresh: Boolean = false
   var basePackage: String = "com.myfirm.mypackage"
   var genStyle: Sol2JavaGenerationStyle = Sol2JavaGenerationStyle.WEB3J
   var genOutputPath: String = "src-gen"

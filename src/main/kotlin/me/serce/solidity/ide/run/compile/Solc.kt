@@ -1,6 +1,7 @@
 package me.serce.solidity.ide.run.compile
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.util.SystemInfoRt
 import com.intellij.openapi.util.io.StreamUtil
 import com.intellij.openapi.vfs.VirtualFile
@@ -19,7 +20,8 @@ import java.util.concurrent.TimeUnit
 
 object Solc  {
   private var solcExecutable : File? = null
-  private var classLoader: URLClassLoader? = null
+
+  private val log = logger<Solc>()
 
   init {
       ApplicationManager.getApplication().messageBus.connect().subscribe(SoliditySettingsListener.TOPIC, object : SoliditySettingsListener {
@@ -35,9 +37,7 @@ object Solc  {
     val standaloneSolc = SoliditySettings.instance.solcPath
     solcExecutable = when {
       evm.isNotBlank() && SoliditySettings.instance.useSolcEthereum -> {
-        classLoader?.apply { close() }
-        classLoader = URLClassLoader(SoliditySettings.getUrls(evm).map { it.toUri().toURL() }.toTypedArray())
-        extractSolc(classLoader!!)
+        extractSolc(SoliditySettings.instance.pathToEvm)
       }
       standaloneSolc.isNotBlank() && !SoliditySettings.instance.useSolcEthereum -> {
         File(standaloneSolc)
@@ -46,42 +46,54 @@ object Solc  {
     }
   }
 
-  private fun extractSolc(classLoader: URLClassLoader): File {
-    val os = when  {
-      SystemInfoRt.isLinux -> "linux"
-      SystemInfoRt.isWindows -> "win"
-      SystemInfoRt.isMac -> "mac"
-      else -> {
-        throw IllegalStateException("Unknown OS name: ${SystemInfoRt.OS_NAME}")
+  fun extractSolc(path: String): File? {
+    URLClassLoader(SoliditySettings.getUrls(path).map { it.toUri().toURL() }.toTypedArray()).use { classLoader ->
+      val os = when {
+        SystemInfoRt.isLinux -> "linux"
+        SystemInfoRt.isWindows -> "win"
+        SystemInfoRt.isMac -> "mac"
+        else -> {
+          throw IllegalStateException("Unknown OS name: ${SystemInfoRt.OS_NAME}")
+        }
+      }
+      try {
+        val solcResDir = "/native/$os/solc"
+        val tmpDir = File(System.getProperty("java.io.tmpdir"), "solc")
+        tmpDir.mkdirs()
+
+        // for some reason, we have to load any class to be able to read any resource from the jar
+        val someClass = classLoader.loadClass("org.ethereum.util.blockchain.StandaloneBlockchain")
+
+        val fileListStream = someClass.getResourceAsStream("$solcResDir/file.list") ?: run {
+          log.error("can't read file list")
+          return null
+        }
+
+        val fileList = StreamUtil.readText(fileListStream, Charset.defaultCharset())
+        val files = fileList.split("\n")
+          .map { it.trim() }
+          .map {
+            val dest = File(tmpDir, it)
+            Files.copy(someClass.getResourceAsStream("$solcResDir/$it"), dest.toPath(), StandardCopyOption.REPLACE_EXISTING)
+            dest
+          }
+
+        val solcExec = files.first()
+        solcExec.setExecutable(true)
+        return solcExec
+      } catch (e: Exception) {
+        log.error("exception occurred while extracting solc", e)
+        return null
       }
     }
-    val solcResDir = "/native/$os/solc"
-    val tmpDir = File(System.getProperty("java.io.tmpdir"), "solc")
-    tmpDir.mkdirs()
-
-    // for some reason, we have to load any class to be able to read any resource from the jar
-    val someClass = classLoader.loadClass("org.ethereum.util.blockchain.StandaloneBlockchain")
-
-    val fileList = StreamUtil.readText(someClass.getResourceAsStream("$solcResDir/file.list"), Charset.defaultCharset())
-    val files = fileList.split("\n")
-      .map { it.trim() }
-      .map {
-        val dest = File(tmpDir, it)
-        Files.copy(someClass.getResourceAsStream("$solcResDir/$it"), dest.toPath(), StandardCopyOption.REPLACE_EXISTING)
-        dest
-      }
-
-    val solcExec = files.first()
-    solcExec.setExecutable(true)
-    return solcExec
   }
 
   fun isEnabled() : Boolean {
-    return solcExecutable != null
+    return solcExecutable != null && solcExecutable!!.exists()
   }
 
-  fun getVersion(): String {
-    solcExecutable?.apply {
+  fun getVersion(executable: File?): String {
+    executable?.apply {
       val output: String
       try {
         val proc = ProcessBuilder(absolutePath, "--version")
@@ -96,6 +108,10 @@ object Solc  {
       return output.split("\n").firstOrNull { it.startsWith(prefix) }?.substring(prefix.length) ?: ""
     }
     return ""
+  }
+
+  fun getVersion(): String {
+    return getVersion(solcExecutable)
   }
 
   fun compile(sources: List<File>, outputDir: File, baseDir: VirtualFile): SolcResult {
