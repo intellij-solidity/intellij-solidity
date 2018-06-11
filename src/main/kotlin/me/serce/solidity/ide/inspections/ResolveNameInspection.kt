@@ -14,8 +14,13 @@ class ResolveNameInspection : LocalInspectionTool() {
   override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
     return object : SolVisitor() {
       override fun visitUserDefinedTypeName(element: SolUserDefinedTypeName) {
-        if (element.reference != null && element.reference?.resolve() == null) {
-          holder.registerProblem(element, "Import File", ProblemHighlightType.GENERIC_ERROR_OR_WARNING, ImportFileFix(element))
+        if (element.reference != null) {
+          // resolve return either 1 reference or null, and because our resolve is not perfect we can return a number
+          // of references, so instead of showing false positives we can use multiresolve
+          val results = element.reference?.multiResolve(false)
+          if (results == null || results.isEmpty()) {
+            holder.registerProblem(element, "Import File", ProblemHighlightType.GENERIC_ERROR_OR_WARNING, ImportFileFix(element))
+          }
         }
       }
     }

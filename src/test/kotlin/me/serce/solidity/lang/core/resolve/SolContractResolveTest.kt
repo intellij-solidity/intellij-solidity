@@ -38,6 +38,36 @@ class SolContractResolveTest : SolResolveTestBase() {
     """)
   )
 
+  fun testResolveSymbolAliasesChain() {
+    InlineFile(
+      code = """
+            contract d {}
+        """,
+      name = "d.sol"
+    )
+    InlineFile(
+      code = """
+            import {d as a} from "./d.sol";
+            contract b {}
+        """,
+      name = "b.sol"
+    )
+    testResolveBetweenFiles(
+      InlineFile(
+        code = """
+            import {b as B} from "./b.sol";
+            contract a {}
+                   //x
+        """,
+        name = "a.sol"
+      ),
+      InlineFile("""
+            import {a as A} from "./a.sol";
+                  //^
+      """)
+    )
+  }
+
   fun testResolveUsingImport() = testResolveBetweenFiles(
     InlineFile(
       code = """

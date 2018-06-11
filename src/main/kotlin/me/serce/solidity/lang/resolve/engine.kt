@@ -16,37 +16,43 @@ import me.serce.solidity.lang.types.*
 object SolResolver {
   fun resolveTypeNameUsingImports(element: SolReferenceElement): Set<SolNamedElement> =
     CachedValuesManager.getCachedValue(element) {
-      val result = resolveContractUsingImports(element, element.containingFile) +
+      val result = resolveContractUsingImports(element, element.containingFile, true) +
         resolveEnum(element, element.containingFile) +
         resolveStruct(element, element.containingFile)
       CachedValueProvider.Result.create(result, PsiModificationTracker.MODIFICATION_COUNT)
     }
 
-  private fun resolveContractUsingImports(element: SolNamedElement, file: PsiFile): Set<SolContractDefinition> =
+  /**
+   * @param withAliases aliases are not recursive, so count them only at the first level of recursion
+   */
+  private fun resolveContractUsingImports(element: SolNamedElement, file: PsiFile, withAliases: Boolean): Set<SolContractDefinition> =
     RecursionManager.doPreventingRecursion(file, true) {
       val inFile = file.children
         .filterIsInstance<SolContractDefinition>()
         .filter { it.name == element.name }
 
-      val resolvedViaAlias = file.children
-        .filterIsInstance<SolImportDirective>()
-        .mapNotNull { directive ->
-          directive.importAliasedPairList
-            .firstOrNull { aliasPair -> aliasPair.importAlias?.name == element.name }
-            ?.let {aliasPair ->
-              directive.importPath?.reference?.resolve()?.let {resolvedFile ->
-                aliasPair.userDefinedTypeName to resolvedFile
+      val resolvedViaAlias = when (withAliases) {
+        true -> file.children
+          .filterIsInstance<SolImportDirective>()
+          .mapNotNull { directive ->
+            directive.importAliasedPairList
+              .firstOrNull { aliasPair -> aliasPair.importAlias?.name == element.name }
+              ?.let { aliasPair ->
+                directive.importPath?.reference?.resolve()?.let { resolvedFile ->
+                  aliasPair.userDefinedTypeName to resolvedFile
+                }
               }
-            }
-        }.flatMap { (alias, resolvedFile) ->
-          resolveContractUsingImports(alias, resolvedFile.containingFile)
-        }
+          }.flatMap { (alias, resolvedFile) ->
+            resolveContractUsingImports(alias, resolvedFile.containingFile, false)
+          }
+        else -> emptyList()
+      }
 
       val imported = file.children
         .filterIsInstance<SolImportDirective>()
         .mapNotNull { it.importPath?.reference?.resolve() }
         .map { it.containingFile }
-        .flatMap { resolveContractUsingImports(element, it) }
+        .flatMap { resolveContractUsingImports(element, it, false) }
 
       (inFile + resolvedViaAlias + imported).toSet()
     } ?: emptySet()
