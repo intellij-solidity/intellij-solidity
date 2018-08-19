@@ -17,12 +17,12 @@ class SolidityFoldingBuilder : FoldingBuilder, DumbAware {
 
   override fun getPlaceholderText(node: ASTNode): String? {
     val type = node.elementType
-    if (type === SolidityTokenTypes.BLOCK) {
-      return "{...}"
-    } else if (type === SolidityTokenTypes.COMMENT) {
-      return "/*...*/"
+    return when (type) {
+      SolidityTokenTypes.BLOCK -> "{...}"
+      SolidityTokenTypes.COMMENT -> "/*...*/"
+      SolidityTokenTypes.CONTRACT_DEFINITION -> "${node.text.substringBefore("{")} {...} "
+      else -> "..."
     }
-    return "..."
   }
 
   override fun isCollapsedByDefault(node: ASTNode): Boolean {
@@ -37,12 +37,13 @@ class SolidityFoldingBuilder : FoldingBuilder, DumbAware {
       descriptors: MutableList<FoldingDescriptor>
     ) {
       val type = node.elementType
-      if ((type === SolidityTokenTypes.BLOCK) && spanMultipleLines(node, document)) {
-        descriptors.add(FoldingDescriptor(node, node.textRange))
-      } else if (type === SolidityTokenTypes.COMMENT) {
+      if (
+        type === SolidityTokenTypes.BLOCK && spanMultipleLines(node, document) ||
+        type === SolidityTokenTypes.COMMENT ||
+        type === SolidityTokenTypes.CONTRACT_DEFINITION) {
+
         descriptors.add(FoldingDescriptor(node, node.textRange))
       }
-
       for (child in node.getChildren(null)) {
         collectDescriptorsRecursively(child, document, descriptors)
       }
