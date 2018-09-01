@@ -110,6 +110,9 @@ class ImportFileAction(
         if (it.contains("node_modules/")) {
           val idx = it.indexOf("node_modules/")
           it.substring(idx + "node_modules/".length)
+        } else if (it.contains("installed_contracts/")) {
+          val idx = it.indexOf("installed_contracts/")
+          it.substring(idx + "installed_contracts/".length).replaceFirst("/contracts/", "/")
         } else if (!it.startsWith(".")) {
           "./$it"
         } else {

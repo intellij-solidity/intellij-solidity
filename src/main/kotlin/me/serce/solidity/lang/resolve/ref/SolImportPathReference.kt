@@ -27,7 +27,11 @@ class SolImportPathReference(element: SolImportPathElement) : SolReferenceBase<S
     if (directFile != null) {
       return directFile
     } else {
-      return findNpmImportFile(file, path)
+      val npmFile = findNpmImportFile(file, path)
+      return when {
+        npmFile != null -> npmFile
+        else -> findEthPMImportFile(file, path)
+      }
     }
   }
 
@@ -36,6 +40,17 @@ class SolImportPathReference(element: SolImportPathElement) : SolReferenceBase<S
     return when {
       test != null -> test
       file.parent != null -> findNpmImportFile(file.parent, path)
+      else -> null
+    }
+  }
+
+  private fun findEthPMImportFile(file: VirtualFile, path: String): VirtualFile? {
+    val test = file.findFileByRelativePath(
+      "installed_contracts/" + path.replaceFirst("/", "/contracts/")
+    )
+    return when {
+      test != null -> test
+      file.parent != null -> findEthPMImportFile(file.parent, path)
       else -> null
     }
   }
