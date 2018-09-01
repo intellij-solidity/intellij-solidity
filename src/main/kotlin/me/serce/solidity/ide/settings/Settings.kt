@@ -26,6 +26,7 @@ class SoliditySettings : PersistentStateComponent<SoliditySettings> {
   var pathToEvm: String = ""
   var pathToDb: String = ""
   var solcPath: String = ""
+  var solcAdditionalOptions = ""
   var useSolcEthereum: Boolean = true
   var useSolcJ: Boolean = false
   var generateJavaStubs: Boolean = false

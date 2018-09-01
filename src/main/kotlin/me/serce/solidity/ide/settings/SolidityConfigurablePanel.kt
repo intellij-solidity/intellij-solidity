@@ -24,6 +24,7 @@ class SolidityConfigurablePanel {
   private lateinit var downloadBtn: JButton
   private lateinit var useSolcEthereum: JCheckBox
   private lateinit var standaloneSolc: TextFieldWithBrowseButton
+  private lateinit var solcAddtionalOptions: JTextField
 
   private lateinit var solcVersion: JLabel
 
@@ -120,6 +121,7 @@ class SolidityConfigurablePanel {
     evmPath.text = FileUtil.toSystemDependentName(settings.pathToEvm)
     evmDbPath.text = FileUtil.toSystemDependentName(settings.pathToDb)
     standaloneSolc.text = FileUtil.toSystemDependentName(settings.solcPath)
+    solcAddtionalOptions.text = settings.solcAdditionalOptions
     useSolcEthereum.isSelected = settings.useSolcEthereum
     useSolcJ.isSelected = settings.useSolcJ
     generateJavaStubs.isSelected = settings.generateJavaStubs
@@ -142,6 +144,7 @@ class SolidityConfigurablePanel {
     settings.pathToEvm = fromPath(evmPath)
     settings.pathToDb = fromPath(evmDbPath)
     settings.solcPath = fromPath(standaloneSolc)
+    settings.solcAdditionalOptions = solcAddtionalOptions.text
     settings.useSolcEthereum = useSolcEthereum.isSelected
     settings.useSolcJ = useSolcJ.isSelected
     settings.generateJavaStubs = generateJavaStubs.isSelected
@@ -192,6 +195,7 @@ class SolidityConfigurablePanel {
     fromPath(evmPath) != settings.pathToEvm.trim() ||
       fromPath(evmDbPath) != settings.pathToDb.trim() ||
       fromPath(standaloneSolc) != settings.solcPath.trim() ||
+      solcAddtionalOptions.text != settings.solcAdditionalOptions ||
       useSolcEthereum.isSelected != settings.useSolcEthereum ||
       useSolcJ.isSelected != settings.useSolcJ ||
       generateJavaStubs.isSelected != settings.generateJavaStubs ||

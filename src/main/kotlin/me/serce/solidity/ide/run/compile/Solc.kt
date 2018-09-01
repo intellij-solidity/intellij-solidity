@@ -6,6 +6,7 @@ import com.intellij.openapi.util.SystemInfoRt
 import com.intellij.openapi.util.io.StreamUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.util.concurrency.AppExecutorUtil
+import com.intellij.util.execution.ParametersListUtil
 import me.serce.solidity.ide.settings.SoliditySettings
 import me.serce.solidity.ide.settings.SoliditySettingsListener
 import org.jetbrains.concurrency.AsyncPromise
@@ -116,7 +117,8 @@ object Solc  {
 
   fun compile(sources: List<File>, outputDir: File, baseDir: VirtualFile): SolcResult {
     val solc = solcExecutable ?: throw IllegalStateException("No solc instance was found")
-    val pb = ProcessBuilder(arrayListOf(solc.canonicalPath, "--abi", "--bin", "--overwrite", "-o", outputDir.absolutePath) + sources.map {
+    val additionalParams = ParametersListUtil.parse(SoliditySettings.instance.solcAdditionalOptions)
+    val pb = ProcessBuilder(arrayListOf(solc.canonicalPath, "--abi", "--bin", "--overwrite", "-o", outputDir.absolutePath) + additionalParams + sources.map {
       Paths.get(baseDir.canonicalPath).relativize(Paths.get(it.path)).toString().replace('\\', '/')
     })
     pb
