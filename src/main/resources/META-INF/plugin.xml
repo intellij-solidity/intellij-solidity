@@ -17,6 +17,13 @@
 
     <change-notes><![CDATA[
       <p>
+        <b>v2.1.2</b>
+        <ul>
+          <li>Make contracts collapsable, thanks @mbolotov</li>
+          <li>Resolve imports from ethpm folder, thanks @quantum13</li>
+          <li>Additional options for solc, thanks @mbolotov</li>
+          <li>Support "address payable" for upcoming solidity 0.5.0</li>
+        </ul>
         <b>v2.1.1</b>
         <ul>
           <li>Multiple solidity compilation fixes, thanks @mbolotov</li>
@@ -24,17 +31,6 @@
           <li>Resolving fixes, thanks 0v1se</li>
           <li>Support for support resolving through "as" aliasing</li>
           <li>Support for multi-variable declaration (Solidity 5.0.0)</li>
-        </ul>
-        <b>v2.1.0</b>
-        <ul>
-          <li>Contracts can be executed from IDE!, thanks @mbolotov (Check out Solidity settings)</li>
-          <li>Contracts can be compiled from IDE, thanks @mbolotov</li>
-          <li>Support for the "emit" keyword</li>
-          <li>Support for "constructor" syntax, thanks @ice1000</li>
-          <li>Performance improvements, thanks @0v1se</li>
-          <li>Messages bugfixes, thanks @0v1se</li>
-          <li>Parameter info bugfixes</li>
-          <li>Formatting bugfixes</li>
         </ul>
       </p>
     ]]>
