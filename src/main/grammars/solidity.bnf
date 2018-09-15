@@ -396,11 +396,11 @@ private FixedNumber ::= fixedNumber
 private DecimalNumber ::= decimalNumber
 private ScientificNumber ::= scientificNumber
 
-private PrimitiveLiteral ::= intNumType | uIntNumType | byteNumType | bytesNumType | fixedNumType | uFixedNumType | booleanLiteral | address | string | bool
+private PrimitiveLiteral ::= intNumType | uIntNumType | byteNumType | bytesNumType | fixedNumType | uFixedNumType | booleanLiteral | ( address payable ) | address | string | bool
 
 private ElementaryTypeNameExpression ::= ElementaryTypeName
 
-ElementaryTypeName ::= address | bool | string | var | NumberType {
+ElementaryTypeName ::= ( address payable ) | address | bool | string | var | NumberType {
     stubClass = "me.serce.solidity.lang.stubs.SolTypeRefStub"
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }

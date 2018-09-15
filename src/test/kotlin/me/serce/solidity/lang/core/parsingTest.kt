@@ -17,6 +17,7 @@ abstract class SolidityParsingTestBase(baseDir: String) : ParsingTestCase(baseDi
 }
 
 class SolidityCompleteCustomParsingTest : SolidityParsingTestBase("fixtures/parser") {
+  fun testAddress() = doTest(true)
   fun testPragma() = doTest(true)
   fun testArrays() = doTest(true)
   fun testArithmetic() = doTest(true)
