@@ -1,0 +1,44 @@
+package me.serce.solidity.lang.completion
+
+class SolEventCompletionTest : SolCompletionTestBase() {
+
+  fun testEventCompletion() = checkCompletion(hashSetOf("FirstEvent"), """
+        contract Base {
+            event BaseEvent();
+
+            function emitEvent() {
+                emit /*caret*/
+            }
+        }
+  """)
+
+  fun testEventWithInheritance() = checkCompletion(hashSetOf("BaseEvent", "ChildEvent"), """
+        contract BaseContract {
+            event BaseEvent();
+        }
+
+        contract ChildContract is BaseContract {
+
+            event ChildEvent();
+
+            function emitEvent() {
+                emit /*caret*/
+            }
+        }
+  """)
+
+  fun testEventExactCompletion() = checkCompletion(hashSetOf("ChildEvent"), """
+        contract BaseContract {
+            event BaseEvent();
+        }
+
+        contract ChildContract is BaseContract {
+
+            event ChildEvent();
+
+            function emitEvent() {
+                emit C/*caret*/
+            }
+        }
+  """)
+}

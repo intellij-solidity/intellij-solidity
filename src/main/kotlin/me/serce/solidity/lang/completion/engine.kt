@@ -10,15 +10,34 @@ import me.serce.solidity.lang.psi.SolContractDefinition
 import me.serce.solidity.lang.psi.SolMemberAccessExpression
 import me.serce.solidity.lang.psi.SolNamedElement
 import me.serce.solidity.lang.resolve.SolResolver
+import me.serce.solidity.lang.stubs.SolEventIndex
 import me.serce.solidity.lang.stubs.SolGotoClassIndex
 import me.serce.solidity.lang.stubs.SolModifierIndex
 import me.serce.solidity.lang.types.SolContract
+import me.serce.solidity.lang.types.SolEnum
 import me.serce.solidity.lang.types.SolStruct
 import me.serce.solidity.lang.types.type
+import javax.swing.Icon
 
 val TYPED_COMPLETION_PRIORITY = 15.0
 
 object SolCompleter {
+
+  fun completeEventName(element: PsiElement): Array<out LookupElementBuilder> {
+    val project = element.project
+    val allTypeNames = StubIndex.getInstance().getAllKeys(
+      SolEventIndex.KEY,
+      project
+    )
+    return allTypeNames
+      .map {
+        LookupElementBuilder
+          .create(it, it)
+          .withIcon(SolidityIcons.EVENT)
+      }
+      .toTypedArray()
+  }
+
   fun completeTypeName(element: PsiElement): Array<out LookupElement> {
     val project = element.project
     val allTypeNames = StubIndex.getInstance().getAllKeys(
@@ -57,14 +76,19 @@ object SolCompleter {
           .flatMap { it.stateVariableDeclarationList }
           .createVarLookups()
       }
+      is SolEnum -> {
+        exprType.ref.enumValueList.createVarLookups(SolidityIcons.ENUM)
+      }
       else -> emptyArray()
     }
   }
 
-  private fun Collection<SolNamedElement>.createVarLookups(): Array<LookupElement> {
+  private fun Collection<SolNamedElement>.createVarLookups(): Array<LookupElement> = createVarLookups(SolidityIcons.STATE_VAR)
+
+  private fun Collection<SolNamedElement>.createVarLookups(icon: Icon): Array<LookupElement> {
     return map {
       LookupElementBuilder.create(it, it.name ?: "")
-        .withIcon(SolidityIcons.STATE_VAR)
+              .withIcon(icon)
     }.toTypedArray().map {
       PrioritizedLookupElement.withPriority(it, TYPED_COMPLETION_PRIORITY)
     }.toTypedArray()
