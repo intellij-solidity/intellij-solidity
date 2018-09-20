@@ -180,4 +180,7 @@ abstract class SolFunctionCallElement(node: ASTNode) : SolNamedElementImpl(node)
   override fun getReference() = SolFunctionCallReference(this)
 }
 
-abstract class SolEventDefMixin(node: ASTNode) : SolNamedElementImpl(node), SolEventDefinition
+abstract class SolEventDefMixin : SolStubbedNamedElementImpl<SolEventDefStub>, SolEventDefinition {
+  constructor(node: ASTNode) : super(node)
+  constructor(stub: SolEventDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
+}

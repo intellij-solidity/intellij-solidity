@@ -30,3 +30,21 @@ class SolNamedElementIndex : StringStubIndexExtension<SolNamedElement>() {
   override fun getVersion(): Int = SolidityFileStub.Type.stubVersion
   override fun getKey(): StubIndexKey<String, SolNamedElement> = KEY
 }
+
+class SolEventIndex : StringStubIndexExtension<SolNamedElement>() {
+  companion object {
+    val KEY: StubIndexKey<String, SolNamedElement> = StubIndexKey.createIndexKey(SolEventIndex::class.java.canonicalName)
+  }
+
+  override fun getVersion(): Int = SolidityFileStub.Type.stubVersion
+  override fun getKey(): StubIndexKey<String, SolNamedElement> = KEY
+}
+
+class SolFunctionIndex : StringStubIndexExtension<SolNamedElement>() {
+  companion object {
+    val KEY: StubIndexKey<String, SolNamedElement> = StubIndexKey.createIndexKey(SolFunctionIndex::class.java.canonicalName)
+  }
+
+  override fun getVersion(): Int = SolidityFileStub.Type.stubVersion
+  override fun getKey(): StubIndexKey<String, SolNamedElement> = KEY
+}
