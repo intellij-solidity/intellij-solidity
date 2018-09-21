@@ -137,7 +137,7 @@
                          implementationClass="me.serce.solidity.ide.inspections.ResolveNameInspection"/>
 
         <localInspection language="Solidity" groupName="Solidity"
-                         displayName="Function without return"
+                         displayName="No return statement"
                          enabledByDefault="true"
                          level="WARNING"
                          implementationClass="me.serce.solidity.ide.inspections.NoReturnInspection"/>
