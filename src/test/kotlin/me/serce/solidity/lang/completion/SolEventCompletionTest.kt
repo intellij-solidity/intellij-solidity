@@ -2,7 +2,7 @@ package me.serce.solidity.lang.completion
 
 class SolEventCompletionTest : SolCompletionTestBase() {
 
-  fun testEventCompletion() = checkCompletion(hashSetOf("FirstEvent"), """
+  fun testEventCompletion() = checkCompletion(hashSetOf("BaseEvent"), """
         contract Base {
             event BaseEvent();
 
