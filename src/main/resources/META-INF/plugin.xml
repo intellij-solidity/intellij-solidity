@@ -77,6 +77,8 @@
                                 implementationClass="me.serce.solidity.lang.completion.SolKeywordCompletionContributor"/>
         <completion.contributor language="Solidity"
                                 implementationClass="me.serce.solidity.lang.completion.SolContextCompletionContributor"/>
+        <completion.contributor language="Solidity"
+                                implementationClass="me.serce.solidity.lang.completion.SolBaseTypesCompletionContributor"/>
 
         <lang.formatter language="Solidity"
                         implementationClass="me.serce.solidity.ide.formatting.SolidityFormattingModelBuilder"/>

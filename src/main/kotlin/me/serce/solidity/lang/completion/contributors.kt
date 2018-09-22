@@ -133,6 +133,24 @@ class SolContextCompletionContributor : CompletionContributor(), DumbAware {
     )
 }
 
+fun baseTypes() = hashSetOf("bool", "uint", "int", "fixed", "ufixed", "address", "byte", "bytes", "string");
+
+class SolBaseTypesCompletionContributor : CompletionContributor(), DumbAware {
+  init {
+    extend(CompletionType.BASIC, stateVarInsideContract(),
+      object : CompletionProvider<CompletionParameters>() {
+        override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext?, result: CompletionResultSet) {
+          baseTypes()
+            .asSequence()
+            .map { "$it " }
+            .map(LookupElementBuilder::create)
+            .map(result::addElement)
+            .toList()
+        }
+      })
+  }
+}
+
 private fun <E> or(vararg patterns: ElementPattern<E>) = StandardPatterns.or(*patterns)
 
 private fun rootDeclaration() = psiElement<PsiElement>()
