@@ -194,6 +194,8 @@ EventDefinition ::= event Identifier IndexedParameterList anonymous? ';' {
     pin = 1
     implements = "me.serce.solidity.lang.psi.SolNamedElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolEventDefMixin"
+    stubClass = "me.serce.solidity.lang.stubs.SolEventDefStub"
+    elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
 
 EnumValue ::= Identifier {

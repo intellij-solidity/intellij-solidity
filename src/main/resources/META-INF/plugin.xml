@@ -77,6 +77,8 @@
                                 implementationClass="me.serce.solidity.lang.completion.SolKeywordCompletionContributor"/>
         <completion.contributor language="Solidity"
                                 implementationClass="me.serce.solidity.lang.completion.SolContextCompletionContributor"/>
+        <completion.contributor language="Solidity"
+                                implementationClass="me.serce.solidity.lang.completion.SolBaseTypesCompletionContributor"/>
 
         <lang.formatter language="Solidity"
                         implementationClass="me.serce.solidity.ide.formatting.SolidityFormattingModelBuilder"/>
@@ -91,6 +93,8 @@
         <stubIndex implementation="me.serce.solidity.lang.stubs.SolNamedElementIndex"/>
         <stubIndex implementation="me.serce.solidity.lang.stubs.SolGotoClassIndex"/>
         <stubIndex implementation="me.serce.solidity.lang.stubs.SolModifierIndex"/>
+        <stubIndex implementation="me.serce.solidity.lang.stubs.SolEventIndex"/>
+        <stubIndex implementation="me.serce.solidity.lang.stubs.SolFunctionIndex"/>
 
         <gotoClassContributor implementation="me.serce.solidity.ide.navigation.SolClassNavigationContributor"/>
         <gotoSymbolContributor implementation="me.serce.solidity.ide.navigation.SolSymbolNavigationContributor"/>

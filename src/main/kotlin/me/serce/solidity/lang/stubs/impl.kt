@@ -34,6 +34,7 @@ fun factory(name: String): SolStubElementType<*, *> = when (name) {
   "FUNCTION_DEFINITION" -> SolFunctionDefStub.Type
   "MODIFIER_DEFINITION" -> SolModifierDefStub.Type
   "STRUCT_DEFINITION" -> SolStructDefStub.Type
+  "EVENT_DEFINITION" -> SolEventDefStub.Type
   "STATE_VARIABLE_DECLARATION" -> SolStateVarDeclStub.Type
 
   "ELEMENTARY_TYPE_NAME" -> SolTypeRefStub.Type("ELEMENTARY_TYPE_NAME", ::SolElementaryTypeNameImpl)
@@ -206,6 +207,29 @@ class SolTypeRefStub(
     override fun createStub(psi: T, parentStub: StubElement<*>?) = SolTypeRefStub(parentStub, this)
 
     override fun indexStub(stub: SolTypeRefStub, sink: IndexSink) {}
+  }
+}
+
+class SolEventDefStub(
+  parent: StubElement<*>?,
+  elementType: IStubElementType<*, *>,
+  override val name: String?
+) : StubBase<SolEventDefinition>(parent, elementType), SolNamedStub {
+
+  object Type : SolStubElementType<SolEventDefStub, SolEventDefinition>("EVENT_DEFINITION") {
+    override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?) =
+      SolEventDefStub(parentStub, this, dataStream.readNameAsString())
+
+    override fun serialize(stub: SolEventDefStub, dataStream: StubOutputStream) = with(dataStream) {
+      writeName(stub.name)
+    }
+
+    override fun createPsi(stub: SolEventDefStub) = SolEventDefinitionImpl(stub, this)
+
+    override fun createStub(psi: SolEventDefinition, parentStub: StubElement<*>?) =
+      SolEventDefStub(parentStub, this, psi.name)
+
+    override fun indexStub(stub: SolEventDefStub, sink: IndexSink) = sink.indexEventDef(stub)
   }
 }
 

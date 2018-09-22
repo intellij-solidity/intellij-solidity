@@ -103,6 +103,17 @@ class SolContextCompletionContributor : CompletionContributor(), DumbAware {
           }
         }
       })
+
+    extend(CompletionType.BASIC, emitStartStatement(),
+      object : CompletionProvider<CompletionParameters>() {
+        override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext?, result: CompletionResultSet) {
+          SolCompleter
+            .completeEventName(parameters.position)
+            .map { insertParens(it, true) }
+            .forEach(result::addElement)
+        }
+      }
+    )
   }
 
   private fun startStatementInsideBlock() = psiElement<PsiElement>()
@@ -122,6 +133,24 @@ class SolContextCompletionContributor : CompletionContributor(), DumbAware {
     )
 }
 
+fun baseTypes() = hashSetOf("bool", "uint", "int", "fixed", "ufixed", "address", "byte", "bytes", "string");
+
+class SolBaseTypesCompletionContributor : CompletionContributor(), DumbAware {
+  init {
+    extend(CompletionType.BASIC, stateVarInsideContract(),
+      object : CompletionProvider<CompletionParameters>() {
+        override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext?, result: CompletionResultSet) {
+          baseTypes()
+            .asSequence()
+            .map { "$it " }
+            .map(LookupElementBuilder::create)
+            .map(result::addElement)
+            .toList()
+        }
+      })
+  }
+}
+
 private fun <E> or(vararg patterns: ElementPattern<E>) = StandardPatterns.or(*patterns)
 
 private fun rootDeclaration() = psiElement<PsiElement>()
@@ -138,3 +167,9 @@ private inline fun <reified I : PsiElement> psiElement(): PsiElementPattern.Capt
 }
 
 private fun LookupElementBuilder.keywordPrioritised(): LookupElement = PrioritizedLookupElement.withPriority(this, KEYWORD_PRIORITY)
+
+private fun insertParens(elem : LookupElementBuilder, finish : Boolean) =
+        elem.withInsertHandler { ctx, _ ->
+            ctx.document.insertString(ctx.selectionEndOffset, if (finish) "();" else "()")
+            EditorModificationUtil.moveCaretRelatively(ctx.editor, 1)
+        }

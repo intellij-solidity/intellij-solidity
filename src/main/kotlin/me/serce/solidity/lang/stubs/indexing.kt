@@ -19,6 +19,7 @@ fun IndexSink.indexStructDef(stub: SolStructDefStub) {
 
 fun IndexSink.indexFunctionDef(stub: SolFunctionDefStub) {
   indexNamedStub(stub)
+  indexFunction(stub)
 }
 
 fun IndexSink.indexModifierDef(stub: SolModifierDefStub) {
@@ -28,6 +29,12 @@ fun IndexSink.indexModifierDef(stub: SolModifierDefStub) {
 
 fun IndexSink.indexStateVarDecl(stub: SolStateVarDeclStub) {
   indexNamedStub(stub)
+}
+
+fun IndexSink.indexEventDef(stub: SolEventDefStub) {
+  indexNamedStub(stub)
+  indexEvent(stub)
+  indexGotoClass(stub)
 }
 
 private fun IndexSink.indexModifier(stub: SolModifierDefStub) {
@@ -45,5 +52,17 @@ private fun IndexSink.indexNamedStub(stub: SolNamedStub) {
 private fun IndexSink.indexGotoClass(stub: SolNamedStub) {
   stub.name?.let {
     occurrence(SolGotoClassIndex.KEY, it)
+  }
+}
+
+private fun IndexSink.indexEvent(stub: SolEventDefStub) {
+  stub.name?.let {
+    occurrence(SolEventIndex.KEY, it)
+  }
+}
+
+private fun IndexSink.indexFunction(stub: SolFunctionDefStub) {
+  stub.name?.let {
+    occurrence(SolFunctionIndex.KEY, it)
   }
 }
