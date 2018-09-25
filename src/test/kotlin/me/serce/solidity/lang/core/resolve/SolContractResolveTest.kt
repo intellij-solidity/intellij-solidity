@@ -3,6 +3,32 @@ package me.serce.solidity.lang.core.resolve
 import me.serce.solidity.lang.psi.SolNamedElement
 
 class SolContractResolveTest : SolResolveTestBase() {
+
+  fun testNewContractResolveToContractDefSelf() = checkByCode(
+    """
+        contract A {
+               //x
+          function resolve() {
+            A a = new A();
+                    //^
+          }
+        }
+          """
+  )
+
+  fun testNewContractResolveToContractDefAnother() = checkByCode(
+    """
+        contract B {}
+               //x
+        contract A {
+          function resolve() {
+            B a = new B();
+                    //^
+          }
+        }
+          """
+  )
+
   fun testField() = checkByCode("""
         contract A {}
                //x

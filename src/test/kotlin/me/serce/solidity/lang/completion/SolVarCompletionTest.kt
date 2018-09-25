@@ -51,4 +51,45 @@ class SolVarCompletionTest : SolCompletionTestBase() {
             }
         }
   """)
+
+  fun testArrayIndexCompletionTest1() = checkCompletion(
+    hashSetOf("userIndex"), """
+        contract B {
+            address[] users;
+
+            function doit() {
+                uint userIndex = 0;
+                users[/*caret*/];
+            }
+        }
+  """
+  )
+
+  fun testArrayIndexCompletionTest2() = checkCompletion(
+    hashSetOf("userIndex"), """
+        contract B {
+            address[] users;
+
+            function doit() {
+                uint userIndex = 0;
+                users[/*caret*/]
+            }
+        }
+  """
+  )
+
+  fun testArrayAssignment() = checkCompletion(
+    hashSetOf("A"), """
+        contract B {
+            address[] users;
+            struct A {
+                uint a1;
+            }
+
+            function doit() {
+                users[userIndex] = /*caret*/;
+            }
+        }
+  """
+  )
 }

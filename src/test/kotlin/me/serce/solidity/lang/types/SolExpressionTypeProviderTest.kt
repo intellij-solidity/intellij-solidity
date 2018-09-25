@@ -50,7 +50,7 @@ class SolExpressionTypeProviderTest : SolTestBase() {
     """
   }
 
-  fun testFunctionParameter() = checkPrimitiveTypes { value, type ->
+  fun testFunctionParameter() = checkPrimitiveTypes { _, type ->
     """
         contract A {
             function f($type x) {
@@ -61,7 +61,7 @@ class SolExpressionTypeProviderTest : SolTestBase() {
     """
   }
 
-  fun testStateVar() = checkPrimitiveTypes { value, type ->
+  fun testStateVar() = checkPrimitiveTypes { _, type ->
     """
       contract A {
           $type x;
@@ -122,7 +122,7 @@ class SolExpressionTypeProviderTest : SolTestBase() {
     }
   }
 
-  fun testContractParameter() = testContractTypes { name, type ->
+  fun testContractParameter() = testContractTypes { _, type ->
     """
         contract B {}
         contract A {
@@ -134,7 +134,7 @@ class SolExpressionTypeProviderTest : SolTestBase() {
     """
   }
 
-  fun testContractStateVar() = testContractTypes { name, type ->
+  fun testContractStateVar() = testContractTypes { _, type ->
     """
         contract B {}
         contract A {

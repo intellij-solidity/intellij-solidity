@@ -11,7 +11,7 @@ abstract class SolCompletionTestBase : SolTestBase() {
       "Expected completions that contain $required, but no completions found"
     }
     if (strict) {
-      assertEquals(variants.map { it.lookupString }.toHashSet(), required.toHashSet())
+      assertEquals(required.toHashSet(), variants.map { it.lookupString }.toHashSet())
     } else {
       assertTrue(variants.map { it.lookupString }.toHashSet().containsAll(required))
     }

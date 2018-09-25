@@ -46,6 +46,19 @@ class SolMemberAccessReference(element: SolMemberAccessExpression) : SolReferenc
   override fun getVariants() = SolCompleter.completeMemberAccess(element)
 }
 
+class SolNewExpressionReference(element: SolNewExpression) : SolReferenceBase<SolNewExpression>(element), SolReference {
+
+  override fun calculateDefaultRangeInElement(): TextRange {
+    return element.referenceNameElement.parentRelativeRange
+  }
+
+  override fun multiResolve(): Collection<PsiElement> {
+    val types = SolResolver.resolveTypeName(element)
+    return types
+      .filterIsInstance(SolContractDefinition::class.java)
+  }
+}
+
 class SolFunctionCallReference(element: SolFunctionCallElement) : SolReferenceBase<SolFunctionCallElement>(element), SolReference {
   override fun calculateDefaultRangeInElement(): TextRange {
     return element.referenceNameElement.parentRelativeRange

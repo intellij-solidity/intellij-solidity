@@ -180,6 +180,15 @@ abstract class SolFunctionCallElement(node: ASTNode) : SolNamedElementImpl(node)
   override fun getReference() = SolFunctionCallReference(this)
 }
 
+abstract class SolNewExpressionElement(node: ASTNode) : SolNamedElementImpl(node), SolNewExpression {
+  override val referenceNameElement: PsiElement
+    get() = findChildByType(IDENTIFIER) ?: firstChild
+  override val referenceName: String
+    get() = referenceNameElement.text
+
+  override fun getReference() = SolNewExpressionReference(this)
+}
+
 abstract class SolEventDefMixin : SolStubbedNamedElementImpl<SolEventDefStub>, SolEventDefinition {
   constructor(node: ASTNode) : super(node)
   constructor(stub: SolEventDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)

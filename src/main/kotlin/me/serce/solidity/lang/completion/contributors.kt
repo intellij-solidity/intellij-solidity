@@ -22,60 +22,6 @@ import me.serce.solidity.lang.psi.SolStatement
  *
  * http://solidity.readthedocs.io/en/develop/units-and-global-variables.html#special-variables-and-functions
  */
-
-private val KEYWORD_PRIORITY = 10.0
-
-class SolKeywordCompletionProvider(private vararg val keywords: String) : CompletionProvider<CompletionParameters>() {
-  override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext?, result: CompletionResultSet) {
-    keywords
-      .map { LookupElementBuilder.create(it) }
-      .forEach { result.addElement(it.keywordPrioritised()) }
-  }
-}
-
-class SolSimpleFunctionCompletionProvider(private vararg val functions: String) : CompletionProvider<CompletionParameters>() {
-  override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext?, result: CompletionResultSet) {
-    functions
-      .map {
-        LookupElementBuilder.create(it).withTailText("()")
-          .withInsertHandler { context, _ ->
-            context.document.insertString(context.selectionEndOffset, "()")
-            EditorModificationUtil.moveCaretRelatively(context.editor, 1)
-          }
-      }
-      .forEach { result.addElement(it.keywordPrioritised()) }
-  }
-}
-
-class SolKeywordCompletionContributor : CompletionContributor(), DumbAware {
-  init {
-    extend(CompletionType.BASIC, rootDeclaration(),
-      SolKeywordCompletionProvider("pragma ", "import ", "contract ", "library "))
-    extend(CompletionType.BASIC, rootDeclaration(), object : CompletionProvider<CompletionParameters>() {
-      override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext?, result: CompletionResultSet) {
-        val pragmaBuilder = LookupElementBuilder
-          .create("pragma solidity")
-          .bold()
-          .withTailText(" ^...")
-          .withInsertHandler { ctx, _ ->
-            ctx.document.insertString(ctx.selectionEndOffset, " ^0.4.4;")
-            EditorModificationUtil.moveCaretRelatively(ctx.editor, 9)
-          }
-        result.addElement(PrioritizedLookupElement.withPriority(pragmaBuilder, KEYWORD_PRIORITY - 5))
-      }
-    })
-
-    extend(CompletionType.BASIC, statement(),
-      SolSimpleFunctionCompletionProvider("assert", "addmod", "mulmod", "keccak256", "sha3", "sha256", "ripemd160",
-        "ecrecover", "revert"))
-
-    extend(CompletionType.BASIC, insideContract(),
-      SolKeywordCompletionProvider("this"))
-    extend(CompletionType.BASIC, insideContract(),
-      SolSimpleFunctionCompletionProvider("selfdestruct"))
-  }
-}
-
 class SolContextCompletionContributor : CompletionContributor(), DumbAware {
   init {
     // beginning of a statement inside a block
@@ -109,7 +55,7 @@ class SolContextCompletionContributor : CompletionContributor(), DumbAware {
         override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext?, result: CompletionResultSet) {
           SolCompleter
             .completeEventName(parameters.position)
-            .map { insertParens(it, true) }
+            .map { insertParenthesis(it, true) }
             .forEach(result::addElement)
         }
       }
@@ -153,22 +99,19 @@ class SolBaseTypesCompletionContributor : CompletionContributor(), DumbAware {
 
 private fun <E> or(vararg patterns: ElementPattern<E>) = StandardPatterns.or(*patterns)
 
-private fun rootDeclaration() = psiElement<PsiElement>()
-  .withParents(SolPrimaryExpression::class.java, SolidityFile::class.java)
-
-private fun statement() = psiElement<PsiElement>()
+fun statement() = psiElement<PsiElement>()
   .inside(SolStatement::class.java)
 
-private fun insideContract() = psiElement<PsiElement>()
+fun insideContract() = psiElement<PsiElement>()
   .inside(SolContractDefinition::class.java)
 
 private inline fun <reified I : PsiElement> psiElement(): PsiElementPattern.Capture<I> {
   return psiElement(I::class.java)
 }
 
-private fun LookupElementBuilder.keywordPrioritised(): LookupElement = PrioritizedLookupElement.withPriority(this, KEYWORD_PRIORITY)
+fun LookupElementBuilder.keywordPrioritised(): LookupElement = PrioritizedLookupElement.withPriority(this, KEYWORD_PRIORITY)
 
-private fun insertParens(elem : LookupElementBuilder, finish : Boolean) =
+fun insertParenthesis(elem: LookupElementBuilder, finish: Boolean): LookupElementBuilder =
         elem.withInsertHandler { ctx, _ ->
             ctx.document.insertString(ctx.selectionEndOffset, if (finish) "();" else "()")
             EditorModificationUtil.moveCaretRelatively(ctx.editor, 1)
