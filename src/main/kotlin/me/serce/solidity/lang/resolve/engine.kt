@@ -165,9 +165,14 @@ object SolResolver {
         it.name == element.referenceName &&
           it.indexedParameterList?.typeNameList?.size ?: 0 == element.argumentsNumber()
       }
+    val structDefinitions = contract.structDefinitionList
+      .filter {
+        it.name == element.referenceName
+      }
     return when {
       currentContractFunctions.isNotEmpty() -> currentContractFunctions
       eventDefinitions.isNotEmpty() -> eventDefinitions
+      structDefinitions.isNotEmpty() -> structDefinitions
       else -> contract.supers.asSequence()
         .flatMap { resolveTypeName(it).asSequence() }
         .filterIsInstance<SolContractDefinition>()

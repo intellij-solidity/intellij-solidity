@@ -17,7 +17,7 @@ abstract class SolResolveTestBase : SolTestBase() {
       return
     }
 
-    val references = refElement.references.map { it?.resolve() }.filterNotNull()
+    val references = refElement.references.mapNotNull { it?.resolve() }
     assertTrue("Failed to resolve ${refElement.text}", references.isNotEmpty())
     val target = findElementInEditor<SolNamedElement>("x")
 

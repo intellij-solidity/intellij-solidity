@@ -371,12 +371,17 @@ FunctionCallExpression ::= (Identifier '(' FunctionCallArguments? ')') |
     implements = "me.serce.solidity.lang.psi.SolReferenceElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolFunctionCallElement"
 }
+
 CallExpression ::= Expression ( ( '.' Identifier ) | ( '[' Expression ']' ) )* '(' FunctionCallArguments? ')' ('(' FunctionCallArguments? ')')*
 FunctionCallArguments ::= MapExpression | Expression? ( ',' Expression )*
 private MapExpressionClause ::= Identifier ':' Expression {pin=2}
 MapExpression ::= '{' MapExpressionClause (',' MapExpressionClause )* '}' {pin=1}
 
-NewExpression ::= new ( Identifier | PrimitiveLiteral )
+NewExpression ::= new ( Identifier | PrimitiveLiteral ) {
+    implements = "me.serce.solidity.lang.psi.SolReferenceElement"
+    mixin = "me.serce.solidity.lang.psi.impl.SolNewExpressionElement"
+}
+
 MemberAccessExpression ::= Expression '.' Identifier {
     pin = 2
     implements = "me.serce.solidity.lang.psi.SolReferenceElement"

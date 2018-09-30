@@ -74,11 +74,13 @@
                                    implementationClass="me.serce.solidity.ide.hints.SolParameterInfoHandler"/>
 
         <completion.contributor language="Solidity"
+                                implementationClass="me.serce.solidity.lang.completion.SolBaseTypesCompletionContributor"/>
+        <completion.contributor language="Solidity"
                                 implementationClass="me.serce.solidity.lang.completion.SolKeywordCompletionContributor"/>
         <completion.contributor language="Solidity"
-                                implementationClass="me.serce.solidity.lang.completion.SolContextCompletionContributor"/>
+                                implementationClass="me.serce.solidity.lang.completion.SolFunctionCompletionContributor"/>
         <completion.contributor language="Solidity"
-                                implementationClass="me.serce.solidity.lang.completion.SolBaseTypesCompletionContributor"/>
+                                implementationClass="me.serce.solidity.lang.completion.SolContextCompletionContributor"/>
 
         <lang.formatter language="Solidity"
                         implementationClass="me.serce.solidity.ide.formatting.SolidityFormattingModelBuilder"/>
