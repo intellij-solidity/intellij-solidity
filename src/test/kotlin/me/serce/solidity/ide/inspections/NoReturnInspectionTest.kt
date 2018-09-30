@@ -41,6 +41,16 @@ class NoReturnInspectionTest : SolInspectionsTestBase(NoReturnInspection()) {
         }
     """)
 
+  fun testAssignmentInAssembly() = checkByText("""
+        contract a {
+            function lowLevel(string memory source) constant returns (bytes32 result) {
+                assembly {
+                    result := mload(add(source, 32))
+                }
+            }
+        }
+    """)
+
   fun testAssignmentWithFunctionCall() = checkByText("""
         interface SomeInterface {
 

@@ -432,7 +432,7 @@ AssemblyItem ::=
 FunctionalAssemblyExpression ::= (AmbiguousAssemblyBytecode | Identifier) '(' AssemblyItem? ( ',' AssemblyItem )* ')'
 AssemblyLocalDefinition ::= let IdentifierOrList ':=' FunctionalAssemblyAssignmentOrIdentifier {pin=1}
 FunctionalAssemblyAssignment ::= IdentifierOrList ':=' FunctionalAssemblyAssignmentOrIdentifier {pin=2}
-private IdentifierOrList ::= IdentifierList | '(' IdentifierList ')'
+IdentifierOrList ::= IdentifierList | '(' IdentifierList ')'
 private IdentifierList ::= Identifier ( ',' Identifier)*
 AssemblyAssignment ::= '=:' Identifier {pin=1}
 LabelDefinition ::= Identifier ':'

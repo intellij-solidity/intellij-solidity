@@ -57,6 +57,12 @@ fun SolStatement.hasAssignment(name: String): Boolean {
     }
   }
 
+  this.inlineAssemblyStatement.let { st ->
+    st?.assemblyBlock?.let {
+      return it.hasAssignment(name)
+    }
+  }
+
   this.block.let {
     if (it != null) return it.hasAssignment(name)
   }
@@ -111,3 +117,20 @@ fun SolIfStatement.hasAssignment(name: String): Boolean =
 
 fun SolVariableDefinition.hasAssignment(name: String): Boolean =
   this.variableDeclaration.name == name
+
+fun SolAssemblyBlock.hasAssignment(name: String): Boolean =
+  this.assemblyItemList.any { it.hasAssignment(name) }
+
+fun SolAssemblyItem.hasAssignment(name: String): Boolean {
+  this.assemblyAssignment.let {
+    if (it != null && it.identifier?.text == name) {
+      return true
+    }
+  }
+  this.functionalAssemblyAssignment.let {
+    if (it != null && it.identifierOrList.text == name) {
+      return true
+    }
+  }
+  return false
+}
