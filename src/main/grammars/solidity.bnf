@@ -316,7 +316,8 @@ SeqExpression ::= '(' ','? Expression (',' Expression)* ','? ')'
 VariableDefinition ::= VariableDeclaration ( '=' Expression )?
 
 Expression ::=
-  TernaryExpression | IncrementExpression | FunctionCallExpression | CallExpression | IndexAccessExpression | ParenExpression
+  AssignmentExpression
+  | TernaryExpression | IncrementExpression | FunctionCallExpression | CallExpression | IndexAccessExpression | ParenExpression
   | UnaryExpression
   | ExponentExpression
   | MultDivExpression
@@ -329,13 +330,12 @@ Expression ::=
   | EqExpression
   | AndExpression
   | OrExpression
-  | AssignmentExpression
   | MemberAccessExpression
   | InlineArrayExpression
   | PrimaryExpression
 
 
-AssignmentExpression ::= Expression ('=' | '|=' | '^=' | '&=' | '<<=' | '>>=' | '+=' | '-=' | '*=' | '/=' | '%=') Expression
+AssignmentExpression ::= Expression ('=' | '|=' | '^=' | '&=' | '<<=' | '>>=' | '+=' | '-=' | '*=' | '/=' | '%=') Expression { rightAssociative=true }
 InlineArrayExpression ::= '[' Expression (',' Expression)* ']'
 TernaryExpression ::= Expression '?' Expression ':' Expression
 OrExpression ::= Expression '||' Expression

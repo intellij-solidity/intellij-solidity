@@ -41,6 +41,20 @@ class NoReturnInspectionTest : SolInspectionsTestBase(NoReturnInspection()) {
         }
     """)
 
+  fun testAssignmentWithFunctionCall() = checkByText("""
+        interface SomeInterface {
+
+        }
+
+        contract a {
+            address someAddress;
+
+            function lookupService(bytes32 identifier) constant returns (address manager) {
+                manager = SomeInterface(someAddress).getContractAddress(identifier);
+            }
+        }
+    """)
+
   fun testHasReturnVarNameWithVarDef() = checkByText("""
         contract a {
             function a() returns (uint a) {
