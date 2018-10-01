@@ -215,7 +215,11 @@ object SolResolver {
         childrenScope + extendsScope
       }
       is SolFunctionDefinition -> {
-        scope.parameters.asSequence()
+        scope.parameters.asSequence() +
+          (scope.returns?.parameterDefList?.asSequence() ?: emptySequence())
+      }
+      is SolConstructorDefinition -> {
+        scope.parameterList?.parameterDefList?.asSequence() ?: emptySequence()
       }
       is SolEnumDefinition -> sequenceOf(scope)
 
