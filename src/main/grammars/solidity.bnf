@@ -318,7 +318,8 @@ SeqExpression ::= '(' ','? Expression (',' Expression)* ','? ')'
 VariableDefinition ::= VariableDeclaration ( '=' Expression )?
 
 Expression ::=
-  TernaryExpression | IncrementExpression | FunctionCallExpression | CallExpression | IndexAccessExpression | ParenExpression
+  AssignmentExpression
+  | TernaryExpression | IncrementExpression | FunctionCallExpression | CallExpression | IndexAccessExpression | ParenExpression
   | UnaryExpression
   | ExponentExpression
   | MultDivExpression
@@ -331,15 +332,15 @@ Expression ::=
   | EqExpression
   | AndExpression
   | OrExpression
-  | AssignmentExpression
   | MemberAccessExpression
   | InlineArrayExpression
   | PrimaryExpression
 
 
-AssignmentExpression ::= Expression ('=' | '|=' | '^=' | '&=' | '<<=' | '>>=' | '+=' | '-=' | '*=' | '/=' | '%=') Expression
+AssignmentExpression ::= Expression ('=' | '|=' | '^=' | '&=' | '<<=' | '>>=' | '+=' | '-=' | '*=' | '/=' | '%=') Expression { rightAssociative=true }
 InlineArrayExpression ::= '[' Expression (',' Expression)* ']'
-TernaryExpression ::= Expression '?' Expression ':' Expression
++TernaryExpression ::= Expression '?' RightTernaryExpression
++private RightTernaryExpression ::= Expression ':' Expression
 OrExpression ::= Expression '||' Expression
 AndExpression ::= Expression '&&' Expression
 EqExpression ::= Expression ('==' | '!=') Expression
@@ -439,7 +440,7 @@ AssemblyItem ::=
 FunctionalAssemblyExpression ::= (AmbiguousAssemblyBytecode | Identifier) '(' AssemblyItem? ( ',' AssemblyItem )* ')'
 AssemblyLocalDefinition ::= let IdentifierOrList ':=' FunctionalAssemblyAssignmentOrIdentifier {pin=1}
 FunctionalAssemblyAssignment ::= IdentifierOrList ':=' FunctionalAssemblyAssignmentOrIdentifier {pin=2}
-private IdentifierOrList ::= IdentifierList | '(' IdentifierList ')'
+IdentifierOrList ::= IdentifierList | '(' IdentifierList ')'
 private IdentifierList ::= Identifier ( ',' Identifier)*
 AssemblyAssignment ::= '=:' Identifier {pin=1}
 LabelDefinition ::= Identifier ':'

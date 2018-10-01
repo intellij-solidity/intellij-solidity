@@ -70,19 +70,31 @@ abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrL
 abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefStub>, SolFunctionDefinition {
   override val referenceNameElement: PsiElement
     get() = findChildByType(IDENTIFIER)!!
+
   override val referenceName: String
     get() = referenceNameElement.text
+
   override val modifiers: List<PsiElement>
     get() = findChildrenByType<PsiElement>(FUNCTION_MODIFIER)
+
   override val parameters: List<SolParameterDef>
     get() = findChildByType<SolParameterList>(PARAMETER_LIST)
       ?.children
       ?.filterIsInstance(SolParameterDef::class.java)
       ?: emptyList()
+
+  override val returns: SolParameterList?
+    get() = if (parameterListList.size == 2) {
+      parameterListList[1]
+    } else {
+      null
+    }
+
   override val contract: SolContractDefinition
     get() = this.ancestors.asSequence()
       .filterIsInstance<SolContractDefinition>()
       .first()
+
   override val isConstructor: Boolean
     get() = contract.name == name
 
