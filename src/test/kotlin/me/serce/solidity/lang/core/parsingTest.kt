@@ -57,7 +57,7 @@ class SolidityCompleteOfficialSuccessfulParsingTest :
   fun testCommentEndWithDoubleStar() = doTest(true)
   fun testComplexExpression() = doTest(true)
   fun testComplexImport() = doTest(true)
-//  fun testConditionalMultiple() = doTest(true)
+  fun testConditionalMultiple() = doTest(true)
   fun testConditionalTrueFalseLiteral() = doTest(true)
   fun testConditionalWithAssignment() = doTest(true)
   fun testConditionalWithConstants() = doTest(true)

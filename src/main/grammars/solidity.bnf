@@ -317,21 +317,27 @@ EmitStatement ::= emit FunctionCallExpression {pin=1}
 SeqExpression ::= '(' ','? Expression (',' Expression)* ','? ')'
 VariableDefinition ::= VariableDeclaration ( '=' Expression )?
 
+// see https://solidity.readthedocs.io/en/v0.4.21/miscellaneous.html#order-of-precedence-of-operators
 Expression ::=
   AssignmentExpression
-  | TernaryExpression | IncrementExpression | FunctionCallExpression | CallExpression | IndexAccessExpression | ParenExpression
-  | UnaryExpression
-  | ExponentExpression
-  | MultDivExpression
-  | PlusMinExpression
-  | ShiftExpression
-  | AndOpExpression
-  | XorOpExpression
-  | OrOpExpression
-  | CompExpression
+  | TernaryExpression
+  | FunctionCallExpression
+  | CallExpression
+  | IndexAccessExpression
+  | ParenExpression
   | EqExpression
-  | AndExpression
   | OrExpression
+  | AndExpression
+  | CompExpression
+  | OrOpExpression
+  | XorOpExpression
+  | AndOpExpression
+  | ShiftExpression
+  | PlusMinExpression
+  | MultDivExpression
+  | ExponentExpression
+  | UnaryExpression
+  | IncrementExpression
   | MemberAccessExpression
   | InlineArrayExpression
   | PrimaryExpression
