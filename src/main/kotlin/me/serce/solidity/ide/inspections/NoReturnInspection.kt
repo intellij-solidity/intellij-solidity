@@ -15,7 +15,7 @@ class NoReturnInspection : LocalInspectionTool() {
   }
 }
 
-fun SolFunctionDefinition.inspectReturns(holder: ProblemsHolder) {
+private fun SolFunctionDefinition.inspectReturns(holder: ProblemsHolder) {
   val block = this.block
   if (block != null) {
     val returns = this.returns
@@ -36,7 +36,7 @@ fun SolFunctionDefinition.inspectReturns(holder: ProblemsHolder) {
   }
 }
 
-fun SolStatement.hasAssignment(name: String): Boolean {
+private fun SolStatement.hasAssignment(name: String): Boolean {
   this.variableDefinition.let {
     if (it != null) return it.hasAssignment(name)
   }
@@ -74,7 +74,7 @@ fun SolStatement.hasAssignment(name: String): Boolean {
   return false
 }
 
-val SolStatement.returns: Boolean
+private val SolStatement.returns: Boolean
   get() {
     this.block.let {
       if (it != null) return it.returns
@@ -95,33 +95,33 @@ val SolStatement.returns: Boolean
     return false
   }
 
-val SolBlock.returns: Boolean
+private val SolBlock.returns: Boolean
   get() = this.statementList.any { it.returns }
 
-fun SolBlock.hasAssignment(name: String): Boolean =
+private fun SolBlock.hasAssignment(name: String): Boolean =
   this.statementList.any { it.hasAssignment(name) }
 
-val SolIfStatement.returns: Boolean
+private val SolIfStatement.returns: Boolean
   get() = if (this.statementList.size == 1) {
     false
   } else {
     statementList.all { it.returns }
   }
 
-fun SolIfStatement.hasAssignment(name: String): Boolean =
+private fun SolIfStatement.hasAssignment(name: String): Boolean =
   if (this.statementList.size == 1) {
     false
   } else {
     statementList.all { it.hasAssignment(name) }
   }
 
-fun SolVariableDefinition.hasAssignment(name: String): Boolean =
+private fun SolVariableDefinition.hasAssignment(name: String): Boolean =
   this.variableDeclaration.name == name
 
-fun SolAssemblyBlock.hasAssignment(name: String): Boolean =
+private fun SolAssemblyBlock.hasAssignment(name: String): Boolean =
   this.assemblyItemList.any { it.hasAssignment(name) }
 
-fun SolAssemblyItem.hasAssignment(name: String): Boolean {
+private fun SolAssemblyItem.hasAssignment(name: String): Boolean {
   this.assemblyAssignment.let {
     if (it != null && it.identifier?.text == name) {
       return true
