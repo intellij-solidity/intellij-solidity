@@ -18,3 +18,11 @@ It's important to remember that running the tests from IDE doesn't regenerate th
 The implementation of the formatter aims to follow the link:https://github.com/ethereum/solidity/blob/develop/docs/style-guide.rst[official style guide] by default, but also to be configurable to step away from the conventions when needed.
 
 The formatting rules are defined in `src/main/kotlin/me/serce/solidity/ide/formatting`, with the corresponding tests in `src/test/kotlin/me/serce/solidity/ide/formatting`. The official link:https://www.jetbrains.org/intellij/sdk/docs/tutorials/custom_language_support/formatter.html[JetBrains documentation] can be used as a reference.
+
+== Exceptions
+
+User-reported errors are collected by Sentry. If you're a contributor and would like to have an account, please contact @SerCeMan.
+
+== Releasing
+
+The plugin is released once a month, typically at the end of the second week. If there is a need for an out-of-schedule release, please contact @SerCeMan.
