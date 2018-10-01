@@ -337,7 +337,8 @@ Expression ::=
 
 AssignmentExpression ::= Expression ('=' | '|=' | '^=' | '&=' | '<<=' | '>>=' | '+=' | '-=' | '*=' | '/=' | '%=') Expression { rightAssociative=true }
 InlineArrayExpression ::= '[' Expression (',' Expression)* ']'
-TernaryExpression ::= Expression '?' Expression ':' Expression
++TernaryExpression ::= Expression '?' RightTernaryExpression
++private RightTernaryExpression ::= Expression ':' Expression
 OrExpression ::= Expression '||' Expression
 AndExpression ::= Expression '&&' Expression
 EqExpression ::= Expression ('==' | '!=') Expression
