@@ -8,6 +8,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.PopupStep
 import com.intellij.openapi.ui.popup.util.BaseListPopupStep
+import com.intellij.openapi.util.RecursionManager
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
@@ -94,10 +95,26 @@ class ImportFileAction(
   }
 
   companion object {
+    fun isImportedAlready(file: PsiFile, to: PsiFile): Boolean {
+      return if (file == to) {
+        true
+      } else {
+        RecursionManager.doPreventingRecursion(file, true) {
+          file.children
+            .filterIsInstance<SolImportDirective>()
+            .mapNotNull { it.importPath?.reference?.resolve()?.containingFile }
+            .any {
+              isImportedAlready(it, to)
+            }
+        }!!
+      }
+    }
+
     fun addImport(project: Project, file: PsiFile, to: PsiFile) {
       CommandProcessor.getInstance().runUndoTransparentAction {
         ApplicationManager.getApplication().runWriteAction {
-          val after = file.children.filterIsInstance<SolImportDirective>().lastOrNull() ?: file.children.filterIsInstance<SolPragmaDirective>().firstOrNull()
+          val after = file.children.filterIsInstance<SolImportDirective>().lastOrNull()
+            ?: file.children.filterIsInstance<SolPragmaDirective>().firstOrNull()
           val factory = SolPsiFactory(project)
           file.addAfter(factory.createImportDirective(buildImportPath(file.virtualFile, to.virtualFile)), after)
           file.addAfter(factory.createNewLine(project), after)
