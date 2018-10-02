@@ -41,5 +41,5 @@ class SolEventCompletionTest : SolCompletionTestBase() {
                 emit C/*caret*/
             }
         }
-  """, strict = true)
+  """)
 }

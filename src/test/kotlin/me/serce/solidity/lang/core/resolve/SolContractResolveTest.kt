@@ -1,5 +1,6 @@
 package me.serce.solidity.lang.core.resolve
 
+import me.serce.solidity.lang.psi.SolElement
 import me.serce.solidity.lang.psi.SolNamedElement
 
 class SolContractResolveTest : SolResolveTestBase() {
@@ -20,6 +21,38 @@ class SolContractResolveTest : SolResolveTestBase() {
     """
         contract B {}
                //x
+        contract A {
+          function resolve() {
+            B a = new B();
+                    //^
+          }
+        }
+          """
+  )
+
+  fun testNewResolveToConstructor() = checkByCodeSearchType<SolElement>(
+    """
+        contract B {
+          constructor() {
+               //x
+          }
+        }
+        contract A {
+          function resolve() {
+            B a = new B();
+                    //^
+          }
+        }
+          """
+  )
+
+  fun testNewResolveToConstructorFunction() = checkByCodeSearchType<SolElement>(
+    """
+        contract B {
+          function B() {
+                 //x
+          }
+        }
         contract A {
           function resolve() {
             B a = new B();

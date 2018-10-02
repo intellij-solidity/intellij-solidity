@@ -7,6 +7,10 @@ import org.intellij.lang.annotations.Language
 
 abstract class SolResolveTestBase : SolTestBase() {
   protected fun checkByCode(@Language("Solidity") code: String) {
+    checkByCodeSearchType<SolNamedElement>(code)
+  }
+
+  protected inline fun <reified T : PsiElement> checkByCodeSearchType(@Language("Solidity") code: String) {
     val (refElement, data) = resolveInCode<SolNamedElement>(code)
 
     if (data == "unresolved") {
@@ -19,7 +23,7 @@ abstract class SolResolveTestBase : SolTestBase() {
 
     val references = refElement.references.mapNotNull { it?.resolve() }
     assertTrue("Failed to resolve ${refElement.text}", references.isNotEmpty())
-    val target = findElementInEditor<SolNamedElement>("x")
+    val target = findElementInEditor<T>("x")
 
     if (references.size == 1) {
       assertEquals(target, references.first())
