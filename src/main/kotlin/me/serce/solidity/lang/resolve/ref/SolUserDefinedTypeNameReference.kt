@@ -53,9 +53,26 @@ class SolNewExpressionReference(element: SolNewExpression) : SolReferenceBase<So
   }
 
   override fun multiResolve(): Collection<PsiElement> {
-    val types = SolResolver.resolveTypeName(element)
+    val types = SolResolver.resolveTypeNameUsingImports(element)
     return types
       .filterIsInstance(SolContractDefinition::class.java)
+      .flatMap {
+        val constructors = it.findConstructors()
+        if (constructors.isEmpty()) {
+          listOf(it)
+        } else {
+          constructors
+        }
+      }
+  }
+}
+
+fun SolContractDefinition.findConstructors(): List<SolElement> {
+  return if (!this.constructorDefinitionList.isEmpty()) {
+    this.constructorDefinitionList
+  } else {
+    this.functionDefinitionList
+      .filter { it.name == this.name }
   }
 }
 
