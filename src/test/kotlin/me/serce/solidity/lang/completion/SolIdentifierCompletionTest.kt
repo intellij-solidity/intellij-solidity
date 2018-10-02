@@ -12,4 +12,19 @@ class SolIdentifierCompletionTest : SolCompletionTestBase() {
     }
 
   """)
+
+  fun testCompletionWithImport() {
+    InlineFile(
+      code = "contract test {}",
+      name = "test.sol"
+    )
+
+    InlineFile("""
+
+    contract A is tes/*caret*/{}""").withCaret()
+    myFixture.completeBasic()
+    myFixture.checkResult("""import "./test.sol";
+
+contract A is test{}""")
+  }
 }
