@@ -61,6 +61,28 @@ class SolVarResolveTest : SolResolveTestBase() {
         }
   """)
 
+  fun testConstructorParams() = checkByCode("""
+        contract B {
+            constructor(uint abc) {
+                          //x
+                _;
+                abc = 1;
+                //^
+            }
+        }
+  """)
+
+  fun testReturnVars() = checkByCode("""
+        contract B {
+            function test() returns (uint abc) {
+                                         //x
+                _;
+                abc = 1;
+                //^
+            }
+        }
+  """)
+
   fun testResolveStateInheritance() = checkByCode("""
         contract C {
             uint abc;
