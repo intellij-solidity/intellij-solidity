@@ -27,7 +27,7 @@ class SolEventCompletionTest : SolCompletionTestBase() {
         }
   """)
 
-  fun testEventExactCompletion() = checkCompletion(hashSetOf("ChildEvent"), """
+  fun testEventExactCompletion() = checkCompletion(hashSetOf("ChildEvent", "CopyEvent"), """
         contract BaseContract {
             event BaseEvent();
         }
@@ -35,10 +35,11 @@ class SolEventCompletionTest : SolCompletionTestBase() {
         contract ChildContract is BaseContract {
 
             event ChildEvent();
+            event CopyEvent();
 
             function emitEvent() {
                 emit C/*caret*/
             }
         }
-  """)
+  """, strict = true)
 }
