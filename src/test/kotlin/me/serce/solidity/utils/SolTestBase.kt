@@ -63,4 +63,8 @@ abstract class SolTestBase : SolLightPlatformCodeInsightFixtureTestCase() {
     action()
     myFixture.checkResultByFile(after, ignoreTrailingWhitespace)
   }
+
+  protected fun checkResult(@Language("Solidity") text: String) {
+    myFixture.checkResult(text)
+  }
 }

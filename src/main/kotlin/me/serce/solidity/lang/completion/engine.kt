@@ -1,11 +1,15 @@
 package me.serce.solidity.lang.completion
 
+import com.intellij.codeInsight.completion.InsertionContext
 import com.intellij.codeInsight.completion.PrioritizedLookupElement
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
+import com.intellij.codeInsight.lookup.LookupElementPresentation
 import com.intellij.psi.PsiElement
+import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.stubs.StubIndex
 import me.serce.solidity.ide.SolidityIcons
+import me.serce.solidity.ide.inspections.fixes.ImportFileAction
 import me.serce.solidity.lang.psi.SolContractDefinition
 import me.serce.solidity.lang.psi.SolMemberAccessExpression
 import me.serce.solidity.lang.psi.SolNamedElement
@@ -45,7 +49,11 @@ object SolCompleter {
       project
     )
     return allTypeNames
-      .map { LookupElementBuilder.create(it, it).withIcon(SolidityIcons.CONTRACT) }
+      .flatMap {
+        StubIndex.getElements(SolGotoClassIndex.KEY, it, project, GlobalSearchScope.projectScope(project), SolNamedElement::class.java)
+      }
+      .filterIsInstance<SolContractDefinition>()
+      .map { ContractLookupElement(it) }
       .toTypedArray()
   }
 
@@ -92,5 +100,21 @@ object SolCompleter {
     }.toTypedArray().map {
       PrioritizedLookupElement.withPriority(it, TYPED_COMPLETION_PRIORITY)
     }.toTypedArray()
+  }
+}
+
+class ContractLookupElement(val contract: SolContractDefinition) : LookupElement() {
+  override fun getLookupString(): String = contract.name!!
+
+  override fun renderElement(presentation: LookupElementPresentation) {
+    presentation.icon = SolidityIcons.CONTRACT
+    presentation.itemText = contract.name
+    presentation.typeText = "from ${contract.containingFile.name}"
+  }
+
+  override fun handleInsert(context: InsertionContext) {
+    if (!ImportFileAction.isImportedAlready(context.file, contract.containingFile)) {
+      ImportFileAction.addImport(contract.project, context.file, contract.containingFile)
+    }
   }
 }
