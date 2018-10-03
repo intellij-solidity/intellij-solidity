@@ -106,7 +106,7 @@ class ImportFileAction(
             .any {
               isImportedAlready(it, to)
             }
-        }!!
+        } ?: false
       }
     }
 

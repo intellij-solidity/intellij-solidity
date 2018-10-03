@@ -112,8 +112,8 @@ class ContractLookupElement(val contract: SolContractDefinition) : LookupElement
     presentation.typeText = "from ${contract.containingFile.name}"
   }
 
-  override fun handleInsert(context: InsertionContext?) {
-    if (!ImportFileAction.isImportedAlready(context!!.file, contract.containingFile)) {
+  override fun handleInsert(context: InsertionContext) {
+    if (!ImportFileAction.isImportedAlready(context.file, contract.containingFile)) {
       ImportFileAction.addImport(contract.project, context.file, contract.containingFile)
     }
   }
