@@ -58,10 +58,10 @@ object SolResolver {
     } ?: emptySet()
 
   private fun resolveEnum(element: SolReferenceElement, file: PsiFile): Set<SolNamedElement> =
-    resolveInnerType<SolEnumDefinition>(element, file, { it.enumDefinitionList })
+    resolveInnerType<SolEnumDefinition>(element, file) { it.enumDefinitionList }
 
   private fun resolveStruct(element: SolReferenceElement, file: PsiFile): Set<SolNamedElement> =
-    resolveInnerType<SolStructDefinition>(element, file, { it.structDefinitionList })
+    resolveInnerType<SolStructDefinition>(element, file) { it.structDefinitionList }
 
   private fun <T : SolNamedElement> resolveInnerType(element: SolReferenceElement, file: PsiFile, f: (SolContractDefinition) -> List<T>): Set<T> =
     RecursionManager.doPreventingRecursion(file, true) {
@@ -127,48 +127,58 @@ object SolResolver {
     return when {
       propName == null -> emptyList()
       refType is SolContract -> resolveContractMember(refType.ref, element)
+      refType is SolSuper -> resolveContractMember(refType.ref, element, true)
       refType is SolStruct -> refType.ref.variableDeclarationList.filter { it.name == propName }
       refType is SolEnum -> refType.ref.enumValueList.filter { it.name == propName }
       else -> emptyList()
     }
   }
 
-  private fun resolveContractMember(ref: SolContractDefinition, element: SolMemberAccessExpression): List<SolNamedElement> {
-    val members = ref.stateVariableDeclarationList.filter { it.name == element.name }
+  private fun resolveContractMember(contract: SolContractDefinition, element: SolMemberAccessExpression, supers: Boolean = false): List<SolNamedElement> {
+    val members = if (!supers)
+      contract.stateVariableDeclarationList.filter { it.name == element.name }
+    else
+      emptyList()
     if (members.isNotEmpty()) {
       return members
     }
-    return ref.supers
+    return contract.supers
       .map { resolveTypeName(it).firstOrNull() }
       .filterIsInstance<SolContractDefinition>()
       .flatMap { resolveContractMember(it, element) }
   }
 
-  fun resolveFunction(contract: SolContractDefinition, element: SolFunctionCallExpression): Collection<PsiElement> {
+  fun resolveFunction(contract: SolContractDefinition, element: SolFunctionCallExpression, supers: Boolean = false): Collection<PsiElement> {
     if (element.argumentsNumber() == 1) {
       val contracts = resolveTypeName(element)
       if (contracts.isNotEmpty()) {
         return contracts
       }
     }
-    return resolveFunRec(contract, element)
+    return resolveFunRec(contract, element, supers)
   }
 
-  private fun resolveFunRec(contract: SolContractDefinition, element: SolFunctionCallExpression): List<PsiElement> {
-    val currentContractFunctions = contract.functionDefinitionList
+  private fun resolveFunRec(contract: SolContractDefinition, element: SolFunctionCallExpression, supers: Boolean = false): List<PsiElement> {
+    val currentContractFunctions = if (!supers) contract.functionDefinitionList
       .filter {
         it.name == element.referenceName &&
           it.parameterListList.firstOrNull()?.parameterDefList?.size == element.argumentsNumber()
       }
-    val eventDefinitions = contract.eventDefinitionList
+    else
+      emptyList()
+    val eventDefinitions = if (!supers) contract.eventDefinitionList
       .filter {
         it.name == element.referenceName &&
           it.indexedParameterList?.typeNameList?.size ?: 0 == element.argumentsNumber()
       }
-    val structDefinitions = contract.structDefinitionList
+    else
+      emptyList()
+    val structDefinitions = if (!supers) contract.structDefinitionList
       .filter {
         it.name == element.referenceName
       }
+    else
+      emptyList()
     return when {
       currentContractFunctions.isNotEmpty() -> currentContractFunctions
       eventDefinitions.isNotEmpty() -> eventDefinitions

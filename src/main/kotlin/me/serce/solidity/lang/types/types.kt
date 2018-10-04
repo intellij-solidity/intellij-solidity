@@ -60,6 +60,10 @@ data class SolContract(val ref: SolContractDefinition) : SolType {
   override fun toString() = ref.name ?: ref.text ?: "$ref"
 }
 
+data class SolSuper(val ref: SolContractDefinition): SolType {
+  override fun toString() = "${ref.name ?: ref.text ?: ref}.super"
+}
+
 data class SolStruct(val ref: SolStructDefinition) : SolType {
   override fun toString() = ref.name ?: ref.text ?: "$ref"
 }

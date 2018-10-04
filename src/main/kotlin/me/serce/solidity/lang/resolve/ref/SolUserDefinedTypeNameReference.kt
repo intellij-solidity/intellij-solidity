@@ -9,6 +9,8 @@ import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.psi.impl.SolFunctionCallElement
 import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.types.SolContract
+import me.serce.solidity.lang.types.SolSuper
+import me.serce.solidity.lang.types.SolType
 import me.serce.solidity.lang.types.type
 
 class SolUserDefinedTypeNameReference(element: SolUserDefinedTypeName) : SolReferenceBase<SolUserDefinedTypeName>(element), SolReference {
@@ -82,14 +84,15 @@ class SolFunctionCallReference(element: SolFunctionCallElement) : SolReferenceBa
   }
 
   override fun multiResolve(): Collection<PsiElement> {
-    val contract: SolContractDefinition? = when {
-      element.expressionList.isEmpty() -> element.ancestors.firstInstanceOrNull<SolContractDefinition>()
-      else -> (element.expressionList.firstOrNull()?.type as? SolContract)?.ref
+    val type: SolType? = when {
+      element.expressionList.isEmpty() -> element.ancestors.firstInstanceOrNull<SolContractDefinition>()?.let { SolContract(it) }
+      else -> element.expressionList.firstOrNull()?.type
     }
 
-    return when (contract) {
-      null -> emptyList()
-      else -> SolResolver.resolveFunction(contract, element)
+    return when (type) {
+      is SolContract -> SolResolver.resolveFunction(type.ref, element)
+      is SolSuper -> SolResolver.resolveFunction(type.ref, element, true)
+      else -> emptyList()
     }
   }
 }
