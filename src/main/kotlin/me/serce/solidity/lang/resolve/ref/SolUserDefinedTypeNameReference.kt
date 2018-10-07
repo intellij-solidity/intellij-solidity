@@ -3,14 +3,12 @@ package me.serce.solidity.lang.resolve.ref
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import me.serce.solidity.firstInstance
-import me.serce.solidity.firstInstanceOrNull
 import me.serce.solidity.lang.completion.SolCompleter
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.psi.impl.SolFunctionCallElement
 import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.types.SolContract
-import me.serce.solidity.lang.types.SolSuper
-import me.serce.solidity.lang.types.SolType
+import me.serce.solidity.lang.types.findContract
 import me.serce.solidity.lang.types.type
 
 class SolUserDefinedTypeNameReference(element: SolUserDefinedTypeName) : SolReferenceBase<SolUserDefinedTypeName>(element), SolReference {
@@ -84,15 +82,23 @@ class SolFunctionCallReference(element: SolFunctionCallElement) : SolReferenceBa
   }
 
   override fun multiResolve(): Collection<PsiElement> {
-    val type: SolType? = when {
-      element.expressionList.isEmpty() -> element.ancestors.firstInstanceOrNull<SolContractDefinition>()?.let { SolContract(it) }
-      else -> element.expressionList.firstOrNull()?.type
-    }
-
-    return when (type) {
-      is SolContract -> SolResolver.resolveFunction(type.ref, element)
-      is SolSuper -> SolResolver.resolveFunction(type.ref, element, true)
-      else -> emptyList()
+    val ref = element.expressionList.firstOrNull()
+    return when {
+      ref == null -> {
+        val contract = findContract(element)
+        contract?.let { SolResolver.resolveFunction(it, element) } ?: emptyList()
+      }
+      ref is SolPrimaryExpression && ref.varLiteral?.name == "super" -> {
+        val contract = findContract(ref)
+        contract?.let { SolResolver.resolveFunction(it, element, true) } ?: emptyList()
+      }
+      else -> {
+        val type = ref.type
+        when (type) {
+          is SolContract -> SolResolver.resolveFunction(type.ref, element)
+          else -> emptyList()
+        }
+      }
     }
   }
 }
