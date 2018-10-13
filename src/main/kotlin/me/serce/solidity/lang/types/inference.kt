@@ -1,6 +1,7 @@
 package me.serce.solidity.lang.types
 
 import com.intellij.openapi.util.RecursionManager
+import com.intellij.psi.PsiElement
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiModificationTracker
@@ -87,8 +88,13 @@ fun inferDeclType(decl: SolNamedElement): SolType {
 }
 
 fun inferRefType(ref: SolReferenceElement): SolType {
-  return when (ref) {
-    is SolVarLiteral -> {
+  return when {
+    ref is SolVarLiteral && ref.name == "this" -> {
+      findContract(ref)
+        ?.let { SolContract(it) } ?: SolUnknown
+    }
+    ref is SolVarLiteral && ref.name == "super" -> SolUnknown
+    ref is SolVarLiteral -> {
       val declarations = SolResolver.resolveVarLiteral(ref)
       return declarations.asSequence()
         .map { inferDeclType(it) }
@@ -98,6 +104,11 @@ fun inferRefType(ref: SolReferenceElement): SolType {
     else -> SolUnknown
   }
 }
+
+fun findContract(element: PsiElement): SolContractDefinition? =
+  element.ancestors
+    .filterIsInstance<SolContractDefinition>()
+    .firstOrNull()
 
 fun inferExprType(expr: SolExpression?): SolType {
   return when (expr) {
@@ -113,9 +124,7 @@ fun inferExprType(expr: SolExpression?): SolType {
     is SolOrExpression,
     is SolEqExpression,
     is SolCompExpression -> SolBoolean
-
     is SolTernaryExpression -> inferExprType(expr.expressionList[1])
-
     is SolIndexAccessExpression -> {
       val arrType = inferExprType(expr.expressionList[0])
       when (arrType) {
@@ -124,7 +133,6 @@ fun inferExprType(expr: SolExpression?): SolType {
         else -> SolUnknown
       }
     }
-
     is SolMemberAccessExpression -> {
       val properties = SolResolver.resolveMemberAccess(expr)
       return properties.asSequence()
@@ -132,7 +140,6 @@ fun inferExprType(expr: SolExpression?): SolType {
         .filter { it != SolUnknown }
         .firstOrElse(SolUnknown)
     }
-
     else -> SolUnknown
   }
 }

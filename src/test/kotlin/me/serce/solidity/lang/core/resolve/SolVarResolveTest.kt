@@ -126,4 +126,22 @@ class SolVarResolveTest : SolResolveTestBase() {
             }
         }
   """)
+
+  fun testResolveSuperMultipleInheritance() = checkByCode("""
+        contract Parent1 {
+
+        }
+
+        contract Parent2 {
+            var b;
+              //x
+        }
+
+        contract A is Parent1, Parent2 {
+            function doit() {
+                super.b;
+                    //^
+            }
+        }
+  """)
 }

@@ -44,6 +44,24 @@ class SolFunctionResolveTest : SolResolveTestBase() {
         }
   """)
 
+  fun testResolveFunctionUsingSuper() = checkByCode("""
+        contract Parent1 {
+        }
+
+        contract Parent2 {
+            function doSomething() {
+                    //x
+            }
+        }
+
+        contract B is Parent1, Parent2 {
+            function doSomething() {
+                super.doSomething();
+                     //^
+            }
+        }
+  """)
+
   fun testResolveContractProperty() = checkByCode("""
         contract A {
             function doit2() {
