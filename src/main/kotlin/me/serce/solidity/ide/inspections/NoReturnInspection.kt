@@ -36,7 +36,18 @@ private fun SolFunctionDefinition.inspectReturns(holder: ProblemsHolder) {
   }
 }
 
+private val SolFunctionCallExpression.revert: Boolean
+  get() {
+    return this.name == "revert"
+      && expressionList.isEmpty()
+      && this.reference?.resolve() == null
+  }
+
 private fun SolStatement.hasAssignment(name: String): Boolean {
+  this.throwSt.let {
+    if (it != null && it is SolFunctionCallExpression && it.revert) return true
+  }
+
   this.variableDefinition.let {
     if (it != null) return it.hasAssignment(name)
   }
@@ -45,7 +56,7 @@ private fun SolStatement.hasAssignment(name: String): Boolean {
     if (it != null && it is SolAssignmentExpression) {
       val first = it.expressionList[0]
       if (first is SolPrimaryExpression) {
-        first.varLiteral.let {lit ->
+        first.varLiteral.let { lit ->
           if (lit != null) {
             if (lit.name == name) {
               return true
@@ -76,6 +87,16 @@ private fun SolStatement.hasAssignment(name: String): Boolean {
 
 private val SolStatement.returns: Boolean
   get() {
+    this.expression.let {
+      if (it != null && it is SolFunctionCallExpression && it.revert) {
+        return true
+      }
+    }
+
+    this.throwSt.let {
+      if (it != null) return true
+    }
+
     this.block.let {
       if (it != null) return it.returns
     }
