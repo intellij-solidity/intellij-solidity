@@ -9,6 +9,26 @@ class NoReturnInspectionTest : SolInspectionsTestBase(NoReturnInspection()) {
         }
     """)
 
+  fun testRevert() = checkByText("""
+        contract a {
+            function a() returns (uint) {
+                revert();
+            }
+        }
+    """)
+
+  fun testRevertShadowing() = checkByText("""
+        contract a {
+            function revert() {
+
+            }
+
+            /*@warning descr="no return statement"@*/function a() returns (uint) {
+                revert();
+            }/*@/warning@*/
+        }
+    """)
+
   fun testReturnWithIf() = checkByText("""
         contract a {
             function a() returns (uint) {
@@ -16,6 +36,18 @@ class NoReturnInspectionTest : SolInspectionsTestBase(NoReturnInspection()) {
                   return 1;
                 } else {
                   return 2;
+                }
+            }
+        }
+    """)
+
+  fun testThrow() = checkByText("""
+        contract a {
+            function payReward() returns(bool) {
+                if (usnContract.getOriginalClient().DAOrewardAccount().call.value(msg.value)()) {
+                    return true;
+                } else {
+                    throw;
                 }
             }
         }
