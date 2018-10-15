@@ -235,6 +235,10 @@ object SolResolver {
           .flatten()
       }
 
+      is SolTupleStatement -> {
+        scope.variableDeclaration?.let { sequenceOf(it) } ?: emptySequence()
+      }
+
       else -> emptySequence()
     }
   }

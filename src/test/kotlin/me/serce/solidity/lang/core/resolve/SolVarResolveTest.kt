@@ -83,6 +83,18 @@ class SolVarResolveTest : SolResolveTestBase() {
         }
   """)
 
+  fun testTupleVar() = checkByCode("""
+        contract B {
+            function test() {
+                var (var1, var2) = (5, 5);
+                     //x
+                _;
+                var1 = 1;
+                //^
+            }
+        }
+  """)
+
   fun testResolveStateInheritance() = checkByCode("""
         contract C {
             uint abc;

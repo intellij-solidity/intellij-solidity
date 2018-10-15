@@ -221,7 +221,9 @@ ParameterList ::= '(' ( ParameterDef (',' ParameterDef)* )? ')'
 // semantic restriction: mappings and structs (recursively) containing mappings
 // are not allowed in argument lists
 // TODO these 2 definitions can be private
-DeclarationList ::= '(' ( (Identifier | '_') ','? | ',' )*  ')' ;
+DeclarationList ::= '(' ( (Identifier | '_') ','? | ',' )*  ')' {
+		implements = ""
+}
 TypedDeclarationList ::= '(' ( (TypeName StorageLocation?)? (Identifier | '_') ','? | ',' )*  ')' ;
 // TODO: remove storage declaration from all other places
 VariableDeclaration ::=
