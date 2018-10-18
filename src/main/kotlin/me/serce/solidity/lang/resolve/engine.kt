@@ -245,6 +245,18 @@ object SolResolver {
           .flatten()
       }
 
+      is SolTupleStatement -> {
+        scope.variableDeclaration?.let {
+          val declarationList = it.declarationList
+          val typedDeclarationList = it.typedDeclarationList
+          when {
+            declarationList != null -> declarationList.declarationItemList.asSequence()
+            typedDeclarationList != null -> typedDeclarationList.typedDeclarationItemList.asSequence()
+            else -> emptySequence()
+          }
+        } ?: emptySequence()
+      }
+
       else -> emptySequence()
     }
   }
