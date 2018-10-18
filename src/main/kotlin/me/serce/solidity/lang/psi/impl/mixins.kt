@@ -144,6 +144,10 @@ abstract class SolVarLiteralMixin(node: ASTNode) : SolNamedElementImpl(node), So
   override fun getReference(): SolReference = SolVarLiteralReference(this)
 }
 
+open class SolDeclarationItemMixin(node: ASTNode) : SolNamedElementImpl(node)
+
+open class SolTypedDeclarationItemMixin(node: ASTNode) : SolNamedElementImpl(node)
+
 open class SolVariableDeclarationMixin(node: ASTNode) : SolNamedElementImpl(node)
 
 open class SolParameterDefMixin(node: ASTNode) : SolNamedElementImpl(node)
