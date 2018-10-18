@@ -73,6 +73,15 @@ class NoReturnInspectionTest : SolInspectionsTestBase(NoReturnInspection()) {
         }
     """)
 
+  fun testReturnVarInTuple() = checkByText("""
+        contract a {
+            function a() returns (uint a) {
+                var test = 5;
+                (a, test) = (5, 5);
+            }
+        }
+    """)
+
   fun testAssignmentInAssembly() = checkByText("""
         contract a {
             function lowLevel(string memory source) constant returns (bytes32 result) {
@@ -93,14 +102,6 @@ class NoReturnInspectionTest : SolInspectionsTestBase(NoReturnInspection()) {
 
             function lookupService(bytes32 identifier) constant returns (address manager) {
                 manager = SomeInterface(someAddress).getContractAddress(identifier);
-            }
-        }
-    """)
-
-  fun testHasReturnVarNameWithVarDef() = checkByText("""
-        contract a {
-            function a() returns (uint a) {
-                var a = 5;
             }
         }
     """)
