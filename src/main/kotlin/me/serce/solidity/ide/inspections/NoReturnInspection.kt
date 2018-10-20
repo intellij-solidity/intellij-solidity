@@ -44,17 +44,19 @@ private val SolFunctionCallExpression.revert: Boolean
   }
 
 private fun SolStatement.hasAssignment(el: SolNamedElement): Boolean {
-  this.throwSt.let {
-    if (it != null && it is SolFunctionCallExpression && it.revert) return true
+  this.throwSt?.let {
+    return true
   }
 
-  this.variableDefinition.let {
-    if (it != null) return it.hasAssignment(el)
+  this.variableDefinition?.let {
+    return it.hasAssignment(el)
   }
 
-  this.expression.let {
-    if (it != null && it is SolAssignmentExpression) {
+  this.expression?.let {
+    if (it is SolAssignmentExpression) {
       return it.expressionList[0].isReferenceTo(el)
+    } else if (it is SolFunctionCallExpression && it.revert) {
+      return true
     }
   }
 
@@ -64,12 +66,12 @@ private fun SolStatement.hasAssignment(el: SolNamedElement): Boolean {
     }
   }
 
-  this.block.let {
-    if (it != null) return it.hasAssignment(el)
+  this.block?.let {
+    return it.hasAssignment(el)
   }
 
-  this.ifStatement.let {
-    if (it != null) return it.hasAssignment(el)
+  this.ifStatement?.let {
+    return it.hasAssignment(el)
   }
 
   this.tupleStatement?.let { st ->
@@ -91,11 +93,9 @@ private fun SolStatement.hasAssignment(el: SolNamedElement): Boolean {
 
 private fun SolExpression.isReferenceTo(el: SolNamedElement): Boolean {
   if (this is SolPrimaryExpression) {
-    this.varLiteral.let { lit ->
-      if (lit != null) {
-        if (lit.reference?.resolve() == el) {
-          return true
-        }
+    this.varLiteral?.let { lit ->
+      if (lit.reference?.resolve() == el) {
+        return true
       }
     }
   }
@@ -104,22 +104,22 @@ private fun SolExpression.isReferenceTo(el: SolNamedElement): Boolean {
 
 private val SolStatement.returns: Boolean
   get() {
-    this.expression.let {
-      if (it != null && it is SolFunctionCallExpression && it.revert) {
+    this.expression?.let {
+      if (it is SolFunctionCallExpression && it.revert) {
         return true
       }
     }
 
-    this.throwSt.let {
-      if (it != null) return true
+    this.throwSt?.let {
+      return true
     }
 
-    this.block.let {
-      if (it != null) return it.returns
+    this.block?.let {
+      return it.returns
     }
 
-    this.ifStatement.let {
-      if (it != null) return it.returns
+    this.ifStatement?.let {
+      return it.returns
     }
 
     if (this.returnSt != null) {
@@ -160,13 +160,13 @@ private fun SolAssemblyBlock.hasAssignment(el: SolNamedElement): Boolean =
   this.assemblyItemList.any { it.hasAssignment(el) }
 
 private fun SolAssemblyItem.hasAssignment(el: SolNamedElement): Boolean {
-  this.assemblyAssignment.let {
-    if (it != null && it.identifier?.text == el.name) {//todo better
+  this.assemblyAssignment?.let {
+    if (it.identifier?.text == el.name) {//todo better
       return true
     }
   }
-  this.functionalAssemblyAssignment.let {
-    if (it != null && it.identifierOrList.text == el.name) {//todo better
+  this.functionalAssemblyAssignment?.let {
+    if (it.identifierOrList.text == el.name) {//todo better
       return true
     }
   }

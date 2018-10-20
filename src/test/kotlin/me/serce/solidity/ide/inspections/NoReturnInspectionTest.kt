@@ -65,6 +65,18 @@ class NoReturnInspectionTest : SolInspectionsTestBase(NoReturnInspection()) {
         }
     """)
 
+  fun testAssignmentWithIfRevert() = checkByText("""
+      contract a {
+          function test() returns (uint256 result) {
+              if (true) {
+                  result = 1;
+              } else {
+                  revert();
+              }
+          }
+      }
+  """)
+
   fun testHasReturnVarName() = checkByText("""
         contract a {
             function a() returns (/*@warning descr="return variable not assigned"@*/uint a/*@/warning@*/) {
