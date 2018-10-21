@@ -110,6 +110,12 @@ private val SolStatement.returns: Boolean
       }
     }
 
+    this.inlineAssemblyStatement.let { st ->
+      st?.assemblyBlock?.let {
+        return it.returns
+      }
+    }
+
     this.throwSt?.let {
       return true
     }
@@ -131,6 +137,19 @@ private val SolStatement.returns: Boolean
     }
 
     return false
+  }
+
+private val SolAssemblyItem.returns: Boolean
+  get() {
+    functionalAssemblyExpression?.let {
+      return it.text.startsWith("return")//todo better
+    }
+    return false
+  }
+
+private val SolAssemblyBlock.returns: Boolean
+  get() {
+    return this.assemblyItemList.any { it.returns }
   }
 
 private val SolBlock.returns: Boolean

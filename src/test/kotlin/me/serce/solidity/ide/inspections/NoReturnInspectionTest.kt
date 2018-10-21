@@ -17,6 +17,18 @@ class NoReturnInspectionTest : SolInspectionsTestBase(NoReturnInspection()) {
         }
     """)
 
+  fun testAssemblyReturn() = checkByText("""
+      contract a {
+          function asmReturns(uint _v) public returns (uint) {
+              assembly {
+                  let _ptr := add(msize(), 1)
+                  mstore(_ptr, _v)
+                  return(_ptr, 0x20)
+              }
+          }
+      }
+  """)
+
   fun testRevertShadowing() = checkByText("""
         contract a {
             function revert() {
