@@ -148,14 +148,36 @@ object SolResolver {
       .flatMap { resolveContractMember(it, element) }
   }
 
-  fun resolveFunction(contract: SolContractDefinition, element: SolFunctionCallExpression, skipThis: Boolean = false): Collection<PsiElement> {
+  fun resolveFunction(type: SolType, element: SolFunctionCallExpression, skipThis: Boolean = false): Collection<PsiElement> {
     if (element.argumentsNumber() == 1) {
       val contracts = resolveTypeName(element)
       if (contracts.isNotEmpty()) {
         return contracts
       }
     }
-    return resolveFunRec(contract, element, skipThis)
+    val contract = findContract(element)
+    val superContracts = contract
+      ?.collectSupers
+      ?.flatMap { SolResolver.resolveTypeNameUsingImports(it) }
+      ?.filterIsInstance<SolContractDefinition>()
+      ?: emptyList()
+    val fromLibraries = (superContracts + contract.wrap())
+      .flatMap { it.usingForDeclarationList }
+      .filter { it.type == type }
+      .flatMap { resoleFunInLibrary(element, it.library) }
+
+    val fromContracts = if (type is SolContract)
+      resolveFunRec(type.ref, element, skipThis)
+    else
+      emptyList()
+
+    return fromContracts + fromLibraries
+  }
+
+  private fun resoleFunInLibrary(element: SolFunctionCallExpression, library: SolContractDefinition): Collection<PsiElement> {
+    return library.functionDefinitionList
+      .filter { it.name == element.referenceName &&
+        it.parameterListList.firstOrNull()?.parameterDefList?.size == element.argumentsNumber() + 1}
   }
 
   private fun resolveFunRec(contract: SolContractDefinition, element: SolFunctionCallExpression, skipThis: Boolean = false): List<PsiElement> {

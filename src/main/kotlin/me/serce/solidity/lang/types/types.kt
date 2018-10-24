@@ -84,6 +84,24 @@ sealed class SolArray(val type: SolType) : SolType {
   }
 }
 
+object SolBytes : SolPrimitiveType {
+  override fun toString() = "bytes"
+}
+
+data class SolFixedBytes(val size: Int): SolPrimitiveType {
+  override fun toString() = "bytes$size"
+
+  companion object {
+    fun parse(name: String): SolFixedBytes {
+      return if (name.startsWith("bytes")) {
+        SolFixedBytes(name.substring(5).toInt())
+      } else {
+        throw java.lang.IllegalArgumentException("should start with bytes")
+      }
+    }
+  }
+}
+
 private val INTENAL_INDICATOR = "_sol1_s"
 
 fun internalise(name: String): String = "$name$INTENAL_INDICATOR"

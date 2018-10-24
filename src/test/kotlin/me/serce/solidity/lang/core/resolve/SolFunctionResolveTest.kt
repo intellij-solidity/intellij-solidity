@@ -91,4 +91,42 @@ class SolFunctionResolveTest : SolResolveTestBase() {
             }
         }
   """)
+
+  fun testResolveUsingLibrary1() = checkByCode("""
+        library Library {
+            function something(bytes self, uint256 go) internal pure returns (uint256) {
+                    //x
+                return go;
+            }
+        }
+
+        contract B {
+            using Library for bytes;
+
+            function doit(bytes value) {
+                value.something(60);
+                     //^
+            }
+        }
+  """)
+
+  fun testResolveUsingLibrary2() = checkByCode("""
+        contract SomeContract {}
+
+        library Library {
+            function something(SomeContract self, uint256 go) internal pure returns (uint256) {
+                    //x
+                return go;
+            }
+        }
+
+        contract B {
+            using Library for SomeContract;
+
+            function doit(SomeContract value) {
+                value.something(60);
+                     //^
+            }
+        }
+  """)
 }
