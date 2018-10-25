@@ -214,8 +214,15 @@ abstract class SolEventDefMixin : SolStubbedNamedElementImpl<SolEventDefStub>, S
 }
 
 abstract class SolUsingForMixin(node: ASTNode) : SolElementImpl(node), SolUsingForElement {
-  override val type: SolType
-    get() = getSolType(getTypeNameList()[1])
+  override val type: SolType?
+    get() {
+      val list = getTypeNameList()
+      return if (list.size > 1) {
+        getSolType(list[1])
+      } else {
+        null
+      }
+    }
   override val library: SolContractDefinition
     get() = SolResolver.resolveTypeNameUsingImports(getTypeNameList()[0] as SolUserDefinedTypeName)
       .filterIsInstance<SolContractDefinition>()

@@ -129,4 +129,23 @@ class SolFunctionResolveTest : SolResolveTestBase() {
             }
         }
   """)
+
+  fun testResolveUsingLibraryWithWildcard() = checkByCode("""
+        library Library {
+            function something(bytes self, uint256 go) internal pure returns (uint256) {
+                    //x
+                return go;
+            }
+        }
+
+        contract B {
+            using Library for *;
+
+            function doit(bytes value) {
+                value.something(60);
+                     //^
+            }
+        }
+  """)
+
 }

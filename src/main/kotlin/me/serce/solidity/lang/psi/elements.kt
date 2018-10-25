@@ -42,7 +42,7 @@ interface SolReferenceElement : SolNamedElement {
 }
 
 interface SolUsingForElement : PsiElement {
-  val type: SolType
+  val type: SolType?
   val library: SolContractDefinition
   fun getTypeNameList(): List<SolTypeName>
 }

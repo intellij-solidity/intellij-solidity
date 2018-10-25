@@ -26,7 +26,7 @@ object SolResolver {
    * @param withAliases aliases are not recursive, so count them only at the first level of recursion
    */
   private fun resolveContractUsingImports(element: SolNamedElement, file: PsiFile, withAliases: Boolean): Set<SolContractDefinition> =
-    RecursionManager.doPreventingRecursion(file, true) {
+    RecursionManager.doPreventingRecursion(ResolveContractKey(element.name, file), true) {
       val inFile = file.children
         .filterIsInstance<SolContractDefinition>()
         .filter { it.name == element.name }
@@ -64,7 +64,7 @@ object SolResolver {
     resolveInnerType<SolStructDefinition>(element, file) { it.structDefinitionList }
 
   private fun <T : SolNamedElement> resolveInnerType(element: SolReferenceElement, file: PsiFile, f: (SolContractDefinition) -> List<T>): Set<T> =
-    RecursionManager.doPreventingRecursion(file, true) {
+    RecursionManager.doPreventingRecursion(ResolveContractKey(element.name, file), true) {
       val inheritanceSpecifier = element.parentOfType<SolInheritanceSpecifier>()
       if (inheritanceSpecifier != null) {
         emptySet()
@@ -163,7 +163,10 @@ object SolResolver {
       ?: emptyList()
     val fromLibraries = (superContracts + contract.wrap())
       .flatMap { it.usingForDeclarationList }
-      .filter { it.type == type }
+      .filter {
+        val usingType = it.type
+        usingType == null || usingType == type
+      }
       .flatMap { resoleFunInLibrary(element, it.library) }
 
     val fromContracts = if (type is SolContract)
@@ -292,6 +295,8 @@ object SolResolver {
     }
   }
 }
+
+data class ResolveContractKey(val name: String?, val file: PsiFile)
 
 private fun <T> Sequence<T>.takeWhileInclusive(pred: (T) -> Boolean): Sequence<T> {
   var shouldContinue = true
