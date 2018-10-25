@@ -63,10 +63,7 @@ fun getSolType(type: SolTypeName?): SolType {
     is SolArrayTypeName -> {
       val sizeExpr = type.expression
       when {
-        sizeExpr == null -> {
-          println("test ${type.containingFile.name} ${type.text}")
-          SolDynamicArray(getSolType(type.typeName))
-        }
+        sizeExpr == null -> SolDynamicArray(getSolType(type.typeName))
         sizeExpr is SolPrimaryExpression && sizeExpr.firstChild is SolNumberLiteral ->
           SolStaticArray(getSolType(type.typeName), Integer.parseInt(sizeExpr.firstChild.text))
         else -> SolUnknown
