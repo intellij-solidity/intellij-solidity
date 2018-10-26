@@ -7,6 +7,7 @@ import com.intellij.psi.PsiElement
 import me.serce.solidity.firstInstanceOrNull
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.resolve.SolResolver
+import me.serce.solidity.lang.types.SolContract
 
 class SolParameterInfoHandler : ParameterInfoHandler<PsiElement, SolArgumentsDescription> {
   val INVALID_INDEX: Int = -2
@@ -123,7 +124,7 @@ class SolArgumentsDescription(val arguments: Array<String>) {
       if (contract == null) {
         return null
       }
-      val resolved = SolResolver.resolveFunction(contract, element)
+      val resolved = SolResolver.resolveFunction(SolContract(contract), element)
       val argumentDefList = resolved.filterIsInstance<SolFunctionDefinition>().firstOrNull()?.parameterListList?.firstOrNull()?.parameterDefList
       if (argumentDefList == null) {
         return null

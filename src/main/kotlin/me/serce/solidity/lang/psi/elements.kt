@@ -5,6 +5,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNamedElement
 import com.intellij.psi.PsiReference
 import me.serce.solidity.lang.resolve.ref.SolReference
+import me.serce.solidity.lang.types.SolType
 
 interface SolElement : PsiElement {
   override fun getReference(): PsiReference?
@@ -38,4 +39,10 @@ interface SolReferenceElement : SolNamedElement {
   val referenceName: String
 
   override fun getReference(): SolReference?
+}
+
+interface SolUsingForElement : PsiElement {
+  val type: SolType?
+  val library: SolContractDefinition
+  fun getTypeNameList(): List<SolTypeName>
 }

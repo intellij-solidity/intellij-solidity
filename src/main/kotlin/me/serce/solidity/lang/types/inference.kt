@@ -13,6 +13,13 @@ import me.serce.solidity.lang.types.SolArray.SolStaticArray
 
 fun getSolType(type: SolTypeName?): SolType {
   return when (type) {
+    is SolBytesArrayTypeName -> {
+      if (type.bytesNumType.text == "bytes") {
+        SolBytes
+      } else {
+        SolFixedBytes.parse(type.bytesNumType.text)
+      }
+    }
     is SolElementaryTypeName -> {
       val text = type.firstChild.text
       when (text) {

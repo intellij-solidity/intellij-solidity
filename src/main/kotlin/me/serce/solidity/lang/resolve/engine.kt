@@ -26,7 +26,7 @@ object SolResolver {
    * @param withAliases aliases are not recursive, so count them only at the first level of recursion
    */
   private fun resolveContractUsingImports(element: SolNamedElement, file: PsiFile, withAliases: Boolean): Set<SolContractDefinition> =
-    RecursionManager.doPreventingRecursion(file, true) {
+    RecursionManager.doPreventingRecursion(ResolveContractKey(element.name, file), true) {
       val inFile = file.children
         .filterIsInstance<SolContractDefinition>()
         .filter { it.name == element.name }
@@ -64,7 +64,7 @@ object SolResolver {
     resolveInnerType<SolStructDefinition>(element, file) { it.structDefinitionList }
 
   private fun <T : SolNamedElement> resolveInnerType(element: SolReferenceElement, file: PsiFile, f: (SolContractDefinition) -> List<T>): Set<T> =
-    RecursionManager.doPreventingRecursion(file, true) {
+    RecursionManager.doPreventingRecursion(ResolveContractKey(element.name, file), true) {
       val inheritanceSpecifier = element.parentOfType<SolInheritanceSpecifier>()
       if (inheritanceSpecifier != null) {
         emptySet()
@@ -148,14 +148,39 @@ object SolResolver {
       .flatMap { resolveContractMember(it, element) }
   }
 
-  fun resolveFunction(contract: SolContractDefinition, element: SolFunctionCallExpression, skipThis: Boolean = false): Collection<PsiElement> {
+  fun resolveFunction(type: SolType, element: SolFunctionCallExpression, skipThis: Boolean = false): Collection<PsiElement> {
     if (element.argumentsNumber() == 1) {
       val contracts = resolveTypeName(element)
       if (contracts.isNotEmpty()) {
         return contracts
       }
     }
-    return resolveFunRec(contract, element, skipThis)
+    val contract = findContract(element)
+    val superContracts = contract
+      ?.collectSupers
+      ?.flatMap { SolResolver.resolveTypeNameUsingImports(it) }
+      ?.filterIsInstance<SolContractDefinition>()
+      ?: emptyList()
+    val fromLibraries = (superContracts + contract.wrap())
+      .flatMap { it.usingForDeclarationList }
+      .filter {
+        val usingType = it.type
+        usingType == null || usingType == type
+      }
+      .flatMap { resoleFunInLibrary(element, it.library) }
+
+    val fromContracts = if (type is SolContract)
+      resolveFunRec(type.ref, element, skipThis)
+    else
+      emptyList()
+
+    return fromContracts + fromLibraries
+  }
+
+  private fun resoleFunInLibrary(element: SolFunctionCallExpression, library: SolContractDefinition): Collection<PsiElement> {
+    return library.functionDefinitionList
+      .filter { it.name == element.referenceName &&
+        it.parameterListList.firstOrNull()?.parameterDefList?.size == element.argumentsNumber() + 1}
   }
 
   private fun resolveFunRec(contract: SolContractDefinition, element: SolFunctionCallExpression, skipThis: Boolean = false): List<PsiElement> {
@@ -270,6 +295,8 @@ object SolResolver {
     }
   }
 }
+
+data class ResolveContractKey(val name: String?, val file: PsiFile)
 
 private fun <T> Sequence<T>.takeWhileInclusive(pred: (T) -> Boolean): Sequence<T> {
   var shouldContinue = true

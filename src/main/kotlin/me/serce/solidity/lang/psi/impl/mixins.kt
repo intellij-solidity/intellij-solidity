@@ -11,8 +11,11 @@ import me.serce.solidity.firstInstance
 import me.serce.solidity.ide.SolidityIcons
 import me.serce.solidity.lang.core.SolidityTokenTypes.*
 import me.serce.solidity.lang.psi.*
+import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.resolve.ref.*
 import me.serce.solidity.lang.stubs.*
+import me.serce.solidity.lang.types.SolType
+import me.serce.solidity.lang.types.getSolType
 import java.util.*
 
 open class SolImportPathElement(node: ASTNode) : SolNamedElementImpl(node), SolReferenceElement {
@@ -208,4 +211,20 @@ abstract class SolNewExpressionElement(node: ASTNode) : SolNamedElementImpl(node
 abstract class SolEventDefMixin : SolStubbedNamedElementImpl<SolEventDefStub>, SolEventDefinition {
   constructor(node: ASTNode) : super(node)
   constructor(stub: SolEventDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
+}
+
+abstract class SolUsingForMixin(node: ASTNode) : SolElementImpl(node), SolUsingForElement {
+  override val type: SolType?
+    get() {
+      val list = getTypeNameList()
+      return if (list.size > 1) {
+        getSolType(list[1])
+      } else {
+        null
+      }
+    }
+  override val library: SolContractDefinition
+    get() = SolResolver.resolveTypeNameUsingImports(getTypeNameList()[0] as SolUserDefinedTypeName)
+      .filterIsInstance<SolContractDefinition>()
+      .first()
 }

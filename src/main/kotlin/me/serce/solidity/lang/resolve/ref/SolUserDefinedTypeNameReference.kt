@@ -86,18 +86,14 @@ class SolFunctionCallReference(element: SolFunctionCallElement) : SolReferenceBa
     return when {
       ref == null -> {
         val contract = findContract(element)
-        contract?.let { SolResolver.resolveFunction(it, element) } ?: emptyList()
+        contract?.let { SolResolver.resolveFunction(SolContract(it), element) } ?: emptyList()
       }
       ref is SolPrimaryExpression && ref.varLiteral?.name == "super" -> {
         val contract = findContract(ref)
-        contract?.let { SolResolver.resolveFunction(it, element, true) } ?: emptyList()
+        contract?.let { SolResolver.resolveFunction(SolContract(it), element, true) } ?: emptyList()
       }
       else -> {
-        val type = ref.type
-        when (type) {
-          is SolContract -> SolResolver.resolveFunction(type.ref, element)
-          else -> emptyList()
-        }
+        SolResolver.resolveFunction(ref.type, element)
       }
     }
   }

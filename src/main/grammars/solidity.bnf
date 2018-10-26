@@ -153,7 +153,11 @@ StateVariableDeclaration ::= TypeName (VisibilityModifiers constant | constant? 
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
 
-UsingForDeclaration ::= using UserDefinedTypeName for ('*' | TypeName) ';' {pin=1}
+UsingForDeclaration ::= using UserDefinedTypeName for ('*' | TypeName) ';' {
+    pin=1
+    implements = "me.serce.solidity.lang.psi.SolUsingForElement"
+    mixin = "me.serce.solidity.lang.psi.impl.SolUsingForMixin"
+}
 
 StructDefinition ::= struct Identifier '{'
                      ( VariableDeclaration ';' (VariableDeclaration ';')* )? '}' {
