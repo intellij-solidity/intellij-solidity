@@ -7,8 +7,7 @@ import com.intellij.openapi.util.Computable
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import me.serce.solidity.ide.settings.SoliditySettings
-import me.serce.solidity.lang.psi.SolContractDefinition
-import me.serce.solidity.lang.psi.SolFunctionDefinition
+import org.web3j.protocol.core.methods.response.AbiDefinition
 import java.io.ByteArrayOutputStream
 import java.lang.reflect.Modifier
 import java.nio.file.Files
@@ -25,8 +24,8 @@ object EthJStubGenerator : Sol2JavaGenerator {
     runReadAction {
       val repo = EthJStubGenerator.generateRepo(contracts)
       writeClass(output, repoClassName, repo)
-      contracts.map { it.contract }.forEach {
-        writeClass(output, it.name!!, convert(it))
+      contracts.forEach {
+        writeClass(output, it.contract.name!!, convert(it))
       }
     }
   }
@@ -42,7 +41,7 @@ object EthJStubGenerator : Sol2JavaGenerator {
     .map { it.name }
     .toSet()
 
-  private fun contractStubTemplate(className: String, functions: List<SolFunctionDefinition>): String =
+  private fun contractStubTemplate(className: String, functions: List<AbiDefinition>): String =
     """$autoGenComment
 package ${getPackageName()};
 
@@ -56,13 +55,20 @@ public class $className {
 ${functions.filter { it.name != null }.joinToString("\n") { funcStubTemplate(it) }}
 }"""
 
-  private fun funcStubTemplate(function: SolFunctionDefinition): String {
+  private fun funcStubTemplate(function: AbiDefinition): String {
     val params = stringifyParams(function)
     val paramRefs = paramRefs(function)
     val methodName = function.name
+    val firstOutput = function.outputs.firstOrNull()
+    val hasReturn = firstOutput != null
+    var returnType = if (hasReturn) EthJTypeConverter.convert(firstOutput!!.type, lax = true) else "void"
+    if (returnType.contains("BigInteger[]")) {
+      // EthJ always returns an object array if an int array defined for output. Bug?
+      returnType = returnType.replaceBefore("[", "Object")
+    }
     return """
-  public Object ${methodName(methodName)}($params) {
-		return contract.callFunction("$methodName"$paramRefs).getReturnValue();
+  public $returnType ${methodName(methodName)}($params) {
+		${if (hasReturn) "return ($returnType) " else ""}contract.callFunction("$methodName"$paramRefs)${if (hasReturn) ".getReturnValue()" else ""};
 	}
 """
   }
@@ -70,10 +76,10 @@ ${functions.filter { it.name != null }.joinToString("\n") { funcStubTemplate(it)
   private fun methodName(name: String?) =
     if (objNames.contains(name)) "_$name" else name
 
-  private fun paramRefs(function: SolFunctionDefinition?): String {
-    val parameters = function?.parameters ?: return ""
+  private fun paramRefs(function: AbiDefinition?): String {
+    val parameters = function?.inputs ?: return ""
     return if (parameters.isNotEmpty()) {
-      ", " + parameters.map { it.name }.joinToString(", ")
+      ", " + parameters.map { "(Object)${it.name}" }.joinToString(", ")
     } else ""
   }
 
@@ -144,8 +150,7 @@ ${contracts.joinToString("\n") { submitContractTemplate(it) }}
 
   private fun submitContractTemplate(contract: CompiledContractDefinition): String {
     val name = contract.contract.name
-    val definition = contract.contract
-    val constructor = definition.functionDefinitionList.find { it.isConstructor }
+    val constructor = contract.abis.find { it.isConstructor() }
     val params = stringifyParams(constructor)
     val paramRefs = paramRefs(constructor)
     return """
@@ -168,15 +173,15 @@ ${contracts.joinToString("\n") { submitContractTemplate(it) }}
     return Base64.getEncoder().encodeToString(baos.toByteArray())
   }
 
-  private fun stringifyParams(function: SolFunctionDefinition?): String {
+  private fun stringifyParams(function: AbiDefinition?): String {
     var paramCounter = 0
-    return function?.parameters?.joinToString(", ") {
-      "${EthJTypeConverter.convert(it.typeName)} ${it.name ?: "param${paramCounter++}"}"
+    return function?.inputs?.joinToString(", ") {
+      "${EthJTypeConverter.convert(it.type)} ${it.name ?: "param${paramCounter++}"}"
     } ?: ""
   }
 
-  private fun convert(contract: SolContractDefinition): String {
-    return contractStubTemplate(contract.name!!, contract.functionDefinitionList.filter { !it.isConstructor })
+  private fun convert(contract: CompiledContractDefinition): String {
+    return contractStubTemplate(contract.contract.name!!, contract.abis.filter { !it.isConstructor() })
   }
 
   private fun generateRepo(contracts: List<CompiledContractDefinition>): String {
