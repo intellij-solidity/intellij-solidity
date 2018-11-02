@@ -110,6 +110,29 @@ class SolFunctionResolveTest : SolResolveTestBase() {
         }
   """)
 
+  fun testResolveUsingLibraryWithInheritance() = checkByCode("""
+        library Library {
+            function something(bytes self, uint256 go) internal pure returns (uint256) {
+                    //x
+                return go;
+            }
+        }
+
+        contract Super {
+            using Library for bytes;
+        }
+
+        contract B is Super {
+            using Library for bytes;
+
+            function doit(bytes value) {
+                value.something(60);
+                     //^
+            }
+        }
+  """)
+
+
   fun testResolveUsingLibrary2() = checkByCode("""
         contract SomeContract {}
 

@@ -27,6 +27,21 @@ class SolVarResolveTest : SolResolveTestBase() {
         }
   """)
 
+  fun testLocalWithIf() = checkByCode("""
+        contract B {
+            function B() {
+                if (true) {
+                  var a0 = 0;
+                  var a = 0;
+                    //x
+                  var b = 1;
+                  a = a++;
+                    //^
+                }
+            }
+        }
+  """)
+
   fun testField1() = checkByCode("""
         contract B {
             uint public lastC;
