@@ -167,8 +167,9 @@ object SolResolver {
         val usingType = it.type
         usingType == null || usingType == type
       }
+      .map { it.library }
       .distinct()
-      .flatMap { resoleFunInLibrary(element, it.library) }
+      .flatMap { resoleFunInLibrary(element, it) }
 
     val fromContracts = if (type is SolContract)
       resolveFunRec(type.ref, element, skipThis)
