@@ -167,7 +167,9 @@ object SolResolver {
         val usingType = it.type
         usingType == null || usingType == type
       }
-      .flatMap { resoleFunInLibrary(element, it.library) }
+      .map { it.library }
+      .distinct()
+      .flatMap { resoleFunInLibrary(element, it) }
 
     val fromContracts = if (type is SolContract)
       resolveFunRec(type.ref, element, skipThis)
@@ -219,7 +221,7 @@ object SolResolver {
 
   fun lexicalDeclarations(place: PsiElement, stop: (PsiElement) -> Boolean = { false }): Sequence<SolNamedElement> {
     val globalType = SolInternalTypeFactory.of(place.project).globalType
-    return lexicalDeclarations(globalType.ref, place) + lexicalDeclRec(place, stop)
+    return lexicalDeclarations(globalType.ref, place) + lexicalDeclRec(place, stop).distinct()
   }
 
   private fun lexicalDeclRec(place: PsiElement, stop: (PsiElement) -> Boolean): Sequence<SolNamedElement> {
