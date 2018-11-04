@@ -21,7 +21,7 @@ abstract class SolReferenceBase<T : SolReferenceElement>(element: T) : PsiPolyVa
       r.multiResolve().map(::PsiElementResolveResult).toTypedArray()
     }, true, false)
 
-  open fun multiResolve(): Collection<PsiElement> = singleResolve()?.let { listOf(it) } ?: emptyList()
+  override fun multiResolve(): Collection<PsiElement> = singleResolve()?.let { listOf(it) } ?: emptyList()
 
   open fun singleResolve(): PsiElement? = null
 
