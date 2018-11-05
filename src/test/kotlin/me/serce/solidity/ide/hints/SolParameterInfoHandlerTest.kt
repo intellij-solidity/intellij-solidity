@@ -41,7 +41,35 @@ class SolParameterInfoHandlerTest : SolTestBase() {
                 foo.bar(342/*caret*/);
             }
         }
-    """, "uint _self, uint _param", 0)
+    """, "uint _param", 0)
+
+  fun testOtherContract() = checkByText("""
+        contract Test {
+            function foo(uint256 a) {}
+        }
+
+        contract A {
+            Test test;
+
+            function main() {
+                test.foo(1/*caret*/);
+            }
+        }
+    """, "uint256 a", 0)
+
+  fun testLibraryEmpty() = checkByText("""
+        library Lib {
+            function bar(uint _self) {}
+        }
+
+        contract A {
+            using Lib for uint;
+
+            function main(uint foo) {
+                foo.bar(/*caret*/);
+            }
+        }
+    """, "<no arguments>", -1)
 
   fun testMultipleParameter2() = checkByText("""
         contract A {

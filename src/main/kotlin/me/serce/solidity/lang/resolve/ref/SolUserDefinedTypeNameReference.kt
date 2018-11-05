@@ -6,6 +6,7 @@ import me.serce.solidity.firstInstance
 import me.serce.solidity.lang.completion.SolCompleter
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.psi.impl.SolFunctionCallElement
+import me.serce.solidity.lang.resolve.FunctionResolveResult
 import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.types.SolContract
 import me.serce.solidity.lang.types.findContract
@@ -81,7 +82,7 @@ class SolFunctionCallReference(element: SolFunctionCallElement) : SolReferenceBa
     return element.referenceNameElement.parentRelativeRange
   }
 
-  override fun multiResolve(): Collection<PsiElement> {
+  fun resolveFunctionCall(): Collection<FunctionResolveResult> {
     val ref = element.expressionList.firstOrNull()
     return when {
       ref == null -> {
@@ -96,5 +97,9 @@ class SolFunctionCallReference(element: SolFunctionCallElement) : SolReferenceBa
         SolResolver.resolveFunction(ref.type, element)
       }
     }
+  }
+
+  override fun multiResolve(): Collection<PsiElement> {
+    return resolveFunctionCall().map { it.psiElement }
   }
 }
