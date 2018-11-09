@@ -4,10 +4,8 @@ import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.lang.parameterInfo.*
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
-import me.serce.solidity.firstInstanceOrNull
 import me.serce.solidity.lang.psi.*
-import me.serce.solidity.lang.resolve.SolResolver
-import me.serce.solidity.lang.types.SolContract
+import me.serce.solidity.lang.resolve.ref.SolFunctionCallReference
 
 class SolParameterInfoHandler : ParameterInfoHandler<PsiElement, SolArgumentsDescription> {
   val INVALID_INDEX: Int = -2
@@ -87,9 +85,9 @@ class SolParameterInfoHandler : ParameterInfoHandler<PsiElement, SolArgumentsDes
     var index = -1
     val arguments = callArgs.functionCallArguments
     if (arguments != null && descr.arguments.isNotEmpty()) {
-      index += generateSequence(arguments.firstChild, { c -> c.nextSibling })
+      index += generateSequence(arguments.firstChild) { c -> c.nextSibling }
         .filter { it.text == "," }
-        .count({ it.textRange.startOffset < place.textRange.startOffset }) + 1
+        .count { it.textRange.startOffset < place.textRange.startOffset } + 1
       if (index >= descr.arguments.size) {
         index = -1
       }
@@ -120,16 +118,24 @@ class SolArgumentsDescription(val arguments: Array<String>) {
 
   companion object {
     fun findDescription(element: SolFunctionCallExpression): SolArgumentsDescription? {
-      val contract = element.ancestors.firstInstanceOrNull<SolContractDefinition>()
-      if (contract == null) {
+      val ref = element.reference
+      if (ref is SolFunctionCallReference) {
+        val resolved = ref.resolveFunctionCall()
+        val def = resolved.filter { it.psiElement is SolFunctionDefinition }.firstOrNull()
+        if (def != null) {
+          val functionDef = def.psiElement as SolFunctionDefinition
+          val argumentDefList = (if (def.usingLibrary) {
+            functionDef.parameterListList.firstOrNull()?.parameterDefList?.drop(1)
+          } else {
+            functionDef.parameterListList.firstOrNull()?.parameterDefList
+          }) ?: return null
+          return SolArgumentsDescription(argumentDefList.map { "${it.typeName.text} ${it.identifier?.text ?: ""}" }.toTypedArray())
+        } else {
+          return null
+        }
+      } else {
         return null
       }
-      val resolved = SolResolver.resolveFunction(SolContract(contract), element)
-      val argumentDefList = resolved.filterIsInstance<SolFunctionDefinition>().firstOrNull()?.parameterListList?.firstOrNull()?.parameterDefList
-      if (argumentDefList == null) {
-        return null
-      }
-      return SolArgumentsDescription(argumentDefList.map { "${it.typeName.text} ${it.identifier?.text ?: ""}" }.toTypedArray())
     }
   }
 }
