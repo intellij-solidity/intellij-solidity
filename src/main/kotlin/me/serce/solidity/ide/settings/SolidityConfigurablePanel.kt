@@ -9,6 +9,7 @@ import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.ui.DocumentAdapter
 import me.serce.solidity.ide.interop.Sol2JavaGenerationStyle
+import me.serce.solidity.ide.run.SolidityConfigurationType
 import me.serce.solidity.ide.run.compile.Solc
 import me.serce.solidity.ide.run.hasJavaSupport
 import java.awt.Component
@@ -39,7 +40,7 @@ class SolidityConfigurablePanel {
 
   private lateinit var warningLabel: JLabel
 
-  private val noJavaWarning = "Current IDE platform does not support execution of Solidity contracts"
+
 
   init {
     val ethDescriptor = FileChooserDescriptor(false, true, true, true, false, false)
@@ -88,7 +89,7 @@ class SolidityConfigurablePanel {
     }
     if (!hasJavaSupport) {
       warningLabel.icon = AllIcons.General.BalloonWarning
-      warningLabel.text = noJavaWarning
+      warningLabel.text = SolidityConfigurationType.noJavaWarning
     } else {
       warningLabel.isVisible = false
     }
