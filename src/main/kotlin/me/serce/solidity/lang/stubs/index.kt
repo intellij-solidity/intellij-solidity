@@ -3,6 +3,7 @@ package me.serce.solidity.lang.stubs
 import com.intellij.psi.stubs.StringStubIndexExtension
 import com.intellij.psi.stubs.StubIndexKey
 import me.serce.solidity.lang.psi.SolNamedElement
+import me.serce.solidity.lang.psi.impl.SolImportPathElement
 
 class SolGotoClassIndex : StringStubIndexExtension<SolNamedElement>() {
   companion object {
@@ -47,4 +48,13 @@ class SolFunctionIndex : StringStubIndexExtension<SolNamedElement>() {
 
   override fun getVersion(): Int = SolidityFileStub.Type.stubVersion
   override fun getKey(): StubIndexKey<String, SolNamedElement> = KEY
+}
+
+class SolImportIndex : StringStubIndexExtension<SolImportPathElement>() {
+  companion object {
+    val KEY: StubIndexKey<String, SolImportPathElement> = StubIndexKey.createIndexKey(SolImportIndex::class.java.canonicalName)
+  }
+
+  override fun getVersion(): Int = SolidityFileStub.Type.stubVersion
+  override fun getKey(): StubIndexKey<String, SolImportPathElement> = KEY
 }

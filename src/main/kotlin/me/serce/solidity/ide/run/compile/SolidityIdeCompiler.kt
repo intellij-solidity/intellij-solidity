@@ -1,17 +1,37 @@
 package me.serce.solidity.ide.run.compile
 
+import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.compiler.*
+import com.intellij.openapi.diagnostic.logger
+import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.psi.stubs.StubIndex
+import com.intellij.util.io.lastModified
 import me.serce.solidity.ide.settings.SoliditySettings
 import me.serce.solidity.lang.SolidityFileType
+import me.serce.solidity.lang.psi.impl.SolImportPathElement
+import me.serce.solidity.lang.stubs.SolImportIndex
 import java.io.DataInput
 import java.io.File
+import java.nio.file.Path
+import java.nio.file.Paths
+
+private val log = logger<SolidityIdeCompiler>()
+
+fun DataInput?.toValidityState(): ValidityState {
+  if (this != null) try {
+    return TimestampValidityState.load(this)
+  } catch (e: Exception) {
+    log.warn("Failed to read a timestamp", e)
+  }
+  return EmptyValidityState()
+}
 
 object SolidityIdeCompiler : Validator {
 // extends Validator to be run after the regular (javac) compiler,
 // otherwise the last one will erase all the compiled contract files
 
   override fun createValidityState(`in`: DataInput?): ValidityState {
-    return EmptyValidityState()
+    return `in`.toValidityState()
   }
 
   override fun getProcessingItems(context: CompileContext): Array<FileProcessingCompiler.ProcessingItem> {
@@ -23,10 +43,29 @@ object SolidityIdeCompiler : Validator {
 
   fun collectProcessingItems(context: CompileContext): Array<FileProcessingCompiler.ProcessingItem> {
     val scope = context.compileScope
-    val files = scope.getFiles(SolidityFileType, true).filterNotNull()
-    // todo enable incremental compilation (need to handle import links correctly)
-    return files.map { SolProcessingItem(EmptyValidityState(), it.canonicalFile!!) }.toTypedArray()
+    val files = scope.getFiles(SolidityFileType, true).asSequence().filterNotNull()
+    return runReadAction {
+      val importKeys = StubIndex.getInstance().getAllKeys(SolImportIndex.KEY, context.project)
+      val imports = importKeys.asSequence()
+        .map { StubIndex.getElements(SolImportIndex.KEY, it, context.project, GlobalSearchScope.projectScope(context.project), SolImportPathElement::class.java) }
+        .flatten()
+        .groupBy { it.containingFile.virtualFile }
+      files.map {
+        val base = Paths.get(it.parent.path)
+        val importStamps = imports[it]?.map { stampForImport(base, it) }?.sum() ?: 0
+        val myValidityState = TimestampValidityState(it.timeStamp + importStamps)
+        SolProcessingItem(myValidityState, it.canonicalFile!!)
+      }.toList().toTypedArray()
+    }
   }
+
+  private fun stampForImport(base: Path, pathElement: SolImportPathElement): Long =
+    try {
+      base.resolve(pathElement.text.replace("\"", "")).normalize().lastModified().toMillis()
+    } catch (e: Exception) {
+      log.debug("failed to calculate timestamp", e)
+      0
+    }
 
   override fun process(context: CompileContext, items: Array<FileProcessingCompiler.ProcessingItem>): Array<FileProcessingCompiler.ProcessingItem> {
     val modules = context.compileScope.affectedModules
@@ -43,7 +82,6 @@ object SolidityIdeCompiler : Validator {
     val success = compiled[true] ?: return emptyArray()
     return success.flatMap { it.first }.map { it.first }.toTypedArray()
   }
-
 
 
   override fun validateConfiguration(scope: CompileScope?): Boolean {

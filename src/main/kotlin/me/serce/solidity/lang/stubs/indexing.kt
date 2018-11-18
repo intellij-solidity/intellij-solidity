@@ -37,6 +37,11 @@ fun IndexSink.indexEventDef(stub: SolEventDefStub) {
   indexGotoClass(stub)
 }
 
+fun IndexSink.indexImportPathDef(stub: SolImportPathDefStub) {
+  indexNamedStub(stub)
+  indexImportPath(stub)
+}
+
 private fun IndexSink.indexModifier(stub: SolModifierDefStub) {
   stub.name?.let {
     occurrence(SolModifierIndex.KEY, it)
@@ -64,5 +69,11 @@ private fun IndexSink.indexEvent(stub: SolEventDefStub) {
 private fun IndexSink.indexFunction(stub: SolFunctionDefStub) {
   stub.name?.let {
     occurrence(SolFunctionIndex.KEY, it)
+  }
+}
+
+private fun IndexSink.indexImportPath(stub: SolImportPathDefStub) {
+  stub.path?.let {
+    occurrence(SolImportIndex.KEY, it)
   }
 }
