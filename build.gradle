@@ -66,15 +66,13 @@ repositories {
 configurations {
     lexer
     parser
+    runtime.exclude group: "org.slf4j"  // IntelliJ uses slf4j which results in a class loader conflict
 }
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    compile("io.sentry:sentry:$sentry_version") {
-        // IntelliJ uses slf4j which results in a class loader conflict
-        exclude group: 'org.slf4j'
-    }
+    compile"io.sentry:sentry:$sentry_version"
 
     // https://mvnrepository.com/artifact/org.ethereum/ethereumj-core
     compileOnly( group: 'org.ethereum', name: 'ethereumj-core', version: '1.7.0-RELEASE') {
@@ -82,7 +80,10 @@ dependencies {
         exclude group: 'org.ethereum', module: 'rocksdbjni'
     }
 
-    compile group: 'org.web3j', name: 'codegen', version: '3.3.1'
+    def web3jVersion = "4.0.1"
+    compile group: 'org.web3j', name: 'core', version: web3jVersion
+    compile group: 'org.web3j', name: 'codegen', version: web3jVersion
+    compile group: 'org.web3j', name: 'abi', version: web3jVersion
 
     testCompile group: 'junit', name: 'junit', version: '4.11'
 }
