@@ -18,7 +18,10 @@ import me.serce.solidity.lang.types.SolType
 import me.serce.solidity.lang.types.getSolType
 import java.util.*
 
-open class SolImportPathElement(node: ASTNode) : SolNamedElementImpl(node), SolReferenceElement {
+open class SolImportPathElement : SolStubbedNamedElementImpl<SolImportPathDefStub>, SolReferenceElement {
+  constructor(node: ASTNode) : super(node)
+  constructor(stub: SolImportPathDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
+
   override val referenceNameElement: PsiElement
     get() = findChildByType(STRINGLITERAL)!!
   override val referenceName: String

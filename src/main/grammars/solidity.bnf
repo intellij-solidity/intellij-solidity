@@ -118,6 +118,8 @@ private ImportRuleSet ::= ImportAliasedPair ( ',' ImportAliasedPair )* {
 ImportPath ::= StringLiteral {
     implements = "me.serce.solidity.lang.psi.SolNamedElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolImportPathElement"
+    stubClass = "me.serce.solidity.lang.stubs.SolImportPathDefStub"
+    elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
 private ImportDirectivePart ::= import ( ImportPath (as ImportAlias)?
         | ('*' | UserDefinedTypeName) (as ImportAlias)? 'from' ImportPath

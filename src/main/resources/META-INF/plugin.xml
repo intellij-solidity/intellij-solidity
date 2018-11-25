@@ -104,6 +104,7 @@
         <stubIndex implementation="me.serce.solidity.lang.stubs.SolModifierIndex"/>
         <stubIndex implementation="me.serce.solidity.lang.stubs.SolEventIndex"/>
         <stubIndex implementation="me.serce.solidity.lang.stubs.SolFunctionIndex"/>
+        <stubIndex implementation="me.serce.solidity.lang.stubs.SolImportIndex"/>
 
         <gotoClassContributor implementation="me.serce.solidity.ide.navigation.SolClassNavigationContributor"/>
         <gotoSymbolContributor implementation="me.serce.solidity.ide.navigation.SolSymbolNavigationContributor"/>

@@ -1,10 +1,7 @@
 package me.serce.solidity.ide.interop
 
 import com.intellij.openapi.compiler.*
-import me.serce.solidity.ide.run.compile.SolCompileParams
-import me.serce.solidity.ide.run.compile.Solc
-import me.serce.solidity.ide.run.compile.SolidityCompiler
-import me.serce.solidity.ide.run.compile.SolidityIdeCompiler
+import me.serce.solidity.ide.run.compile.*
 import me.serce.solidity.ide.settings.SoliditySettings
 import java.io.DataInput
 
@@ -16,7 +13,7 @@ object JavaStubProcessor : SourceInstrumentingCompiler {
   }
 
   override fun createValidityState(`in`: DataInput?): ValidityState {
-    return TimestampValidityState.load(`in`)
+    return `in`.toValidityState()
   }
 
   override fun validateConfiguration(scope: CompileScope?): Boolean {

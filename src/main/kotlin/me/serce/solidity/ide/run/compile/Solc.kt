@@ -118,7 +118,7 @@ object Solc  {
   fun compile(sources: List<File>, outputDir: File, baseDir: VirtualFile): SolcResult {
     val solc = solcExecutable ?: throw IllegalStateException("No solc instance was found")
     val additionalParams = ParametersListUtil.parse(SoliditySettings.instance.solcAdditionalOptions)
-    val pb = ProcessBuilder(arrayListOf(solc.canonicalPath, "--abi", "--bin", "--overwrite", "-o", outputDir.absolutePath) + additionalParams + sources.map {
+    val pb = ProcessBuilder(arrayListOf(solc.canonicalPath, "--allow-paths=${baseDir.path}", "--abi", "--bin", "--overwrite", "-o", outputDir.absolutePath) + additionalParams + sources.map {
       Paths.get(baseDir.canonicalPath).relativize(Paths.get(it.path)).toString().replace('\\', '/')
     })
     pb

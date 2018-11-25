@@ -14,7 +14,7 @@ class SolidityFileStub(file: SolidityFile?) : PsiFileStubImpl<SolidityFile>(file
 
   object Type : IStubFileElementType<SolidityFileStub>(SolidityLanguage) {
     // bump version every time stub tree changes
-    override fun getStubVersion() = 10
+    override fun getStubVersion() = 11
 
     override fun getBuilder(): StubBuilder = object : DefaultStubBuilder() {
       override fun createStubForFile(file: PsiFile) = SolidityFileStub(file as SolidityFile)
@@ -36,6 +36,7 @@ fun factory(name: String): SolStubElementType<*, *> = when (name) {
   "STRUCT_DEFINITION" -> SolStructDefStub.Type
   "EVENT_DEFINITION" -> SolEventDefStub.Type
   "STATE_VARIABLE_DECLARATION" -> SolStateVarDeclStub.Type
+  "IMPORT_PATH" -> SolImportPathDefStub.Type
 
   "ELEMENTARY_TYPE_NAME" -> SolTypeRefStub.Type("ELEMENTARY_TYPE_NAME", ::SolElementaryTypeNameImpl)
   "MAPPING_TYPE_NAME" -> SolTypeRefStub.Type("MAPPING_TYPE_NAME", ::SolMappingTypeNameImpl)
@@ -230,6 +231,30 @@ class SolEventDefStub(
       SolEventDefStub(parentStub, this, psi.name)
 
     override fun indexStub(stub: SolEventDefStub, sink: IndexSink) = sink.indexEventDef(stub)
+  }
+}
+
+class SolImportPathDefStub(
+  parent: StubElement<*>?,
+  elementType: IStubElementType<*, *>,
+  override val name: String?,
+  val path: String?
+) : StubBase<SolImportPathImpl>(parent, elementType), SolNamedStub {
+
+  object Type : SolStubElementType<SolImportPathDefStub, SolImportPathImpl>("IMPORT_PATH") {
+    override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?) =
+      SolImportPathDefStub(parentStub, this, dataStream.readNameAsString(), dataStream.readUTFFast())
+
+    override fun serialize(stub: SolImportPathDefStub, dataStream: StubOutputStream) = with(dataStream) {
+      writeName(stub.name)
+      writeUTFFast(stub.path ?: "")
+    }
+
+    override fun createPsi(stub: SolImportPathDefStub) = SolImportPathImpl(stub, this)
+
+    override fun createStub(psi: SolImportPathImpl, parentStub: StubElement<*>?) = SolImportPathDefStub(parentStub, this, psi.name, psi.text)
+
+    override fun indexStub(stub: SolImportPathDefStub, sink: IndexSink) = sink.indexImportPathDef(stub)
   }
 }
 
