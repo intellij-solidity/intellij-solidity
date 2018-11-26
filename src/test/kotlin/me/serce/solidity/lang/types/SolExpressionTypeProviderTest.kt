@@ -5,7 +5,7 @@ import me.serce.solidity.utils.SolTestBase
 import org.intellij.lang.annotations.Language
 
 class SolExpressionTypeProviderTest : SolTestBase() {
-  fun checkPrimitiveTypes(inference: Boolean = false, @Language("Solidity") codeProvider: (String, String) -> String) {
+  private fun checkPrimitiveTypes(inference: Boolean = false, @Language("Solidity") codeProvider: (String, String) -> String) {
     var cases = listOf(
       "true" to "bool",
       "42" to "int256",
@@ -260,6 +260,19 @@ class SolExpressionTypeProviderTest : SolTestBase() {
                 //^ B
             }
         }
+    """)
+  }
+
+  fun testIndexAccessType() {
+    checkExpr(    """
+      contract A {
+          struct S { int b; }
+          function f(S[] arr) {
+              var x = 1 == arr[1].b;
+              x;
+            //^ bool
+          }
+      }
     """)
   }
 

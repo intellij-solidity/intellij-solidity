@@ -148,11 +148,11 @@ object SolResolver {
       .flatMap { resolveContractMember(it, element) }
   }
 
-  fun resolveFunction(type: SolType, element: SolFunctionCallExpression, skipThis: Boolean = false): Collection<PsiElement> {
+  fun resolveFunction(type: SolType, element: SolFunctionCallExpression, skipThis: Boolean = false): Collection<FunctionResolveResult> {
     if (element.argumentsNumber() == 1) {
       val contracts = resolveTypeName(element)
       if (contracts.isNotEmpty()) {
-        return contracts
+        return contracts.map { FunctionResolveResult(it) }
       }
     }
     val contract = findContract(element)
@@ -167,20 +167,24 @@ object SolResolver {
         val usingType = it.type
         usingType == null || usingType == type
       }
-      .flatMap { resoleFunInLibrary(element, it.library) }
+      .map { it.library }
+      .distinct()
+      .flatMap { resoleFunInLibrary(element, it) }
 
     val fromContracts = if (type is SolContract)
       resolveFunRec(type.ref, element, skipThis)
+        .map { FunctionResolveResult(it) }
     else
       emptyList()
 
     return fromContracts + fromLibraries
   }
 
-  private fun resoleFunInLibrary(element: SolFunctionCallExpression, library: SolContractDefinition): Collection<PsiElement> {
+  private fun resoleFunInLibrary(element: SolFunctionCallExpression, library: SolContractDefinition): Collection<FunctionResolveResult> {
     return library.functionDefinitionList
       .filter { it.name == element.referenceName &&
         it.parameterListList.firstOrNull()?.parameterDefList?.size == element.argumentsNumber() + 1}
+      .map { FunctionResolveResult(it, true) }
   }
 
   private fun resolveFunRec(contract: SolContractDefinition, element: SolFunctionCallExpression, skipThis: Boolean = false): List<PsiElement> {
@@ -219,7 +223,7 @@ object SolResolver {
 
   fun lexicalDeclarations(place: PsiElement, stop: (PsiElement) -> Boolean = { false }): Sequence<SolNamedElement> {
     val globalType = SolInternalTypeFactory.of(place.project).globalType
-    return lexicalDeclarations(globalType.ref, place) + lexicalDeclRec(place, stop)
+    return lexicalDeclarations(globalType.ref, place) + lexicalDeclRec(place, stop).distinct()
   }
 
   private fun lexicalDeclRec(place: PsiElement, stop: (PsiElement) -> Boolean): Sequence<SolNamedElement> {
@@ -297,6 +301,8 @@ object SolResolver {
 }
 
 data class ResolveContractKey(val name: String?, val file: PsiFile)
+
+data class FunctionResolveResult(val psiElement: PsiElement, val usingLibrary: Boolean = false)
 
 private fun <T> Sequence<T>.takeWhileInclusive(pred: (T) -> Boolean): Sequence<T> {
   var shouldContinue = true
