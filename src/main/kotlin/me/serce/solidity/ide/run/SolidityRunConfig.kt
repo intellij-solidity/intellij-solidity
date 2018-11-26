@@ -20,8 +20,46 @@ import me.serce.solidity.lang.psi.SolContractDefinition
 import me.serce.solidity.lang.psi.SolFunctionDefinition
 import org.jdom.Element
 import java.util.*
+import javax.swing.BorderFactory
+import javax.swing.JComponent
+import javax.swing.JLabel
+import javax.swing.JPanel
 
-class SolidityRunConfig(configurationModule: SolidityRunConfigModule, factory: ConfigurationFactory) : ModuleBasedConfiguration<SolidityRunConfigModule>(configurationModule, factory), CommonJavaRunConfigurationParameters, RunConfigurationWithSuppressedDefaultDebugAction {
+abstract class SolidityRunConfigBase(configurationModule: SolidityRunConfigModule, factory: ConfigurationFactory) : ModuleBasedConfiguration<SolidityRunConfigModule>(configurationModule, factory), RunConfigurationWithSuppressedDefaultDebugAction
+
+class UnsupportedSolidityRunConfig(configurationModule: SolidityRunConfigModule, factory: ConfigurationFactory) : SolidityRunConfigBase(configurationModule, factory) {
+  override fun getConfigurationEditor(): SettingsEditor<out RunConfiguration> {
+    return object : SettingsEditor<RunConfiguration>() {
+      val myPanel = JPanel()
+
+      init {
+        myPanel.border = BorderFactory.createEmptyBorder(0, 0, 50, 0)
+        myPanel.add(JLabel("This configuration cannot be edited", JLabel.CENTER))
+      }
+
+      override fun createEditor(): JComponent = myPanel
+      override fun resetEditorFrom(s: RunConfiguration) {}
+      override fun applyEditorTo(s: RunConfiguration) {}
+    }
+  }
+
+  override fun getState(executor: Executor, environment: ExecutionEnvironment): RunProfileState? {
+    throw ExecutionException(SolidityConfigurationType.noJavaWarning)
+  }
+
+  override fun getValidModules(): Collection<Module> {
+    throw ExecutionException(SolidityConfigurationType.noJavaWarning)
+  }
+
+  override fun checkConfiguration() {
+    throw RuntimeConfigurationException(SolidityConfigurationType.noJavaWarning)
+  }
+}
+
+/**
+ * Extends [CommonJavaRunConfigurationParameters] which may not be accessible on some IDE (e.g. WebStorm)
+ */
+class SolidityRunConfig(configurationModule: SolidityRunConfigModule, factory: ConfigurationFactory) : SolidityRunConfigBase(configurationModule, factory), CommonJavaRunConfigurationParameters {
 
   private var myData: Data = Data()
 

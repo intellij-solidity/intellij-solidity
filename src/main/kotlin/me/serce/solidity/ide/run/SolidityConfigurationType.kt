@@ -1,6 +1,9 @@
 package me.serce.solidity.ide.run
 
-import com.intellij.execution.configurations.*
+import com.intellij.execution.configurations.ConfigurationFactory
+import com.intellij.execution.configurations.ConfigurationTypeBase
+import com.intellij.execution.configurations.ConfigurationTypeUtil
+import com.intellij.execution.configurations.RunConfiguration
 import com.intellij.openapi.project.Project
 import me.serce.solidity.ide.SolidityIcons
 import javax.swing.Icon
@@ -12,14 +15,10 @@ class SolidityConfigurationType : ConfigurationTypeBase("SolidityConfigurationTy
 
   private fun configurationFactory(): ConfigurationFactory {
     return object : ConfigurationFactory(this) {
-      override fun createTemplateConfiguration(p0: Project): RunConfiguration {
-        return if (hasJavaSupport)
-          SolidityRunConfig(SolidityRunConfigModule(p0), this)
-        else object : UnknownRunConfiguration(this, p0) {
-          override fun checkConfiguration() {
-            throw RuntimeConfigurationException(noJavaWarning)
-          }
-        }
+      override fun createTemplateConfiguration(p: Project): RunConfiguration {
+        val configurationModule = SolidityRunConfigModule(p)
+        return if (hasJavaSupport) SolidityRunConfig(configurationModule, this)
+        else UnsupportedSolidityRunConfig(configurationModule, this)
       }
 
       override fun getIcon(): Icon {

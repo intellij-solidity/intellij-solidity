@@ -15,16 +15,27 @@ import me.serce.solidity.lang.core.SolElementType
 import me.serce.solidity.lang.psi.SolFunctionDefinition
 import me.serce.solidity.lang.psi.elementType
 
-class SolidityRunConfigProducer : RunConfigurationProducer<SolidityRunConfig>(SolidityConfigurationType.getInstance()) {
-  override fun isConfigurationFromContext(configuration: SolidityRunConfig?, context: ConfigurationContext?): Boolean {
-    val funcName = configuration?.getPersistentData()?.functionName ?: return false
-    val contrName = configuration.getPersistentData().contractName ?: return false
-    val psiElement = context?.location?.psiElement ?: return false
-    val func = searchFunction(psiElement) ?: return false
-    return funcName == func.name && contrName == func.contract.name
+class SolidityRunConfigProducer : RunConfigurationProducer<SolidityRunConfigBase>(SolidityConfigurationType.getInstance()) {
+  override fun isConfigurationFromContext(configuration: SolidityRunConfigBase?, context: ConfigurationContext?): Boolean {
+    return ifSolidityRunConfig(configuration) { config ->
+      val funcName = config.getPersistentData().functionName ?: return@ifSolidityRunConfig false
+      val contrName = config.getPersistentData().contractName ?: return@ifSolidityRunConfig false
+      val psiElement = context?.location?.psiElement ?: return@ifSolidityRunConfig false
+      val func = searchFunction(psiElement) ?: return@ifSolidityRunConfig false
+      return@ifSolidityRunConfig funcName == func.name && contrName == func.contract.name
+    }
   }
 
-  override fun setupConfigurationFromContext(configuration: SolidityRunConfig?, context: ConfigurationContext?, sourceElement: Ref<PsiElement>?): Boolean {
+  private fun ifSolidityRunConfig(config: SolidityRunConfigBase?, action: (config: SolidityRunConfig) -> Boolean): Boolean {
+    if (config != null && config::class.qualifiedName == "me.serce.solidity.ide.run.SolidityRunConfig") {
+      if (config is SolidityRunConfig) {
+        return action(config)
+      }
+    }
+    return false
+  }
+
+  override fun setupConfigurationFromContext(configuration: SolidityRunConfigBase?, context: ConfigurationContext?, sourceElement: Ref<PsiElement>?): Boolean {
     if (context == null || configuration == null || sourceElement == null) {
       return false
     }
@@ -35,10 +46,12 @@ class SolidityRunConfigProducer : RunConfigurationProducer<SolidityRunConfig>(So
     if (Strings.isNullOrEmpty(solFunctionDefinition.name)) {
       return false
     }
-    configuration.setModule(context.module)
-    configuration.getPersistentData().setFunction(solFunctionDefinition)
-    configuration.name = solFunctionDefinition.contract.name + "." + solFunctionDefinition.name
-    return true
+    `    return ifSolidityRunConfig(configuration) { configuration ->
+      configuration.setModule(context.module)
+      configuration.getPersistentData().setFunction(solFunctionDefinition)
+      configuration.name = solFunctionDefinition.contract.name + "." + solFunctionDefinition.name
+      true
+    }
   }
 }
 
