@@ -46,7 +46,7 @@ class SolidityRunConfigProducer : RunConfigurationProducer<SolidityRunConfigBase
     if (Strings.isNullOrEmpty(solFunctionDefinition.name)) {
       return false
     }
-    `    return ifSolidityRunConfig(configuration) { configuration ->
+    return ifSolidityRunConfig(configuration) { configuration ->
       configuration.setModule(context.module)
       configuration.getPersistentData().setFunction(solFunctionDefinition)
       configuration.name = solFunctionDefinition.contract.name + "." + solFunctionDefinition.name
