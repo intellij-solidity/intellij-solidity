@@ -10,15 +10,15 @@ import javax.swing.Icon
 
 class SolidityConfigurationType : ConfigurationTypeBase("SolidityConfigurationType", "Solidity", "Run Solidity Contract", SolidityIcons.FILE_ICON) {
   init {
-    if (hasJavaSupport) {
-      addFactory(configurationFactory())
-    }
+    addFactory(configurationFactory())
   }
 
   private fun configurationFactory(): ConfigurationFactory {
     return object : ConfigurationFactory(this) {
-      override fun createTemplateConfiguration(p0: Project): RunConfiguration {
-        return SolidityRunConfig(SolidityRunConfigModule(p0), this)
+      override fun createTemplateConfiguration(p: Project): RunConfiguration {
+        val configurationModule = SolidityRunConfigModule(p)
+        return if (hasJavaSupport) SolidityRunConfig(configurationModule, this)
+        else UnsupportedSolidityRunConfig(configurationModule, this)
       }
 
       override fun getIcon(): Icon {
@@ -32,6 +32,7 @@ class SolidityConfigurationType : ConfigurationTypeBase("SolidityConfigurationTy
   }
 
   companion object {
+    const val noJavaWarning = "Current IDE platform does not support execution of Solidity contracts"
     fun getInstance(): SolidityConfigurationType {
       return ConfigurationTypeUtil.findConfigurationType<SolidityConfigurationType>(SolidityConfigurationType::class.java)
     }
