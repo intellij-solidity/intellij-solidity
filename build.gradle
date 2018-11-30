@@ -14,7 +14,6 @@ plugins {
     id 'net.researchgate.release' version '2.4.0'
 }
 
-
 apply plugin: 'java'
 apply plugin: 'org.jetbrains.grammarkit'
 apply plugin: 'kotlin'
@@ -46,11 +45,11 @@ clean.doFirst {
 intellij {
     pluginName 'Intellij-Solidity'
 
-    version '2016.3.2'
-    downloadSources true
+    version = "${findProperty("intellij.version") ?: '2016.3.2'}"
+    downloadSources = true
     updateSinceUntilBuild = false
 
-    sandboxDirectory project.rootDir.canonicalPath + "/.sandbox"
+    sandboxDirectory = project.rootDir.canonicalPath + "/.sandbox"
     systemProperties = ['compiler.process.debug.port': '21232']
 }
 
