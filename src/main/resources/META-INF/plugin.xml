@@ -17,6 +17,23 @@
 
     <change-notes><![CDATA[
       <p>
+        <b>v2.1.4</b>
+        <ul>
+          <li>Resolve vars from tuples, thanks @0v1se</li>
+          <li>
+            "No return" inspection improvements, thanks @0v1se!
+            Inspection to catch possible errors when function doesn't return a result. The inspection
+            can be enabled in Editor->Inspections->Solidity->No return statement. Let us know what you think!
+          </li>
+          <li>Resolve library calls, thanks @0v1se</li>
+          <li>Fixes for var/function resolving, thanks @0v1se</li>
+          <li>Use abi to generate EthJ stubs, thanks @mbolotov</li>
+          <li>Fix parameter info for variables, thanks @0v1se</li>
+          <li>Update web3j version to 4.0.1, thanks @mbolotov</li>
+          <li>Incremental compilation for solc, thanks @mbolotov</li>
+          <li>Do not throw exception in context menu on non-java IDEs, thanks @mbolotov</li>
+          <li>Multiple grammar fixes</li>
+        </ul>
         <b>v2.1.3</b>
         <ul>
           <li>Fix super and var resolving, thanks @0v1se</li>
@@ -31,13 +48,6 @@
           <li>Completion for event names after emit keyword, thanks @indegro</li>
           <li>Support underscored in numeric literals for upcoming solidity 0.5.0</li>
           <li>Multiple grammar fixes</li>
-        </ul>
-        <b>v2.1.2</b>
-        <ul>
-          <li>Make contracts collapsable, thanks @mbolotov</li>
-          <li>Resolve imports from ethpm folder, thanks @quantum13</li>
-          <li>Additional options for solc, thanks @mbolotov</li>
-          <li>Support "address payable" for upcoming solidity 0.5.0</li>
         </ul>
       </p>
     ]]>
