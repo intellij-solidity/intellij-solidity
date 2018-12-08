@@ -338,6 +338,7 @@ Expression ::=
   | FunctionCallExpression
   | CallExpression
   | ParenExpression
+  | NewExpression
   | EqExpression
   | OrExpression
   | AndExpression
