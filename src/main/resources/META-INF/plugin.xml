@@ -162,7 +162,7 @@
 
         <localInspection language="Solidity" groupName="Solidity"
                          displayName="No return statement"
-                         enabledByDefault="false"
+                         enabledByDefault="true"
                          level="WARNING"
                          implementationClass="me.serce.solidity.ide.inspections.NoReturnInspection"/>
 
