@@ -86,7 +86,9 @@
     DOC_COMMENT_BEGIN='/*'
     DOC_COMMENT_END='*/'
 
-    pragmaAll='regexp:\^[a-zA-Z_0-9\.]*'
+    // this is a special grammar for "preview only" because grammar-kit seems to not
+    // support whitespaces
+    pragmaAll='regexp:[\^a-zA-Z_0-9.<>"]*'
   ]
 
   extends(".*Expression")=Expression
