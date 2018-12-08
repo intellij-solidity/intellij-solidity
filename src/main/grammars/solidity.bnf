@@ -35,7 +35,6 @@
 
 
     DOT='.'
-    PLACEHOLDER='_'
     COLON=':'
     SEMICOLON=';'
     COMMA=','
@@ -229,12 +228,12 @@ ParameterList ::= '(' ( ParameterDef (',' ParameterDef)* )? ')'
 // semantic restriction: mappings and structs (recursively) containing mappings
 // are not allowed in argument lists
 // TODO these 2 definitions can be private
-DeclarationItem ::= (Identifier | '_') ','? | ',' {
+DeclarationItem ::= Identifier ','? | ',' {
     implements = "me.serce.solidity.lang.psi.SolNamedElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolDeclarationItemMixin"
 }
 DeclarationList ::= '(' DeclarationItem*  ')'
-TypedDeclarationItem ::= (TypeName StorageLocation?)? (Identifier | '_') ','? | ',' {
+TypedDeclarationItem ::= (TypeName StorageLocation?)? Identifier ','? | ',' {
     implements = "me.serce.solidity.lang.psi.SolNamedElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolTypedDeclarationItemMixin"
 }

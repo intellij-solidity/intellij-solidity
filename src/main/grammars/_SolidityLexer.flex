@@ -54,7 +54,6 @@ PRAGMAALL=[^ ][^;]*
   {WHITE_SPACE}           { return WHITE_SPACE; }
 
   "."                     { return DOT; }
-  "_"                     { return PLACEHOLDER; }
   ":"                     { return COLON; }
   ";"                     { return SEMICOLON; }
   ","                     { return COMMA; }

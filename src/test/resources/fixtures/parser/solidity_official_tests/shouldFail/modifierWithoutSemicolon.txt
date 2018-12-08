@@ -34,7 +34,7 @@ Solidity File
                   PsiElement(decimalNumber)('0')
             PsiElement())(')')
         PsiWhiteSpace(' ')
-        PsiElement(_)('_')
+        PsiElement(Identifier)('_')
         PsiErrorElement:'}' unexpected
           <empty list>
         PsiWhiteSpace(' ')
