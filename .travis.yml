@@ -15,7 +15,7 @@ before_script:
   - uname -a
 script:
   - ./gradlew clean build check
-  - ./gradlew clean build check -Pintellij.version=2018.3
+  - ./gradlew clean build check -Pintellij.version=2018.3.1
   - ./gradlew jacocoTestReport
 after_success:
   - bash <(curl -s https://codecov.io/bash)
