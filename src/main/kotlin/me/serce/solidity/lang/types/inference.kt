@@ -123,7 +123,7 @@ fun inferExprType(expr: SolExpression?): SolType {
       expr.varLiteral?.let { inferRefType(it) }
         ?: expr.booleanLiteral?.let { SolBoolean }
         ?: expr.stringLiteral?.let { SolString }
-        ?: expr.numberLiteral?.let { SolInteger.INT }
+        ?: expr.numberLiteral?.let { SolInteger.inferType(it) }
         ?: expr.elementaryTypeName?.let { getSolType(it) }
         ?: SolUnknown
     }

@@ -89,6 +89,9 @@ abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefSt
       ?.filterIsInstance(SolParameterDef::class.java)
       ?: emptyList()
 
+  override val parameterTypes: List<SolType>
+    get() = parameters.map { getSolType(it.typeName) }
+
   override val returns: SolParameterList?
     get() = if (parameterListList.size == 2) {
       parameterListList[1]
