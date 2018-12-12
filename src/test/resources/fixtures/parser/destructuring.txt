@@ -33,7 +33,7 @@ Solidity File
                   PsiElement(,)(',')
                 PsiWhiteSpace(' ')
                 SolDeclarationItemImpl(DECLARATION_ITEM)
-                  PsiElement(_)('_')
+                  PsiElement(Identifier)('_')
                   PsiElement(,)(',')
                 PsiWhiteSpace(' ')
                 SolDeclarationItemImpl(DECLARATION_ITEM)

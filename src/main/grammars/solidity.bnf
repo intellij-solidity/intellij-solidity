@@ -35,7 +35,6 @@
 
 
     DOT='.'
-    PLACEHOLDER='_'
     COLON=':'
     SEMICOLON=';'
     COMMA=','
@@ -86,7 +85,9 @@
     DOC_COMMENT_BEGIN='/*'
     DOC_COMMENT_END='*/'
 
-    pragmaAll='regexp:\^[a-zA-Z_0-9\.]*'
+    // this is a special grammar for "preview only" because grammar-kit seems to not
+    // support whitespaces
+    pragmaAll='regexp:[\^a-zA-Z_0-9.<>"]*'
   ]
 
   extends(".*Expression")=Expression
@@ -227,12 +228,12 @@ ParameterList ::= '(' ( ParameterDef (',' ParameterDef)* )? ')'
 // semantic restriction: mappings and structs (recursively) containing mappings
 // are not allowed in argument lists
 // TODO these 2 definitions can be private
-DeclarationItem ::= (Identifier | '_') ','? | ',' {
+DeclarationItem ::= Identifier ','? | ',' {
     implements = "me.serce.solidity.lang.psi.SolNamedElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolDeclarationItemMixin"
 }
 DeclarationList ::= '(' DeclarationItem*  ')'
-TypedDeclarationItem ::= (TypeName StorageLocation?)? (Identifier | '_') ','? | ',' {
+TypedDeclarationItem ::= (TypeName StorageLocation?)? Identifier ','? | ',' {
     implements = "me.serce.solidity.lang.psi.SolNamedElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolTypedDeclarationItemMixin"
 }
@@ -338,6 +339,7 @@ Expression ::=
   | FunctionCallExpression
   | CallExpression
   | ParenExpression
+  | NewExpression
   | EqExpression
   | OrExpression
   | AndExpression

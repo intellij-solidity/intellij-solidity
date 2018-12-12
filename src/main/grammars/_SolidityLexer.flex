@@ -46,14 +46,14 @@ UFIXEDNUMTYPE=ufixed(0x8|0x16|0x24|0x32|0x40|0x48|0x56|0x64|0x72|0x80|0x88|0x96|
 BOOLEANLITERAL=true|false
 SPACE=[ \t\n\x0B\f\r]+
 IDENTIFIER=[a-zA-Z_$][a-zA-Z_$0-9]*
-PRAGMAALL=[\^a-zA-Z_0-9\.\"\']*
+// Pragma parses anything up to the trailing ';' to be fully forward-compatible.
+PRAGMAALL=[^ ][^;]*
 
 %%
 <YYINITIAL> {
   {WHITE_SPACE}           { return WHITE_SPACE; }
 
   "."                     { return DOT; }
-  "_"                     { return PLACEHOLDER; }
   ":"                     { return COLON; }
   ";"                     { return SEMICOLON; }
   ","                     { return COMMA; }
