@@ -182,43 +182,57 @@ object SolResolver {
 
   private fun resoleFunInLibrary(element: SolFunctionCallExpression, library: SolContractDefinition): Collection<FunctionResolveResult> {
     return library.functionDefinitionList
-      .filter { it.name == element.referenceName &&
-        it.parameterListList.firstOrNull()?.parameterDefList?.size == element.argumentsNumber() + 1}
+      .filter { it.name == element.referenceName && canBeApplied(it.parameterTypes.drop(1), element) }
       .map { FunctionResolveResult(it, true) }
   }
 
   private fun resolveFunRec(contract: SolContractDefinition, element: SolFunctionCallExpression, skipThis: Boolean = false): List<PsiElement> {
-    val currentContractFunctions = if (!skipThis) contract.functionDefinitionList
-      .filter {
-        it.name == element.referenceName &&
-          it.parameterListList.firstOrNull()?.parameterDefList?.size == element.argumentsNumber()
+    if (!skipThis) {
+      val functions = contract.functionDefinitionList
+        .filter {
+          it.name == element.referenceName && canBeApplied(it.parameterTypes, element)
+        }
+      if (!functions.isEmpty()) {
+        return functions
       }
-    else
-      emptyList()
-    val eventDefinitions = if (!skipThis) contract.eventDefinitionList
-      .filter {
-        it.name == element.referenceName &&
-          it.indexedParameterList?.typeNameList?.size ?: 0 == element.argumentsNumber()
+
+      val events = contract.eventDefinitionList
+        .filter {
+          it.name == element.referenceName && canBeApplied(it.getParameterTypes(), element)
+        }
+      if (!events.isEmpty()) {
+        return events
       }
-    else
-      emptyList()
-    val structDefinitions = if (!skipThis) contract.structDefinitionList
-      .filter {
-        it.name == element.referenceName
+
+      val structs = contract.structDefinitionList
+        .filter {
+          it.name == element.referenceName
+        }
+      if (!structs.isEmpty()) {
+        return structs
       }
-    else
-      emptyList()
-    return when {
-      currentContractFunctions.isNotEmpty() -> currentContractFunctions
-      eventDefinitions.isNotEmpty() -> eventDefinitions
-      structDefinitions.isNotEmpty() -> structDefinitions
-      else -> contract.supers.asSequence()
-        .flatMap { resolveTypeName(it).asSequence() }
-        .filterIsInstance<SolContractDefinition>()
-        .map { resolveFunRec(it, element) }
-        .filter { it.isNotEmpty() }
-        .firstOrElse(emptyList())
     }
+
+    return contract.supers.asSequence()
+      .flatMap { resolveTypeName(it).asSequence() }
+      .filterIsInstance<SolContractDefinition>()
+      .map { resolveFunRec(it, element) }
+      .filter { it.isNotEmpty() }
+      .firstOrElse(emptyList())
+  }
+
+  private fun SolEventDefinition.getParameterTypes(): List<SolType> {
+    return this.indexedParameterList?.typeNameList?.map { getSolType(it) } ?: emptyList()
+  }
+
+  private fun canBeApplied(parameterTypes: List<SolType>, element: SolFunctionCallExpression) : Boolean {
+    val callArgumentTypes = element.functionCallArguments?.expressionList?.map { it.type } ?: emptyList()
+    if (parameterTypes.size != callArgumentTypes.size)
+      return false
+    return !parameterTypes.zip(callArgumentTypes)
+      .any { (paramType, argumentType) ->
+        !paramType.isAssignableFrom(argumentType)
+      }
   }
 
   fun lexicalDeclarations(place: PsiElement, stop: (PsiElement) -> Boolean = { false }): Sequence<SolNamedElement> {

@@ -10,6 +10,7 @@ import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.types.SolArray.SolDynamicArray
 import me.serce.solidity.lang.types.SolArray.SolStaticArray
+import kotlin.math.max
 
 fun getSolType(type: SolTypeName?): SolType {
   return when (type) {
@@ -127,6 +128,14 @@ fun inferExprType(expr: SolExpression?): SolType {
         ?: expr.elementaryTypeName?.let { getSolType(it) }
         ?: SolUnknown
     }
+    is SolPlusMinExpression -> getNumericExpressionType(
+      inferExprType(expr.expressionList[0]),
+      inferExprType(expr.expressionList[1])
+    )
+    is SolMultDivExpression -> getNumericExpressionType(
+      inferExprType(expr.expressionList[0]),
+      inferExprType(expr.expressionList[1])
+    )
     is SolAndExpression,
     is SolOrExpression,
     is SolEqExpression,
@@ -148,6 +157,14 @@ fun inferExprType(expr: SolExpression?): SolType {
         .firstOrElse(SolUnknown)
     }
     else -> SolUnknown
+  }
+}
+
+private fun getNumericExpressionType(firstType: SolType, secondType: SolType): SolType {
+  return if (firstType is SolInteger && secondType is SolInteger) {
+    SolInteger(!(!firstType.unsigned || !secondType.unsigned), max(firstType.size, secondType.size))
+  } else {
+    SolUnknown
   }
 }
 
