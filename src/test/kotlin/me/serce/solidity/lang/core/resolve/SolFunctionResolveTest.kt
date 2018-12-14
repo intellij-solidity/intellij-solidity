@@ -1,5 +1,8 @@
 package me.serce.solidity.lang.core.resolve
 
+import me.serce.solidity.lang.psi.SolFunctionDefinition
+import me.serce.solidity.lang.psi.SolNamedElement
+
 class SolFunctionResolveTest : SolResolveTestBase() {
   fun testResolveFunction() = checkByCode("""
         contract B {
@@ -78,6 +81,23 @@ class SolFunctionResolveTest : SolResolveTestBase() {
             }
         }
   """)
+
+  fun testResolveGlobal() {
+    val (refElement, _) = resolveInCode<SolNamedElement>("""
+        contract B {
+            function doit() {
+                assert(true);
+                 //^
+            }
+        }
+    """)
+
+    val resolved = refElement.reference?.resolve()
+    assertTrue(resolved is SolFunctionDefinition)
+    if (resolved is SolFunctionDefinition) {
+      assertEquals(resolved.name, "assert")
+    }
+  }
 
   fun testResolveContractConstructor() = checkByCode("""
         contract A {

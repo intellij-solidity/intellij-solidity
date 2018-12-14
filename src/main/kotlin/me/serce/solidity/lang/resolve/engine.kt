@@ -148,13 +148,18 @@ object SolResolver {
       .flatMap { resolveContractMember(it, element) }
   }
 
-  fun resolveFunction(type: SolType, element: SolFunctionCallExpression, skipThis: Boolean = false): Collection<FunctionResolveResult> {
+  fun resolveCast(element: SolFunctionCallExpression): Collection<FunctionResolveResult> {
     if (element.argumentsNumber() == 1) {
-      val contracts = resolveTypeName(element)
+      val contracts = resolveTypeNameUsingImports(element)
+        .filterIsInstance<SolContractDefinition>()
       if (contracts.isNotEmpty()) {
         return contracts.map { FunctionResolveResult(it) }
       }
     }
+    return emptyList()
+  }
+
+  fun resolveFunction(type: SolType, element: SolFunctionCallExpression, skipThis: Boolean = false): Collection<FunctionResolveResult> {
     val contract = findContract(element)
     val superContracts = contract
       ?.collectSupers

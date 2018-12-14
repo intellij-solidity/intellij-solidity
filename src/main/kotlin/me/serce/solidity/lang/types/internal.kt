@@ -70,6 +70,9 @@ class SolInternalTypeFactory(project: Project) : AbstractProjectComponent(projec
 
           function assert(bool condition) private {}
           function require(bool condition) private {}
+          function require(bool condition, string message) private {}
+          function revert() private {}
+          function revert(string) {}
           function keccak256() returns (bytes32) private {}
           function sha3() returns (bytes32) private {}
           function sha256() returns (bytes32) private {}

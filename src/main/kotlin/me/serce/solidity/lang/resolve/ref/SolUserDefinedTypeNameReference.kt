@@ -9,6 +9,7 @@ import me.serce.solidity.lang.psi.impl.SolFunctionCallElement
 import me.serce.solidity.lang.resolve.FunctionResolveResult
 import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.types.SolContract
+import me.serce.solidity.lang.types.SolInternalTypeFactory
 import me.serce.solidity.lang.types.findContract
 import me.serce.solidity.lang.types.type
 
@@ -86,8 +87,15 @@ class SolFunctionCallReference(element: SolFunctionCallElement) : SolReferenceBa
     val ref = element.expressionList.firstOrNull()
     return when {
       ref == null -> {
+        val globalType = SolInternalTypeFactory.of(element.project).globalType.ref
+        val global = SolResolver.resolveFunction(SolContract(globalType), element)
+
+        val casts = SolResolver.resolveCast(element)
+
         val contract = findContract(element)
-        contract?.let { SolResolver.resolveFunction(SolContract(it), element) } ?: emptyList()
+        val regular = contract?.let { SolResolver.resolveFunction(SolContract(it), element) } ?: emptyList()
+
+        global + casts + regular
       }
       ref is SolPrimaryExpression && ref.varLiteral?.name == "super" -> {
         val contract = findContract(ref)
