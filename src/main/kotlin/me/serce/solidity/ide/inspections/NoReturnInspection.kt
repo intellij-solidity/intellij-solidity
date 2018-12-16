@@ -4,6 +4,8 @@ import com.intellij.codeInspection.LocalInspectionTool
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.psi.PsiElementVisitor
 import me.serce.solidity.lang.psi.*
+import me.serce.solidity.lang.types.SolInternalTypeFactory
+import me.serce.solidity.lang.types.findContract
 
 class NoReturnInspection : LocalInspectionTool() {
   override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
@@ -38,9 +40,12 @@ private fun SolFunctionDefinition.inspectReturns(holder: ProblemsHolder) {
 
 private val SolFunctionCallExpression.revert: Boolean
   get() {
-    return this.name == "revert"
-      && expressionList.isEmpty()
-      && this.reference?.resolve() == null
+    return if (this.name == "revert") {
+      val ref = this.reference?.resolve()
+      ref?.isGlobal() ?: false
+    } else {
+      false
+    }
   }
 
 private fun SolStatement.hasAssignment(el: SolNamedElement): Boolean {
@@ -190,4 +195,9 @@ private fun SolAssemblyItem.hasAssignment(el: SolNamedElement): Boolean {
     }
   }
   return false
+}
+
+private fun SolElement.isGlobal(): Boolean {
+  val contract = findContract(this)
+  return contract == SolInternalTypeFactory.of(this.project).globalType.ref
 }
