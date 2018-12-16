@@ -74,6 +74,12 @@ data class SolMapping(val from: SolType, val to: SolType) : SolType {
   }
 }
 
+data class SolTuple(val types: List<SolType>) : SolType {
+  override fun toString(): String {
+    return "(${types.joinToString(separator = ",") { it.toString() }})"
+  }
+}
+
 sealed class SolArray(val type: SolType) : SolType {
   class SolStaticArray(type: SolType, val size: Int) : SolArray(type) {
     override fun toString() = "$type[$size]"
