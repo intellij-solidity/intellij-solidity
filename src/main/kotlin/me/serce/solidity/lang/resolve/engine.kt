@@ -235,7 +235,11 @@ object SolResolver {
 
   private fun lexicalDeclarations(scope: PsiElement, place: PsiElement): Sequence<SolNamedElement> {
     return when (scope) {
-      is SolVariableDeclaration -> sequenceOf(scope)
+      is SolVariableDeclaration -> {
+        scope.declarationList?.declarationItemList?.filterIsInstance<SolNamedElement>()?.asSequence()
+          ?: scope.typedDeclarationList?.typedDeclarationItemList?.filterIsInstance<SolNamedElement>()?.asSequence()
+          ?: sequenceOf(scope)
+      }
       is SolVariableDefinition -> lexicalDeclarations(scope.firstChild, place)
 
       is SolStateVariableDeclaration -> sequenceOf(scope)
