@@ -8,6 +8,7 @@ import com.intellij.psi.util.PsiModificationTracker
 import me.serce.solidity.firstOrElse
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.resolve.SolResolver
+import me.serce.solidity.lang.resolve.ref.SolFunctionCallReference
 import me.serce.solidity.lang.types.SolArray.SolDynamicArray
 import me.serce.solidity.lang.types.SolArray.SolStaticArray
 import kotlin.math.max
@@ -76,6 +77,17 @@ fun getSolType(type: SolTypeName?): SolType {
 
 fun inferDeclType(decl: SolNamedElement): SolType {
   return when (decl) {
+    is SolDeclarationItem -> {
+      val list = decl.findParent<SolDeclarationList>()
+      val def = list.findParent<SolVariableDefinition>()
+      val inferred = inferExprType(def.expression)
+      val index = list.declarationItemList.indexOf(decl)
+      when (inferred) {
+        is SolTuple -> inferred.types[index]
+        else -> SolUnknown
+      }
+    }
+    is SolTypedDeclarationItem -> getSolType(decl.typeName)
     is SolVariableDeclaration -> {
       return if (decl.typeName == null || decl.typeName?.firstChild?.text == "var") {
         val parent = decl.parent
@@ -95,28 +107,36 @@ fun inferDeclType(decl: SolNamedElement): SolType {
   }
 }
 
-fun inferRefType(ref: SolReferenceElement): SolType {
+fun inferRefType(ref: SolVarLiteral): SolType {
   return when {
-    ref is SolVarLiteral && ref.name == "this" -> {
+    ref.name == "this" -> {
       findContract(ref)
         ?.let { SolContract(it) } ?: SolUnknown
     }
-    ref is SolVarLiteral && ref.name == "super" -> SolUnknown
-    ref is SolVarLiteral -> {
+    ref.name == "super" -> SolUnknown
+    else -> {
       val declarations = SolResolver.resolveVarLiteral(ref)
       return declarations.asSequence()
         .map { inferDeclType(it) }
         .filter { it != SolUnknown }
         .firstOrElse(SolUnknown)
     }
-    else -> SolUnknown
   }
 }
 
-fun findContract(element: PsiElement): SolContractDefinition? =
-  element.ancestors
-    .filterIsInstance<SolContractDefinition>()
+inline fun <reified T : PsiElement> PsiElement.findParent(): T {
+  return this.ancestors
+    .filterIsInstance<T>()
+    .first()
+}
+
+inline fun <reified T : PsiElement> PsiElement.findParentOrNull(): T? {
+  return this.ancestors
+    .filterIsInstance<T>()
     .firstOrNull()
+}
+
+fun findContract(element: PsiElement): SolContractDefinition? = element.findParentOrNull()
 
 fun inferExprType(expr: SolExpression?): SolType {
   return when (expr) {
@@ -136,6 +156,19 @@ fun inferExprType(expr: SolExpression?): SolType {
       inferExprType(expr.expressionList[0]),
       inferExprType(expr.expressionList[1])
     )
+    is SolFunctionCallExpression -> {
+      val reference = expr.reference
+      if (reference is SolFunctionCallReference) {
+        reference.multiResolve().firstOrNull().let {
+          when (it) {
+            is SolFunctionDefinition -> it.returnType
+            else -> SolUnknown
+          }
+        }
+      } else {
+        SolUnknown
+      }
+    }
     is SolAndExpression,
     is SolOrExpression,
     is SolEqExpression,
@@ -180,3 +213,19 @@ val SolExpression.type: SolType
       CachedValueProvider.Result.create(type, PsiModificationTracker.MODIFICATION_COUNT)
     }
   }
+
+val SolFunctionDefinition.returnType: SolType
+  get() {
+    return this.returns.let { list ->
+      when (list) {
+        null -> SolUnknown
+        else -> list.parameterDefList.let {
+          when {
+            it.size == 1 -> getSolType(it[0].typeName)
+            else -> SolTuple(it.map { def -> getSolType(def.typeName) })
+          }
+        }
+      }
+    }
+  }
+
