@@ -169,6 +169,8 @@ data class SolMapping(val from: SolType, val to: SolType) : SolType {
 }
 
 data class SolTuple(val types: List<SolType>) : SolType {
+  override fun isAssignableFrom(other: SolType): Boolean = false
+
   override fun toString(): String {
     return "(${types.joinToString(separator = ",") { it.toString() }})"
   }
