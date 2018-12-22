@@ -191,4 +191,20 @@ class SolFunctionResolveTest : SolResolveTestBase() {
         }
   """)
 
+  fun testResolveFunctionSameNumberOfArguments() = checkByCode("""
+        contract B {
+            function doit(uint16) {
+                    //x
+            }
+
+            function doit(string) {
+
+            }
+
+            function test() {
+                doit(1 + 1);
+                //^
+            }
+        }
+  """)
 }

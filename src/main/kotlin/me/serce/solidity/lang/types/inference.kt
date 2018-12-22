@@ -11,6 +11,7 @@ import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.resolve.ref.SolFunctionCallReference
 import me.serce.solidity.lang.types.SolArray.SolDynamicArray
 import me.serce.solidity.lang.types.SolArray.SolStaticArray
+import kotlin.math.max
 
 fun getSolType(type: SolTypeName?): SolType {
   return when (type) {
@@ -143,10 +144,18 @@ fun inferExprType(expr: SolExpression?): SolType {
       expr.varLiteral?.let { inferRefType(it) }
         ?: expr.booleanLiteral?.let { SolBoolean }
         ?: expr.stringLiteral?.let { SolString }
-        ?: expr.numberLiteral?.let { SolInteger.INT }
+        ?: expr.numberLiteral?.let { SolInteger.inferType(it) }
         ?: expr.elementaryTypeName?.let { getSolType(it) }
         ?: SolUnknown
     }
+    is SolPlusMinExpression -> getNumericExpressionType(
+      inferExprType(expr.expressionList[0]),
+      inferExprType(expr.expressionList[1])
+    )
+    is SolMultDivExpression -> getNumericExpressionType(
+      inferExprType(expr.expressionList[0]),
+      inferExprType(expr.expressionList[1])
+    )
     is SolFunctionCallExpression -> {
       val reference = expr.reference
       if (reference is SolFunctionCallReference) {
@@ -181,6 +190,14 @@ fun inferExprType(expr: SolExpression?): SolType {
         .firstOrElse(SolUnknown)
     }
     else -> SolUnknown
+  }
+}
+
+private fun getNumericExpressionType(firstType: SolType, secondType: SolType): SolType {
+  return if (firstType is SolInteger && secondType is SolInteger) {
+    SolInteger(!(!firstType.unsigned || !secondType.unsigned), max(firstType.size, secondType.size))
+  } else {
+    SolUnknown
   }
 }
 

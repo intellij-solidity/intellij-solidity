@@ -8,7 +8,7 @@ class SolExpressionTypeProviderTest : SolTestBase() {
   private fun checkPrimitiveTypes(inference: Boolean = false, @Language("Solidity") codeProvider: (String, String) -> String) {
     var cases = listOf(
       "true" to "bool",
-      "42" to "int256",
+      "1000" to "uint16",
       "\"hello\"" to "string"
     )
 
