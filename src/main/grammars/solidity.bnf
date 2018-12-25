@@ -294,7 +294,7 @@ FunctionTypeName ::= function ParameterList ( internal | external | StateMutabil
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
 
-StorageLocation ::= memory | storage
+StorageLocation ::= memory | storage | calldata
 StateMutability ::= pure | constant | view | payable
 
 private UnfinishedBlock ::= '{' Statement* {

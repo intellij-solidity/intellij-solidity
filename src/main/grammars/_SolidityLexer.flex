@@ -117,6 +117,7 @@ PRAGMAALL=[^ ][^;]*
   "internal"              { return INTERNAL; }
   "private"               { return PRIVATE; }
   "constant"              { return CONSTANT; }
+  "calldata"              { return CALLDATA; }
   "using"                 { return USING; }
   "for"                   { return FOR; }
   "struct"                { return STRUCT; }
