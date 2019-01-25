@@ -83,7 +83,9 @@ private fun SolStatement.hasAssignment(el: SolNamedElement): Boolean {
     val declaration = st.variableDeclaration
     val expressions = st.expressionList
     if (declaration != null) {
-
+      return declaration.declarationList?.declarationItemList?.any { it.hasAssignment(el) }
+        ?: declaration.typedDeclarationList?.typedDeclarationItemList?.any { it.hasAssignment(el) }
+        ?: false
     } else {
       expressions.firstOrNull()?.let {
         if (it is SolSeqExpression) {
@@ -195,6 +197,14 @@ private fun SolAssemblyItem.hasAssignment(el: SolNamedElement): Boolean {
     }
   }
   return false
+}
+
+private fun SolDeclarationItem.hasAssignment(el: SolNamedElement): Boolean {
+  return this.identifier?.text == el.name
+}
+
+private fun SolTypedDeclarationItem.hasAssignment(el: SolNamedElement): Boolean {
+  return this.identifier?.text == el.name
 }
 
 private fun SolElement.isGlobal(): Boolean {
