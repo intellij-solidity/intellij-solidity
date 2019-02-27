@@ -156,6 +156,10 @@ fun inferExprType(expr: SolExpression?): SolType {
       inferExprType(expr.expressionList[0]),
       inferExprType(expr.expressionList[1])
     )
+    is SolExponentExpression -> getNumericExpressionType(
+      inferExprType(expr.expressionList[0]),
+      inferExprType(expr.expressionList[1])
+    )
     is SolFunctionCallExpression -> {
       val reference = expr.reference
       if (reference is SolFunctionCallReference) {

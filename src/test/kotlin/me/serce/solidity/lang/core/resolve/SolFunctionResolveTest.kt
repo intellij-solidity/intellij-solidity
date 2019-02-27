@@ -221,6 +221,19 @@ class SolFunctionResolveTest : SolResolveTestBase() {
         }
   """)
 
+  fun testResolveFunctionUintWithExponent() = checkByCode("""
+        contract B {
+            function doit(uint256) {
+                    //x
+            }
+
+            function test() {
+                doit(10 ** 18);
+                //^
+            }
+        }
+  """)
+
   fun testResolveFunctionUintWithScientificNotation() = checkByCode("""
         contract B {
             function doit(uint256) {
