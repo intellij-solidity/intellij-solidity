@@ -1,5 +1,9 @@
 package me.serce.solidity.lang.types
 
+import com.intellij.openapi.util.RecursionManager
+import com.intellij.psi.util.CachedValueProvider
+import com.intellij.psi.util.CachedValuesManager
+import com.intellij.psi.util.PsiModificationTracker
 import me.serce.solidity.lang.psi.SolContractDefinition
 import me.serce.solidity.lang.psi.SolEnumDefinition
 import me.serce.solidity.lang.psi.SolNumberLiteral
@@ -134,6 +138,15 @@ data class SolInteger(val unsigned: Boolean, val size: Int) : SolNumeric {
 }
 
 data class SolContract(val ref: SolContractDefinition) : SolType, Linearizable<SolContract> {
+  override fun linearize(): List<SolContract> {
+    return CachedValuesManager.getCachedValue(ref) {
+      val result = RecursionManager.doPreventingRecursion(ref, true) {
+        super.linearize()
+      }
+      CachedValueProvider.Result.create(result, PsiModificationTracker.MODIFICATION_COUNT)
+    }
+  }
+
   override fun getParents(): List<SolContract> {
     return ref.supers
       .flatMap { it.reference?.multiResolve() ?: emptyList() }

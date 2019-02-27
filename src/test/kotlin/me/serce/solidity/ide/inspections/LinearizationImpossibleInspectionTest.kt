@@ -6,7 +6,7 @@ class LinearizationImpossibleInspectionTest : SolInspectionsTestBase(Linearizati
         contract B {}
         contract C is B, A {}
         contract D is A, B {}
-        contract /*@warning descr="Linearization of inheritance graph impossible: result: [C, D] lists: [[A, B], [B, A]]"@*/E/*@/warning@*/ is D, C {}
+        contract /*@warning descr="Linearization of inheritance graph impossible: result: [C, D] lists: [[A, B], [B, A]] source: [[C, A, B], [D, B, A], [C, D]]"@*/E/*@/warning@*/ is D, C {}
     """)
 
   fun testPossible() = checkByText("""

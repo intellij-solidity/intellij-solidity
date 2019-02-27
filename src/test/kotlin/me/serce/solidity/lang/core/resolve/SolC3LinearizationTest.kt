@@ -1,6 +1,7 @@
 package me.serce.solidity.lang.core.resolve
 
 import me.serce.solidity.lang.psi.SolContractDefinition
+import me.serce.solidity.lang.psi.impl.LinearizationImpossibleException
 import me.serce.solidity.lang.psi.impl.merge
 import me.serce.solidity.lang.types.SolContract
 
@@ -14,8 +15,8 @@ class SolC3LinearizationTest : SolResolveTestBase() {
     try {
       listOf("CAB".toList(), "DBA".toList(), "CD".toList()).merge()
       fail("should fail")
-    } catch (e: IllegalStateException) {
-      assertEquals("Unable to merge lists: result: [C, D] lists: [[A, B], [B, A]]", e.message)
+    } catch (e: LinearizationImpossibleException) {
+      assertEquals("result: [C, D] lists: [[A, B], [B, A]] source: [[C, A, B], [D, B, A], [C, D]]", e.message)
     }
   }
 
@@ -49,10 +50,10 @@ class SolC3LinearizationTest : SolResolveTestBase() {
         contract C is O {}
         contract D is O {}
         contract E is O {}
-        contract K1 is A, B, C {}
-        contract K2 is D, B, E {}
-        contract K3 is D, A {}
-        contract Z is K1, K2, K3 {}
+        contract K1 is C, B, A {}
+        contract K2 is E, B, D {}
+        contract K3 is A, D {}
+        contract Z is K3, K2, K1 {}
                //^
           """
     )

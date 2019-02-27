@@ -20,7 +20,7 @@ fun <T> List<List<T>>.merge(): List<T> {
       result.add(next)
       lists = lists.map { it.filter { i -> i != next } }.filter { !it.isEmpty() }
     } else {
-      throw LinearizationImpossibleException("result: $result lists: $lists")
+      throw LinearizationImpossibleException("result: $result lists: $lists source: $this")
     }
   }
   return result
