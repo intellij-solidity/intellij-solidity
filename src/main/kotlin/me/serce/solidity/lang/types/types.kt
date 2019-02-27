@@ -139,6 +139,7 @@ data class SolContract(val ref: SolContractDefinition) : SolType, Linearizable<S
       .flatMap { it.reference?.multiResolve() ?: emptyList() }
       .filterIsInstance<SolContractDefinition>()
       .map { SolContract(it) }
+      .reversed()
   }
 
   override fun isAssignableFrom(other: SolType): Boolean =
