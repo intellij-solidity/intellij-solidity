@@ -165,6 +165,12 @@
                          level="WARNING"
                          implementationClass="me.serce.solidity.ide.inspections.NoReturnInspection"/>
 
+        <localInspection language="Solidity" groupName="Solidity"
+                         displayName="Linearization impossible"
+                         enabledByDefault="true"
+                         level="WARNING"
+                         implementationClass="me.serce.solidity.ide.inspections.LinearizationImpossibleInspection"/>
+
         <errorHandler implementation="me.serce.solidity.ide.SentryReportSubmitter"/>
         <runConfigurationProducer implementation="me.serce.solidity.ide.run.SolidityRunConfigProducer"/>
         <runLineMarkerContributor language="Solidity" implementationClass="me.serce.solidity.ide.run.SolidityRunLineMarkerProvider"/>

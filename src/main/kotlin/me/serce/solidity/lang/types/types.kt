@@ -4,6 +4,7 @@ import me.serce.solidity.lang.psi.SolContractDefinition
 import me.serce.solidity.lang.psi.SolEnumDefinition
 import me.serce.solidity.lang.psi.SolNumberLiteral
 import me.serce.solidity.lang.psi.SolStructDefinition
+import me.serce.solidity.lang.psi.impl.Linearizable
 import me.serce.solidity.lang.types.SolInteger.Companion.UINT_160
 import java.math.BigInteger
 
@@ -132,7 +133,14 @@ data class SolInteger(val unsigned: Boolean, val size: Int) : SolNumeric {
   override fun toString() = "${if (unsigned) "u" else ""}int$size"
 }
 
-data class SolContract(val ref: SolContractDefinition) : SolType {
+data class SolContract(val ref: SolContractDefinition) : SolType, Linearizable<SolContract> {
+  override fun getParents(): List<SolContract> {
+    return ref.supers
+      .flatMap { it.reference?.multiResolve() ?: emptyList() }
+      .filterIsInstance<SolContractDefinition>()
+      .map { SolContract(it) }
+  }
+
   override fun isAssignableFrom(other: SolType): Boolean =
     when (other) {
       is SolContract -> {
