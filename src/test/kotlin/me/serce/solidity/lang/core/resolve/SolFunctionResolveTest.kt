@@ -246,4 +246,21 @@ class SolFunctionResolveTest : SolResolveTestBase() {
             }
         }
   """)
+
+  fun testResolveFunctionEnum() = checkByCode("""
+        contract B {
+            enum Test {
+                ONE
+            }
+
+            function doit(Test) {
+                    //x
+            }
+
+            function test() {
+                doit(Test.ONE);
+                //^
+            }
+        }
+  """)
 }
