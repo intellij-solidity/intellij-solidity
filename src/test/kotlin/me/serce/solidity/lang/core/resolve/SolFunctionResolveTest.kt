@@ -207,4 +207,30 @@ class SolFunctionResolveTest : SolResolveTestBase() {
             }
         }
   """)
+
+  fun testResolveFunctionUintWithUnderscores() = checkByCode("""
+        contract B {
+            function doit(uint16) {
+                    //x
+            }
+
+            function test() {
+                doit(1_000);
+                //^
+            }
+        }
+  """)
+
+  fun testResolveFunctionUintWithScientificNotation() = checkByCode("""
+        contract B {
+            function doit(uint256) {
+                    //x
+            }
+
+            function test() {
+                doit(2e20);
+                //^
+            }
+        }
+  """)
 }
