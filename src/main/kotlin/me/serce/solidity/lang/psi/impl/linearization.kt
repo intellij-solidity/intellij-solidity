@@ -6,8 +6,12 @@ interface Linearizable<T : Linearizable<T>> {
 
   @Suppress("UNCHECKED_CAST")
   fun linearize(): List<T> {
+    return listOf(this as T)  + linearizeParents()
+  }
+
+  fun linearizeParents(): List<T> {
     val parents = getParents()
-    return listOf(this as T)  + (parents.map { it.linearize() } + listOf(parents)).merge()
+    return (parents.map { it.linearize() } + listOf(parents)).merge()
   }
 }
 

@@ -147,6 +147,15 @@ data class SolContract(val ref: SolContractDefinition) : SolType, Linearizable<S
     }
   }
 
+  override fun linearizeParents(): List<SolContract> {
+    return CachedValuesManager.getCachedValue(ref) {
+      val result = RecursionManager.doPreventingRecursion(ref, true) {
+        super.linearizeParents()
+      }
+      CachedValueProvider.Result.create(result, PsiModificationTracker.MODIFICATION_COUNT)
+    }
+  }
+
   override fun getParents(): List<SolContract> {
     return ref.supers
       .flatMap { it.reference?.multiResolve() ?: emptyList() }
