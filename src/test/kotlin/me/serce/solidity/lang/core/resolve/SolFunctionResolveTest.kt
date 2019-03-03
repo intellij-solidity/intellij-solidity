@@ -207,4 +207,60 @@ class SolFunctionResolveTest : SolResolveTestBase() {
             }
         }
   """)
+
+  fun testResolveFunctionUintWithUnderscores() = checkByCode("""
+        contract B {
+            function doit(uint16) {
+                    //x
+            }
+
+            function test() {
+                doit(1_000);
+                //^
+            }
+        }
+  """)
+
+  fun testResolveFunctionUintWithExponent() = checkByCode("""
+        contract B {
+            function doit(uint256) {
+                    //x
+            }
+
+            function test() {
+                doit(10 ** 18);
+                //^
+            }
+        }
+  """)
+
+  fun testResolveFunctionUintWithScientificNotation() = checkByCode("""
+        contract B {
+            function doit(uint256) {
+                    //x
+            }
+
+            function test() {
+                doit(2e20);
+                //^
+            }
+        }
+  """)
+
+  fun testResolveFunctionEnum() = checkByCode("""
+        contract B {
+            enum Test {
+                ONE
+            }
+
+            function doit(Test) {
+                    //x
+            }
+
+            function test() {
+                doit(Test.ONE);
+                //^
+            }
+        }
+  """)
 }

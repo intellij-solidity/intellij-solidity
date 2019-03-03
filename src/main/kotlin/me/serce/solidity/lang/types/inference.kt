@@ -43,12 +43,13 @@ fun getSolType(type: SolTypeName?): SolType {
         val internalType = SolInternalTypeFactory.of(type.project).byName(name)
         return internalType ?: SolUnknown
       }
-      val resolvedTypes = SolResolver.resolveTypeName(type)
+      val resolvedTypes = SolResolver.resolveTypeNameUsingImports(type)
       return resolvedTypes.asSequence()
         .map {
           when (it) {
             is SolContractDefinition -> SolContract(it)
             is SolStructDefinition -> SolStruct(it)
+            is SolEnumDefinition -> SolEnum(it)
             else -> null
           }
         }
@@ -153,6 +154,10 @@ fun inferExprType(expr: SolExpression?): SolType {
       inferExprType(expr.expressionList[1])
     )
     is SolMultDivExpression -> getNumericExpressionType(
+      inferExprType(expr.expressionList[0]),
+      inferExprType(expr.expressionList[1])
+    )
+    is SolExponentExpression -> getNumericExpressionType(
       inferExprType(expr.expressionList[0]),
       inferExprType(expr.expressionList[1])
     )

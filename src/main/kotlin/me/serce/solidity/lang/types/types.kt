@@ -77,7 +77,7 @@ data class SolInteger(val unsigned: Boolean, val size: Int) : SolNumeric {
       return inferIntegerType(numberLiteral.toBigInteger())
     }
 
-    fun inferIntegerType(value: BigInteger): SolInteger {
+    private fun inferIntegerType(value: BigInteger): SolInteger {
       if (value == BigInteger.ZERO) return SolInteger(true, 8)
       val positive = value >= BigInteger.ZERO
       if (positive) {
@@ -101,14 +101,13 @@ data class SolInteger(val unsigned: Boolean, val size: Int) : SolNumeric {
 
     private fun SolNumberLiteral.toBigInteger(): BigInteger {
       this.decimalNumber?.let {
-        return it.text.toBigInteger()
+        return it.text.replace("_", "").toBigInteger()
       }
       this.hexNumber?.let {
         return it.text.removePrefix("0x").toBigInteger(16)
       }
       this.scientificNumber?.let {
-        val eIndex = it.text.toLowerCase().indexOf('e')
-
+        return it.text.replace("_", "").toLowerCase().toBigDecimal().toBigInteger()
       }
       //todo
       return BigInteger.ZERO
