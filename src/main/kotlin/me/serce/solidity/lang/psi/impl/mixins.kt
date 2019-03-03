@@ -49,8 +49,8 @@ abstract class SolEnumValueMixin(node: ASTNode) : SolNamedElementImpl(node), Sol
 
 abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrLibDefStub>, SolContractDefinition {
   override val supers: List<SolUserDefinedTypeName>
-    get() = findChildrenByType<SolInheritanceSpecifier>(INHERITANCE_SPECIFIER)
-      .mapNotNull { it.children.filterIsInstance(SolUserDefinedTypeName::class.java).firstOrNull() }
+    get() = inheritanceSpecifierList
+      .mapNotNull { it.userDefinedTypeName }
 
   override val collectSupers: Collection<SolUserDefinedTypeName>
     get() = CachedValuesManager.getCachedValue(this) {

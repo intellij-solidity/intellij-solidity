@@ -3,15 +3,20 @@ package me.serce.solidity.lang.resolve.function
 import me.serce.solidity.ide.navigation.findAllImplementations
 import me.serce.solidity.lang.psi.SolContractDefinition
 import me.serce.solidity.lang.psi.SolFunctionDefinition
+import me.serce.solidity.lang.psi.impl.LinearizationImpossibleException
 import me.serce.solidity.lang.psi.parentOfType
+import me.serce.solidity.lang.types.SolContract
 import me.serce.solidity.lang.types.getSolType
 
 object SolFunctionResolver {
   fun collectOverriden(func: SolFunctionDefinition): Collection<SolFunctionDefinition> {
     val contract = func.parentOfType<SolContractDefinition>() ?: return emptyList()
-    return contract.collectSupers
-      .mapNotNull { it.reference?.resolve() }
-      .filterIsInstance<SolContractDefinition>()
+    val parents = try {
+      SolContract(contract).linearizeParents().map { it.ref }
+    } catch (e: LinearizationImpossibleException) {
+      emptyList<SolContractDefinition>()
+    }
+    return parents
       .flatMap { it.functionDefinitionList }
       .filter { signatureEquals(func, it) }
   }
