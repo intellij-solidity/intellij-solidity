@@ -2,7 +2,6 @@ package me.serce.solidity.lang.types
 
 import com.intellij.openapi.util.RecursionManager
 import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiNamedElement
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiModificationTracker
