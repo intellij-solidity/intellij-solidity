@@ -37,25 +37,9 @@ fun getSolType(type: SolTypeName?): SolType {
         }
       }
     }
-    is SolUserDefinedTypeName -> {
-      val name = type.name
-      if (name != null && isInternal(name)) {
-        val internalType = SolInternalTypeFactory.of(type.project).byName(name)
-        return internalType ?: SolUnknown
-      }
-      val resolvedTypes = SolResolver.resolveTypeNameUsingImports(type)
-      return resolvedTypes.asSequence()
-        .map {
-          when (it) {
-            is SolContractDefinition -> SolContract(it)
-            is SolStructDefinition -> SolStruct(it)
-            is SolEnumDefinition -> SolEnum(it)
-            else -> null
-          }
-        }
-        .filterNotNull()
-        .firstOrElse(SolUnknown)
-    }
+    is SolUserDefinedLocationTypeName ->
+      type.userDefinedTypeName?.let { getSolTypeFromUserDefinedTypeName(it) } ?: SolUnknown
+    is SolUserDefinedTypeName -> getSolTypeFromUserDefinedTypeName(type)
     is SolMappingTypeName -> when {
       type.typeNameList.size >= 2 -> SolMapping(
         getSolType(type.typeNameList[0]),
@@ -74,6 +58,26 @@ fun getSolType(type: SolTypeName?): SolType {
     }
     else -> SolUnknown
   }
+}
+
+private fun getSolTypeFromUserDefinedTypeName(type: SolUserDefinedTypeName): SolType {
+  val name = type.name
+  if (name != null && isInternal(name)) {
+    val internalType = SolInternalTypeFactory.of(type.project).byName(name)
+    return internalType ?: SolUnknown
+  }
+  val resolvedTypes = SolResolver.resolveTypeNameUsingImports(type)
+  return resolvedTypes.asSequence()
+    .map {
+      when (it) {
+        is SolContractDefinition -> SolContract(it)
+        is SolStructDefinition -> SolStruct(it)
+        is SolEnumDefinition -> SolEnum(it)
+        else -> null
+      }
+    }
+    .filterNotNull()
+    .firstOrElse(SolUnknown)
 }
 
 fun inferDeclType(decl: SolNamedElement): SolType {
