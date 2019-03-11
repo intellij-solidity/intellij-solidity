@@ -37,7 +37,8 @@ fun getSolType(type: SolTypeName?): SolType {
         }
       }
     }
-    is SolUserDefinedLocationTypeName -> getSolTypeFromUserDefinedTypeName(type.userDefinedTypeName!!)
+    is SolUserDefinedLocationTypeName ->
+      type.userDefinedTypeName?.let { getSolTypeFromUserDefinedTypeName(it) } ?: SolUnknown
     is SolUserDefinedTypeName -> getSolTypeFromUserDefinedTypeName(type)
     is SolMappingTypeName -> when {
       type.typeNameList.size >= 2 -> SolMapping(
