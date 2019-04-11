@@ -1,14 +1,47 @@
 package me.serce.solidity.lang.core.resolve
 
 import junit.framework.TestCase
+import me.serce.solidity.lang.psi.SolContractDefinition
 import me.serce.solidity.lang.psi.SolExpression
 import me.serce.solidity.lang.psi.SolStructDefinition
-import me.serce.solidity.lang.types.SolStruct
-import me.serce.solidity.lang.types.SolType
-import me.serce.solidity.lang.types.type
+import me.serce.solidity.lang.types.*
 import org.intellij.lang.annotations.Language
 
 class InferenceTest : SolResolveTestBase() {
+
+  fun testCastContract() {
+    InlineFile(
+      code = """
+         contract Contract {
+                  //x
+
+         }
+      """,
+      name = "base.sol"
+    )
+
+    val (contract, _) = findElementAndDataInEditor<SolContractDefinition>("x")
+    checkType(SolContract(contract), """
+        import './base.sol';
+        contract Test  {
+            function test() {
+                var test = Contract(address(this));
+                test;
+               //^
+            }
+        }""")
+  }
+
+  fun testCastAddress() {
+    checkType(SolAddress, """
+        contract Contract {
+            function test() {
+                var test = address(this);
+                test;
+               //^
+            }
+        }""")
+  }
 
   fun testStorageStruct() {
     InlineFile(

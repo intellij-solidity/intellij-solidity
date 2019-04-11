@@ -166,16 +166,23 @@ fun inferExprType(expr: SolExpression?): SolType {
       inferExprType(expr.expressionList[1])
     )
     is SolFunctionCallExpression -> {
-      val reference = expr.reference
-      if (reference is SolFunctionCallReference) {
-        reference.multiResolve().firstOrNull().let {
-          when (it) {
-            is SolFunctionDefinition -> it.returnType
-            else -> SolUnknown
+      expr.expressionList.firstOrNull().let { first ->
+        if (expr.expressionList.size == 1 && first is SolPrimaryExpression && first.elementaryTypeName != null) {
+          getSolType(first.elementaryTypeName)
+        } else {
+          val reference = expr.reference
+          if (reference is SolFunctionCallReference) {
+            reference.multiResolve().firstOrNull().let {
+              when (it) {
+                is SolFunctionDefinition -> it.returnType
+                is SolContractDefinition -> SolContract(it)
+                else -> SolUnknown
+              }
+            }
+          } else {
+            SolUnknown
           }
         }
-      } else {
-        SolUnknown
       }
     }
     is SolAndExpression,
