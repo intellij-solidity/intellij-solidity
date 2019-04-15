@@ -263,4 +263,20 @@ class SolFunctionResolveTest : SolResolveTestBase() {
             }
         }
   """)
+
+  fun testResolveWithCast() = checkByCode("""
+        contract A {
+            function doit2() {
+                    //x
+            }
+        }
+
+        contract B {
+            function doit(address some) {
+                A(some).doit2();
+                       //^
+            }
+        }
+  """)
+
 }
