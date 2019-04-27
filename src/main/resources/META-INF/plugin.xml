@@ -17,6 +17,21 @@
 
     <change-notes><![CDATA[
       <p>
+        <b>v2.1.6</b>
+        <ul>
+          <p>
+            Huge kudos to @0v1se for working on all of the features for this release!
+          </p>
+          <li>Fixes for functional calls, thanks @0v1se!</li>
+          <li>C3 linearization warning for contract inheritance, thanks @0v1se!</li>
+          <li>Type inference fixes, thanks @0v1se!</li>
+          <li>Inference fixes for type casts, thanks @0v1se!</li>
+          <li>
+            "No return" inspection is enabled by default, thanks @0v1se!
+            Inspection to catch possible errors when function doesn't return a result.
+            Let us know what you think!
+          </li>
+        </ul>
         <b>v2.1.5</b>
         <ul>
           <li>Allow for a declaration list without var</li>
@@ -30,23 +45,6 @@
             can be enabled in Editor->Inspections->Solidity->No return statement. Let us know what you think!
             The inspection is planned to be enabled by default in the next release.
           </li>
-        </ul>
-        <b>v2.1.4</b>
-        <ul>
-          <li>Resolve vars from tuples, thanks @0v1se</li>
-          <li>
-            "No return" inspection improvements, thanks @0v1se!
-            Inspection to catch possible errors when function doesn't return a result. The inspection
-            can be enabled in Editor->Inspections->Solidity->No return statement. Let us know what you think!
-          </li>
-          <li>Resolve library calls, thanks @0v1se</li>
-          <li>Fixes for var/function resolving, thanks @0v1se</li>
-          <li>Use abi to generate EthJ stubs, thanks @mbolotov</li>
-          <li>Fix parameter info for variables, thanks @0v1se</li>
-          <li>Update web3j version to 4.0.1, thanks @mbolotov</li>
-          <li>Incremental compilation for solc, thanks @mbolotov</li>
-          <li>Do not throw exception in context menu on non-java IDEs, thanks @mbolotov</li>
-          <li>Multiple grammar fixes</li>
         </ul>
       </p>
     ]]>
