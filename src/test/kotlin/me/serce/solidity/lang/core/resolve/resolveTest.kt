@@ -1,17 +1,26 @@
 package me.serce.solidity.lang.core.resolve
 
 import com.intellij.psi.PsiElement
+import me.serce.solidity.lang.psi.SolFunctionCallExpression
 import me.serce.solidity.lang.psi.SolNamedElement
 import me.serce.solidity.utils.SolTestBase
 import org.intellij.lang.annotations.Language
 
 abstract class SolResolveTestBase : SolTestBase() {
-  protected fun checkByCode(@Language("Solidity") code: String) {
+  protected fun checkFunctionByCode(@Language("Solidity") code: String) {
+    checkByCodeInternal<SolFunctionCallExpression, SolNamedElement>(code)
+  }
+
+  protected open fun checkByCode(@Language("Solidity") code: String) {
     checkByCodeSearchType<SolNamedElement>(code)
   }
 
   protected inline fun <reified T : PsiElement> checkByCodeSearchType(@Language("Solidity") code: String) {
-    val (refElement, data) = resolveInCode<SolNamedElement>(code)
+    checkByCodeInternal<SolNamedElement, T>(code)
+  }
+
+  protected inline fun <reified F : PsiElement, reified T : PsiElement> checkByCodeInternal(@Language("Solidity") code: String) {
+    val (refElement, data) = resolveInCode<F>(code)
 
     if (data == "unresolved") {
       val resolved = refElement.reference?.resolve()

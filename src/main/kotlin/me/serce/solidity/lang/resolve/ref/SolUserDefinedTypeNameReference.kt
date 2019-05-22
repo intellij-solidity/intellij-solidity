@@ -5,7 +5,6 @@ import com.intellij.psi.PsiElement
 import me.serce.solidity.firstInstance
 import me.serce.solidity.lang.completion.SolCompleter
 import me.serce.solidity.lang.psi.*
-import me.serce.solidity.lang.psi.impl.SolFunctionCallElement
 import me.serce.solidity.lang.resolve.FunctionResolveResult
 import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.types.SolContract
@@ -70,7 +69,7 @@ class SolNewExpressionReference(element: SolNewExpression) : SolReferenceBase<So
 }
 
 fun SolContractDefinition.findConstructors(): List<SolElement> {
-  return if (!this.constructorDefinitionList.isEmpty()) {
+  return if (this.constructorDefinitionList.isNotEmpty()) {
     this.constructorDefinitionList
   } else {
     this.functionDefinitionList
@@ -78,31 +77,31 @@ fun SolContractDefinition.findConstructors(): List<SolElement> {
   }
 }
 
-class SolFunctionCallReference(element: SolFunctionCallElement) : SolReferenceBase<SolFunctionCallElement>(element), SolReference {
+class SolFunctionCallReference(element: SolFunctionCallExpression) : SolReferenceBase<SolFunctionCallExpression>(element), SolReference {
   override fun calculateDefaultRangeInElement(): TextRange {
     return element.referenceNameElement.parentRelativeRange
   }
 
   fun resolveFunctionCall(): Collection<FunctionResolveResult> {
-    val ref = element.expressionList.firstOrNull()
+    val (base, refName) = element.getBaseAndReferenceNameElement()
     return when {
-      ref == null -> {
+      base == null -> {
         val globalType = SolInternalTypeFactory.of(element.project).globalType.ref
-        val global = SolResolver.resolveFunction(SolContract(globalType), element)
+        val global = SolResolver.resolveFunction(SolContract(globalType), refName, element.functionCallArguments)
 
-        val casts = SolResolver.resolveCast(element)
+        val casts = SolResolver.resolveCast(refName, element.functionCallArguments)
 
         val contract = findContract(element)
-        val regular = contract?.let { SolResolver.resolveFunction(SolContract(it), element) } ?: emptyList()
+        val regular = contract?.let { SolResolver.resolveFunction(SolContract(it), refName, element.functionCallArguments) } ?: emptyList()
 
         global + casts + regular
       }
-      ref is SolPrimaryExpression && ref.varLiteral?.name == "super" -> {
-        val contract = findContract(ref)
-        contract?.let { SolResolver.resolveFunction(SolContract(it), element, true) } ?: emptyList()
+      base is SolPrimaryExpression && base.varLiteral?.name == "super" -> {
+        val contract = findContract(base)
+        contract?.let { SolResolver.resolveFunction(SolContract(it), refName, element.functionCallArguments, true) } ?: emptyList()
       }
       else -> {
-        SolResolver.resolveFunction(ref.type, element)
+        SolResolver.resolveFunction(base.type, refName, element.functionCallArguments)
       }
     }
   }

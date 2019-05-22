@@ -1,7 +1,9 @@
 package me.serce.solidity.lang.core.resolve
 
+import me.serce.solidity.lang.psi.SolFunctionCallExpression
 import me.serce.solidity.lang.psi.SolFunctionDefinition
 import me.serce.solidity.lang.psi.SolNamedElement
+import org.intellij.lang.annotations.Language
 
 class SolFunctionResolveTest : SolResolveTestBase() {
   fun testResolveFunction() = checkByCode("""
@@ -14,6 +16,20 @@ class SolFunctionResolveTest : SolResolveTestBase() {
             function doit() {
                 doit2();
                 //^
+            }
+        }
+  """)
+
+  fun testResolveThis() = checkByCode("""
+        contract B {
+            function doit2() {
+                    //x
+            }
+
+
+            function doit() {
+                this.doit2();
+                     //^
             }
         }
   """)
@@ -83,7 +99,7 @@ class SolFunctionResolveTest : SolResolveTestBase() {
   """)
 
   fun testResolveGlobal() {
-    val (refElement, _) = resolveInCode<SolNamedElement>("""
+    val (refElement, _) = resolveInCode<SolFunctionCallExpression>("""
         contract B {
             function doit() {
                 assert(true);
@@ -279,4 +295,7 @@ class SolFunctionResolveTest : SolResolveTestBase() {
         }
   """)
 
+  override fun checkByCode(@Language("Solidity") code: String) {
+    checkByCodeInternal<SolFunctionCallExpression, SolNamedElement>(code)
+  }
 }

@@ -148,22 +148,20 @@ object SolResolver {
       .flatMap { resolveContractMember(it, element) }
   }
 
-  fun resolveCast(element: SolFunctionCallExpression): Collection<FunctionResolveResult> {
-    if (element.argumentsNumber() == 1) {
+  fun resolveCast(element: PsiElement, arguments: SolFunctionCallArguments): Collection<FunctionResolveResult> {
+    if (arguments.expressionList.size == 1 && element is SolReferenceElement) {
       val contracts = resolveTypeNameUsingImports(element)
         .filterIsInstance<SolContractDefinition>()
-      if (contracts.isNotEmpty()) {
-        return contracts.map { FunctionResolveResult(it) }
-      }
+      return contracts.map { FunctionResolveResult(it) }
     }
     return emptyList()
   }
 
-  fun resolveFunction(type: SolType, element: SolFunctionCallExpression, skipThis: Boolean = false): Collection<FunctionResolveResult> {
+  fun resolveFunction(type: SolType, element: PsiElement, arguments: SolFunctionCallArguments, skipThis: Boolean = false): Collection<FunctionResolveResult> {
     val contract = findContract(element)
     val superContracts = contract
       ?.collectSupers
-      ?.flatMap { SolResolver.resolveTypeNameUsingImports(it) }
+      ?.flatMap { resolveTypeNameUsingImports(it) }
       ?.filterIsInstance<SolContractDefinition>()
       ?: emptyList()
     val fromLibraries = (superContracts + contract.wrap())
@@ -174,10 +172,10 @@ object SolResolver {
       }
       .map { it.library }
       .distinct()
-      .flatMap { resoleFunInLibrary(element, it) }
+      .flatMap { resoleFunInLibrary(element, arguments, it) }
 
     val fromContracts = if (type is SolContract)
-      resolveFunRec(type.ref, element, skipThis)
+      resolveFunRec(type.ref, element, arguments, skipThis)
         .map { FunctionResolveResult(it) }
     else
       emptyList()
@@ -185,35 +183,35 @@ object SolResolver {
     return fromContracts + fromLibraries
   }
 
-  private fun resoleFunInLibrary(element: SolFunctionCallExpression, library: SolContractDefinition): Collection<FunctionResolveResult> {
+  private fun resoleFunInLibrary(element: PsiElement, arguments: SolFunctionCallArguments, library: SolContractDefinition): Collection<FunctionResolveResult> {
     return library.functionDefinitionList
-      .filter { it.name == element.referenceName && canBeApplied(it.parameterTypes.drop(1), element) }
+      .filter { it.name == element.text && canBeApplied(it.parameterTypes.drop(1), arguments) }
       .map { FunctionResolveResult(it, true) }
   }
 
-  private fun resolveFunRec(contract: SolContractDefinition, element: SolFunctionCallExpression, skipThis: Boolean = false): List<PsiElement> {
+  private fun resolveFunRec(contract: SolContractDefinition, element: PsiElement, arguments: SolFunctionCallArguments, skipThis: Boolean = false): List<PsiElement> {
     if (!skipThis) {
       val functions = contract.functionDefinitionList
         .filter {
-          it.name == element.referenceName && canBeApplied(it.parameterTypes, element)
+          it.name == element.text && canBeApplied(it.parameterTypes, arguments)
         }
-      if (!functions.isEmpty()) {
+      if (functions.isNotEmpty()) {
         return functions
       }
 
       val events = contract.eventDefinitionList
         .filter {
-          it.name == element.referenceName && canBeApplied(it.getParameterTypes(), element)
+          it.name == element.text && canBeApplied(it.getParameterTypes(), arguments)
         }
-      if (!events.isEmpty()) {
+      if (events.isNotEmpty()) {
         return events
       }
 
       val structs = contract.structDefinitionList
         .filter {
-          it.name == element.referenceName
+          it.name == element.text
         }
-      if (!structs.isEmpty()) {
+      if (structs.isNotEmpty()) {
         return structs
       }
     }
@@ -221,7 +219,7 @@ object SolResolver {
     return contract.supers.asSequence()
       .flatMap { resolveTypeName(it).asSequence() }
       .filterIsInstance<SolContractDefinition>()
-      .map { resolveFunRec(it, element) }
+      .map { resolveFunRec(it, element, arguments) }
       .filter { it.isNotEmpty() }
       .firstOrElse(emptyList())
   }
@@ -230,8 +228,8 @@ object SolResolver {
     return this.indexedParameterList?.typeNameList?.map { getSolType(it) } ?: emptyList()
   }
 
-  private fun canBeApplied(parameterTypes: List<SolType>, element: SolFunctionCallExpression) : Boolean {
-    val callArgumentTypes = element.functionCallArguments?.expressionList?.map { it.type } ?: emptyList()
+  private fun canBeApplied(parameterTypes: List<SolType>, arguments: SolFunctionCallArguments) : Boolean {
+    val callArgumentTypes = arguments.expressionList.map { it.type }
     if (parameterTypes.size != callArgumentTypes.size)
       return false
     return !parameterTypes.zip(callArgumentTypes)

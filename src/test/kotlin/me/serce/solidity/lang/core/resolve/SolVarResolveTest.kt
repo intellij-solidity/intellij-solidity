@@ -138,20 +138,6 @@ class SolVarResolveTest : SolResolveTestBase() {
         }
   """)
 
-  fun testResolveThis() = checkByCode("""
-        contract B {
-            function doit2() {
-                    //x
-            }
-
-
-            function doit() {
-                this.doit2();
-                     //^
-            }
-        }
-  """)
-
   fun testResolveSuper() = checkByCode("""
         contract B {
             var b;

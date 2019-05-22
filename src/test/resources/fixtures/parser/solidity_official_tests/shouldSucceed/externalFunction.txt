@@ -14,7 +14,7 @@ Solidity File
         PsiElement(()('(')
         PsiElement())(')')
       PsiWhiteSpace(' ')
-      SolFunctionModifierImpl(FUNCTION_MODIFIER)
+      SolFunctionVisibilitySpecifierImpl(FUNCTION_VISIBILITY_SPECIFIER)
         PsiElement(external)('external')
       PsiWhiteSpace(' ')
       SolBlockImpl(BLOCK)

@@ -13,7 +13,7 @@ class SolStructResolveTest : SolResolveTestBase() {
       }
   """)
 
-  fun testStructResolveOneField() = checkByCode("""
+  fun testStructResolveOneField() = checkFunctionByCode("""
       contract B {
           struct Prop {
                 //x
@@ -25,7 +25,7 @@ class SolStructResolveTest : SolResolveTestBase() {
       }
   """)
 
-  fun testStructResolveTwoFields() = checkByCode("""
+  fun testStructResolveTwoFields() = checkFunctionByCode("""
       contract B {
           struct Prop {
                 //x
@@ -38,7 +38,7 @@ class SolStructResolveTest : SolResolveTestBase() {
       }
   """)
 
-  fun testStructResolveInherited() = checkByCode("""
+  fun testStructResolveInherited() = checkFunctionByCode("""
       contract A {
           struct Prop {
                 //x
