@@ -4,7 +4,7 @@ import com.intellij.codeInspection.LocalInspectionTool
 import me.serce.solidity.utils.SolTestBase
 import org.intellij.lang.annotations.Language
 
-abstract class SolInspectionsTestBase(val inspection: LocalInspectionTool) : SolTestBase() {
+abstract class SolInspectionsTestBase(private val inspection: LocalInspectionTool) : SolTestBase() {
 
   protected fun enableInspection() = myFixture.enableInspections(inspection.javaClass)
 

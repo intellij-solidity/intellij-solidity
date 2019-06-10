@@ -10,7 +10,7 @@ import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.PsiDirectory
 import me.serce.solidity.ide.SolidityIcons
 
-private val CAPTION = "New Solidity File"
+private const val CAPTION = "New Solidity File"
 
 class SolCreateFileAction : CreateFileFromTemplateAction(CAPTION, "", SolidityIcons.FILE_ICON), DumbAware {
 

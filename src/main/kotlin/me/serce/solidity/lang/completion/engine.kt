@@ -23,7 +23,7 @@ import me.serce.solidity.lang.types.SolStruct
 import me.serce.solidity.lang.types.type
 import javax.swing.Icon
 
-val TYPED_COMPLETION_PRIORITY = 15.0
+const val TYPED_COMPLETION_PRIORITY = 15.0
 
 object SolCompleter {
 

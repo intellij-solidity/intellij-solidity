@@ -14,9 +14,9 @@ class SolidityFormattingTest : SolLightPlatformCodeInsightFixtureTestCase() {
     val inputFile = inputFileName
     val inputText = FileUtil.loadFile(File(testDataPath + inputFile))
     myFixture.configureByText(inputFile, inputText)
-    WriteCommandAction.runWriteCommandAction(project, {
+    WriteCommandAction.runWriteCommandAction(project) {
       CodeStyleManager.getInstance(project).reformat(myFixture.file as PsiElement)
-    })
+    }
     myFixture.checkResultByFile(expectedOutputFileName)
   }
 

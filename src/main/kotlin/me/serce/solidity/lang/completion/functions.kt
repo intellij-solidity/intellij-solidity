@@ -100,7 +100,7 @@ object FunctionCompletionProvider : CompletionProvider<CompletionParameters>() {
       .filterNot { it.name == null }
       .map {
         LookupElementBuilder
-          .create(it as PsiNamedElement)
+          .create(it)
           .withBoldness(true)
           .withIcon(SolidityIcons.FUNCTION)
           .withTypeText(funcOutType(it))

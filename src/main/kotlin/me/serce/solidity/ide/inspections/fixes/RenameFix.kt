@@ -8,8 +8,8 @@ import com.intellij.refactoring.RefactoringFactory
 
 class RenameFix(
   element: PsiElement,
-  val newName: String,
-  val fixName: String = "Rename to '$newName'"
+  private val newName: String,
+  private val fixName: String = "Rename to '$newName'"
 ) : LocalQuickFixOnPsiElement(element) {
   override fun getText() = fixName
   override fun getFamilyName() = "Rename element"

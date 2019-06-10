@@ -6,7 +6,7 @@ import java.math.BigInteger
 import kotlin.reflect.KClass
 
 object EthJTypeConverter {
-  val default = Any::class
+  private val default = Any::class
 
   fun convert(type: String?, lax: Boolean = false): String {
     val clazz = if (type != null) getClass(type, lax) else default

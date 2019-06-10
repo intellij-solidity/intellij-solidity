@@ -123,7 +123,7 @@ object Solc  {
     })
     pb
       .directory(File(baseDir.path))
-      .environment().put("LD_LIBRARY_PATH", solc.parentFile.canonicalPath)
+      .environment()["LD_LIBRARY_PATH"] = solc.parentFile.canonicalPath
     val solcProc = pb.start()
     val outputPromise = runAsync2 { StreamUtil.readText(solcProc.inputStream, Charset.defaultCharset()) }
     val errorPromise = runAsync2 { StreamUtil.readText(solcProc.errorStream, Charset.defaultCharset()) }

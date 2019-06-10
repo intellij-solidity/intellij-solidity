@@ -36,5 +36,5 @@ fun primaryExpression(): ElementPattern<PsiElement> =
   psiElement(SolidityTokenTypes.IDENTIFIER).inside(SolPrimaryExpression::class.java)
 
 fun functionCallArguments(): ElementPattern<PsiElement> =
-  psiElement(SolidityTokenTypes.IDENTIFIER).inside(SolFunctionCallArguments::class.java);
+  psiElement(SolidityTokenTypes.IDENTIFIER).inside(SolFunctionCallArguments::class.java)
 

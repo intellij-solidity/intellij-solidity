@@ -42,7 +42,7 @@ object SolcMessageProcessor {
     }
   }
 
-  fun MessageType.toCompilationCategory(): CompilerMessageCategory {
+  private fun MessageType.toCompilationCategory(): CompilerMessageCategory {
     return when (this) {
       MessageType.ERROR -> CompilerMessageCategory.ERROR
       MessageType.WARNING -> CompilerMessageCategory.WARNING

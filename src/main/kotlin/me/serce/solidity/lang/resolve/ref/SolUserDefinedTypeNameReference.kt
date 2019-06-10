@@ -24,7 +24,7 @@ class SolVarLiteralReference(element: SolVarLiteral) : SolReferenceBase<SolVarLi
   override fun getVariants() = SolCompleter.completeLiteral(element)
 }
 
-class SolModifierReference(element: SolFunctionDefinition, val modifierElement: PsiElement) : SolReferenceBase<SolFunctionDefinition>(element), SolReference {
+class SolModifierReference(element: SolFunctionDefinition, private val modifierElement: PsiElement) : SolReferenceBase<SolFunctionDefinition>(element), SolReference {
   override fun calculateDefaultRangeInElement() = modifierElement.parentRelativeRange
 
   override fun multiResolve(): List<SolNamedElement> {
@@ -92,13 +92,15 @@ class SolFunctionCallReference(element: SolFunctionCallExpression) : SolReferenc
         val casts = SolResolver.resolveCast(refName, element.functionCallArguments)
 
         val contract = findContract(element)
-        val regular = contract?.let { SolResolver.resolveFunction(SolContract(it), refName, element.functionCallArguments) } ?: emptyList()
+        val regular = contract?.let { SolResolver.resolveFunction(SolContract(it), refName, element.functionCallArguments) }
+          ?: emptyList()
 
         global + casts + regular
       }
       base is SolPrimaryExpression && base.varLiteral?.name == "super" -> {
         val contract = findContract(base)
-        contract?.let { SolResolver.resolveFunction(SolContract(it), refName, element.functionCallArguments, true) } ?: emptyList()
+        contract?.let { SolResolver.resolveFunction(SolContract(it), refName, element.functionCallArguments, true) }
+          ?: emptyList()
       }
       else -> {
         SolResolver.resolveFunction(base.type, refName, element.functionCallArguments)

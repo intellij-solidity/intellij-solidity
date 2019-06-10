@@ -7,8 +7,9 @@ import com.intellij.psi.PsiElement
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.resolve.ref.SolFunctionCallReference
 
+private const val INVALID_INDEX: Int = -2
+
 class SolParameterInfoHandler : ParameterInfoHandler<PsiElement, SolArgumentsDescription> {
-  val INVALID_INDEX: Int = -2
   var hintText: String = ""
 
   override fun findElementForParameterInfo(context: CreateParameterInfoContext): PsiElement? {
@@ -121,7 +122,7 @@ class SolArgumentsDescription(val arguments: Array<String>) {
       val ref = element.reference
       if (ref is SolFunctionCallReference) {
         val resolved = ref.resolveFunctionCall()
-        val def = resolved.filter { it.psiElement is SolFunctionDefinition }.firstOrNull()
+        val def = resolved.firstOrNull { it.psiElement is SolFunctionDefinition }
         if (def != null) {
           val functionDef = def.psiElement as SolFunctionDefinition
           val argumentDefList = (if (def.usingLibrary) {

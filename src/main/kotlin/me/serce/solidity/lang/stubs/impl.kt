@@ -194,7 +194,7 @@ class SolTypeRefStub(
 ) : StubBase<SolTypeName>(parent, elementType) {
 
   class Type<T : SolTypeName>(
-    val debugName: String,
+    debugName: String,
     private val psiFactory: (SolTypeRefStub, IStubElementType<*, *>) -> T
   ) : SolStubElementType<SolTypeRefStub, T>(debugName) {
     override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?) =
