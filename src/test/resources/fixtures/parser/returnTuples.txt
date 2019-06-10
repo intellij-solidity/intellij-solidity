@@ -111,7 +111,9 @@ Solidity File
             PsiElement(=)('=')
             PsiWhiteSpace(' ')
             SolFunctionCallExpressionImpl(FUNCTION_CALL_EXPRESSION)
-              PsiElement(Identifier)('aaa')
+              SolPrimaryExpressionImpl(PRIMARY_EXPRESSION)
+                SolVarLiteralImpl(VAR_LITERAL)
+                  PsiElement(Identifier)('aaa')
               PsiElement(()('(')
               SolFunctionCallArgumentsImpl(FUNCTION_CALL_ARGUMENTS)
                 <empty list>

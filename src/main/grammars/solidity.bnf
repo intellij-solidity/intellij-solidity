@@ -141,9 +141,15 @@ ContractDefinition ::= ( contract | library | interface ) Identifier
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
 
-private ContractPart ::= StateVariableDeclaration | UsingForDeclaration
-             | StructDefinition | ModifierDefinition | FunctionDefinition | EventDefinition | EnumDefinition
-             | ConstructorDefinition
+private ContractPart ::=
+    FunctionDefinition
+    | StateVariableDeclaration
+    | UsingForDeclaration
+    | StructDefinition
+    | ModifierDefinition
+    | EventDefinition
+    | EnumDefinition
+    | ConstructorDefinition
 
 InheritanceSpecifier ::= UserDefinedTypeName ( '(' Expression ( ',' Expression )* ')' )?
 
@@ -179,23 +185,33 @@ ModifierDefinition ::= modifier Identifier ParameterList? Block {
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
 
-FunctionModifier ::= StateMutability | external | public | internal | private | Identifier
+FunctionVisibilitySpecifier ::= external | public | internal | 'private'
+ModifierInvocation ::= VarLiteral ('(' ModifierInvocationCallArguments ')')? {
+    implements = "me.serce.solidity.lang.psi.SolModifierInvocationElement"
+    mixin = "me.serce.solidity.lang.psi.impl.SolModifierInvocationMixin"
+}
+private ModifierInvocationCallArguments ::= FunctionCallArguments
 
 ConstructorDefinition ::= constructor ParameterList
-                         ( FunctionCallExpression | FunctionModifier )*
+                         ( ModifierInvocation | FunctionVisibilitySpecifier | StateMutability)*
                          Block {
     pin = 1
 }
 
-FunctionDefinition ::= function Identifier? ParameterList
-                     ( FunctionCallExpression | FunctionModifier )*
-                     ( returns ParameterList )? ( ';' | Block ) {
-    pin = 1
+FunctionDefinition ::= OrdinaryFunctionDefinition | FallbackFunctionDefinition {
     implements = "me.serce.solidity.lang.psi.SolFunctionDefElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolFunctionDefMixin"
     stubClass = "me.serce.solidity.lang.stubs.SolFunctionDefStub"
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
+
+private OrdinaryFunctionDefinition ::= function Identifier ParameterList
+                     ( ModifierInvocation | FunctionVisibilitySpecifier | StateMutability)*
+                     ( returns ParameterList )? ( ';' | Block ) {
+    pin = 2
+}
+
+private FallbackFunctionDefinition ::= function ParameterList (FunctionVisibilitySpecifier | StateMutability)* Block
 
 EventDefinition ::= event Identifier IndexedParameterList anonymous? ';' {
     pin = 1
@@ -337,13 +353,9 @@ VariableDefinition ::= VariableDeclaration ( '=' Expression )?
 Expression ::=
   AssignmentExpression
   | TernaryExpression
-  | FunctionCallExpression
-  | CallExpression
-  | ParenExpression
-  | NewExpression
-  | EqExpression
   | OrExpression
   | AndExpression
+  | EqExpression
   | CompExpression
   | OrOpExpression
   | XorOpExpression
@@ -353,12 +365,16 @@ Expression ::=
   | MultDivExpression
   | ExponentExpression
   | UnaryExpression
-  | IncrementExpression
-  | IndexAccessExpression
-  | MemberAccessExpression
+  | HighestPriorityGroup
   | InlineArrayExpression
   | PrimaryExpression
 
+private HighestPriorityGroup ::= IncrementExpression
+                      | NewExpression
+                      | IndexAccessExpression
+                      | MemberAccessExpression
+                      | FunctionCallExpression
+                      | ParenExpression
 
 AssignmentExpression ::= Expression ('=' | '|=' | '^=' | '&=' | '<<=' | '>>=' | '+=' | '-=' | '*=' | '/=' | '%=') Expression { rightAssociative=true }
 InlineArrayExpression ::= '[' Expression (',' Expression)* ']'
@@ -390,21 +406,20 @@ VarLiteral ::= Identifier {
     implements = "me.serce.solidity.lang.psi.SolReferenceElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolVarLiteralMixin"
 }
-FunctionCallExpression ::= (Identifier '(' FunctionCallArguments? ')') |
-                           ( ( PrimaryExpression | NewExpression | TypeName  ) ( ( '.' Identifier ) | ( '[' Expression? ']' ) )* '(' FunctionCallArguments? ')' )  {
-    implements = "me.serce.solidity.lang.psi.SolReferenceElement"
-    mixin = "me.serce.solidity.lang.psi.impl.SolFunctionCallElement"
+FunctionCallExpression ::= Expression '(' FunctionCallArguments? ')' {
+    implements = "me.serce.solidity.lang.psi.SolFunctionCallElement"
+    mixin = "me.serce.solidity.lang.psi.impl.SolFunctionCallMixin"
 }
 
-CallExpression ::= Expression ( ( '.' Identifier ) | ( '[' Expression ']' ) )* '(' FunctionCallArguments? ')' ('(' FunctionCallArguments? ')')*
 FunctionCallArguments ::= MapExpression | Expression? ( ',' Expression )*
 private MapExpressionClause ::= Identifier ':' Expression {pin=2}
 MapExpression ::= '{' MapExpressionClause (',' MapExpressionClause )* '}' {pin=1}
 
-NewExpression ::= new ( Identifier | PrimitiveLiteral ) {
+NewExpression ::= new ( Identifier | PrimitiveLiteral ) NewExpressionEnd* {
     implements = "me.serce.solidity.lang.psi.SolReferenceElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolNewExpressionElement"
 }
+private NewExpressionEnd ::='(' FunctionCallArguments')' | '[' Expression? ']'
 
 MemberAccessExpression ::= Expression '.' Identifier {
     pin = 2

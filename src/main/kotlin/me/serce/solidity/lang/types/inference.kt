@@ -23,8 +23,7 @@ fun getSolType(type: SolTypeName?): SolType {
       }
     }
     is SolElementaryTypeName -> {
-      val text = type.firstChild.text
-      when (text) {
+      when (val text = type.firstChild.text) {
         "bool" -> SolBoolean
         "string" -> SolString
         "address" -> SolAddress
@@ -95,8 +94,7 @@ fun inferDeclType(decl: SolNamedElement): SolType {
     is SolTypedDeclarationItem -> getSolType(decl.typeName)
     is SolVariableDeclaration -> {
       return if (decl.typeName == null || decl.typeName?.firstChild?.text == "var") {
-        val parent = decl.parent
-        when (parent) {
+        when (val parent = decl.parent) {
           is SolVariableDefinition -> inferExprType(parent.expression)
           else -> SolUnknown
         }
@@ -166,22 +164,30 @@ fun inferExprType(expr: SolExpression?): SolType {
       inferExprType(expr.expressionList[1])
     )
     is SolFunctionCallExpression -> {
-      expr.expressionList.firstOrNull().let { first ->
-        if (expr.expressionList.size == 1 && first is SolPrimaryExpression && first.elementaryTypeName != null) {
-          getSolType(first.elementaryTypeName)
+      val cast = if (expr.functionCallArguments.expressionList.size == 1) {
+        val element = expr.referenceNameElement
+        if (element is SolElementaryTypeName) {
+          getSolType(element)
         } else {
-          val reference = expr.reference
-          if (reference is SolFunctionCallReference) {
-            reference.multiResolve().firstOrNull().let {
-              when (it) {
-                is SolFunctionDefinition -> it.returnType
-                is SolContractDefinition -> SolContract(it)
-                else -> SolUnknown
-              }
+          null
+        }
+      } else {
+        null
+      }
+      if (cast != null) {
+        cast
+      } else {
+        val reference = expr.reference
+        if (reference is SolFunctionCallReference) {
+          reference.multiResolve().firstOrNull().let {
+            when (it) {
+              is SolFunctionDefinition -> it.returnType
+              is SolContractDefinition -> SolContract(it)
+              else -> SolUnknown
             }
-          } else {
-            SolUnknown
           }
+        } else {
+          SolUnknown
         }
       }
     }
@@ -191,8 +197,7 @@ fun inferExprType(expr: SolExpression?): SolType {
     is SolCompExpression -> SolBoolean
     is SolTernaryExpression -> inferExprType(expr.expressionList[1])
     is SolIndexAccessExpression -> {
-      val arrType = inferExprType(expr.expressionList[0])
-      when (arrType) {
+      when (val arrType = inferExprType(expr.expressionList[0])) {
         is SolArray -> arrType.type
         is SolMapping -> arrType.to
         else -> SolUnknown

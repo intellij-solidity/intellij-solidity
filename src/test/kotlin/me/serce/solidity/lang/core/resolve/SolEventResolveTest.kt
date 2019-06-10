@@ -1,5 +1,8 @@
 package me.serce.solidity.lang.core.resolve
 
+import me.serce.solidity.lang.psi.SolFunctionCallExpression
+import me.serce.solidity.lang.psi.SolNamedElement
+
 class SolEventResolveTest : SolResolveTestBase() {
   fun testEventWithNoArguments() = checkByCode("""
         contract B {
@@ -37,4 +40,8 @@ class SolEventResolveTest : SolResolveTestBase() {
             }
         }
   """)
+
+  override fun checkByCode(code: String) {
+    checkByCodeInternal<SolFunctionCallExpression, SolNamedElement>(code)
+  }
 }

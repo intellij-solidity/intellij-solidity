@@ -15,11 +15,23 @@ interface SolNamedElement : SolElement, PsiNamedElement, NavigatablePsiElement
 
 interface SolFunctionDefElement : SolReferenceElement {
   val contract: SolContractDefinition
-  val modifiers: List<PsiElement>
+  val modifiers: List<SolModifierInvocation>
   val parameters: List<SolParameterDef>
   val parameterTypes: List<SolType>
   val returns: SolParameterList?
   val isConstructor: Boolean
+}
+
+interface SolFunctionCallElement : SolReferenceElement {
+  val expression: SolExpression
+  val functionCallArguments: SolFunctionCallArguments
+
+  fun getBaseAndReferenceNameElement(): Pair<SolExpression?, PsiElement>
+}
+
+interface SolModifierInvocationElement : SolReferenceElement {
+  val varLiteral: SolVarLiteral
+  val functionCallArguments: SolFunctionCallArguments
 }
 
 interface SolEnumDefElement : SolNamedElement {

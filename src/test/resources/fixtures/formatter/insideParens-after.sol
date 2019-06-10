@@ -22,12 +22,12 @@ contract A {
         }
         // TODO: fix && inside if
         if (a == 1
-        && b == 2) {
+            && b == 2) {
             doSomething(1, 2);
             2;
         }
         while (1 == 2
-        || 2 == 3) {
+            || 2 == 3) {
             doSomething(1, 2);
         }
     }

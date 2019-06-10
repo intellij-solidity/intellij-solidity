@@ -1,5 +1,9 @@
 package me.serce.solidity.lang.core.resolve
 
+import me.serce.solidity.lang.psi.SolModifierInvocation
+import me.serce.solidity.lang.psi.SolNamedElement
+import org.intellij.lang.annotations.Language
+
 class SolModifierResolveTest : SolResolveTestBase() {
   fun testResolveModifier() = checkByCode("""
         contract B {
@@ -46,4 +50,8 @@ class SolModifierResolveTest : SolResolveTestBase() {
             }
         }
   """)
+
+  override fun checkByCode(@Language("Solidity") code: String) {
+    super.checkByCodeInternal<SolModifierInvocation, SolNamedElement>(code)
+  }
 }

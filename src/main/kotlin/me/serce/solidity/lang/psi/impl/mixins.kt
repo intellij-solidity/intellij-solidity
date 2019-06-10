@@ -15,6 +15,7 @@ import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.resolve.ref.*
 import me.serce.solidity.lang.stubs.*
 import me.serce.solidity.lang.types.SolType
+import me.serce.solidity.lang.types.findParent
 import me.serce.solidity.lang.types.getSolType
 import java.util.*
 
@@ -80,8 +81,8 @@ abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefSt
   override val referenceName: String
     get() = referenceNameElement.text
 
-  override val modifiers: List<PsiElement>
-    get() = findChildrenByType<PsiElement>(FUNCTION_MODIFIER)
+  override val modifiers: List<SolModifierInvocation>
+    get() = findChildrenByType(MODIFIER_INVOCATION)
 
   override val parameters: List<SolParameterDef>
     get() = findChildByType<SolParameterList>(PARAMETER_LIST)
@@ -143,6 +144,39 @@ abstract class SolStructDefMixin : SolStubbedNamedElementImpl<SolStructDefStub>,
   override fun getIcon(flags: Int) = SolidityIcons.STRUCT
 }
 
+abstract class SolFunctionCallMixin(node: ASTNode) : SolNamedElementImpl(node), SolFunctionCallElement {
+  override fun getBaseAndReferenceNameElement(): Pair<SolExpression?, PsiElement> {
+    return when (val expr = expression) {
+      is SolPrimaryExpression ->
+        expr.varLiteral?.let { Pair(null, it) }
+          ?: expr.elementaryTypeName?.let { Pair(null, it) }!!
+      is SolMemberAccessExpression ->
+        Pair(expr.expression, expr.identifier!!)
+      else -> throw IllegalStateException("unable to extract reference name element from $this")
+    }
+  }
+
+  override val referenceNameElement: PsiElement
+    get() = getBaseAndReferenceNameElement().second
+
+  override val referenceName: String
+    get() = referenceNameElement.text
+
+  override fun getName(): String? = referenceName
+
+  override fun getReference(): SolReference = SolFunctionCallReference(this as SolFunctionCallExpression)
+}
+
+abstract class SolModifierInvocationMixin(node: ASTNode) : SolNamedElementImpl(node), SolModifierInvocationElement {
+
+  override val referenceNameElement: PsiElement
+    get() = this.varLiteral
+  override val referenceName: String
+    get() = this.varLiteral.text
+
+  override fun getReference(): SolReference = SolModifierReference(this.findParent(), this)
+}
+
 abstract class SolVarLiteralMixin(node: ASTNode) : SolNamedElementImpl(node), SolVarLiteral {
   override val referenceNameElement: PsiElement
     get() = findChildByType(IDENTIFIER)!!
@@ -193,16 +227,6 @@ abstract class SolMemberAccessElement(node: ASTNode) : SolNamedElementImpl(node)
     get() = referenceNameElement.text
 
   override fun getReference() = SolMemberAccessReference(this)
-}
-
-abstract class SolFunctionCallElement(node: ASTNode) : SolNamedElementImpl(node), SolFunctionCallExpression {
-  // TODO: simplify
-  override val referenceNameElement: PsiElement
-    get() = findLastChildByType(IDENTIFIER) ?: firstChild
-  override val referenceName: String
-    get() = referenceNameElement.text
-
-  override fun getReference() = SolFunctionCallReference(this)
 }
 
 abstract class SolNewExpressionElement(node: ASTNode) : SolNamedElementImpl(node), SolNewExpression {
