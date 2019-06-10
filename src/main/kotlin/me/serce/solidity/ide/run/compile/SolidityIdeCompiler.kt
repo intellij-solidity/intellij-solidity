@@ -50,11 +50,11 @@ object SolidityIdeCompiler : Validator {
         .map { StubIndex.getElements(SolImportIndex.KEY, it, context.project, GlobalSearchScope.projectScope(context.project), SolImportPathElement::class.java) }
         .flatten()
         .groupBy { it.containingFile.virtualFile }
-      files.map {
-        val base = Paths.get(it.parent.path)
-        val importStamps = imports[it]?.map { stampForImport(base, it) }?.sum() ?: 0
-        val myValidityState = TimestampValidityState(it.timeStamp + importStamps)
-        SolProcessingItem(myValidityState, it.canonicalFile!!)
+      files.map { file ->
+        val base = Paths.get(file.parent.path)
+        val importStamps = imports[file]?.map { stampForImport(base, it) }?.sum() ?: 0
+        val myValidityState = TimestampValidityState(file.timeStamp + importStamps)
+        SolProcessingItem(myValidityState, file.canonicalFile!!)
       }.toList().toTypedArray()
     }
   }
@@ -74,8 +74,8 @@ object SolidityIdeCompiler : Validator {
       .filterNotNull()
       .groupBy { it.second }
 
-    val compiled = fileByModule.map {
-      Pair(it.value, Solc.compile(it.value.map { File(it.first.file.path) }, SolidityCompiler.getOutputDir(it.key), context.project.baseDir))
+    val compiled = fileByModule.map { entry ->
+      Pair(entry.value, Solc.compile(entry.value.map { File(it.first.file.path) }, SolidityCompiler.getOutputDir(entry.key), context.project.baseDir))
     }.onEach { SolcMessageProcessor.process(it.second, context) }
       .groupBy { it.second.success }
 

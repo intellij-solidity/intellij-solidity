@@ -79,7 +79,7 @@ ${functions.filter { it.name != null }.joinToString("\n") { funcStubTemplate(it)
   private fun paramRefs(function: AbiDefinition?): String {
     val parameters = function?.inputs ?: return ""
     return if (parameters.isNotEmpty()) {
-      ", " + parameters.map { "(Object)${it.name}" }.joinToString(", ")
+      ", " + parameters.joinToString(", ") { "(Object)${it.name}" }
     } else ""
   }
 

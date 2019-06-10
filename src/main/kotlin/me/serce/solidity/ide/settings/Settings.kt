@@ -21,7 +21,7 @@ import java.nio.file.Paths
 import java.util.stream.Collectors
 import javax.swing.JComponent
 
-@State(name = "SoliditySettings", storages = arrayOf(Storage("other.xml")))
+@State(name = "SoliditySettings", storages = [Storage("other.xml")])
 class SoliditySettings : PersistentStateComponent<SoliditySettings> {
   var pathToEvm: String = ""
   var pathToDb: String = ""
@@ -77,11 +77,11 @@ class SoliditySettings : PersistentStateComponent<SoliditySettings> {
         files[ethJar] = files[0].also { files[0] = files[ethJar] }
       }
       val cl = URLClassLoader(files.map { it.toUri().toURL() }.toTypedArray())
-      try {
+      return try {
         Class.forName("org.ethereum.util.blockchain.StandaloneBlockchain", false, cl)
-        return true
+        true
       } catch (e: ClassNotFoundException) {
-        return false
+        false
       }
     }
 

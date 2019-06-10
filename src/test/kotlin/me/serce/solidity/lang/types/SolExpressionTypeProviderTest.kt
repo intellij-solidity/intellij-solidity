@@ -147,7 +147,7 @@ class SolExpressionTypeProviderTest : SolTestBase() {
     }
   }
 
-  fun testContractTypes(@Language("Solidity") codeProvider: (String, String) -> String) {
+  private fun testContractTypes(@Language("Solidity") codeProvider: (String, String) -> String) {
     val cases = listOf(
       "B" to "B"
     )

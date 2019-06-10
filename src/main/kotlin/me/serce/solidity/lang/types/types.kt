@@ -54,7 +54,6 @@ object SolAddress : SolPrimitiveType {
 data class SolInteger(val unsigned: Boolean, val size: Int) : SolNumeric {
   companion object {
     val UINT_160 = SolInteger(true, 160)
-    val INT = SolInteger(false, 256)
 
     fun parse(name: String): SolInteger {
       var unsigned = false
@@ -246,13 +245,13 @@ data class SolFixedBytes(val size: Int): SolPrimitiveType {
   }
 }
 
-private val INTENAL_INDICATOR = "_sol1_s"
+private const val INTERNAL_INDICATOR = "_sol1_s"
 
-fun internalise(name: String): String = "$name$INTENAL_INDICATOR"
+fun internalise(name: String): String = "$name$INTERNAL_INDICATOR"
 
-fun isInternal(name: String): Boolean = name.endsWith(INTENAL_INDICATOR)
+fun isInternal(name: String): Boolean = name.endsWith(INTERNAL_INDICATOR)
 
 fun deInternalise(name: String): String = when {
-  name.endsWith(INTENAL_INDICATOR) -> name.removeSuffix(INTENAL_INDICATOR)
+  name.endsWith(INTERNAL_INDICATOR) -> name.removeSuffix(INTERNAL_INDICATOR)
   else -> name
 }

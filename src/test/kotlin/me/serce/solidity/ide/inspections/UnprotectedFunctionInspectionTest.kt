@@ -1,6 +1,6 @@
 package me.serce.solidity.ide.inspections
 
-class UnprotectedFunctionInspectionTest() : SolInspectionsTestBase(UnprotectedFunctionInspection()) {
+class UnprotectedFunctionInspectionTest : SolInspectionsTestBase(UnprotectedFunctionInspection()) {
   fun testOwner() = checkByText("""
       contract Ownable {
         address public owner;

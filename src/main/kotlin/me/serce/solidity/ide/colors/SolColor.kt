@@ -4,7 +4,7 @@ import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.options.colors.AttributesDescriptor
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as Defaults
 
-enum class SolColor(humanName: String, val default: TextAttributesKey) {
+enum class SolColor(humanName: String, default: TextAttributesKey) {
   LINE_COMMENT("Comment", Defaults.LINE_COMMENT),
 
   BRACES("Braces", Defaults.BRACES),

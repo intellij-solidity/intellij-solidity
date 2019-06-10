@@ -11,7 +11,7 @@ import me.serce.solidity.lang.psi.SolContractDefinition
 import me.serce.solidity.lang.psi.SolInheritanceSpecifier
 import java.util.*
 
-private val MAX_IMPLEMENTATIONS = 250
+private const val MAX_IMPLEMENTATIONS = 250
 
 class SolContractImplementationSearcher : QueryExecutorBase<PsiElement, SearchParameters>(true) {
 

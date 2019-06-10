@@ -4,7 +4,11 @@ import com.intellij.openapi.compiler.FileProcessingCompiler
 import com.intellij.openapi.compiler.ValidityState
 import com.intellij.openapi.vfs.VirtualFile
 
-class SolProcessingItem(val myValidityState: ValidityState, val myFile: VirtualFile) : FileProcessingCompiler.ProcessingItem {
+class SolProcessingItem(
+  private val myValidityState: ValidityState,
+  private val myFile: VirtualFile
+) : FileProcessingCompiler.ProcessingItem {
+
   override fun getValidityState(): ValidityState? {
     return myValidityState
   }

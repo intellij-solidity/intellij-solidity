@@ -10,7 +10,7 @@ import me.serce.solidity.lang.psi.*
  */
 class UnprotectedFunctionInspection : LocalInspectionTool() {
   companion object {
-    val MESSAGE = "Function might modify owners of the contract, but has no modifiers. Consider adding an explicit modifier."
+    const val MESSAGE = "Function might modify owners of the contract, but has no modifiers. Consider adding an explicit modifier."
   }
 
   override fun getDisplayName() = ""

@@ -22,7 +22,7 @@ abstract class SolTestBase : SolLightPlatformCodeInsightFixtureTestCase() {
     }
   }
 
-  protected val fileName: String
+  private val fileName: String
     get() = "${getTestName(true)}.sol"
 
   protected fun replaceCaretMarker(text: String) = text.replace("/*caret*/", "<caret>")

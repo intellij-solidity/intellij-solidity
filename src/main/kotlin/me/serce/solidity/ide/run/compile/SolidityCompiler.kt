@@ -50,7 +50,7 @@ object SolidityCompiler {
   }
 
   fun getOutputDir(module: Module): File {
-    var outputPath: VirtualFile? = try {
+    val outputPath: VirtualFile? = try {
       Class.forName("com.intellij.openapi.compiler.CompilerPaths")
       getIdeModuleOutputDirectory(module)
     } catch (e: ClassNotFoundException) {
