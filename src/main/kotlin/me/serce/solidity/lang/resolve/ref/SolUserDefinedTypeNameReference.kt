@@ -7,6 +7,7 @@ import me.serce.solidity.lang.completion.SolCompleter
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.resolve.FunctionResolveResult
 import me.serce.solidity.lang.resolve.SolResolver
+import me.serce.solidity.lang.resolve.canBeApplied
 import me.serce.solidity.lang.types.SolContract
 import me.serce.solidity.lang.types.SolInternalTypeFactory
 import me.serce.solidity.lang.types.findContract
@@ -84,31 +85,39 @@ class SolFunctionCallReference(element: SolFunctionCallExpression) : SolReferenc
 
   fun resolveFunctionCall(): Collection<FunctionResolveResult> {
     val (base, refName) = element.getBaseAndReferenceNameElement()
+    val name = refName.text
+    val calling = findContract(refName)
     return when {
       base == null -> {
         val globalType = SolInternalTypeFactory.of(element.project).globalType.ref
-        val global = SolResolver.resolveFunction(SolContract(globalType), refName, element.functionCallArguments)
+        val global = SolResolver.resolveFunction(SolContract(globalType), name, calling)
 
         val casts = SolResolver.resolveCast(refName, element.functionCallArguments)
 
         val contract = findContract(element)
-        val regular = contract?.let { SolResolver.resolveFunction(SolContract(it), refName, element.functionCallArguments) }
+        val regular = contract?.let { SolResolver.resolveFunction(SolContract(it), name, calling) }
           ?: emptyList()
 
         global + casts + regular
       }
       base is SolPrimaryExpression && base.varLiteral?.name == "super" -> {
         val contract = findContract(base)
-        contract?.let { SolResolver.resolveFunction(SolContract(it), refName, element.functionCallArguments, true) }
+        contract?.let { SolResolver.resolveFunction(SolContract(it), name, calling, true) }
           ?: emptyList()
       }
       else -> {
-        SolResolver.resolveFunction(base.type, refName, element.functionCallArguments)
+        SolResolver.resolveFunction(base.type, name, calling)
       }
     }
   }
 
   override fun multiResolve(): Collection<PsiElement> {
-    return resolveFunctionCall().map { it.psiElement }
+    val resolved = resolveFunctionCall()
+    val filtered = resolved.filter { it.element.canBeApplied(element.functionCallArguments) }
+    return if (filtered.size == 1) {
+      filtered.map { it.element }
+    } else {
+      resolved.map { it.element }
+    }
   }
 }

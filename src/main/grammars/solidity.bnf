@@ -171,7 +171,7 @@ UsingForDeclaration ::= using UserDefinedTypeName for ('*' | TypeName) ';' {
 StructDefinition ::= struct Identifier '{'
                      ( VariableDeclaration ';' (VariableDeclaration ';')* )? '}' {
     pin=1
-    implements = "me.serce.solidity.lang.psi.SolNamedElement"
+    implements = "me.serce.solidity.lang.psi.SolCallableElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolStructDefMixin"
     stubClass = "me.serce.solidity.lang.stubs.SolStructDefStub"
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
@@ -215,7 +215,7 @@ private FallbackFunctionDefinition ::= function ParameterList (FunctionVisibilit
 
 EventDefinition ::= event Identifier IndexedParameterList anonymous? ';' {
     pin = 1
-    implements = "me.serce.solidity.lang.psi.SolNamedElement"
+    implements = "me.serce.solidity.lang.psi.SolCallableElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolEventDefMixin"
     stubClass = "me.serce.solidity.lang.stubs.SolEventDefStub"
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
