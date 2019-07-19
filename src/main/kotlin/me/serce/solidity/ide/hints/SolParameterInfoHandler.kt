@@ -4,7 +4,6 @@ import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.lang.parameterInfo.*
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
-import com.intellij.psi.ResolveResult
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.resolve.canBeApplied
 import me.serce.solidity.lang.resolve.ref.SolFunctionCallReference
@@ -37,15 +36,14 @@ class SolParameterInfoHandler : ParameterInfoHandler<PsiElement, SolArgumentsDes
       return
     }
     val range = p.getArgumentRange(context.currentParameterIndex)
-    hintText = p.presentText
     context.setupUIComponentPresentation(
-      hintText,
+      p.presentText,
       range.startOffset,
       range.endOffset,
       !context.isUIComponentEnabled,
       false,
       false,
-      context.defaultParameterColor)
+      if (p.valid) context.defaultParameterColor.brighter() else context.defaultParameterColor)
   }
 
   override fun updateParameterInfo(parameterOwner: PsiElement, context: UpdateParameterInfoContext) {
@@ -106,8 +104,13 @@ class SolParameterInfoHandler : ParameterInfoHandler<PsiElement, SolArgumentsDes
   override fun couldShowInLookup() = true
 }
 
-class SolArgumentsDescription(private val element: SolCallableElement, callArguments: SolFunctionCallArguments, val arguments: Array<String>) : ResolveResult {
-  private val valid = element.canBeApplied(callArguments)
+class SolArgumentsDescription(
+  element: SolCallableElement,
+  callArguments: SolFunctionCallArguments,
+  val arguments: Array<String>
+) {
+
+  val valid = element.canBeApplied(callArguments)
   val presentText = if (arguments.isEmpty()) "<no arguments>" else arguments.joinToString(", ")
 
   fun getArgumentRange(index: Int): TextRange {
@@ -117,10 +120,6 @@ class SolArgumentsDescription(private val element: SolCallableElement, callArgum
     val start = arguments.take(index).sumBy { it.length + 2 }
     return TextRange(start, start + arguments[index].length)
   }
-
-  override fun getElement(): PsiElement? = element
-
-  override fun isValidResult(): Boolean = valid
 
   companion object {
     fun findDescriptions(element: SolFunctionCallExpression): List<SolArgumentsDescription> {
