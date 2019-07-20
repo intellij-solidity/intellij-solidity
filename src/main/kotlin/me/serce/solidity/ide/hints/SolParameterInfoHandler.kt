@@ -11,8 +11,6 @@ import me.serce.solidity.lang.resolve.ref.SolFunctionCallReference
 private const val INVALID_INDEX: Int = -2
 
 class SolParameterInfoHandler : ParameterInfoHandler<PsiElement, SolArgumentsDescription> {
-  var hintText: String = ""
-
   override fun findElementForParameterInfo(context: CreateParameterInfoContext): PsiElement? {
     val contextElement = context.file?.findElementAt(context.editor.caretModel.offset) ?: return null
     return findElementForParameterInfo(contextElement)

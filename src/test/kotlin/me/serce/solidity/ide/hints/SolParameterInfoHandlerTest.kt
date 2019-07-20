@@ -1,5 +1,6 @@
 package me.serce.solidity.ide.hints
 
+import com.intellij.psi.PsiElement
 import com.intellij.testFramework.utils.parameterInfo.MockCreateParameterInfoContext
 import com.intellij.testFramework.utils.parameterInfo.MockParameterInfoUIContext
 import com.intellij.testFramework.utils.parameterInfo.MockUpdateParameterInfoContext
@@ -7,6 +8,7 @@ import junit.framework.AssertionFailedError
 import junit.framework.TestCase
 import me.serce.solidity.utils.SolTestBase
 import org.intellij.lang.annotations.Language
+import java.awt.Color
 
 class SolParameterInfoHandlerTest : SolTestBase() {
   fun testEmptyParameters() = checkByText("""
@@ -118,9 +120,11 @@ class SolParameterInfoHandlerTest : SolTestBase() {
     val items = createContext.itemsToShow ?: throw AssertionFailedError("Parameters are not shown")
     TestCase.assertEquals(hints.size, items.size)
     for (hint in hints.withIndex()) {
-      val context = MockParameterInfoUIContext(el)
+      val context = object : MockParameterInfoUIContext<PsiElement>(el) {
+        override fun getDefaultParameterColor(): Color = Color.GRAY
+      }
       handler.updateUI(items[hint.index] as SolArgumentsDescription, context)
-      TestCase.assertEquals(hint.value, handler.hintText)
+      TestCase.assertEquals(hint.value, context.text)
     }
 
     val updateContext = MockUpdateParameterInfoContext(myFixture.editor, myFixture.file)
