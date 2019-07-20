@@ -123,8 +123,7 @@ object SolResolver {
         return contract?.let { resolveContractMember(it, element, true) } ?: emptyList()
       }
       else -> {
-        val refType = ref.type
-        when (refType) {
+        when (val refType = ref.type) {
           is SolContract -> resolveContractMember(refType.ref, element)
           is SolStruct -> refType.ref.variableDeclarationList.filter { it.name == propName }
           is SolEnum -> refType.ref.enumValueList.filter { it.name == propName }
@@ -157,8 +156,12 @@ object SolResolver {
     return emptyList()
   }
 
-  fun resolveFunction(type: SolType, element: PsiElement, arguments: SolFunctionCallArguments, skipThis: Boolean = false): Collection<FunctionResolveResult> {
-    val contract = findContract(element)
+  fun resolveFunction(
+    type: SolType,
+    name: String,
+    contract: SolContractDefinition?,
+    skipThis: Boolean = false): Collection<FunctionResolveResult> {
+
     val superContracts = contract
       ?.collectSupers
       ?.flatMap { resolveTypeNameUsingImports(it) }
@@ -172,10 +175,10 @@ object SolResolver {
       }
       .map { it.library }
       .distinct()
-      .flatMap { resoleFunInLibrary(element, arguments, it) }
+      .flatMap { resoleFunInLibrary(name, it) }
 
     val fromContracts = if (type is SolContract)
-      resolveFunRec(type.ref, element, arguments, skipThis)
+      resolveFunRec(type.ref, name, skipThis)
         .map { FunctionResolveResult(it) }
     else
       emptyList()
@@ -183,17 +186,17 @@ object SolResolver {
     return fromContracts + fromLibraries
   }
 
-  private fun resoleFunInLibrary(element: PsiElement, arguments: SolFunctionCallArguments, library: SolContractDefinition): Collection<FunctionResolveResult> {
+  private fun resoleFunInLibrary(name: String, library: SolContractDefinition): Collection<FunctionResolveResult> {
     return library.functionDefinitionList
-      .filter { it.name == element.text && canBeApplied(it.parameterTypes.drop(1), arguments) }
+      .filter { it.name == name }
       .map { FunctionResolveResult(it, true) }
   }
 
-  private fun resolveFunRec(contract: SolContractDefinition, element: PsiElement, arguments: SolFunctionCallArguments, skipThis: Boolean = false): List<PsiElement> {
+  private fun resolveFunRec(contract: SolContractDefinition, name: String, skipThis: Boolean = false): List<SolCallableElement> {
     if (!skipThis) {
       val functions = contract.functionDefinitionList
         .filter {
-          it.name == element.text && canBeApplied(it.parameterTypes, arguments)
+          it.name == name
         }
       if (functions.isNotEmpty()) {
         return functions
@@ -201,7 +204,7 @@ object SolResolver {
 
       val events = contract.eventDefinitionList
         .filter {
-          it.name == element.text && canBeApplied(it.getParameterTypes(), arguments)
+          it.name == name
         }
       if (events.isNotEmpty()) {
         return events
@@ -209,7 +212,7 @@ object SolResolver {
 
       val structs = contract.structDefinitionList
         .filter {
-          it.name == element.text
+          it.name == name
         }
       if (structs.isNotEmpty()) {
         return structs
@@ -219,23 +222,9 @@ object SolResolver {
     return contract.supers.asSequence()
       .flatMap { resolveTypeName(it).asSequence() }
       .filterIsInstance<SolContractDefinition>()
-      .map { resolveFunRec(it, element, arguments) }
+      .map { resolveFunRec(it, name) }
       .filter { it.isNotEmpty() }
       .firstOrElse(emptyList())
-  }
-
-  private fun SolEventDefinition.getParameterTypes(): List<SolType> {
-    return this.indexedParameterList?.typeNameList?.map { getSolType(it) } ?: emptyList()
-  }
-
-  private fun canBeApplied(parameterTypes: List<SolType>, arguments: SolFunctionCallArguments) : Boolean {
-    val callArgumentTypes = arguments.expressionList.map { it.type }
-    if (parameterTypes.size != callArgumentTypes.size)
-      return false
-    return !parameterTypes.zip(callArgumentTypes)
-      .any { (paramType, argumentType) ->
-        !paramType.isAssignableFrom(argumentType)
-      }
   }
 
   fun lexicalDeclarations(place: PsiElement, stop: (PsiElement) -> Boolean = { false }): Sequence<SolNamedElement> {
@@ -311,8 +300,6 @@ object SolResolver {
     }
   }
 
-  private fun SolFunctionCallExpression.argumentsNumber() = functionCallArguments?.expressionList?.size ?: 0
-
   private fun <T> T?.wrap(): List<T> {
     return when (this) {
       null -> listOf()
@@ -323,7 +310,7 @@ object SolResolver {
 
 data class ResolveContractKey(val name: String?, val file: PsiFile)
 
-data class FunctionResolveResult(val psiElement: PsiElement, val usingLibrary: Boolean = false)
+data class FunctionResolveResult(val element: SolCallableElement, val usingLibrary: Boolean = false)
 
 private fun <T> Sequence<T>.takeWhileInclusive(pred: (T) -> Boolean): Sequence<T> {
   var shouldContinue = true
@@ -332,4 +319,14 @@ private fun <T> Sequence<T>.takeWhileInclusive(pred: (T) -> Boolean): Sequence<T
     shouldContinue = pred(it)
     result
   }
+}
+
+fun SolCallableElement.canBeApplied(arguments: SolFunctionCallArguments) : Boolean {
+  val callArgumentTypes = arguments.expressionList.map { it.type }
+  if (parameterTypes.size != callArgumentTypes.size)
+    return false
+  return !parameterTypes.zip(callArgumentTypes)
+    .any { (paramType, argumentType) ->
+      !paramType.isAssignableFrom(argumentType)
+    }
 }

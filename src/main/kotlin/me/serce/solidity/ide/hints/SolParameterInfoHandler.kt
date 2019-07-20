@@ -5,13 +5,12 @@ import com.intellij.lang.parameterInfo.*
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import me.serce.solidity.lang.psi.*
+import me.serce.solidity.lang.resolve.canBeApplied
 import me.serce.solidity.lang.resolve.ref.SolFunctionCallReference
 
 private const val INVALID_INDEX: Int = -2
 
 class SolParameterInfoHandler : ParameterInfoHandler<PsiElement, SolArgumentsDescription> {
-  var hintText: String = ""
-
   override fun findElementForParameterInfo(context: CreateParameterInfoContext): PsiElement? {
     val contextElement = context.file?.findElementAt(context.editor.caretModel.offset) ?: return null
     return findElementForParameterInfo(contextElement)
@@ -21,8 +20,8 @@ class SolParameterInfoHandler : ParameterInfoHandler<PsiElement, SolArgumentsDes
     if (element !is SolFunctionCallExpression) {
       return
     }
-    val argsDescr = SolArgumentsDescription.findDescription(element) ?: return
-    context.itemsToShow = arrayOf(argsDescr)
+    val descriptions = SolArgumentsDescription.findDescriptions(element)
+    context.itemsToShow = descriptions.toTypedArray()
     context.showHint(element, element.textRange.startOffset, this)
   }
 
@@ -35,15 +34,14 @@ class SolParameterInfoHandler : ParameterInfoHandler<PsiElement, SolArgumentsDes
       return
     }
     val range = p.getArgumentRange(context.currentParameterIndex)
-    hintText = p.presentText
     context.setupUIComponentPresentation(
-      hintText,
+      p.presentText,
       range.startOffset,
       range.endOffset,
       !context.isUIComponentEnabled,
       false,
       false,
-      context.defaultParameterColor)
+      if (p.valid) context.defaultParameterColor.brighter() else context.defaultParameterColor)
   }
 
   override fun updateParameterInfo(parameterOwner: PsiElement, context: UpdateParameterInfoContext) {
@@ -76,22 +74,20 @@ class SolParameterInfoHandler : ParameterInfoHandler<PsiElement, SolArgumentsDes
 
   private fun findArgumentIndex(place: PsiElement): Int {
     val callArgs = place.parentOfType<SolFunctionCallExpression>()
+    @Suppress("FoldInitializerAndIfToElvis")
     if (callArgs == null) {
       return INVALID_INDEX
     }
-    val descr = SolArgumentsDescription.findDescription(callArgs)
-    if (descr == null) {
+    val descriptions = SolArgumentsDescription.findDescriptions(callArgs)
+    if (descriptions.isEmpty()) {
       return INVALID_INDEX
     }
     var index = -1
     val arguments = callArgs.functionCallArguments
-    if (arguments != null && descr.arguments.isNotEmpty()) {
+    if (arguments != null) {
       index += generateSequence(arguments.firstChild) { c -> c.nextSibling }
         .filter { it.text == "," }
         .count { it.textRange.startOffset < place.textRange.startOffset } + 1
-      if (index >= descr.arguments.size) {
-        index = -1
-      }
     }
     return index
   }
@@ -106,7 +102,13 @@ class SolParameterInfoHandler : ParameterInfoHandler<PsiElement, SolArgumentsDes
   override fun couldShowInLookup() = true
 }
 
-class SolArgumentsDescription(val arguments: Array<String>) {
+class SolArgumentsDescription(
+  element: SolCallableElement,
+  callArguments: SolFunctionCallArguments,
+  val arguments: Array<String>
+) {
+
+  val valid = element.canBeApplied(callArguments)
   val presentText = if (arguments.isEmpty()) "<no arguments>" else arguments.joinToString(", ")
 
   fun getArgumentRange(index: Int): TextRange {
@@ -118,24 +120,23 @@ class SolArgumentsDescription(val arguments: Array<String>) {
   }
 
   companion object {
-    fun findDescription(element: SolFunctionCallExpression): SolArgumentsDescription? {
+    fun findDescriptions(element: SolFunctionCallExpression): List<SolArgumentsDescription> {
       val ref = element.reference
       if (ref is SolFunctionCallReference) {
-        val resolved = ref.resolveFunctionCall()
-        val def = resolved.firstOrNull { it.psiElement is SolFunctionDefinition }
-        if (def != null) {
-          val functionDef = def.psiElement as SolFunctionDefinition
-          val argumentDefList = (if (def.usingLibrary) {
-            functionDef.parameterListList.firstOrNull()?.parameterDefList?.drop(1)
-          } else {
-            functionDef.parameterListList.firstOrNull()?.parameterDefList
-          }) ?: return null
-          return SolArgumentsDescription(argumentDefList.map { "${it.typeName.text} ${it.identifier?.text ?: ""}" }.toTypedArray())
-        } else {
-          return null
-        }
+        return ref.resolveFunctionCall()
+          .mapNotNull {def ->
+            val functionDef = def.element as SolFunctionDefinition
+            val argumentDefList = (if (def.usingLibrary) {
+              functionDef.parameterListList.firstOrNull()?.parameterDefList?.drop(1)
+            } else {
+              functionDef.parameterListList.firstOrNull()?.parameterDefList
+            })
+            argumentDefList?.let { list ->
+              SolArgumentsDescription(def.element, element.functionCallArguments, list.map { "${it.typeName.text} ${it.identifier?.text ?: ""}" }.toTypedArray())
+            }
+          }
       } else {
-        return null
+        return emptyList()
       }
     }
   }

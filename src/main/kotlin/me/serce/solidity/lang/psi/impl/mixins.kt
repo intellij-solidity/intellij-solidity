@@ -14,6 +14,7 @@ import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.resolve.ref.*
 import me.serce.solidity.lang.stubs.*
+import me.serce.solidity.lang.types.SolAddress
 import me.serce.solidity.lang.types.SolType
 import me.serce.solidity.lang.types.findParent
 import me.serce.solidity.lang.types.getSolType
@@ -72,6 +73,9 @@ abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrL
   constructor(stub: SolContractOrLibDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
 
   override fun getIcon(flags: Int) = SolidityIcons.CONTRACT
+
+  override val parameterTypes: List<SolType>
+    get() = listOf(SolAddress)
 }
 
 abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefStub>, SolFunctionDefinition {
@@ -137,11 +141,16 @@ abstract class SolStateVarDeclMixin : SolStubbedNamedElementImpl<SolStateVarDecl
   override fun getIcon(flags: Int) = SolidityIcons.STATE_VAR
 }
 
-abstract class SolStructDefMixin : SolStubbedNamedElementImpl<SolStructDefStub>, SolStructDefinition {
+abstract class SolStructDefMixin : SolStubbedNamedElementImpl<SolStructDefStub>, SolStructDefinition, SolCallableElement {
   constructor(node: ASTNode) : super(node)
   constructor(stub: SolStructDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
 
   override fun getIcon(flags: Int) = SolidityIcons.STRUCT
+
+  override val parameterTypes: List<SolType>
+    get() = variableDeclarationList
+      .map { it.typeName }
+      .map { getSolType(it) }
 }
 
 abstract class SolFunctionCallMixin(node: ASTNode) : SolNamedElementImpl(node), SolFunctionCallElement {
@@ -238,9 +247,12 @@ abstract class SolNewExpressionElement(node: ASTNode) : SolNamedElementImpl(node
   override fun getReference() = SolNewExpressionReference(this)
 }
 
-abstract class SolEventDefMixin : SolStubbedNamedElementImpl<SolEventDefStub>, SolEventDefinition {
+abstract class SolEventDefMixin : SolStubbedNamedElementImpl<SolEventDefStub>, SolEventDefinition, SolCallableElement {
   constructor(node: ASTNode) : super(node)
   constructor(stub: SolEventDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
+
+  override val parameterTypes: List<SolType>
+    get() = this.indexedParameterList?.typeNameList?.map { getSolType(it) } ?: emptyList()
 }
 
 abstract class SolUsingForMixin(node: ASTNode) : SolElementImpl(node), SolUsingForElement {

@@ -1,5 +1,6 @@
 package me.serce.solidity.ide.hints
 
+import com.intellij.psi.PsiElement
 import com.intellij.testFramework.utils.parameterInfo.MockCreateParameterInfoContext
 import com.intellij.testFramework.utils.parameterInfo.MockParameterInfoUIContext
 import com.intellij.testFramework.utils.parameterInfo.MockUpdateParameterInfoContext
@@ -7,6 +8,7 @@ import junit.framework.AssertionFailedError
 import junit.framework.TestCase
 import me.serce.solidity.utils.SolTestBase
 import org.intellij.lang.annotations.Language
+import java.awt.Color
 
 class SolParameterInfoHandlerTest : SolTestBase() {
   fun testEmptyParameters() = checkByText("""
@@ -17,7 +19,7 @@ class SolParameterInfoHandlerTest : SolTestBase() {
                 foo(/*caret*/);
             }
         }
-    """, "<no arguments>", -1)
+    """, "<no arguments>", 0)
 
   fun testInt() = checkByText("""
         contract A {
@@ -28,6 +30,18 @@ class SolParameterInfoHandlerTest : SolTestBase() {
             }
         }
     """, "uint256 a", 0)
+
+  fun testSome() = checkByText("""
+        contract A {
+            function foo(uint256 a) {}
+            
+            function foo(string a) {}
+
+            function main() {
+                foo(1/*caret*/);
+            }
+        }
+    """, listOf("uint256 a", "string a"), 0)
 
   fun testLibrary() = checkByText("""
         library Lib {
@@ -69,7 +83,7 @@ class SolParameterInfoHandlerTest : SolTestBase() {
                 foo.bar(/*caret*/);
             }
         }
-    """, "<no arguments>", -1)
+    """, "<no arguments>", 0)
 
   fun testMultipleParameter2() = checkByText("""
         contract A {
@@ -92,26 +106,30 @@ class SolParameterInfoHandlerTest : SolTestBase() {
     """, "string a, int b, address c", 0)
 
   private fun checkByText(@Language("Solidity") code: String, hint: String, index: Int) {
+    checkByText(code, listOf(hint), index)
+  }
+
+  private fun checkByText(@Language("Solidity") code: String, hints: List<String>, index: Int) {
     myFixture.configureByText("main.sol", code.replace("/*caret*/", "<caret>"))
     val handler = SolParameterInfoHandler()
     val createContext = MockCreateParameterInfoContext(myFixture.editor, myFixture.file)
 
     val el = handler.findElementForParameterInfo(createContext)
-    if (hint.isNotEmpty()) {
-      el ?: throw AssertionFailedError("Hint not found")
-      handler.showParameterInfo(el, createContext)
-      val items = createContext.itemsToShow ?: throw AssertionFailedError("Parameters are not shown")
-      if (items.isEmpty()) throw AssertionFailedError("Parameters are empty")
-      val context = MockParameterInfoUIContext(el)
-      handler.updateUI(items[0] as SolArgumentsDescription, context)
-      TestCase.assertEquals(hint, handler.hintText)
-
-      val updateContext = MockUpdateParameterInfoContext(myFixture.editor, myFixture.file)
-      val element = handler.findElementForUpdatingParameterInfo(updateContext) ?: throw AssertionFailedError("Parameter not found")
-      handler.updateParameterInfo(element, updateContext)
-      TestCase.assertEquals(index, updateContext.currentParameter)
-    } else if (el != null) {
-      throw AssertionFailedError("Unexpected hint found")
+    el ?: throw AssertionFailedError("Hint not found")
+    handler.showParameterInfo(el, createContext)
+    val items = createContext.itemsToShow ?: throw AssertionFailedError("Parameters are not shown")
+    TestCase.assertEquals(hints.size, items.size)
+    for (hint in hints.withIndex()) {
+      val context = object : MockParameterInfoUIContext<PsiElement>(el) {
+        override fun getDefaultParameterColor(): Color = Color.GRAY
+      }
+      handler.updateUI(items[hint.index] as SolArgumentsDescription, context)
+      TestCase.assertEquals(hint.value, context.text)
     }
+
+    val updateContext = MockUpdateParameterInfoContext(myFixture.editor, myFixture.file)
+    val element = handler.findElementForUpdatingParameterInfo(updateContext) ?: throw AssertionFailedError("Parameter not found")
+    handler.updateParameterInfo(element, updateContext)
+    TestCase.assertEquals(index, updateContext.currentParameter)
   }
 }

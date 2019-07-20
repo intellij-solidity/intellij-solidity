@@ -13,11 +13,14 @@ interface SolElement : PsiElement {
 
 interface SolNamedElement : SolElement, PsiNamedElement, NavigatablePsiElement
 
-interface SolFunctionDefElement : SolReferenceElement {
+interface SolCallableElement : SolNamedElement {
+  val parameterTypes: List<SolType>
+}
+
+interface SolFunctionDefElement : SolReferenceElement, SolCallableElement {
   val contract: SolContractDefinition
   val modifiers: List<SolModifierInvocation>
   val parameters: List<SolParameterDef>
-  val parameterTypes: List<SolType>
   val returns: SolParameterList?
   val isConstructor: Boolean
 }
@@ -42,7 +45,7 @@ interface SolModifierElement : SolNamedElement {
   val contract: SolContractDefinition
 }
 
-interface SolContractOrLibElement : SolNamedElement {
+interface SolContractOrLibElement : SolCallableElement {
   val supers: List<SolUserDefinedTypeName>
   val collectSupers: Collection<SolUserDefinedTypeName>
 }
