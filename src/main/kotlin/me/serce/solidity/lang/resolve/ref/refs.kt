@@ -5,13 +5,10 @@ import com.intellij.psi.PsiElement
 import me.serce.solidity.firstInstance
 import me.serce.solidity.lang.completion.SolCompleter
 import me.serce.solidity.lang.psi.*
-import me.serce.solidity.lang.resolve.FunctionResolveResult
 import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.resolve.canBeApplied
-import me.serce.solidity.lang.types.SolContract
-import me.serce.solidity.lang.types.SolInternalTypeFactory
-import me.serce.solidity.lang.types.findContract
-import me.serce.solidity.lang.types.type
+import me.serce.solidity.lang.types.*
+import me.serce.solidity.wrap
 
 class SolUserDefinedTypeNameReference(element: SolUserDefinedTypeName) : SolReferenceBase<SolUserDefinedTypeName>(element), SolReference {
   override fun multiResolve() = SolResolver.resolveTypeNameUsingImports(element)
@@ -83,41 +80,91 @@ class SolFunctionCallReference(element: SolFunctionCallExpression) : SolReferenc
     return element.referenceNameElement.parentRelativeRange
   }
 
-  fun resolveFunctionCall(): Collection<FunctionResolveResult> {
-    val (base, refName) = element.getBaseAndReferenceNameElement()
-    val name = refName.text
-    val calling = findContract(refName)
-    return when {
-      base == null -> {
-        val globalType = SolInternalTypeFactory.of(element.project).globalType.ref
-        val global = SolResolver.resolveFunction(SolContract(globalType), name, calling)
+  fun resolveFunctionCall(): Collection<ResolvedCallable> {
+    return when (val expr = element.expression) {
+      is SolPrimaryExpression -> {
+        val regular = (expr.varLiteral?.reference?.multiResolve() ?: emptyList())
+          .filterIsInstance<ResolvedCallable>()
+        val casts = resolveElementaryTypeCasts(expr)
+        regular + casts
+      }
+      is SolMemberAccessExpression -> {
+        val members = SolResolver.resolveMembers(expr)
+          .filterIsInstance<ResolvedCallable>()
+        val fromLibraries = resolveFunctionCallUsingLibraries(expr)
+        members + fromLibraries
+      }
+      else ->
+        emptyList()
+    }
+  }
 
-        val casts = SolResolver.resolveCast(refName, element.functionCallArguments)
+  private fun resolveElementaryTypeCasts(expr: SolPrimaryExpression): Collection<ResolvedCallable> {
+    return expr.elementaryTypeName
+      ?.let {
+        val type = getSolType(it)
+        object : ResolvedCallable {
+          override val resolvedElement: SolNamedElement? = null
+          override fun parseParameters(): List<Pair<String?, SolType>> = listOf(null to SolUnknown)
 
-        val contract = findContract(element)
-        val regular = contract?.let { SolResolver.resolveFunction(SolContract(it), name, calling) }
+          override fun parseReturnType(): SolType = type
+        }
+      }
+      .wrap()
+  }
+
+  private fun resolveFunctionCallUsingLibraries(expression: SolMemberAccessExpression): Collection<ResolvedCallable> {
+    val name = expression.identifier?.text
+    return if (name != null) {
+      val type = expression.expression.type
+      if (type != SolUnknown) {
+        val contract = expression.findContract()
+        val superContracts = contract
+          ?.collectSupers
+          ?.flatMap { SolResolver.resolveTypeNameUsingImports(it) }
+          ?.filterIsInstance<SolContractDefinition>()
           ?: emptyList()
+        return (superContracts + contract.wrap())
+          .flatMap { it.usingForDeclarationList }
+          .filter {
+            val usingType = it.type
+            usingType == null || usingType == type
+          }
+          .map { it.library }
+          .distinct()
+          .flatMap { it.functionDefinitionList }
+          .filter { it.name == name }
+          .filter {
+            val firstParam = it.parameters.firstOrNull()
+            if (firstParam == null) {
+              false
+            } else {
+              getSolType(firstParam.typeName).isAssignableFrom(type)
+            }
+          }
+          .map { it.toLibraryCallable() }
+      } else {
+        emptyList()
+      }
+    } else {
+      emptyList()
+    }
+  }
 
-        global + casts + regular
-      }
-      base is SolPrimaryExpression && base.varLiteral?.name == "super" -> {
-        val contract = findContract(base)
-        contract?.let { SolResolver.resolveFunction(SolContract(it), name, calling, true) }
-          ?: emptyList()
-      }
-      else -> {
-        SolResolver.resolveFunction(base.type, name, calling)
-      }
+  private fun SolFunctionDefinition.toLibraryCallable(): ResolvedCallable {
+    return object : ResolvedCallable {
+      override fun parseParameters(): List<Pair<String?, SolType>> = this@toLibraryCallable.parseParameters().drop(1)
+
+      override fun parseReturnType(): SolType = this@toLibraryCallable.parseReturnType()
+
+      override val resolvedElement: SolNamedElement
+        get() = this@toLibraryCallable
     }
   }
 
   override fun multiResolve(): Collection<PsiElement> {
-    val resolved = resolveFunctionCall()
-    val filtered = resolved.filter { it.element.canBeApplied(element.functionCallArguments) }
-    return if (filtered.size == 1) {
-      filtered.map { it.element }
-    } else {
-      resolved.map { it.element }
-    }
+    return resolveFunctionCall()
+      .filter { it.canBeApplied(element.functionCallArguments) }
+      .mapNotNull { it.resolvedElement }
   }
 }

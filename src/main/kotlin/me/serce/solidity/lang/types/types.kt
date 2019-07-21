@@ -9,6 +9,7 @@ import me.serce.solidity.lang.psi.SolEnumDefinition
 import me.serce.solidity.lang.psi.SolNumberLiteral
 import me.serce.solidity.lang.psi.SolStructDefinition
 import me.serce.solidity.lang.psi.impl.Linearizable
+import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.types.SolInteger.Companion.UINT_160
 import java.math.BigInteger
 
@@ -166,7 +167,7 @@ data class SolContract(val ref: SolContractDefinition) : SolType, Linearizable<S
     when (other) {
       is SolContract -> {
         other.ref == ref
-          || other.ref.collectSupers.filterIsInstance<SolContractDefinition>().contains(ref)
+          || other.ref.collectSupers.flatMap { SolResolver.resolveTypeNameUsingImports(it) }.contains(ref)
       }
       else -> false
     }

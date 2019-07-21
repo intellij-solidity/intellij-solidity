@@ -14,10 +14,7 @@ import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.resolve.ref.*
 import me.serce.solidity.lang.stubs.*
-import me.serce.solidity.lang.types.SolAddress
-import me.serce.solidity.lang.types.SolType
-import me.serce.solidity.lang.types.findParent
-import me.serce.solidity.lang.types.getSolType
+import me.serce.solidity.lang.types.*
 import java.util.*
 
 open class SolImportPathElement : SolStubbedNamedElementImpl<SolImportPathDefStub>, SolReferenceElement {
@@ -74,8 +71,16 @@ abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrL
 
   override fun getIcon(flags: Int) = SolidityIcons.CONTRACT
 
-  override val parameterTypes: List<SolType>
-    get() = listOf(SolAddress)
+  override fun parseParameters(): List<Pair<String?, SolType>> {
+    return listOf(Pair(null, SolAddress))
+  }
+
+  override fun parseReturnType(): SolType {
+    return SolContract(this)
+  }
+
+  override val resolvedElement: SolNamedElement
+    get() = this
 }
 
 abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefStub>, SolFunctionDefinition {
@@ -94,8 +99,26 @@ abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefSt
       ?.filterIsInstance(SolParameterDef::class.java)
       ?: emptyList()
 
-  override val parameterTypes: List<SolType>
-    get() = parameters.map { getSolType(it.typeName) }
+  override fun parseParameters(): List<Pair<String?, SolType>> {
+    return parameters.map { it.identifier?.text to getSolType(it.typeName) }
+  }
+
+  override fun parseReturnType(): SolType {
+    return this.returns.let { list ->
+      when (list) {
+        null -> SolUnknown
+        else -> list.parameterDefList.let {
+          when {
+            it.size == 1 -> getSolType(it[0].typeName)
+            else -> SolTuple(it.map { def -> getSolType(def.typeName) })
+          }
+        }
+      }
+    }
+  }
+
+  override val resolvedElement: SolNamedElement
+    get() = this
 
   override val returns: SolParameterList?
     get() = if (parameterListList.size == 2) {
@@ -147,10 +170,19 @@ abstract class SolStructDefMixin : SolStubbedNamedElementImpl<SolStructDefStub>,
 
   override fun getIcon(flags: Int) = SolidityIcons.STRUCT
 
-  override val parameterTypes: List<SolType>
-    get() = variableDeclarationList
-      .map { it.typeName }
-      .map { getSolType(it) }
+  override fun parseParameters(): List<Pair<String?, SolType>> {
+    return variableDeclarationList
+      .map { it.identifier?.text to getSolType(it.typeName) }
+
+
+  }
+
+  override fun parseReturnType(): SolType {
+    return SolStruct(this)
+  }
+
+  override val resolvedElement: SolNamedElement
+    get() = this
 }
 
 abstract class SolFunctionCallMixin(node: ASTNode) : SolNamedElementImpl(node), SolFunctionCallElement {
@@ -251,8 +283,19 @@ abstract class SolEventDefMixin : SolStubbedNamedElementImpl<SolEventDefStub>, S
   constructor(node: ASTNode) : super(node)
   constructor(stub: SolEventDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
 
-  override val parameterTypes: List<SolType>
-    get() = this.indexedParameterList?.typeNameList?.map { getSolType(it) } ?: emptyList()
+  //todo add event args identifiers
+  override fun parseParameters(): List<Pair<String?, SolType>> {
+    return indexedParameterList?.typeNameList
+      ?.map { null to getSolType(it) }
+      ?: emptyList()
+  }
+
+  override fun parseReturnType(): SolType {
+    return SolUnknown
+  }
+
+  override val resolvedElement: SolNamedElement
+    get() = this
 }
 
 abstract class SolUsingForMixin(node: ASTNode) : SolElementImpl(node), SolUsingForElement {

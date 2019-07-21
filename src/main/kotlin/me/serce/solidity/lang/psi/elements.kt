@@ -13,8 +13,13 @@ interface SolElement : PsiElement {
 
 interface SolNamedElement : SolElement, PsiNamedElement, NavigatablePsiElement
 
-interface SolCallableElement : SolNamedElement {
-  val parameterTypes: List<SolType>
+interface ResolvedCallable {
+  fun parseParameters(): List<Pair<String?, SolType>>
+  fun parseReturnType(): SolType
+  val resolvedElement: SolNamedElement?
+}
+
+interface SolCallableElement : ResolvedCallable, SolNamedElement {
 }
 
 interface SolFunctionDefElement : SolReferenceElement, SolCallableElement {
