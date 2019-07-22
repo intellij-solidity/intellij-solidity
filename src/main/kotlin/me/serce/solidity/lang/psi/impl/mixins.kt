@@ -16,6 +16,7 @@ import me.serce.solidity.lang.resolve.ref.*
 import me.serce.solidity.lang.stubs.*
 import me.serce.solidity.lang.types.*
 import java.util.*
+import javax.naming.OperationNotSupportedException
 
 open class SolImportPathElement : SolStubbedNamedElementImpl<SolImportPathDefStub>, SolReferenceElement {
   constructor(node: ASTNode) : super(node)
@@ -52,8 +53,8 @@ abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrL
       .mapNotNull { it.userDefinedTypeName }
 
   override val collectSupers: Collection<SolUserDefinedTypeName>
-    get() = CachedValuesManager.getCachedValue(this) {
-      val collectedSupers = RecursionManager.doPreventingRecursion(this, true) {
+    get() = RecursionManager.doPreventingRecursion(this, true) {
+      CachedValuesManager.getCachedValue(this) {
         val collectedSupers = LinkedHashSet<SolUserDefinedTypeName>()
         collectedSupers.addAll(supers)
         collectedSupers.addAll(
@@ -61,10 +62,9 @@ abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrL
             .filterIsInstance<SolContractOrLibElement>()
             .flatMap { it.collectSupers }
         )
-        collectedSupers
+        CachedValueProvider.Result.create(collectedSupers, PsiModificationTracker.MODIFICATION_COUNT)
       }
-      CachedValueProvider.Result.create(collectedSupers, PsiModificationTracker.MODIFICATION_COUNT)
-    }
+    } ?: emptyList()
 
   constructor(node: ASTNode) : super(node)
   constructor(stub: SolContractOrLibDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
@@ -81,6 +81,25 @@ abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrL
 
   override val resolvedElement: SolNamedElement
     get() = this
+}
+
+abstract class SolConstructorDefMixin(node: ASTNode) : SolElementImpl(node), SolConstructorDefinition {
+  override val referenceNameElement: PsiElement
+    get() = this
+
+  override val referenceName: String
+    get() = "constructor"
+
+  override fun setName(name: String): PsiElement {
+    throw OperationNotSupportedException("constructors don't have name")
+  }
+
+  override fun getReference(): SolReference? = references.firstOrNull()
+
+  override fun getReferences(): Array<SolReference> {
+    return findChildrenByType<SolModifierInvocation>(MODIFIER_INVOCATION)
+      .map { SolModifierReference(this, it) }.toTypedArray()
+  }
 }
 
 abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefStub>, SolFunctionDefinition {
@@ -215,7 +234,7 @@ abstract class SolModifierInvocationMixin(node: ASTNode) : SolNamedElementImpl(n
   override val referenceName: String
     get() = this.varLiteral.text
 
-  override fun getReference(): SolReference = SolModifierReference(this.findParent(), this)
+  override fun getReference(): SolReference = SolModifierReference(this.findParent<SolHasModifiersElement>(), this)
 }
 
 abstract class SolVarLiteralMixin(node: ASTNode) : SolNamedElementImpl(node), SolVarLiteral {

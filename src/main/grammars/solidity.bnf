@@ -196,6 +196,8 @@ ConstructorDefinition ::= constructor ParameterList
                          ( ModifierInvocation | FunctionVisibilitySpecifier | StateMutability)*
                          Block {
     pin = 1
+    implements = "me.serce.solidity.lang.psi.SolHasModifiersElement"
+    mixin = "me.serce.solidity.lang.psi.impl.SolConstructorDefMixin"
 }
 
 FunctionDefinition ::= OrdinaryFunctionDefinition | FallbackFunctionDefinition {

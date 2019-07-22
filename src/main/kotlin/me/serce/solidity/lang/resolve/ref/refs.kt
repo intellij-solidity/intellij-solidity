@@ -2,7 +2,6 @@ package me.serce.solidity.lang.resolve.ref
 
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
-import me.serce.solidity.firstInstance
 import me.serce.solidity.lang.completion.SolCompleter
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.resolve.SolResolver
@@ -22,11 +21,11 @@ class SolVarLiteralReference(element: SolVarLiteral) : SolReferenceBase<SolVarLi
   override fun getVariants() = SolCompleter.completeLiteral(element)
 }
 
-class SolModifierReference(element: SolFunctionDefinition, private val modifierElement: PsiElement) : SolReferenceBase<SolFunctionDefinition>(element), SolReference {
+class SolModifierReference(element: SolReferenceElement, private val modifierElement: SolModifierInvocationElement) : SolReferenceBase<SolReferenceElement>(element), SolReference {
   override fun calculateDefaultRangeInElement() = modifierElement.parentRelativeRange
 
   override fun multiResolve(): List<SolNamedElement> {
-    val contract = element.ancestors.firstInstance<SolContractDefinition>()
+    val contract = modifierElement.findContract()!!
     val superNames: List<String> = (contract.collectSupers.map { it.name } + contract.name).filterNotNull()
     return SolResolver.resolveModifier(modifierElement)
       .filter { it.contract.name in superNames }

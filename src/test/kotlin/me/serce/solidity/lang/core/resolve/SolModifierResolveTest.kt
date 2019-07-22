@@ -18,6 +18,19 @@ class SolModifierResolveTest : SolResolveTestBase() {
         }
   """)
 
+  fun testResolveConstructorModifier() = checkByCode("""
+        contract B {
+            modifier onlySeller() {
+                     //x
+                _;
+            }
+
+            constructor() public onlySeller constant {
+                                      //^
+            }
+        }
+  """)
+
   fun testResolveModifierAnother() = checkByCode("""
         contract A {
             modifier onlySeller() {

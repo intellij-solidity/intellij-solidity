@@ -207,11 +207,10 @@ val SolExpression.type: SolType
     if (!isValid) {
       return SolUnknown
     }
-    return CachedValuesManager.getCachedValue(this) {
-      val type = RecursionManager.doPreventingRecursion(this, true) {
-        inferExprType(this)
-      } ?: SolUnknown
-      CachedValueProvider.Result.create(type, PsiModificationTracker.MODIFICATION_COUNT)
-    }
+    return RecursionManager.doPreventingRecursion(this, true) {
+      CachedValuesManager.getCachedValue(this) {
+        CachedValueProvider.Result.create(inferExprType(this), PsiModificationTracker.MODIFICATION_COUNT)
+      }
+    } ?: SolUnknown
   }
 

@@ -12,16 +12,16 @@ import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.stubs.SolGotoClassIndex
 import me.serce.solidity.lang.stubs.SolModifierIndex
 import me.serce.solidity.lang.types.*
+import me.serce.solidity.nullIfError
 import me.serce.solidity.wrap
 
 object SolResolver {
-  fun resolveTypeNameUsingImports(element: SolReferenceElement): Set<SolNamedElement> =
-    CachedValuesManager.getCachedValue(element) {
-      val result = resolveContractUsingImports(element, element.containingFile, true) +
-        resolveEnum(element, element.containingFile) +
-        resolveStruct(element, element.containingFile)
-      CachedValueProvider.Result.create(result, PsiModificationTracker.MODIFICATION_COUNT)
-    }
+  fun resolveTypeNameUsingImports(element: SolReferenceElement): Set<SolNamedElement> = CachedValuesManager.getCachedValue(element) {
+    val result = resolveContractUsingImports(element, element.containingFile, true) +
+      resolveEnum(element) +
+      resolveStruct(element)
+    CachedValueProvider.Result.create(result, PsiModificationTracker.MODIFICATION_COUNT)
+  }
 
   /**
    * @param withAliases aliases are not recursive, so count them only at the first level of recursion
@@ -51,36 +51,35 @@ object SolResolver {
 
       val imported = file.children
         .filterIsInstance<SolImportDirective>()
-        .mapNotNull { it.importPath?.reference?.resolve()?.containingFile }
+        .mapNotNull { nullIfError { it.importPath?.reference?.resolve()?.containingFile } }
         .flatMap { resolveContractUsingImports(element, it, false) }
 
       (inFile + resolvedViaAlias + imported).toSet()
     } ?: emptySet()
 
-  private fun resolveEnum(element: SolReferenceElement, file: PsiFile): Set<SolNamedElement> =
-    resolveInnerType<SolEnumDefinition>(element, file) { it.enumDefinitionList }
+  private fun resolveEnum(element: SolReferenceElement): Set<SolNamedElement> =
+    resolveInnerType<SolEnumDefinition>(element) { it.enumDefinitionList }
 
-  private fun resolveStruct(element: SolReferenceElement, file: PsiFile): Set<SolNamedElement> =
-    resolveInnerType<SolStructDefinition>(element, file) { it.structDefinitionList }
+  private fun resolveStruct(element: SolReferenceElement): Set<SolNamedElement> =
+    resolveInnerType<SolStructDefinition>(element) { it.structDefinitionList }
 
-  private fun <T : SolNamedElement> resolveInnerType(element: SolReferenceElement, file: PsiFile, f: (SolContractDefinition) -> List<T>): Set<T> =
-    RecursionManager.doPreventingRecursion(ResolveContractKey(element.name, file), true) {
-      val inheritanceSpecifier = element.parentOfType<SolInheritanceSpecifier>()
-      if (inheritanceSpecifier != null) {
+  private fun <T : SolNamedElement> resolveInnerType(element: SolReferenceElement, f: (SolContractDefinition) -> List<T>): Set<T> {
+    val inheritanceSpecifier = element.parentOfType<SolInheritanceSpecifier>()
+    return if (inheritanceSpecifier != null) {
+      emptySet()
+    } else {
+      val contract = element.parentOfType<SolContractDefinition>()
+      if (contract == null) {
         emptySet()
       } else {
-        val contract = element.parentOfType<SolContractDefinition>()
-        if (contract == null) {
-          emptySet()
-        } else {
-          val supers = contract.collectSupers
-            .mapNotNull { it.reference?.resolve() }.filterIsInstance<SolContractDefinition>() + contract
-          supers.flatMap(f)
-            .filter { it.name == element.name }
-            .toSet()
-        }
+        val supers = contract.collectSupers
+          .mapNotNull { it.reference?.resolve() }.filterIsInstance<SolContractDefinition>() + contract
+        supers.flatMap(f)
+          .filter { it.name == element.name }
+          .toSet()
       }
-    } ?: emptySet()
+    }
+  }
 
   fun resolveTypeName(element: SolReferenceElement): Collection<SolNamedElement> = StubIndex.getElements(
     SolGotoClassIndex.KEY,
@@ -90,7 +89,7 @@ object SolResolver {
     SolNamedElement::class.java
   )
 
-  fun resolveModifier(modifier: PsiElement): List<SolModifierDefinition> = StubIndex.getElements(
+  fun resolveModifier(modifier: SolModifierInvocationElement): List<SolModifierDefinition> = StubIndex.getElements(
     SolModifierIndex.KEY,
     modifier.text,
     modifier.project,
@@ -228,7 +227,7 @@ object SolResolver {
           val contracts = scope.children.asSequence()
             .filterIsInstance<SolContractDefinition>()
           val imports = scope.children.asSequence().filterIsInstance<SolImportDirective>()
-            .mapNotNull { it.importPath?.reference?.resolve()?.containingFile }
+            .mapNotNull { nullIfError { it.importPath?.reference?.resolve()?.containingFile } }
             .mapNotNull { lexicalDeclarations(it, place) }
             .flatten()
           imports + contracts

@@ -32,3 +32,11 @@ fun <T> T?.wrap(): List<T> {
     else -> listOf(this)
   }
 }
+
+fun <T> nullIfError(action: () -> T): T? {
+  return try {
+    action()
+  } catch (e: Throwable) {
+    null
+  }
+}

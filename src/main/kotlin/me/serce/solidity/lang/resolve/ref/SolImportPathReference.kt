@@ -14,8 +14,8 @@ class SolImportPathReference(element: SolImportPathElement) : SolReferenceBase<S
       return null
     }
     val path = importText.substring(1, importText.length - 1)
-    val file = findImportFile(element.containingFile.virtualFile, path)
-    return file?.let { PsiManager.getInstance(element.project).findFile(file) }
+    return findImportFile(element.containingFile.originalFile.virtualFile, path)
+      ?.let { PsiManager.getInstance(element.project).findFile(it) }
   }
 
   private fun findImportFile(file: VirtualFile, path: String): VirtualFile? {

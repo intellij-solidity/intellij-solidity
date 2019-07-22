@@ -22,7 +22,7 @@ interface ResolvedCallable {
 interface SolCallableElement : ResolvedCallable, SolNamedElement {
 }
 
-interface SolFunctionDefElement : SolReferenceElement, SolCallableElement {
+interface SolFunctionDefElement : SolHasModifiersElement, SolCallableElement {
   val contract: SolContractDefinition
   val modifiers: List<SolModifierInvocation>
   val parameters: List<SolParameterDef>
@@ -61,6 +61,8 @@ interface SolReferenceElement : SolNamedElement {
 
   override fun getReference(): SolReference?
 }
+
+interface SolHasModifiersElement : SolReferenceElement
 
 interface SolUsingForElement : PsiElement {
   val type: SolType?

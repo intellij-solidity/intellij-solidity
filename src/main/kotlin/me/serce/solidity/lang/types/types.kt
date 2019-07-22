@@ -138,21 +138,19 @@ data class SolInteger(val unsigned: Boolean, val size: Int) : SolNumeric {
 
 data class SolContract(val ref: SolContractDefinition) : SolType, Linearizable<SolContract> {
   override fun linearize(): List<SolContract> {
-    return CachedValuesManager.getCachedValue(ref) {
-      val result = RecursionManager.doPreventingRecursion(ref, true) {
-        super.linearize()
+    return RecursionManager.doPreventingRecursion(ref, true) {
+      CachedValuesManager.getCachedValue(ref) {
+        CachedValueProvider.Result.create(super.linearize(), PsiModificationTracker.MODIFICATION_COUNT)
       }
-      CachedValueProvider.Result.create(result, PsiModificationTracker.MODIFICATION_COUNT)
-    }
+    } ?: emptyList()
   }
 
   override fun linearizeParents(): List<SolContract> {
-    return CachedValuesManager.getCachedValue(ref) {
-      val result = RecursionManager.doPreventingRecursion(ref, true) {
-        super.linearizeParents()
+    return RecursionManager.doPreventingRecursion(ref, true) {
+      CachedValuesManager.getCachedValue(ref) {
+        CachedValueProvider.Result.create(super.linearizeParents(), PsiModificationTracker.MODIFICATION_COUNT)
       }
-      CachedValueProvider.Result.create(result, PsiModificationTracker.MODIFICATION_COUNT)
-    }
+    } ?: emptyList()
   }
 
   override fun getParents(): List<SolContract> {

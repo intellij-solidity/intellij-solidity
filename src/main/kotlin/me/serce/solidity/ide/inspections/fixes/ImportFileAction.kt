@@ -14,6 +14,7 @@ import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
 import com.intellij.ui.popup.list.ListPopupImpl
 import com.intellij.ui.popup.list.PopupListElementRenderer
+import me.serce.solidity.nullIfError
 import me.serce.solidity.lang.psi.SolImportDirective
 import me.serce.solidity.lang.psi.SolPragmaDirective
 import me.serce.solidity.lang.psi.SolPsiFactory
@@ -102,7 +103,7 @@ class ImportFileAction(
         RecursionManager.doPreventingRecursion(file, true) {
           file.children
             .filterIsInstance<SolImportDirective>()
-            .mapNotNull { it.importPath?.reference?.resolve()?.containingFile }
+            .mapNotNull { nullIfError { it.importPath?.reference?.resolve()?.containingFile } }
             .any {
               isImportedAlready(it, to)
             }
