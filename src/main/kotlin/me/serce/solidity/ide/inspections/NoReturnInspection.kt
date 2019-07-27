@@ -208,6 +208,6 @@ private fun SolTypedDeclarationItem.hasAssignment(el: SolNamedElement): Boolean 
 }
 
 private fun SolElement.isGlobal(): Boolean {
-  val contract = findContract(this)
+  val contract = this.findContract()
   return contract == SolInternalTypeFactory.of(this.project).globalType.ref
 }

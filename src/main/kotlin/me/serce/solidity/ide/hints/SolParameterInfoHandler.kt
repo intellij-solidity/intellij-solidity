@@ -103,12 +103,12 @@ class SolParameterInfoHandler : ParameterInfoHandler<PsiElement, SolArgumentsDes
 }
 
 class SolArgumentsDescription(
-  element: SolCallableElement,
+  callable: ResolvedCallable,
   callArguments: SolFunctionCallArguments,
   val arguments: Array<String>
 ) {
 
-  val valid = element.canBeApplied(callArguments)
+  val valid = callable.canBeApplied(callArguments)
   val presentText = if (arguments.isEmpty()) "<no arguments>" else arguments.joinToString(", ")
 
   fun getArgumentRange(index: Int): TextRange {
@@ -122,21 +122,14 @@ class SolArgumentsDescription(
   companion object {
     fun findDescriptions(element: SolFunctionCallExpression): List<SolArgumentsDescription> {
       val ref = element.reference
-      if (ref is SolFunctionCallReference) {
-        return ref.resolveFunctionCall()
-          .mapNotNull {def ->
-            val functionDef = def.element as SolFunctionDefinition
-            val argumentDefList = (if (def.usingLibrary) {
-              functionDef.parameterListList.firstOrNull()?.parameterDefList?.drop(1)
-            } else {
-              functionDef.parameterListList.firstOrNull()?.parameterDefList
-            })
-            argumentDefList?.let { list ->
-              SolArgumentsDescription(def.element, element.functionCallArguments, list.map { "${it.typeName.text} ${it.identifier?.text ?: ""}" }.toTypedArray())
-            }
+      return if (ref is SolFunctionCallReference) {
+        ref.resolveFunctionCall()
+          .map { def ->
+            val parameters = def.parseParameters()
+            SolArgumentsDescription(def, element.functionCallArguments, parameters.map { "${it.second}${it.first?.let { name -> " $name" } ?: ""}" }.toTypedArray())
           }
       } else {
-        return emptyList()
+        emptyList()
       }
     }
   }

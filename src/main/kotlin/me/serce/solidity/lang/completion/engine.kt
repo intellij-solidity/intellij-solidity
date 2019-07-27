@@ -12,6 +12,7 @@ import me.serce.solidity.ide.SolidityIcons
 import me.serce.solidity.ide.inspections.fixes.ImportFileAction
 import me.serce.solidity.lang.psi.SolContractDefinition
 import me.serce.solidity.lang.psi.SolMemberAccessExpression
+import me.serce.solidity.lang.psi.SolModifierInvocationElement
 import me.serce.solidity.lang.psi.SolNamedElement
 import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.stubs.SolEventIndex
@@ -57,7 +58,7 @@ object SolCompleter {
       .toTypedArray()
   }
 
-  fun completeModifier(element: PsiElement): Array<out LookupElement> {
+  fun completeModifier(element: SolModifierInvocationElement): Array<out LookupElement> {
     val project = element.project
     val allModifiers = StubIndex.getInstance().getAllKeys(
       SolModifierIndex.KEY,
@@ -74,13 +75,13 @@ object SolCompleter {
   }
 
   fun completeMemberAccess(element: SolMemberAccessExpression): Array<out LookupElement> {
-    val exprType = element.expression.type
-    return when (exprType) {
+    return when (val exprType = element.expression.type) {
       is SolStruct -> exprType.ref.variableDeclarationList.createVarLookups()
       is SolContract -> {
         val ref = exprType.ref
-        (ref.collectSupers.flatMap { SolResolver.resolveTypeName(it) } + ref)
+        val contracts = (ref.collectSupers.flatMap { SolResolver.resolveTypeName(it) } + ref)
           .filterIsInstance<SolContractDefinition>()
+        contracts
           .flatMap { it.stateVariableDeclarationList }
           .createVarLookups()
       }

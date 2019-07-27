@@ -8,6 +8,8 @@ import org.intellij.lang.annotations.Language
 class SolFunctionResolveTest : SolResolveTestBase() {
   fun testResolveFunction() = checkByCode("""
         contract B {
+            uint public doit2;
+        
             function doit2() {
                     //x
             }
@@ -171,6 +173,10 @@ class SolFunctionResolveTest : SolResolveTestBase() {
 
   fun testResolveUsingLibrary2() = checkByCode("""
         contract SomeContract {}
+        
+        contract ChildContract is SomeContract {
+        
+        }
 
         library Library {
             function something(SomeContract self, uint256 go) internal pure returns (uint256) {
@@ -180,9 +186,9 @@ class SolFunctionResolveTest : SolResolveTestBase() {
         }
 
         contract B {
-            using Library for SomeContract;
+            using Library for ChildContract;
 
-            function doit(SomeContract value) {
+            function doit(ChildContract value) {
                 value.something(60);
                      //^
             }

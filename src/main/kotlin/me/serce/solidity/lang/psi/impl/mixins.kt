@@ -14,11 +14,9 @@ import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.resolve.ref.*
 import me.serce.solidity.lang.stubs.*
-import me.serce.solidity.lang.types.SolAddress
-import me.serce.solidity.lang.types.SolType
-import me.serce.solidity.lang.types.findParent
-import me.serce.solidity.lang.types.getSolType
+import me.serce.solidity.lang.types.*
 import java.util.*
+import javax.naming.OperationNotSupportedException
 
 open class SolImportPathElement : SolStubbedNamedElementImpl<SolImportPathDefStub>, SolReferenceElement {
   constructor(node: ASTNode) : super(node)
@@ -55,8 +53,8 @@ abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrL
       .mapNotNull { it.userDefinedTypeName }
 
   override val collectSupers: Collection<SolUserDefinedTypeName>
-    get() = CachedValuesManager.getCachedValue(this) {
-      val collectedSupers = RecursionManager.doPreventingRecursion(this, true) {
+    get() = RecursionManager.doPreventingRecursion(this, true) {
+      CachedValuesManager.getCachedValue(this) {
         val collectedSupers = LinkedHashSet<SolUserDefinedTypeName>()
         collectedSupers.addAll(supers)
         collectedSupers.addAll(
@@ -64,18 +62,44 @@ abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrL
             .filterIsInstance<SolContractOrLibElement>()
             .flatMap { it.collectSupers }
         )
-        collectedSupers
+        CachedValueProvider.Result.create(collectedSupers, PsiModificationTracker.MODIFICATION_COUNT)
       }
-      CachedValueProvider.Result.create(collectedSupers, PsiModificationTracker.MODIFICATION_COUNT)
-    }
+    } ?: emptyList()
 
   constructor(node: ASTNode) : super(node)
   constructor(stub: SolContractOrLibDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
 
   override fun getIcon(flags: Int) = SolidityIcons.CONTRACT
 
-  override val parameterTypes: List<SolType>
-    get() = listOf(SolAddress)
+  override fun parseParameters(): List<Pair<String?, SolType>> {
+    return listOf(Pair(null, SolAddress))
+  }
+
+  override fun parseReturnType(): SolType {
+    return SolContract(this)
+  }
+
+  override val resolvedElement: SolNamedElement
+    get() = this
+}
+
+abstract class SolConstructorDefMixin(node: ASTNode) : SolElementImpl(node), SolConstructorDefinition {
+  override val referenceNameElement: PsiElement
+    get() = this
+
+  override val referenceName: String
+    get() = "constructor"
+
+  override fun setName(name: String): PsiElement {
+    throw OperationNotSupportedException("constructors don't have name")
+  }
+
+  override fun getReference(): SolReference? = references.firstOrNull()
+
+  override fun getReferences(): Array<SolReference> {
+    return findChildrenByType<SolModifierInvocation>(MODIFIER_INVOCATION)
+      .map { SolModifierReference(this, it) }.toTypedArray()
+  }
 }
 
 abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefStub>, SolFunctionDefinition {
@@ -94,8 +118,26 @@ abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefSt
       ?.filterIsInstance(SolParameterDef::class.java)
       ?: emptyList()
 
-  override val parameterTypes: List<SolType>
-    get() = parameters.map { getSolType(it.typeName) }
+  override fun parseParameters(): List<Pair<String?, SolType>> {
+    return parameters.map { it.identifier?.text to getSolType(it.typeName) }
+  }
+
+  override fun parseReturnType(): SolType {
+    return this.returns.let { list ->
+      when (list) {
+        null -> SolUnknown
+        else -> list.parameterDefList.let {
+          when {
+            it.size == 1 -> getSolType(it[0].typeName)
+            else -> SolTuple(it.map { def -> getSolType(def.typeName) })
+          }
+        }
+      }
+    }
+  }
+
+  override val resolvedElement: SolNamedElement
+    get() = this
 
   override val returns: SolParameterList?
     get() = if (parameterListList.size == 2) {
@@ -147,10 +189,19 @@ abstract class SolStructDefMixin : SolStubbedNamedElementImpl<SolStructDefStub>,
 
   override fun getIcon(flags: Int) = SolidityIcons.STRUCT
 
-  override val parameterTypes: List<SolType>
-    get() = variableDeclarationList
-      .map { it.typeName }
-      .map { getSolType(it) }
+  override fun parseParameters(): List<Pair<String?, SolType>> {
+    return variableDeclarationList
+      .map { it.identifier?.text to getSolType(it.typeName) }
+
+
+  }
+
+  override fun parseReturnType(): SolType {
+    return SolStruct(this)
+  }
+
+  override val resolvedElement: SolNamedElement
+    get() = this
 }
 
 abstract class SolFunctionCallMixin(node: ASTNode) : SolNamedElementImpl(node), SolFunctionCallElement {
@@ -183,7 +234,7 @@ abstract class SolModifierInvocationMixin(node: ASTNode) : SolNamedElementImpl(n
   override val referenceName: String
     get() = this.varLiteral.text
 
-  override fun getReference(): SolReference = SolModifierReference(this.findParent(), this)
+  override fun getReference(): SolReference = SolModifierReference(this.findParent<SolHasModifiersElement>(), this)
 }
 
 abstract class SolVarLiteralMixin(node: ASTNode) : SolNamedElementImpl(node), SolVarLiteral {
@@ -251,8 +302,19 @@ abstract class SolEventDefMixin : SolStubbedNamedElementImpl<SolEventDefStub>, S
   constructor(node: ASTNode) : super(node)
   constructor(stub: SolEventDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
 
-  override val parameterTypes: List<SolType>
-    get() = this.indexedParameterList?.typeNameList?.map { getSolType(it) } ?: emptyList()
+  //todo add event args identifiers
+  override fun parseParameters(): List<Pair<String?, SolType>> {
+    return indexedParameterList?.typeNameList
+      ?.map { null to getSolType(it) }
+      ?: emptyList()
+  }
+
+  override fun parseReturnType(): SolType {
+    return SolUnknown
+  }
+
+  override val resolvedElement: SolNamedElement
+    get() = this
 }
 
 abstract class SolUsingForMixin(node: ASTNode) : SolElementImpl(node), SolUsingForElement {

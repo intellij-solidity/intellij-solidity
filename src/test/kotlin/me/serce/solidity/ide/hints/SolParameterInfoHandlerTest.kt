@@ -11,6 +11,27 @@ import org.intellij.lang.annotations.Language
 import java.awt.Color
 
 class SolParameterInfoHandlerTest : SolTestBase() {
+  fun testEvent() = checkByText("""
+        contract A {
+            event SomeEvent(uint value, string s);
+        
+            function main() {
+                emit SomeEvent(/*caret*/);
+            }
+        }
+    """, "uint256, string", 0)
+
+  fun testStruct() = checkByText("""
+      contract B {
+          struct Prop {
+              uint prop1;
+              uint prop2;
+          }
+
+          Prop prop = Prop(0/*caret*/, 1);
+      }
+    """, "uint256 prop1, uint256 prop2", 0)
+
   fun testEmptyParameters() = checkByText("""
         contract A {
             function foo() {}
@@ -55,7 +76,7 @@ class SolParameterInfoHandlerTest : SolTestBase() {
                 foo.bar(342/*caret*/);
             }
         }
-    """, "uint _param", 0)
+    """, "uint256 _param", 0)
 
   fun testOtherContract() = checkByText("""
         contract Test {
@@ -93,7 +114,7 @@ class SolParameterInfoHandlerTest : SolTestBase() {
                 foo(1, 2/*caret*/);
             }
         }
-    """, "uint256 a, int b", 1)
+    """, "uint256 a, int256 b", 1)
 
   fun testMultipleParameter3() = checkByText("""
         contract A {
@@ -103,7 +124,7 @@ class SolParameterInfoHandlerTest : SolTestBase() {
                 foo("1"/*caret*/, 2, 0x000d);
             }
         }
-    """, "string a, int b, address c", 0)
+    """, "string a, int256 b, address c", 0)
 
   private fun checkByText(@Language("Solidity") code: String, hint: String, index: Int) {
     checkByText(code, listOf(hint), index)

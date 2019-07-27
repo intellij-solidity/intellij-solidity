@@ -25,3 +25,18 @@ fun loadCodeSampleResource(ctx: Any, resource: String): String {
   // while on Windows the resource file will be read with \r\n as line separator.
   return StreamUtil.convertSeparators(StreamUtil.readText(stream, "UTF-8"))
 }
+
+fun <T> T?.wrap(): List<T> {
+  return when (this) {
+    null -> emptyList()
+    else -> listOf(this)
+  }
+}
+
+fun <T> nullIfError(action: () -> T): T? {
+  return try {
+    action()
+  } catch (e: Throwable) {
+    null
+  }
+}

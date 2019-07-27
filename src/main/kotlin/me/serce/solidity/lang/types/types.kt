@@ -9,6 +9,7 @@ import me.serce.solidity.lang.psi.SolEnumDefinition
 import me.serce.solidity.lang.psi.SolNumberLiteral
 import me.serce.solidity.lang.psi.SolStructDefinition
 import me.serce.solidity.lang.psi.impl.Linearizable
+import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.types.SolInteger.Companion.UINT_160
 import java.math.BigInteger
 
@@ -137,21 +138,19 @@ data class SolInteger(val unsigned: Boolean, val size: Int) : SolNumeric {
 
 data class SolContract(val ref: SolContractDefinition) : SolType, Linearizable<SolContract> {
   override fun linearize(): List<SolContract> {
-    return CachedValuesManager.getCachedValue(ref) {
-      val result = RecursionManager.doPreventingRecursion(ref, true) {
-        super.linearize()
+    return RecursionManager.doPreventingRecursion(ref, true) {
+      CachedValuesManager.getCachedValue(ref) {
+        CachedValueProvider.Result.create(super.linearize(), PsiModificationTracker.MODIFICATION_COUNT)
       }
-      CachedValueProvider.Result.create(result, PsiModificationTracker.MODIFICATION_COUNT)
-    }
+    } ?: emptyList()
   }
 
   override fun linearizeParents(): List<SolContract> {
-    return CachedValuesManager.getCachedValue(ref) {
-      val result = RecursionManager.doPreventingRecursion(ref, true) {
-        super.linearizeParents()
+    return RecursionManager.doPreventingRecursion(ref, true) {
+      CachedValuesManager.getCachedValue(ref) {
+        CachedValueProvider.Result.create(super.linearizeParents(), PsiModificationTracker.MODIFICATION_COUNT)
       }
-      CachedValueProvider.Result.create(result, PsiModificationTracker.MODIFICATION_COUNT)
-    }
+    } ?: emptyList()
   }
 
   override fun getParents(): List<SolContract> {
@@ -166,7 +165,7 @@ data class SolContract(val ref: SolContractDefinition) : SolType, Linearizable<S
     when (other) {
       is SolContract -> {
         other.ref == ref
-          || other.ref.collectSupers.filterIsInstance<SolContractDefinition>().contains(ref)
+          || other.ref.collectSupers.flatMap { SolResolver.resolveTypeNameUsingImports(it) }.contains(ref)
       }
       else -> false
     }

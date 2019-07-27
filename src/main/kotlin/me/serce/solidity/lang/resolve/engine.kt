@@ -7,20 +7,21 @@ import com.intellij.psi.stubs.StubIndex
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiModificationTracker
-import me.serce.solidity.firstOrElse
+import me.serce.solidity.lang.core.SolidityFile
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.stubs.SolGotoClassIndex
 import me.serce.solidity.lang.stubs.SolModifierIndex
 import me.serce.solidity.lang.types.*
+import me.serce.solidity.nullIfError
+import me.serce.solidity.wrap
 
 object SolResolver {
-  fun resolveTypeNameUsingImports(element: SolReferenceElement): Set<SolNamedElement> =
-    CachedValuesManager.getCachedValue(element) {
-      val result = resolveContractUsingImports(element, element.containingFile, true) +
-        resolveEnum(element, element.containingFile) +
-        resolveStruct(element, element.containingFile)
-      CachedValueProvider.Result.create(result, PsiModificationTracker.MODIFICATION_COUNT)
-    }
+  fun resolveTypeNameUsingImports(element: SolReferenceElement): Set<SolNamedElement> = CachedValuesManager.getCachedValue(element) {
+    val result = resolveContractUsingImports(element, element.containingFile, true) +
+      resolveEnum(element) +
+      resolveStruct(element)
+    CachedValueProvider.Result.create(result, PsiModificationTracker.MODIFICATION_COUNT)
+  }
 
   /**
    * @param withAliases aliases are not recursive, so count them only at the first level of recursion
@@ -50,37 +51,35 @@ object SolResolver {
 
       val imported = file.children
         .filterIsInstance<SolImportDirective>()
-        .mapNotNull { it.importPath?.reference?.resolve() }
-        .map { it.containingFile }
+        .mapNotNull { nullIfError { it.importPath?.reference?.resolve()?.containingFile } }
         .flatMap { resolveContractUsingImports(element, it, false) }
 
       (inFile + resolvedViaAlias + imported).toSet()
     } ?: emptySet()
 
-  private fun resolveEnum(element: SolReferenceElement, file: PsiFile): Set<SolNamedElement> =
-    resolveInnerType<SolEnumDefinition>(element, file) { it.enumDefinitionList }
+  private fun resolveEnum(element: SolReferenceElement): Set<SolNamedElement> =
+    resolveInnerType<SolEnumDefinition>(element) { it.enumDefinitionList }
 
-  private fun resolveStruct(element: SolReferenceElement, file: PsiFile): Set<SolNamedElement> =
-    resolveInnerType<SolStructDefinition>(element, file) { it.structDefinitionList }
+  private fun resolveStruct(element: SolReferenceElement): Set<SolNamedElement> =
+    resolveInnerType<SolStructDefinition>(element) { it.structDefinitionList }
 
-  private fun <T : SolNamedElement> resolveInnerType(element: SolReferenceElement, file: PsiFile, f: (SolContractDefinition) -> List<T>): Set<T> =
-    RecursionManager.doPreventingRecursion(ResolveContractKey(element.name, file), true) {
-      val inheritanceSpecifier = element.parentOfType<SolInheritanceSpecifier>()
-      if (inheritanceSpecifier != null) {
+  private fun <T : SolNamedElement> resolveInnerType(element: SolReferenceElement, f: (SolContractDefinition) -> List<T>): Set<T> {
+    val inheritanceSpecifier = element.parentOfType<SolInheritanceSpecifier>()
+    return if (inheritanceSpecifier != null) {
+      emptySet()
+    } else {
+      val contract = element.parentOfType<SolContractDefinition>()
+      if (contract == null) {
         emptySet()
       } else {
-        val contract = element.parentOfType<SolContractDefinition>()
-        if (contract == null) {
-          emptySet()
-        } else {
-          val supers = contract.collectSupers
-            .mapNotNull { it.reference?.resolve() }.filterIsInstance<SolContractDefinition>() + contract
-          supers.flatMap(f)
-            .filter { it.name == element.name }
-            .toSet()
-        }
+        val supers = contract.collectSupers
+          .mapNotNull { it.reference?.resolve() }.filterIsInstance<SolContractDefinition>() + contract
+        supers.flatMap(f)
+          .filter { it.name == element.name }
+          .toSet()
       }
-    } ?: emptySet()
+    }
+  }
 
   fun resolveTypeName(element: SolReferenceElement): Collection<SolNamedElement> = StubIndex.getElements(
     SolGotoClassIndex.KEY,
@@ -90,7 +89,7 @@ object SolResolver {
     SolNamedElement::class.java
   )
 
-  fun resolveModifier(modifier: PsiElement): List<SolModifierDefinition> = StubIndex.getElements(
+  fun resolveModifier(modifier: SolModifierInvocationElement): List<SolModifierDefinition> = StubIndex.getElements(
     SolModifierIndex.KEY,
     modifier.text,
     modifier.project,
@@ -101,9 +100,9 @@ object SolResolver {
 
   fun resolveVarLiteral(element: SolNamedElement): List<SolNamedElement> {
     return when (element.name) {
-      "this" -> findContract(element)
+      "this" -> element.findContract()
         .wrap()
-      "super" -> findContract(element)
+      "super" -> element.findContract()
         ?.supers
         ?.flatMap { resolveTypeNameUsingImports(it) }
         ?: emptyList()
@@ -114,28 +113,47 @@ object SolResolver {
   }
 
   fun resolveMemberAccess(element: SolMemberAccessExpression): List<SolNamedElement> {
-    val propName = element.identifier?.text
+    val functionCall = element.findParentOrNull<SolFunctionCallElement>()
+    return if (functionCall != null) {
+      val resolved = functionCall.reference?.multiResolve() ?: emptyList()
+      if (resolved.isNotEmpty()) {
+        resolved.filterIsInstance<SolNamedElement>()
+      } else {
+        resolveMembers(element)
+      }
+    } else {
+      resolveMembers(element)
+    }
+  }
+
+  fun resolveMembers(element: SolMemberAccessExpression): List<SolNamedElement> {
+    val memberName = element.identifier?.text
     val ref = element.expression
     return when {
-      propName == null -> emptyList()
+      memberName == null -> emptyList()
       ref is SolPrimaryExpression && ref.varLiteral?.name == "super" -> {
-        val contract = findContract(ref)
+        val contract = ref.findContract()
         return contract?.let { resolveContractMember(it, element, true) } ?: emptyList()
       }
       else -> {
         when (val refType = ref.type) {
           is SolContract -> resolveContractMember(refType.ref, element)
-          is SolStruct -> refType.ref.variableDeclarationList.filter { it.name == propName }
-          is SolEnum -> refType.ref.enumValueList.filter { it.name == propName }
+          is SolStruct -> refType.ref.variableDeclarationList.filter { it.name == memberName }
+          is SolEnum -> refType.ref.enumValueList.filter { it.name == memberName }
           else -> emptyList()
         }
       }
     }
   }
 
-  private fun resolveContractMember(contract: SolContractDefinition, element: SolMemberAccessExpression, skipThis: Boolean = false): List<SolNamedElement> {
+  private fun resolveContractMember(
+    contract: SolContractDefinition,
+    element: SolMemberAccessExpression,
+    skipThis: Boolean = false): List<SolNamedElement> {
+
     val members = if (!skipThis)
-      contract.stateVariableDeclarationList.filter { it.name == element.name }
+      (contract.stateVariableDeclarationList as List<SolNamedElement> + contract.functionDefinitionList)
+        .filter { it.name == element.name }
     else
       emptyList()
     if (members.isNotEmpty()) {
@@ -145,86 +163,6 @@ object SolResolver {
       .map { resolveTypeName(it).firstOrNull() }
       .filterIsInstance<SolContractDefinition>()
       .flatMap { resolveContractMember(it, element) }
-  }
-
-  fun resolveCast(element: PsiElement, arguments: SolFunctionCallArguments): Collection<FunctionResolveResult> {
-    if (arguments.expressionList.size == 1 && element is SolReferenceElement) {
-      val contracts = resolveTypeNameUsingImports(element)
-        .filterIsInstance<SolContractDefinition>()
-      return contracts.map { FunctionResolveResult(it) }
-    }
-    return emptyList()
-  }
-
-  fun resolveFunction(
-    type: SolType,
-    name: String,
-    contract: SolContractDefinition?,
-    skipThis: Boolean = false): Collection<FunctionResolveResult> {
-
-    val superContracts = contract
-      ?.collectSupers
-      ?.flatMap { resolveTypeNameUsingImports(it) }
-      ?.filterIsInstance<SolContractDefinition>()
-      ?: emptyList()
-    val fromLibraries = (superContracts + contract.wrap())
-      .flatMap { it.usingForDeclarationList }
-      .filter {
-        val usingType = it.type
-        usingType == null || usingType == type
-      }
-      .map { it.library }
-      .distinct()
-      .flatMap { resoleFunInLibrary(name, it) }
-
-    val fromContracts = if (type is SolContract)
-      resolveFunRec(type.ref, name, skipThis)
-        .map { FunctionResolveResult(it) }
-    else
-      emptyList()
-
-    return fromContracts + fromLibraries
-  }
-
-  private fun resoleFunInLibrary(name: String, library: SolContractDefinition): Collection<FunctionResolveResult> {
-    return library.functionDefinitionList
-      .filter { it.name == name }
-      .map { FunctionResolveResult(it, true) }
-  }
-
-  private fun resolveFunRec(contract: SolContractDefinition, name: String, skipThis: Boolean = false): List<SolCallableElement> {
-    if (!skipThis) {
-      val functions = contract.functionDefinitionList
-        .filter {
-          it.name == name
-        }
-      if (functions.isNotEmpty()) {
-        return functions
-      }
-
-      val events = contract.eventDefinitionList
-        .filter {
-          it.name == name
-        }
-      if (events.isNotEmpty()) {
-        return events
-      }
-
-      val structs = contract.structDefinitionList
-        .filter {
-          it.name == name
-        }
-      if (structs.isNotEmpty()) {
-        return structs
-      }
-    }
-
-    return contract.supers.asSequence()
-      .flatMap { resolveTypeName(it).asSequence() }
-      .filterIsInstance<SolContractDefinition>()
-      .map { resolveFunRec(it, name) }
-      .filter { it.isNotEmpty() }
-      .firstOrElse(emptyList())
   }
 
   fun lexicalDeclarations(place: PsiElement, stop: (PsiElement) -> Boolean = { false }): Sequence<SolNamedElement> {
@@ -255,13 +193,13 @@ object SolResolver {
           scope.enumDefinitionList,
           scope.structDefinitionList).flatten()
           .map { lexicalDeclarations(it, place) }
-          .flatten()
+          .flatten() + scope.structDefinitionList + scope.eventDefinitionList
         val extendsScope = scope.supers.asSequence()
           .map { resolveTypeName(it).firstOrNull() }
           .filterNotNull()
           .map { lexicalDeclarations(it, place) }
           .flatten()
-        childrenScope + extendsScope
+        childrenScope + extendsScope + scope.functionDefinitionList
       }
       is SolFunctionDefinition -> {
         scope.parameters.asSequence() +
@@ -284,6 +222,18 @@ object SolResolver {
           .flatten()
       }
 
+      is SolidityFile -> {
+        RecursionManager.doPreventingRecursion(scope.name, true) {
+          val contracts = scope.children.asSequence()
+            .filterIsInstance<SolContractDefinition>()
+          val imports = scope.children.asSequence().filterIsInstance<SolImportDirective>()
+            .mapNotNull { nullIfError { it.importPath?.reference?.resolve()?.containingFile } }
+            .mapNotNull { lexicalDeclarations(it, place) }
+            .flatten()
+          imports + contracts
+        } ?: emptySequence()
+      }
+
       is SolTupleStatement -> {
         scope.variableDeclaration?.let {
           val declarationList = it.declarationList
@@ -299,18 +249,9 @@ object SolResolver {
       else -> emptySequence()
     }
   }
-
-  private fun <T> T?.wrap(): List<T> {
-    return when (this) {
-      null -> listOf()
-      else -> listOf(this)
-    }
-  }
 }
 
 data class ResolveContractKey(val name: String?, val file: PsiFile)
-
-data class FunctionResolveResult(val element: SolCallableElement, val usingLibrary: Boolean = false)
 
 private fun <T> Sequence<T>.takeWhileInclusive(pred: (T) -> Boolean): Sequence<T> {
   var shouldContinue = true
@@ -321,12 +262,14 @@ private fun <T> Sequence<T>.takeWhileInclusive(pred: (T) -> Boolean): Sequence<T
   }
 }
 
-fun SolCallableElement.canBeApplied(arguments: SolFunctionCallArguments) : Boolean {
+fun ResolvedCallable.canBeApplied(arguments: SolFunctionCallArguments) : Boolean {
   val callArgumentTypes = arguments.expressionList.map { it.type }
-  if (parameterTypes.size != callArgumentTypes.size)
+  val parameters = parseParameters()
+    .map { it.second }
+  if (parameters.size != callArgumentTypes.size)
     return false
-  return !parameterTypes.zip(callArgumentTypes)
+  return !parameters.zip(callArgumentTypes)
     .any { (paramType, argumentType) ->
-      !paramType.isAssignableFrom(argumentType)
+      paramType != SolUnknown && !paramType.isAssignableFrom(argumentType)
     }
 }
