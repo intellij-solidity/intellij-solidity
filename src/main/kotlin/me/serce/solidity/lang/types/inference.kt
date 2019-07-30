@@ -190,6 +190,10 @@ fun inferExprType(expr: SolExpression?): SolType {
         .filter { it != SolUnknown }
         .firstOrElse(SolUnknown)
     }
+    is SolParenExpression ->
+      inferExprType(expr.expression)
+    is SolUnaryExpression ->
+      inferExprType(expr.expression)
     else -> SolUnknown
   }
 }

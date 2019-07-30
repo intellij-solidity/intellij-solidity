@@ -195,6 +195,27 @@ class SolFunctionResolveTest : SolResolveTestBase() {
         }
   """)
 
+  fun testResolveUsingLibrary3() = checkByCode("""
+
+        library Library {
+            function findUpperBound(uint256[] storage array, uint256 element) internal view returns (uint256) {
+                      //x
+                return 0;
+            }
+        }
+
+        contract B {
+            using Library for uint256[];
+            
+            uint256[] private array;
+
+            function doit(uint256  value) {
+                array.findUpperBound(value);
+                      //^
+            }
+        }
+  """)
+
   fun testResolveUsingLibraryWithWildcard() = checkByCode("""
         library Library {
             function something(bytes self, uint256 go) internal pure returns (uint256) {

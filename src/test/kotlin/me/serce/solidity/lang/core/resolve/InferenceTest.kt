@@ -32,6 +32,17 @@ class InferenceTest : SolResolveTestBase() {
         }""")
   }
 
+  fun testNegateBoolean() {
+    checkType(SolBoolean, """
+        contract Contract {
+            function test() {
+                var test = !true;
+                test;
+               //^
+            }
+        }""")
+  }
+
   fun testCastAddress() {
     checkType(SolAddress, """
         contract Contract {
