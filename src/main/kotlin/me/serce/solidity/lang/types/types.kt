@@ -126,7 +126,7 @@ data class SolInteger(val unsigned: Boolean, val size: Int) : SolNumeric {
         if (this.unsigned && !other.unsigned) {
           false
         } else if (!this.unsigned && other.unsigned) {
-          this.size * 2 >= other.size
+          this.size - 2 >= other.size
         } else {
           this.size >= other.size
         }
