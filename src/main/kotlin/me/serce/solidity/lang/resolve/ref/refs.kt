@@ -79,40 +79,51 @@ class SolFunctionCallReference(element: SolFunctionCallExpression) : SolReferenc
     return element.referenceNameElement.parentRelativeRange
   }
 
-  fun resolveFunctionCall(): Collection<ResolvedCallable> {
+  fun resolveFunctionCall(): Collection<SolCallable> {
     return when (val expr = element.expression) {
       is SolPrimaryExpression -> {
         val regular = (expr.varLiteral?.reference?.multiResolve() ?: emptyList())
-          .filterIsInstance<ResolvedCallable>()
+          .filterIsInstance<SolCallable>()
         val casts = resolveElementaryTypeCasts(expr)
         regular + casts
       }
       is SolMemberAccessExpression -> {
         val members = SolResolver.resolveMembers(expr)
-          .filterIsInstance<ResolvedCallable>()
-        val fromLibraries = resolveFunctionCallUsingLibraries(expr)
-        members + fromLibraries
+          .filterIsInstance<SolCallable>()
+        members + resolveFunctionCallUsingLibraries(expr) + resolveBuiltinFunctions(expr)
       }
       else ->
         emptyList()
     }
   }
 
-  private fun resolveElementaryTypeCasts(expr: SolPrimaryExpression): Collection<ResolvedCallable> {
+  private fun resolveElementaryTypeCasts(expr: SolPrimaryExpression): Collection<SolCallable> {
     return expr.elementaryTypeName
       ?.let {
         val type = getSolType(it)
-        object : ResolvedCallable {
+        object : SolCallable {
           override val resolvedElement: SolNamedElement? = null
           override fun parseParameters(): List<Pair<String?, SolType>> = listOf(null to SolUnknown)
-
           override fun parseReturnType(): SolType = type
+          override val callableName: String?
+            get() = null
         }
       }
       .wrap()
   }
 
-  private fun resolveFunctionCallUsingLibraries(expression: SolMemberAccessExpression): Collection<ResolvedCallable> {
+  private fun resolveBuiltinFunctions(expression: SolMemberAccessExpression): Collection<SolCallable> {
+    val name = expression.identifier?.text
+    return if (name != null) {
+      val type = expression.expression.type
+      type.getBuiltinFunctions(expression.project)
+        .filter { it.callableName == name }
+    } else {
+      emptyList()
+    }
+  }
+
+  private fun resolveFunctionCallUsingLibraries(expression: SolMemberAccessExpression): Collection<SolCallable> {
     val name = expression.identifier?.text
     return if (name != null) {
       val type = expression.expression.type
@@ -123,13 +134,14 @@ class SolFunctionCallReference(element: SolFunctionCallExpression) : SolReferenc
           ?.flatMap { SolResolver.resolveTypeNameUsingImports(it) }
           ?.filterIsInstance<SolContractDefinition>()
           ?: emptyList()
-        return (superContracts + contract.wrap())
+        val libraries = (superContracts + contract.wrap())
           .flatMap { it.usingForDeclarationList }
           .filter {
             val usingType = it.type
             usingType == null || usingType == type
           }
           .map { it.library }
+        return libraries
           .distinct()
           .flatMap { it.functionDefinitionList }
           .filter { it.name == name }
@@ -150,14 +162,14 @@ class SolFunctionCallReference(element: SolFunctionCallExpression) : SolReferenc
     }
   }
 
-  private fun SolFunctionDefinition.toLibraryCallable(): ResolvedCallable {
-    return object : ResolvedCallable {
+  private fun SolFunctionDefinition.toLibraryCallable(): SolCallable {
+    return object : SolCallable {
       override fun parseParameters(): List<Pair<String?, SolType>> = this@toLibraryCallable.parseParameters().drop(1)
-
       override fun parseReturnType(): SolType = this@toLibraryCallable.parseReturnType()
-
       override val resolvedElement: SolNamedElement
         get() = this@toLibraryCallable
+      override val callableName: String?
+        get() = name
     }
   }
 

@@ -81,6 +81,9 @@ abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrL
 
   override val resolvedElement: SolNamedElement
     get() = this
+
+  override val callableName: String?
+    get() = name
 }
 
 abstract class SolConstructorDefMixin(node: ASTNode) : SolElementImpl(node), SolConstructorDefinition {
@@ -135,6 +138,9 @@ abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefSt
       }
     }
   }
+
+  override val callableName: String?
+    get() = name
 
   override val resolvedElement: SolNamedElement
     get() = this
@@ -202,6 +208,9 @@ abstract class SolStructDefMixin : SolStubbedNamedElementImpl<SolStructDefStub>,
 
   override val resolvedElement: SolNamedElement
     get() = this
+
+  override val callableName: String?
+    get() = name
 }
 
 abstract class SolFunctionCallMixin(node: ASTNode) : SolNamedElementImpl(node), SolFunctionCallElement {
@@ -315,6 +324,9 @@ abstract class SolEventDefMixin : SolStubbedNamedElementImpl<SolEventDefStub>, S
 
   override val resolvedElement: SolNamedElement
     get() = this
+
+  override val callableName: String?
+    get() = name
 }
 
 abstract class SolUsingForMixin(node: ASTNode) : SolElementImpl(node), SolUsingForElement {

@@ -262,7 +262,7 @@ private fun <T> Sequence<T>.takeWhileInclusive(pred: (T) -> Boolean): Sequence<T
   }
 }
 
-fun ResolvedCallable.canBeApplied(arguments: SolFunctionCallArguments) : Boolean {
+fun SolCallable.canBeApplied(arguments: SolFunctionCallArguments) : Boolean {
   val callArgumentTypes = arguments.expressionList.map { it.type }
   val parameters = parseParameters()
     .map { it.second }

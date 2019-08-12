@@ -13,14 +13,14 @@ interface SolElement : PsiElement {
 
 interface SolNamedElement : SolElement, PsiNamedElement, NavigatablePsiElement
 
-interface ResolvedCallable {
+interface SolCallable {
   fun parseParameters(): List<Pair<String?, SolType>>
   fun parseReturnType(): SolType
+  val callableName: String?
   val resolvedElement: SolNamedElement?
 }
 
-interface SolCallableElement : ResolvedCallable, SolNamedElement {
-}
+interface SolCallableElement : SolCallable, SolNamedElement
 
 interface SolFunctionDefElement : SolHasModifiersElement, SolCallableElement {
   val contract: SolContractDefinition

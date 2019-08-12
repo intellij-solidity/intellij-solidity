@@ -45,6 +45,24 @@ class SolInternalTypeFactory(project: Project) : AbstractProjectComponent(projec
     """))
   }
 
+  val addressType: SolContract by lazy {
+    SolContract(psiFactory.createContract("""
+      contract ${internalise("Address")} {
+          function transfer(uint value);
+          
+          function send(uint value) returns (bool);
+      }
+    """))
+  }
+
+  val arrayType: SolContract by lazy {
+    SolContract(psiFactory.createContract("""
+      contract ${internalise("Array")} {
+          function push(uint value);
+      }
+    """))
+  }
+
   val blockType: SolType by lazy {
     SolContract(psiFactory.createContract("""
       contract ${internalise("Block")} {

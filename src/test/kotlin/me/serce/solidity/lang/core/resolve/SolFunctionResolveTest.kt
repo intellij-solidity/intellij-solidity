@@ -322,6 +322,33 @@ class SolFunctionResolveTest : SolResolveTestBase() {
         }
   """)
 
+  fun testResolveTransfer() {
+    checkIsResolved("""
+        contract B {
+            function doit(address some) {
+                some.transfer(100);
+                       //^
+            }
+        }
+  """)
+  }
+
+  fun testResolveArrayPush() {
+    checkIsResolved("""
+        contract B {
+            function doit(uint256[] storage array) {
+                array.push(100);
+                     //^
+            }
+        }
+  """)
+  }
+
+  fun checkIsResolved(@Language("Solidity") code: String) {
+    val (refElement, _) = resolveInCode<SolFunctionCallExpression>(code)
+    assertNotNull(refElement.reference?.resolve())
+  }
+
   override fun checkByCode(@Language("Solidity") code: String) {
     checkByCodeInternal<SolFunctionCallExpression, SolNamedElement>(code)
   }

@@ -1,13 +1,11 @@
 package me.serce.solidity.lang.types
 
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.RecursionManager
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiModificationTracker
-import me.serce.solidity.lang.psi.SolContractDefinition
-import me.serce.solidity.lang.psi.SolEnumDefinition
-import me.serce.solidity.lang.psi.SolNumberLiteral
-import me.serce.solidity.lang.psi.SolStructDefinition
+import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.psi.impl.Linearizable
 import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.types.SolInteger.Companion.UINT_160
@@ -18,7 +16,11 @@ import java.util.*
 
 interface SolType {
   fun isAssignableFrom(other: SolType): Boolean
+  fun getBuiltinFunctions(project: Project): List<SolCallable> {
+    return emptyList()
+  }
 }
+
 interface SolPrimitiveType : SolType
 interface SolNumeric : SolPrimitiveType
 
@@ -51,6 +53,10 @@ object SolAddress : SolPrimitiveType {
     }
 
   override fun toString() = "address"
+
+  override fun getBuiltinFunctions(project: Project): List<SolCallable> {
+    return SolInternalTypeFactory.of(project).addressType.ref.functionDefinitionList
+  }
 }
 
 data class SolInteger(val unsigned: Boolean, val size: Int) : SolNumeric {
@@ -247,6 +253,15 @@ sealed class SolArray(val type: SolType) : SolType {
     override fun hashCode(): Int {
       return type.hashCode()
     }
+
+    override fun getBuiltinFunctions(project: Project): List<SolCallable> {
+      return SolInternalTypeFactory.of(project).arrayType.ref
+        .functionDefinitionList
+        .map {
+          val parameters = it.parseParameters()
+            .map { pair -> pair.first to type }
+          BuiltinCallable(parameters, it.parseReturnType(), it.callableName, it) }
+    }
   }
 }
 
@@ -283,4 +298,14 @@ fun isInternal(name: String): Boolean = name.endsWith(INTERNAL_INDICATOR)
 fun deInternalise(name: String): String = when {
   name.endsWith(INTERNAL_INDICATOR) -> name.removeSuffix(INTERNAL_INDICATOR)
   else -> name
+}
+
+data class BuiltinCallable(
+  private val parameters: List<Pair<String?, SolType>>,
+  private val returnType: SolType,
+  override val callableName: String?,
+  override val resolvedElement: SolNamedElement?
+) : SolCallable {
+  override fun parseParameters(): List<Pair<String?, SolType>> = parameters
+  override fun parseReturnType(): SolType = returnType
 }
