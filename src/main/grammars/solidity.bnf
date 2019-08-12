@@ -294,7 +294,7 @@ private UserDefinedWithLocationTypeName ::= UserDefinedTypeName StorageLocation
 private UserDefinedWithoutLocationTypeName ::= UserDefinedTypeName
 
 UserDefinedTypeName ::= Identifier ( '.' Identifier )* {
-    implements = "me.serce.solidity.lang.psi.SolReferenceElement"
+    implements = "me.serce.solidity.lang.psi.SolUserDefinedTypeNameElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolUserDefinedTypeNameImplMixin"
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }

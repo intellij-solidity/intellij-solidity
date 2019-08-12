@@ -62,6 +62,10 @@ interface SolReferenceElement : SolNamedElement {
   override fun getReference(): SolReference?
 }
 
+interface SolUserDefinedTypeNameElement : SolReferenceElement {
+  fun findIdentifiers(): List<PsiElement>
+}
+
 interface SolHasModifiersElement : SolReferenceElement
 
 interface SolUsingForElement : PsiElement {
