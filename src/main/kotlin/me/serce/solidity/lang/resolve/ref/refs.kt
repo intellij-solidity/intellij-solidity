@@ -80,7 +80,7 @@ class SolFunctionCallReference(element: SolFunctionCallExpression) : SolReferenc
   }
 
   fun resolveFunctionCall(): Collection<SolCallable> {
-    return when (val expr = element.expression) {
+    val resolved: Collection<SolCallable> = when (val expr = element.expression) {
       is SolPrimaryExpression -> {
         val regular = (expr.varLiteral?.reference?.multiResolve() ?: emptyList())
           .filterIsInstance<SolCallable>()
@@ -95,6 +95,7 @@ class SolFunctionCallReference(element: SolFunctionCallExpression) : SolReferenc
       else ->
         emptyList()
     }
+    return resolved.groupBy { it.callablePriority }.entries.sortedBy { it.key }.firstOrNull()?.value ?: emptyList()
   }
 
   private fun resolveElementaryTypeCasts(expr: SolPrimaryExpression): Collection<SolCallable> {
@@ -107,6 +108,8 @@ class SolFunctionCallReference(element: SolFunctionCallExpression) : SolReferenc
           override fun parseReturnType(): SolType = type
           override val callableName: String?
             get() = null
+          override val callablePriority: Int
+            get() = 1000
         }
       }
       .wrap()
@@ -170,6 +173,8 @@ class SolFunctionCallReference(element: SolFunctionCallExpression) : SolReferenc
         get() = this@toLibraryCallable
       override val callableName: String?
         get() = name
+      override val callablePriority: Int
+        get() = 0
     }
   }
 

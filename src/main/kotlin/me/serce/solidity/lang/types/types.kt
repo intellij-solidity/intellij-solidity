@@ -305,7 +305,10 @@ data class BuiltinCallable(
   private val returnType: SolType,
   override val callableName: String?,
   override val resolvedElement: SolNamedElement?
+
 ) : SolCallable {
+  override val callablePriority: Int
+    get() = 1000
   override fun parseParameters(): List<Pair<String?, SolType>> = parameters
   override fun parseReturnType(): SolType = returnType
 }

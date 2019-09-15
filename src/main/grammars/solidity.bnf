@@ -153,10 +153,10 @@ private ContractPart ::=
 
 InheritanceSpecifier ::= UserDefinedTypeName ( '(' Expression ( ',' Expression )* ')' )?
 
-private VisibilityModifiers ::= ( public | internal | private )
+VisibilityModifier ::= ( public | internal | private )
 
-StateVariableDeclaration ::= TypeName (VisibilityModifiers constant | constant? VisibilityModifiers? ) Identifier ('=' Expression)? ';'  {
-    implements = "me.serce.solidity.lang.psi.SolNamedElement"
+StateVariableDeclaration ::= TypeName (VisibilityModifier constant | constant? VisibilityModifier? ) Identifier ('=' Expression)? ';'  {
+    implements = "me.serce.solidity.lang.psi.SolCallableElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolStateVarDeclMixin"
     stubClass = "me.serce.solidity.lang.stubs.SolStateVarDeclStub"
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"

@@ -322,6 +322,20 @@ class SolFunctionResolveTest : SolResolveTestBase() {
         }
   """)
 
+  fun testResolvePublicVar() = checkByCode("""
+        contract A {
+            uint public value;
+                       //x
+        }
+
+        contract B {
+            function doit(address some) {
+                A(some).value();
+                       //^
+            }
+        }
+  """)
+
   fun testResolveTransfer() {
     checkIsResolved("""
         contract B {

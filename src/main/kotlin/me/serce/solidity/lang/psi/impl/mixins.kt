@@ -84,6 +84,9 @@ abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrL
 
   override val callableName: String?
     get() = name
+
+  override val callablePriority: Int
+    get() = 1000
 }
 
 abstract class SolConstructorDefMixin(node: ASTNode) : SolElementImpl(node), SolConstructorDefinition {
@@ -124,6 +127,9 @@ abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefSt
   override fun parseParameters(): List<Pair<String?, SolType>> {
     return parameters.map { it.identifier?.text to getSolType(it.typeName) }
   }
+
+  override val callablePriority: Int
+    get() = 0
 
   override fun parseReturnType(): SolType {
     return this.returns.let { list ->
@@ -187,6 +193,22 @@ abstract class SolStateVarDeclMixin : SolStubbedNamedElementImpl<SolStateVarDecl
   constructor(stub: SolStateVarDeclStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
 
   override fun getIcon(flags: Int) = SolidityIcons.STATE_VAR
+
+  override fun parseParameters(): List<Pair<String?, SolType>> = emptyList()
+
+  override fun parseReturnType(): SolType = getSolType(typeName)
+
+  override val callableName: String?
+    get() = if (visibilityModifier?.text == "public")
+      identifier.text
+    else
+      null
+
+  override val callablePriority: Int
+    get() = 1000
+
+  override val resolvedElement: SolNamedElement?
+    get() = this
 }
 
 abstract class SolStructDefMixin : SolStubbedNamedElementImpl<SolStructDefStub>, SolStructDefinition, SolCallableElement {
@@ -211,6 +233,9 @@ abstract class SolStructDefMixin : SolStubbedNamedElementImpl<SolStructDefStub>,
 
   override val callableName: String?
     get() = name
+
+  override val callablePriority: Int
+    get() = 1000
 }
 
 abstract class SolFunctionCallMixin(node: ASTNode) : SolNamedElementImpl(node), SolFunctionCallElement {
@@ -330,6 +355,9 @@ abstract class SolEventDefMixin : SolStubbedNamedElementImpl<SolEventDefStub>, S
 
   override val callableName: String?
     get() = name
+
+  override val callablePriority: Int
+    get() = 1000
 }
 
 abstract class SolUsingForMixin(node: ASTNode) : SolElementImpl(node), SolUsingForElement {

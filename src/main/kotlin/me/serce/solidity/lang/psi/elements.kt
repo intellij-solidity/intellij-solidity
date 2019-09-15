@@ -18,6 +18,7 @@ interface SolCallable {
   fun parseReturnType(): SolType
   val callableName: String?
   val resolvedElement: SolNamedElement?
+  val callablePriority: Int
 }
 
 interface SolCallableElement : SolCallable, SolNamedElement
