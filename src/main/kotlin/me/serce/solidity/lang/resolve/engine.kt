@@ -125,6 +125,34 @@ object SolResolver {
   ).filterIsInstance<SolModifierDefinition>()
     .toList()
 
+  fun resolveVarLiteralReference(element: SolNamedElement): List<SolNamedElement> {
+    val functionCall = element.findParentOrNull<SolFunctionCallElement>()
+    return if (functionCall != null) {
+      val resolved = functionCall.reference?.multiResolve() ?: emptyList()
+      if (resolved.isNotEmpty()) {
+        resolved.filterIsInstance<SolNamedElement>()
+      } else {
+        resolveVarLiteral(element)
+      }
+    } else {
+      resolveVarLiteral(element)
+        .findBest {
+          when (it) {
+            is SolStateVariableDeclaration -> 0
+            else -> Int.MAX_VALUE
+          }
+        }
+    }
+  }
+
+  private fun <T : Any> List<T>.findBest(priorities: (T) -> Int): List<T> {
+    return this
+      .groupBy { priorities(it) }
+      .minBy { it.key }
+      ?.value
+      ?: emptyList()
+  }
+
   fun resolveVarLiteral(element: SolNamedElement): List<SolNamedElement> {
     return when (element.name) {
       "this" -> element.findContract()

@@ -16,7 +16,7 @@ class SolUserDefinedTypeNameReference(element: SolUserDefinedTypeName) : SolRefe
 }
 
 class SolVarLiteralReference(element: SolVarLiteral) : SolReferenceBase<SolVarLiteral>(element), SolReference {
-  override fun multiResolve() = SolResolver.resolveVarLiteral(element)
+  override fun multiResolve() = SolResolver.resolveVarLiteralReference(element)
 
   override fun getVariants() = SolCompleter.completeLiteral(element)
 }
@@ -82,8 +82,10 @@ class SolFunctionCallReference(element: SolFunctionCallExpression) : SolReferenc
   fun resolveFunctionCall(): Collection<SolCallable> {
     val resolved: Collection<SolCallable> = when (val expr = element.expression) {
       is SolPrimaryExpression -> {
-        val regular = (expr.varLiteral?.reference?.multiResolve() ?: emptyList())
-          .filterIsInstance<SolCallable>()
+        val regular = expr.varLiteral?.let { SolResolver.resolveVarLiteral(it) }
+          ?.filter { it !is SolStateVariableDeclaration }
+          ?.filterIsInstance<SolCallable>()
+          ?: emptyList()
         val casts = resolveElementaryTypeCasts(expr)
         regular + casts
       }
@@ -95,7 +97,7 @@ class SolFunctionCallReference(element: SolFunctionCallExpression) : SolReferenc
       else ->
         emptyList()
     }
-    return resolved.groupBy { it.callablePriority }.entries.sortedBy { it.key }.firstOrNull()?.value ?: emptyList()
+    return resolved.groupBy { it.callablePriority }.entries.minBy { it.key }?.value ?: emptyList()
   }
 
   private fun resolveElementaryTypeCasts(expr: SolPrimaryExpression): Collection<SolCallable> {

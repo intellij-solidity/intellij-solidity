@@ -205,7 +205,7 @@ abstract class SolStateVarDeclMixin : SolStubbedNamedElementImpl<SolStateVarDecl
       null
 
   override val callablePriority: Int
-    get() = 1000
+    get() = 0
 
   override val resolvedElement: SolNamedElement?
     get() = this

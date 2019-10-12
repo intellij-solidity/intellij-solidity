@@ -54,6 +54,22 @@ class SolVarResolveTest : SolResolveTestBase() {
         }
   """)
 
+  fun testFieldWhenFunction() = checkByCode("""
+      contract C {
+          int public member;
+                    //x
+                    
+          function member(uint value) public {
+
+          }
+          
+          function other() public {
+              member = 1;
+               //^
+          }
+      }
+  """)
+
   fun testFunctionParams() = checkByCode("""
         contract B {
             function B(uint abc) {
