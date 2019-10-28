@@ -51,7 +51,12 @@ class SolFunctionResolveTest : SolResolveTestBase() {
   """)
 
   fun testResolveFunctionFromParent() = checkByCode("""
-        contract A {
+        contract Base {
+            function doit2() {
+            }
+        }
+
+        contract A is Base {
             function doit2() {
                     //x
             }

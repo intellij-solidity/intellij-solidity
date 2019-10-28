@@ -17,12 +17,12 @@ interface Linearizable<T : Linearizable<T>> {
 
 fun <T> List<List<T>>.merge(): List<T> {
   val result = mutableListOf<T>()
-  var lists = this.filter { !it.isEmpty() }
-  while (!lists.isEmpty()) {
+  var lists = this.filter { it.isNotEmpty() }
+  while (lists.isNotEmpty()) {
     val next = lists.nextForMerge()
     if (next != null) {
       result.add(next)
-      lists = lists.map { it.filter { i -> i != next } }.filter { !it.isEmpty() }
+      lists = lists.map { it.filter { i -> i != next } }.filter { it.isNotEmpty() }
     } else {
       throw LinearizationImpossibleException("result: $result lists: $lists source: $this")
     }

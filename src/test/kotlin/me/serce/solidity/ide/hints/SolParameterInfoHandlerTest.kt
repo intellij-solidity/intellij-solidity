@@ -64,6 +64,22 @@ class SolParameterInfoHandlerTest : SolTestBase() {
         }
     """, listOf("uint256 a", "string a"), 0)
 
+  fun testSomeWithOverriden() = checkByText("""
+        contract Base {
+            function foo(uint256 a) {} 
+        }
+    
+        contract A is Base {
+            function foo(uint256 a) {}
+            
+            function foo(string a) {}
+
+            function main() {
+                foo(1/*caret*/);
+            }
+        }
+    """, listOf("uint256 a", "string a"), 0)
+
   fun testLibrary() = checkByText("""
         library Lib {
             function bar(uint _self, uint _param) {}
