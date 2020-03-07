@@ -14,9 +14,26 @@ import java.util.*
 
 // http://solidity.readthedocs.io/en/develop/types.html
 
+enum class ContextType {
+  SUPER,
+  EXTERNAL
+}
+
+enum class Usage {
+  VARIABLE,
+  CALLABLE
+}
+
+interface SolMember {
+  fun getName(): String?
+  fun parseType(): SolType
+  fun resolveElement(): SolNamedElement?
+  fun getPossibleUsage(contextType: ContextType): Usage?
+}
+
 interface SolType {
   fun isAssignableFrom(other: SolType): Boolean
-  fun getBuiltinFunctions(project: Project): List<SolCallable> {
+  fun getMembers(project: Project): List<SolMember> {
     return emptyList()
   }
 }
@@ -54,7 +71,7 @@ object SolAddress : SolPrimitiveType {
 
   override fun toString() = "address"
 
-  override fun getBuiltinFunctions(project: Project): List<SolCallable> {
+  override fun getMembers(project: Project): List<SolMember> {
     return SolInternalTypeFactory.of(project).addressType.ref.functionDefinitionList
   }
 }
@@ -62,6 +79,7 @@ object SolAddress : SolPrimitiveType {
 data class SolInteger(val unsigned: Boolean, val size: Int) : SolNumeric {
   companion object {
     val UINT_160 = SolInteger(true, 160)
+    val UINT_256 = SolInteger(true, 256)
 
     fun parse(name: String): SolInteger {
       var unsigned = false
@@ -177,6 +195,10 @@ data class SolContract(val ref: SolContractDefinition) : SolType, Linearizable<S
       else -> false
     }
 
+  override fun getMembers(project: Project): List<SolMember> {
+    return SolResolver.resolveContractMembers(ref, false)
+  }
+
   override fun toString() = ref.name ?: ref.text ?: "$ref"
 }
 
@@ -185,6 +207,23 @@ data class SolStruct(val ref: SolStructDefinition) : SolType {
     other is SolStruct && ref == other.ref
 
   override fun toString() = ref.name ?: ref.text ?: "$ref"
+
+  override fun getMembers(project: Project): List<SolMember> {
+    return ref.variableDeclarationList
+      .map { SolStructVariableDeclaration(it) }
+  }
+}
+
+data class SolStructVariableDeclaration(
+  val ref: SolVariableDeclaration
+) : SolMember {
+  override fun getName(): String? = ref.name
+
+  override fun parseType(): SolType = getSolType(ref.typeName)
+
+  override fun resolveElement(): SolNamedElement? = ref
+
+  override fun getPossibleUsage(contextType: ContextType) = Usage.VARIABLE
 }
 
 data class SolEnum(val ref: SolEnumDefinition) : SolType {
@@ -192,6 +231,10 @@ data class SolEnum(val ref: SolEnumDefinition) : SolType {
     other is SolEnum && ref == other.ref
 
   override fun toString() = ref.name ?: ref.text ?: "$ref"
+
+  override fun getMembers(project: Project): List<SolMember> {
+    return ref.enumValueList
+  }
 }
 
 data class SolMapping(val from: SolType, val to: SolType) : SolType {
@@ -254,13 +297,13 @@ sealed class SolArray(val type: SolType) : SolType {
       return type.hashCode()
     }
 
-    override fun getBuiltinFunctions(project: Project): List<SolCallable> {
+    override fun getMembers(project: Project): List<SolMember> {
       return SolInternalTypeFactory.of(project).arrayType.ref
         .functionDefinitionList
         .map {
           val parameters = it.parseParameters()
             .map { pair -> pair.first to type }
-          BuiltinCallable(parameters, it.parseReturnType(), it.callableName, it) }
+          BuiltinCallable(parameters, it.parseType(), it.name, it) }
     }
   }
 }
@@ -300,15 +343,27 @@ fun deInternalise(name: String): String = when {
   else -> name
 }
 
+class BuiltinType(
+  private val name: String,
+  private val members: List<SolMember>
+) : SolType {
+  override fun isAssignableFrom(other: SolType): Boolean = false
+  override fun getMembers(project: Project): List<SolMember> = members
+  override fun toString(): String = name
+}
+
 data class BuiltinCallable(
   private val parameters: List<Pair<String?, SolType>>,
   private val returnType: SolType,
-  override val callableName: String?,
-  override val resolvedElement: SolNamedElement?
-
-) : SolCallable {
+  private val memberName: String?,
+  private val resolvedElement: SolNamedElement?,
+  private val possibleUsage: Usage = Usage.CALLABLE
+) : SolCallable, SolMember {
   override val callablePriority: Int
     get() = 1000
   override fun parseParameters(): List<Pair<String?, SolType>> = parameters
-  override fun parseReturnType(): SolType = returnType
+  override fun parseType(): SolType = returnType
+  override fun resolveElement(): SolNamedElement? = resolvedElement
+  override fun getName(): String? = memberName
+  override fun getPossibleUsage(contextType: ContextType) = possibleUsage
 }

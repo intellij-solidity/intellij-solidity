@@ -3,6 +3,7 @@ package me.serce.solidity.lang.types
 import com.intellij.openapi.components.AbstractProjectComponent
 import com.intellij.openapi.project.Project
 import me.serce.solidity.lang.psi.SolPsiFactory
+import me.serce.solidity.lang.types.SolInteger.Companion.UINT_256
 
 class SolInternalTypeFactory(project: Project) : AbstractProjectComponent(project) {
   private val psiFactory: SolPsiFactory = SolPsiFactory(project)
@@ -18,9 +19,7 @@ class SolInternalTypeFactory(project: Project) : AbstractProjectComponent(projec
       msgType,
       txType,
       blockType
-    ).associate {
-      it.toString() to it
-    }
+    ).associateBy { it.toString() }
   }
 
   fun byName(name: String): SolType? = registry[name]
@@ -64,18 +63,14 @@ class SolInternalTypeFactory(project: Project) : AbstractProjectComponent(projec
   }
 
   val blockType: SolType by lazy {
-    SolContract(psiFactory.createContract("""
-      contract ${internalise("Block")} {
-          address coinbase;
-          uint difficulty;
-          uint gaslimit;
-          uint number;
-          uint timestamp;
-
-          function blockhash(uint blockNumber) returns (bytes32) {
-          }
-      }
-    """))
+    BuiltinType(internalise("Block"), listOf(
+      BuiltinCallable(listOf(), SolAddress, "coinbase", null, Usage.VARIABLE),
+      BuiltinCallable(listOf(), UINT_256, "difficulty", null, Usage.VARIABLE),
+      BuiltinCallable(listOf(), UINT_256, "gasLimit", null, Usage.VARIABLE),
+      BuiltinCallable(listOf(), UINT_256, "number", null, Usage.VARIABLE),
+      BuiltinCallable(listOf(), UINT_256, "timestamp", null, Usage.VARIABLE),
+      BuiltinCallable(listOf("blockNumber" to UINT_256), SolFixedBytes(32), "blockhash", null, Usage.VARIABLE)
+    ))
   }
 
   val globalType: SolContract by lazy {

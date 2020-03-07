@@ -10,6 +10,7 @@ import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiModificationTracker
 import me.serce.solidity.lang.core.SolidityFile
 import me.serce.solidity.lang.psi.*
+import me.serce.solidity.lang.resolve.ref.SolFunctionCallReference
 import me.serce.solidity.lang.stubs.SolGotoClassIndex
 import me.serce.solidity.lang.stubs.SolModifierIndex
 import me.serce.solidity.lang.types.*
@@ -167,57 +168,32 @@ object SolResolver {
     }
   }
 
-  fun resolveMemberAccess(element: SolMemberAccessExpression): List<SolNamedElement> {
+  fun resolveMemberAccess(element: SolMemberAccessExpression): List<SolMember> {
     val functionCall = element.findParentOrNull<SolFunctionCallElement>()
-    return if (functionCall != null) {
-      val resolved = functionCall.reference?.multiResolve() ?: emptyList()
+    if (functionCall != null) {
+      val resolved = (functionCall.reference as SolFunctionCallReference)
+        .resolveFunctionCallAndFilter()
+        .filterIsInstance<SolMember>()
       if (resolved.isNotEmpty()) {
-        resolved.filterIsInstance<SolNamedElement>()
-      } else {
-        resolveMembers(element)
+        return resolved
       }
-    } else {
-      resolveMembers(element)
+    }
+    return when (val memberName = element.identifier?.text) {
+      null -> emptyList()
+      else -> element.expression.getMembers()
+        .filter { it.getName() == memberName }
     }
   }
 
-  fun resolveMembers(element: SolMemberAccessExpression): List<SolNamedElement> {
-    val memberName = element.identifier?.text
-    val ref = element.expression
-    return when {
-      memberName == null -> emptyList()
-      ref is SolPrimaryExpression && ref.varLiteral?.name == "super" -> {
-        val contract = ref.findContract()
-        return contract?.let { resolveContractMember(it, element, true) } ?: emptyList()
-      }
-      else -> {
-        when (val refType = ref.type) {
-          is SolContract -> resolveContractMember(refType.ref, element)
-          is SolStruct -> refType.ref.variableDeclarationList.filter { it.name == memberName }
-          is SolEnum -> refType.ref.enumValueList.filter { it.name == memberName }
-          else -> emptyList()
-        }
-      }
-    }
-  }
-
-  private fun resolveContractMember(
-    contract: SolContractDefinition,
-    element: SolMemberAccessExpression,
-    skipThis: Boolean = false): List<SolNamedElement> {
-
+  fun resolveContractMembers(contract: SolContractDefinition, skipThis: Boolean = false): List<SolMember> {
     val members = if (!skipThis)
-      (contract.stateVariableDeclarationList as List<SolNamedElement> + contract.functionDefinitionList)
-        .filter { it.name == element.name }
+      contract.stateVariableDeclarationList as List<SolMember> + contract.functionDefinitionList
     else
       emptyList()
-    if (members.isNotEmpty()) {
-      return members
-    }
-    return contract.supers
+    return members + contract.supers
       .map { resolveTypeName(it).firstOrNull() }
       .filterIsInstance<SolContractDefinition>()
-      .flatMap { resolveContractMember(it, element) }
+      .flatMap { resolveContractMembers(it) }
   }
 
   fun lexicalDeclarations(place: PsiElement, stop: (PsiElement) -> Boolean = { false }): Sequence<SolNamedElement> {
@@ -244,7 +220,7 @@ object SolResolver {
       is SolStateVariableDeclaration -> sequenceOf(scope)
       is SolContractDefinition -> {
         val childrenScope = sequenceOf(
-          scope.stateVariableDeclarationList,
+          scope.stateVariableDeclarationList as List<PsiElement>,
           scope.enumDefinitionList,
           scope.structDefinitionList).flatten()
           .map { lexicalDeclarations(it, place) }

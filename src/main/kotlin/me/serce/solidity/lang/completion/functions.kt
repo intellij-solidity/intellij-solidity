@@ -1,13 +1,10 @@
 package me.serce.solidity.lang.completion
 
-import com.google.common.base.Joiner
 import com.intellij.codeInsight.completion.*
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.project.DumbAware
-import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiNamedElement
 import com.intellij.psi.TokenType
 import com.intellij.psi.util.PsiTreeUtil.findElementOfClassAtOffset
 import com.intellij.psi.util.PsiTreeUtil.getParentOfType
@@ -18,6 +15,7 @@ import me.serce.solidity.lang.core.SolidityTokenTypes
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.types.SolInternalTypeFactory
+import me.serce.solidity.lang.types.SolType
 
 class SolFunctionCompletionContributor : CompletionContributor(), DumbAware {
 
@@ -90,13 +88,18 @@ object FunctionCompletionProvider : CompletionProvider<CompletionParameters>() {
     result: CompletionResultSet
   ) {
     val position = parameters.originalPosition
-    val contract = getParentOfType(position, SolFunctionDefinition::class.java)?.contract ?: return
-    val globalRef = SolInternalTypeFactory.of(contract.project).globalType.ref
-    val availableRefs = contract.collectSupers.flatMap { SolResolver.resolveTypeName(it) } + globalRef + contract
-    availableRefs
-      .filterIsInstance<SolContractDefinition>()
-      .flatMap { it.functionDefinitionList + it.structDefinitionList }
-      .filterIsInstance<PsiNamedElement>()
+
+    val availableRefs = getParentOfType(position, SolFunctionDefinition::class.java)?.contract?.let { contract ->
+      val globalRef = SolInternalTypeFactory.of(contract.project).globalType.ref
+      contract.collectSupers.flatMap { SolResolver.resolveTypeName(it) } + globalRef + contract
+    }?.filterIsInstance<SolContractDefinition>() ?: emptyList()
+
+    val functions = availableRefs
+      .flatMap { it.functionDefinitionList }
+      .toFunctionLookups()
+
+    val structs = availableRefs
+      .flatMap { it.structDefinitionList }
       .filterNot { it.name == null }
       .map {
         LookupElementBuilder
@@ -105,51 +108,45 @@ object FunctionCompletionProvider : CompletionProvider<CompletionParameters>() {
           .withIcon(SolidityIcons.FUNCTION)
           .withTypeText(funcOutType(it))
           .withTailText(funcInType(it))
+          .insertParenthesis(false)
       }
-      .map { insertParenthesis(it, false) }
+
+    (functions + structs)
       .forEach(result::addElement)
   }
-
 }
 
-private fun funcOutType(elem: PsiElement) = when (elem) {
-  is SolFunctionDefinition -> {
-    val params = elem.parameterListList
-    when (params.size) {
-      2 -> {
-        val declaredOutTypes = params[1].parameterDefList.map { p -> p.typeName.text }
-        val joinedParams = Joiner.on(",").join(declaredOutTypes)
-        "($joinedParams)"
-      }
-      else -> ""
-    }
+fun List<SolFunctionDefinition>.toFunctionLookups() =
+  this.mapNotNull { it.toFunctionLookup() }
+
+fun SolCallableElement.toFunctionLookup(): LookupElementBuilder? {
+  return if (name == null) {
+    null
+  } else {
+    LookupElementBuilder
+      .create(this)
+      .withBoldness(true)
+      .withIcon(SolidityIcons.FUNCTION)
+      .withTypeText(funcOutType(this))
+      .withTailText(funcInType(this))
+      .insertParenthesis(false)
   }
-  is SolStructDefinition -> {
-    val structName = elem.identifier?.text
-    "($structName)"
-  }
-  else -> ""
 }
 
-private fun funcInType(elem: PsiElement) = when (elem) {
-  is SolFunctionDefinition -> {
-    val declaredInTypes = elem.parameterListList[0].parameterDefList.map { formatParam(it) }
-    val joinedParams = Joiner.on(", ").join(declaredInTypes)
-    "($joinedParams)"
-  }
-  is SolStructDefinition -> {
-    val structFields = (elem.variableDeclarationList).map { v -> v.identifier?.text + ": " + v.typeName?.text }
-    val joinedParams = Joiner.on(", ").join(structFields)
-    "($joinedParams)"
-  }
-  else -> ""
+private fun funcOutType(elem: SolCallableElement): String {
+  val type = elem.parseType()
+  return type.toString()
 }
 
-private fun formatParam(param: SolParameterDef): String {
-  val id = param.identifier?.text
-  val type = param.typeName.text
-  return when (id) {
-    null -> type
-    else -> "$id: $type"
+private fun funcInType(elem: SolCallableElement): String {
+  val params = elem.parseParameters()
+  val joinedParams = params.joinToString { formatParam(it) }
+  return "($joinedParams)"
+}
+
+private fun formatParam(param: Pair<String?, SolType>): String {
+  return when (param.first) {
+    null -> param.second.toString()
+    else -> "${param.first}: ${param.second}"
   }
 }

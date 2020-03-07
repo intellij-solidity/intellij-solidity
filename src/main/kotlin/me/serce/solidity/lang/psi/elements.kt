@@ -5,6 +5,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNamedElement
 import com.intellij.psi.PsiReference
 import me.serce.solidity.lang.resolve.ref.SolReference
+import me.serce.solidity.lang.types.SolMember
 import me.serce.solidity.lang.types.SolType
 
 interface SolElement : PsiElement {
@@ -13,23 +14,39 @@ interface SolElement : PsiElement {
 
 interface SolNamedElement : SolElement, PsiNamedElement, NavigatablePsiElement
 
+enum class Visibility {
+  PRIVATE,
+  INTERNAL,
+  PUBLIC,
+  EXTERNAL
+}
+
 interface SolCallable {
-  fun parseParameters(): List<Pair<String?, SolType>>
-  fun parseReturnType(): SolType
-  val callableName: String?
-  val resolvedElement: SolNamedElement?
   val callablePriority: Int
+  fun getName(): String?
+  fun parseType(): SolType
+  fun parseParameters(): List<Pair<String?, SolType>>
+  fun resolveElement(): SolNamedElement?
 }
 
 interface SolCallableElement : SolCallable, SolNamedElement
 
-interface SolFunctionDefElement : SolHasModifiersElement, SolCallableElement {
+interface SolStateVarElement : SolMember, SolCallableElement {
+  val visibilityModifier: SolVisibilityModifier?
+  val visibility: Visibility
+}
+
+interface SolFunctionDefElement : SolHasModifiersElement, SolMember, SolCallableElement {
   val contract: SolContractDefinition
   val modifiers: List<SolModifierInvocation>
   val parameters: List<SolParameterDef>
   val returns: SolParameterList?
   val isConstructor: Boolean
+  val visibility: Visibility
 }
+
+inline fun <reified T : Enum<*>> safeValueOf(name: String): T? =
+  T::class.java.enumConstants.firstOrNull { it.name == name }
 
 interface SolFunctionCallElement : SolReferenceElement {
   val expression: SolExpression
@@ -46,6 +63,8 @@ interface SolModifierInvocationElement : SolReferenceElement {
 interface SolEnumDefElement : SolNamedElement {
   val contract: SolContractDefinition
 }
+
+interface SolEnumItemElement : SolEnumDefElement, SolMember
 
 interface SolModifierElement : SolNamedElement {
   val contract: SolContractDefinition

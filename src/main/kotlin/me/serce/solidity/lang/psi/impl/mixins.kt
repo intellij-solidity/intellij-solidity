@@ -45,6 +45,15 @@ abstract class SolEnumItemImplMixin : SolStubbedNamedElementImpl<SolEnumDefStub>
 abstract class SolEnumValueMixin(node: ASTNode) : SolNamedElementImpl(node), SolEnumValue {
   override val contract: SolContractDefinition
     get() = ancestors.firstInstance()
+
+  override fun resolveElement(): SolNamedElement? = this
+
+  override fun parseType(): SolType {
+    val def = parentOfType<SolEnumDefinition>()
+    return def?.let { SolEnum(it) } ?: SolUnknown
+  }
+
+  override fun getPossibleUsage(contextType: ContextType) = Usage.VARIABLE
 }
 
 abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrLibDefStub>, SolContractDefinition {
@@ -75,18 +84,12 @@ abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrL
     return listOf(Pair(null, SolAddress))
   }
 
-  override fun parseReturnType(): SolType {
+  override fun parseType(): SolType {
     return SolContract(this)
   }
 
-  override val resolvedElement: SolNamedElement
-    get() = this
-
-  override val callableName: String?
-    get() = name
-
-  override val callablePriority: Int
-    get() = 1000
+  override fun resolveElement() = this
+  override val callablePriority = 1000
 }
 
 abstract class SolConstructorDefMixin(node: ASTNode) : SolElementImpl(node), SolConstructorDefinition {
@@ -128,16 +131,15 @@ abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefSt
     return parameters.map { it.identifier?.text to getSolType(it.typeName) }
   }
 
-  override val callablePriority: Int
-    get() = 0
+  override val callablePriority = 0
 
-  override fun parseReturnType(): SolType {
+  override fun parseType(): SolType {
     return this.returns.let { list ->
       when (list) {
         null -> SolUnknown
         else -> list.parameterDefList.let {
-          when {
-            it.size == 1 -> getSolType(it[0].typeName)
+          when (it.size) {
+            1 -> getSolType(it[0].typeName)
             else -> SolTuple(it.map { def -> getSolType(def.typeName) })
           }
         }
@@ -145,11 +147,27 @@ abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefSt
     }
   }
 
-  override val callableName: String?
-    get() = name
+  override val visibility
+    get() = functionVisibilitySpecifierList
+      .map { it.text.toUpperCase() }
+      .mapNotNull { safeValueOf<Visibility>(it) }
+      .firstOrNull()
+      ?: Visibility.PUBLIC
 
-  override val resolvedElement: SolNamedElement
-    get() = this
+  override fun getPossibleUsage(contextType: ContextType) =
+    if (isPossibleToUse(contextType))
+      Usage.CALLABLE
+    else
+      null
+
+  private fun isPossibleToUse(contextType: ContextType): Boolean {
+    val visibility = this.visibility
+    return visibility != Visibility.PRIVATE
+      && !(visibility == Visibility.EXTERNAL && contextType == ContextType.SUPER)
+      && !(visibility == Visibility.INTERNAL && contextType == ContextType.EXTERNAL)
+  }
+
+  override fun resolveElement() = this
 
   override val returns: SolParameterList?
     get() = if (parameterListList.size == 2) {
@@ -196,19 +214,24 @@ abstract class SolStateVarDeclMixin : SolStubbedNamedElementImpl<SolStateVarDecl
 
   override fun parseParameters(): List<Pair<String?, SolType>> = emptyList()
 
-  override fun parseReturnType(): SolType = getSolType(typeName)
+  override fun parseType(): SolType = getSolType(typeName)
 
-  override val callableName: String?
-    get() = if (visibilityModifier?.text == "public")
-      identifier.text
+  override fun getPossibleUsage(contextType: ContextType): Usage? {
+    val visibility = this.visibility
+    return if (contextType == ContextType.SUPER)
+      Usage.VARIABLE
+    else if (contextType == ContextType.EXTERNAL && visibility == Visibility.PUBLIC)
+      Usage.CALLABLE
     else
       null
+  }
 
-  override val callablePriority: Int
-    get() = 0
+  override val callablePriority = 0
 
-  override val resolvedElement: SolNamedElement?
-    get() = this
+  override fun resolveElement() = this
+
+  override val visibility
+    get() = visibilityModifier?.text?.let { safeValueOf<Visibility>(it.toUpperCase()) } ?: Visibility.INTERNAL
 }
 
 abstract class SolStructDefMixin : SolStubbedNamedElementImpl<SolStructDefStub>, SolStructDefinition, SolCallableElement {
@@ -224,18 +247,13 @@ abstract class SolStructDefMixin : SolStubbedNamedElementImpl<SolStructDefStub>,
 
   }
 
-  override fun parseReturnType(): SolType {
+  override fun parseType(): SolType {
     return SolStruct(this)
   }
 
-  override val resolvedElement: SolNamedElement
-    get() = this
+  override fun resolveElement() = this
 
-  override val callableName: String?
-    get() = name
-
-  override val callablePriority: Int
-    get() = 1000
+  override val callablePriority = 1000
 }
 
 abstract class SolFunctionCallMixin(node: ASTNode) : SolNamedElementImpl(node), SolFunctionCallElement {
@@ -285,7 +303,7 @@ open class SolDeclarationItemMixin(node: ASTNode) : SolNamedElementImpl(node)
 
 open class SolTypedDeclarationItemMixin(node: ASTNode) : SolNamedElementImpl(node)
 
-open class SolVariableDeclarationMixin(node: ASTNode) : SolNamedElementImpl(node)
+abstract class SolVariableDeclarationMixin(node: ASTNode) : SolVariableDeclaration, SolNamedElementImpl(node)
 
 open class SolParameterDefMixin(node: ASTNode) : SolNamedElementImpl(node)
 
@@ -346,18 +364,13 @@ abstract class SolEventDefMixin : SolStubbedNamedElementImpl<SolEventDefStub>, S
       ?: emptyList()
   }
 
-  override fun parseReturnType(): SolType {
+  override fun parseType(): SolType {
     return SolUnknown
   }
 
-  override val resolvedElement: SolNamedElement
-    get() = this
+  override fun resolveElement() = this
 
-  override val callableName: String?
-    get() = name
-
-  override val callablePriority: Int
-    get() = 1000
+  override val callablePriority = 1000
 }
 
 abstract class SolUsingForMixin(node: ASTNode) : SolElementImpl(node), SolUsingForElement {
