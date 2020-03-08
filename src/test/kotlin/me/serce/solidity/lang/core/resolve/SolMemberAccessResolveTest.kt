@@ -31,6 +31,24 @@ class SolMemberAccessResolveTest : SolResolveTestBase() {
       }
   """)
 
+  fun testResolveContractMemberWhenFunction() = checkByCode("""
+      contract C {
+          int public prop;
+                    //x
+                    
+          function prop(uint value) public {
+          
+          }
+      }
+
+      contract B {
+          function B(C c) {
+              c.prop();
+              //^
+          }
+      }
+  """)
+
   fun testResolveContractParent() = checkByCode("""
       contract C {
           int public prop;

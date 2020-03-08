@@ -12,7 +12,7 @@ Solidity File
     SolElementaryTypeNameImpl(ELEMENTARY_TYPE_NAME)
       SolNumberTypeImpl(NUMBER_TYPE)
         PsiElement(fixedNumType)('fixed40x40')
-  PsiErrorElement:<expression>, Identifier, constant, contract, import, interface, internal, library, pragma, private or public expected, got 'pi'
+  PsiErrorElement:<expression>, <visibility modifier>, Identifier, constant, contract, import, interface, library or pragma expected, got 'pi'
     <empty list>
   PsiWhiteSpace(' ')
   SolAssignmentExpressionImpl(ASSIGNMENT_EXPRESSION)

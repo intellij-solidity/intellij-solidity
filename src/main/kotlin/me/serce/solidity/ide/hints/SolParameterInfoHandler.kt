@@ -103,7 +103,7 @@ class SolParameterInfoHandler : ParameterInfoHandler<PsiElement, SolArgumentsDes
 }
 
 class SolArgumentsDescription(
-  callable: ResolvedCallable,
+  callable: SolCallable,
   callArguments: SolFunctionCallArguments,
   val arguments: Array<String>
 ) {

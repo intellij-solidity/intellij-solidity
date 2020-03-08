@@ -33,8 +33,8 @@ class SolStateVarCompletionTest : SolCompletionTestBase() {
 
   fun testContractCompletion() = checkCompletion(hashSetOf("owner1", "owner2"), """
         contract C {
-            address owner1;
-            address owner2;
+            address public owner1;
+            address public owner2;
         }
         contract B {
             C c;
@@ -47,8 +47,8 @@ class SolStateVarCompletionTest : SolCompletionTestBase() {
 
   fun testContractCompletionInheritance() = checkCompletion(hashSetOf("owner1", "owner2"), """
         contract C {
-            address owner1;
-            address owner2;
+            address public owner1;
+            address public owner2;
         }
         contract D is C {}
         contract B {

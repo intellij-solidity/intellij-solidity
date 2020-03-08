@@ -112,12 +112,12 @@ fun inferDeclType(decl: SolNamedElement): SolType {
 }
 
 fun inferRefType(ref: SolVarLiteral): SolType {
-  return when {
-    ref.name == "this" -> {
+  return when (ref.name) {
+    "this" -> {
       ref.findContract()
         ?.let { SolContract(it) } ?: SolUnknown
     }
-    ref.name == "super" -> SolUnknown
+    "super" -> SolUnknown
     else -> {
       val declarations = SolResolver.resolveVarLiteral(ref)
       return declarations.asSequence()
@@ -168,7 +168,7 @@ fun inferExprType(expr: SolExpression?): SolType {
       (expr.reference as SolFunctionCallReference)
         .resolveFunctionCall()
         .firstOrNull { it.canBeApplied(expr.functionCallArguments) }
-        ?.parseReturnType()
+        ?.parseType()
         ?: SolUnknown
     }
     is SolAndExpression,
@@ -184,12 +184,15 @@ fun inferExprType(expr: SolExpression?): SolType {
       }
     }
     is SolMemberAccessExpression -> {
-      val properties = SolResolver.resolveMemberAccess(expr)
-      return properties.asSequence()
-        .map { inferDeclType(it) }
-        .filter { it != SolUnknown }
-        .firstOrElse(SolUnknown)
+      return SolResolver.resolveMemberAccess(expr)
+        .firstOrNull()
+        ?.parseType()
+        ?: SolUnknown
     }
+    is SolParenExpression ->
+      inferExprType(expr.expression)
+    is SolUnaryExpression ->
+      inferExprType(expr.expression)
     else -> SolUnknown
   }
 }
@@ -199,6 +202,19 @@ private fun getNumericExpressionType(firstType: SolType, secondType: SolType): S
     SolInteger(!(!firstType.unsigned || !secondType.unsigned), max(firstType.size, secondType.size))
   } else {
     SolUnknown
+  }
+}
+
+fun SolExpression.getMembers(): List<SolMember> {
+  return when {
+    this is SolPrimaryExpression && varLiteral?.name == "super" -> {
+      val contract = this.findContract()
+      contract?.let { SolResolver.resolveContractMembers(it, true) }
+        ?: emptyList()
+    }
+    else -> {
+      this.type.getMembers(this.project)
+    }
   }
 }
 

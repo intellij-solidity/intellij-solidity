@@ -153,10 +153,10 @@ private ContractPart ::=
 
 InheritanceSpecifier ::= UserDefinedTypeName ( '(' Expression ( ',' Expression )* ')' )?
 
-private VisibilityModifiers ::= ( public | internal | private )
+VisibilityModifier ::= ( public | internal | private )
 
-StateVariableDeclaration ::= TypeName (VisibilityModifiers constant | constant? VisibilityModifiers? ) Identifier ('=' Expression)? ';'  {
-    implements = "me.serce.solidity.lang.psi.SolNamedElement"
+StateVariableDeclaration ::= TypeName (VisibilityModifier constant | constant? VisibilityModifier? ) Identifier ('=' Expression)? ';'  {
+    implements = "me.serce.solidity.lang.psi.SolStateVarElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolStateVarDeclMixin"
     stubClass = "me.serce.solidity.lang.stubs.SolStateVarDeclStub"
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
@@ -224,7 +224,7 @@ EventDefinition ::= event Identifier IndexedParameterList anonymous? ';' {
 }
 
 EnumValue ::= Identifier {
-    implements = "me.serce.solidity.lang.psi.SolEnumDefElement"
+    implements = "me.serce.solidity.lang.psi.SolEnumItemElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolEnumValueMixin"
 }
 
@@ -294,7 +294,7 @@ private UserDefinedWithLocationTypeName ::= UserDefinedTypeName StorageLocation
 private UserDefinedWithoutLocationTypeName ::= UserDefinedTypeName
 
 UserDefinedTypeName ::= Identifier ( '.' Identifier )* {
-    implements = "me.serce.solidity.lang.psi.SolReferenceElement"
+    implements = "me.serce.solidity.lang.psi.SolUserDefinedTypeNameElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolUserDefinedTypeNameImplMixin"
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }

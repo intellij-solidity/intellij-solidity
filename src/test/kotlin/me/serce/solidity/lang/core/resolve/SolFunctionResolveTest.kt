@@ -51,7 +51,12 @@ class SolFunctionResolveTest : SolResolveTestBase() {
   """)
 
   fun testResolveFunctionFromParent() = checkByCode("""
-        contract A {
+        contract Base {
+            function doit2() {
+            }
+        }
+
+        contract A is Base {
             function doit2() {
                     //x
             }
@@ -195,6 +200,27 @@ class SolFunctionResolveTest : SolResolveTestBase() {
         }
   """)
 
+  fun testResolveUsingLibrary3() = checkByCode("""
+
+        library Library {
+            function findUpperBound(uint256[] storage array, uint256 element) internal view returns (uint256) {
+                      //x
+                return 0;
+            }
+        }
+
+        contract B {
+            using Library for uint256[];
+            
+            uint256[] private array;
+
+            function doit(uint256  value) {
+                array.findUpperBound(value);
+                      //^
+            }
+        }
+  """)
+
   fun testResolveUsingLibraryWithWildcard() = checkByCode("""
         library Library {
             function something(bytes self, uint256 go) internal pure returns (uint256) {
@@ -300,6 +326,47 @@ class SolFunctionResolveTest : SolResolveTestBase() {
             }
         }
   """)
+
+  fun testResolvePublicVar() = checkByCode("""
+        contract A {
+            uint public value;
+                       //x
+        }
+
+        contract B {
+            function doit(address some) {
+                A(some).value();
+                       //^
+            }
+        }
+  """)
+
+  fun testResolveTransfer() {
+    checkIsResolved("""
+        contract B {
+            function doit(address some) {
+                some.transfer(100);
+                       //^
+            }
+        }
+  """)
+  }
+
+  fun testResolveArrayPush() {
+    checkIsResolved("""
+        contract B {
+            function doit(uint256[] storage array) {
+                array.push(100);
+                     //^
+            }
+        }
+  """)
+  }
+
+  fun checkIsResolved(@Language("Solidity") code: String) {
+    val (refElement, _) = resolveInCode<SolFunctionCallExpression>(code)
+    assertNotNull(refElement.reference?.resolve())
+  }
 
   override fun checkByCode(@Language("Solidity") code: String) {
     checkByCodeInternal<SolFunctionCallExpression, SolNamedElement>(code)

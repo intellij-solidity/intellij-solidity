@@ -11,10 +11,8 @@ import com.intellij.patterns.PsiElementPattern
 import com.intellij.patterns.StandardPatterns
 import com.intellij.psi.PsiElement
 import com.intellij.util.ProcessingContext
-import me.serce.solidity.lang.core.SolidityFile
 import me.serce.solidity.lang.psi.SolBlock
 import me.serce.solidity.lang.psi.SolContractDefinition
-import me.serce.solidity.lang.psi.SolPrimaryExpression
 import me.serce.solidity.lang.psi.SolStatement
 
 /**
@@ -55,7 +53,7 @@ class SolContextCompletionContributor : CompletionContributor(), DumbAware {
         override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext?, result: CompletionResultSet) {
           SolCompleter
             .completeEventName(parameters.position)
-            .map { insertParenthesis(it, true) }
+            .map { it.insertParenthesis(true) }
             .forEach(result::addElement)
         }
       }
@@ -111,8 +109,7 @@ private inline fun <reified I : PsiElement> psiElement(): PsiElementPattern.Capt
 
 fun LookupElementBuilder.keywordPrioritised(): LookupElement = PrioritizedLookupElement.withPriority(this, KEYWORD_PRIORITY)
 
-fun insertParenthesis(elem: LookupElementBuilder, finish: Boolean): LookupElementBuilder =
-        elem.withInsertHandler { ctx, _ ->
-            ctx.document.insertString(ctx.selectionEndOffset, if (finish) "();" else "()")
-            EditorModificationUtil.moveCaretRelatively(ctx.editor, 1)
-        }
+fun LookupElementBuilder.insertParenthesis(finish: Boolean): LookupElementBuilder = this.withInsertHandler { ctx, _ ->
+  ctx.document.insertString(ctx.selectionEndOffset, if (finish) "();" else "()")
+  EditorModificationUtil.moveCaretRelatively(ctx.editor, 1)
+}
