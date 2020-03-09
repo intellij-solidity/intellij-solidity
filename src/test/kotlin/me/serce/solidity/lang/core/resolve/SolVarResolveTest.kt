@@ -81,6 +81,17 @@ class SolVarResolveTest : SolResolveTestBase() {
         }
   """)
 
+  fun testFunctionParamInOtherFunctionCall() = checkByCode("""
+        contract B {
+            function B(uint abc) {
+                          //x
+                _;
+                require(abc == 100, "some condition");
+                       //^
+            }
+        }
+  """)
+
   fun testFunctionParamsSecond() = checkByCode("""
         contract B {
             function B(uint abc1, uint abc2) {

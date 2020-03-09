@@ -3,6 +3,7 @@ package me.serce.solidity.lang.core.resolve
 import me.serce.solidity.lang.psi.SolFunctionCallExpression
 import me.serce.solidity.lang.psi.SolFunctionDefinition
 import me.serce.solidity.lang.psi.SolNamedElement
+import me.serce.solidity.lang.psi.SolVarLiteral
 import org.intellij.lang.annotations.Language
 
 class SolFunctionResolveTest : SolResolveTestBase() {
@@ -235,6 +236,21 @@ class SolFunctionResolveTest : SolResolveTestBase() {
             function doit(bytes value) {
                 value.something(60);
                      //^
+            }
+        }
+  """)
+
+  fun testResolveVarAsFunction() = checkByCodeInternal<SolVarLiteral, SolNamedElement>("""
+        contract B {
+            uint256 doit;
+        
+            function doit(uint16) {
+                    //x
+            }
+
+            function test() {
+                doit(1 + 1);
+                //^
             }
         }
   """)
