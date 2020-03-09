@@ -169,8 +169,8 @@ object SolResolver {
   }
 
   fun resolveMemberAccess(element: SolMemberAccessExpression): List<SolMember> {
-    val functionCall = element.findParentOrNull<SolFunctionCallElement>()
-    if (functionCall != null) {
+    if (element.parent is SolFunctionCallExpression) {
+      val functionCall = element.findParentOrNull<SolFunctionCallElement>()!!
       val resolved = (functionCall.reference as SolFunctionCallReference)
         .resolveFunctionCallAndFilter()
         .filterIsInstance<SolMember>()

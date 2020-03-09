@@ -70,4 +70,18 @@ class SolMemberAccessResolveTest : SolResolveTestBase() {
           }
       }
   """)
+
+  fun testResolveInsideFunctionCall() = checkByCode("""
+      contract C {
+          bool public def;
+                     //x 
+      }
+
+      contract test {
+          function test(C c){
+              require(c.def, "");
+                       //^
+          }
+      }
+  """)
 }
