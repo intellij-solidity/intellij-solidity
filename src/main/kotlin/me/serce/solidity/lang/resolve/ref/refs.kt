@@ -22,7 +22,11 @@ class SolVarLiteralReference(element: SolVarLiteral) : SolReferenceBase<SolVarLi
   override fun getVariants() = SolCompleter.completeLiteral(element)
 }
 
-class SolModifierReference(element: SolReferenceElement, private val modifierElement: SolModifierInvocationElement) : SolReferenceBase<SolReferenceElement>(element), SolReference {
+class SolModifierReference(
+  element: SolReferenceElement,
+  private val modifierElement: SolModifierInvocationElement
+) : SolReferenceBase<SolReferenceElement>(element), SolReference {
+
   override fun calculateDefaultRangeInElement() = modifierElement.parentRelativeRange
 
   override fun multiResolve(): List<SolNamedElement> {
