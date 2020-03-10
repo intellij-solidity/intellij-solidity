@@ -13,6 +13,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.util.ProcessingContext
 import me.serce.solidity.lang.psi.SolBlock
 import me.serce.solidity.lang.psi.SolContractDefinition
+import me.serce.solidity.lang.psi.SolMemberAccessExpression
 import me.serce.solidity.lang.psi.SolStatement
 
 /**
@@ -97,11 +98,14 @@ class SolBaseTypesCompletionContributor : CompletionContributor(), DumbAware {
 
 private fun <E> or(vararg patterns: ElementPattern<E>) = StandardPatterns.or(*patterns)
 
-fun statement() = psiElement<PsiElement>()
+fun statement(): PsiElementPattern.Capture<PsiElement> = psiElement<PsiElement>()
   .inside(SolStatement::class.java)
 
-fun insideContract() = psiElement<PsiElement>()
+fun insideContract(): PsiElementPattern.Capture<PsiElement> = psiElement<PsiElement>()
   .inside(SolContractDefinition::class.java)
+
+fun inMemberAccess(): PsiElementPattern.Capture<PsiElement> = psiElement<PsiElement>()
+  .withParent(SolMemberAccessExpression::class.java)
 
 private inline fun <reified I : PsiElement> psiElement(): PsiElementPattern.Capture<I> {
   return psiElement(I::class.java)
