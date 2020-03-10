@@ -19,7 +19,7 @@ class SolUserDefinedTypeNameReference(element: SolUserDefinedTypeName) : SolRefe
 class SolVarLiteralReference(element: SolVarLiteral) : SolReferenceBase<SolVarLiteral>(element), SolReference {
   override fun multiResolve() = SolResolver.resolveVarLiteralReference(element)
 
-  override fun getVariants() = SolCompleter.completeLiteral(element)
+  override fun getVariants() = SolCompleter.completeLiteral(element).toList().toTypedArray()
 }
 
 class SolModifierReference(
