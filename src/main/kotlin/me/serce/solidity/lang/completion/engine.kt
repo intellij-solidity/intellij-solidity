@@ -63,9 +63,9 @@ object SolCompleter {
       .toTypedArray()
   }
 
-  fun completeLiteral(element: PsiElement): Array<out LookupElement> {
-    val declarations = SolResolver.lexicalDeclarations(element).take(25).toList()
-    return declarations.createVarLookups()
+  fun completeLiteral(element: PsiElement): Sequence<LookupElement> {
+    return SolResolver.lexicalDeclarations(element)
+      .createVarLookups()
   }
 
   fun completeMemberAccess(element: SolMemberAccessExpression): Array<out LookupElement> {
@@ -91,14 +91,14 @@ object SolCompleter {
       .toTypedArray()
   }
 
-  private fun Collection<SolNamedElement>.createVarLookups(): Array<LookupElement> = createVarLookups(SolidityIcons.STATE_VAR)
+  private fun Sequence<SolNamedElement>.createVarLookups(): Sequence<LookupElement> = createVarLookups(SolidityIcons.STATE_VAR)
 
-  private fun Collection<SolNamedElement>.createVarLookups(icon: Icon): Array<LookupElement> = map {
+  private fun Sequence<SolNamedElement>.createVarLookups(icon: Icon): Sequence<LookupElement> = map {
     PrioritizedLookupElement.withPriority(
       LookupElementBuilder.create(it.name ?: "").withIcon(icon),
       TYPED_COMPLETION_PRIORITY
     )
-  }.toTypedArray()
+  }
 }
 
 class ContractLookupElement(val contract: SolContractDefinition) : LookupElement() {

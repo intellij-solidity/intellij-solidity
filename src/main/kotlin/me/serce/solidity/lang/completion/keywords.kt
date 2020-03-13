@@ -39,6 +39,6 @@ class SolKeywordCompletionContributor : CompletionContributor(), DumbAware {
       }
     })
 
-    extend(CompletionType.BASIC, insideContract(), SolKeywordCompletionProvider("this"))
+    extend(CompletionType.BASIC, insideContract().andNot(inMemberAccess()), SolKeywordCompletionProvider("this"))
   }
 }

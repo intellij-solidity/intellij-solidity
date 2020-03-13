@@ -286,7 +286,7 @@ abstract class SolModifierInvocationMixin(node: ASTNode) : SolNamedElementImpl(n
   override val referenceName: String
     get() = this.varLiteral.text
 
-  override fun getReference(): SolReference = SolModifierReference(this.findParent<SolHasModifiersElement>(), this)
+  override fun getReference(): SolReference = SolModifierReference(this, this)
 }
 
 abstract class SolVarLiteralMixin(node: ASTNode) : SolNamedElementImpl(node), SolVarLiteral {

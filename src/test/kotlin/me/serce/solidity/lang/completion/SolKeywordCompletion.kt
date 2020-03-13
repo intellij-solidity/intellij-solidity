@@ -15,4 +15,35 @@ class SolKeywordCompletion : SolCompletionTestBase() {
   """
   )
 
+  fun testThisKeyword() = checkCompletion(
+    hashSetOf("this"), """
+        contract A {
+            function test() {
+                /*caret*/
+            }
+        } 
+  """)
+
+  fun testThisKeywordInMemberAccess() = checkCompletion(
+    hashSetOf("this"), """
+        contract A {
+            address a;
+            
+            function test() {
+                a.transfer(/*caret*/);
+            }
+        } 
+  """)
+
+  fun testThisKeywordNotInMemberAccess() = checkCompletion(
+    hashSetOf("send", "transfer"), """
+        contract A {
+            address a;
+        
+            function test() {
+                a./*caret*/
+            }
+        } 
+  """, strict = true)
+
 }
