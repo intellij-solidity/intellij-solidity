@@ -5,6 +5,8 @@ Solidity File
     PsiElement(Identifier)('test')
     PsiWhiteSpace(' ')
     PsiElement({)('{')
+    PsiErrorElement:<number type>, <type name>, constructor, enum, event, function, import, modifier, pragma, struct, using or '}' expected, got 'function'
+      <empty list>
   PsiWhiteSpace('\n  ')
   PsiElement(function)('function')
   PsiWhiteSpace(' ')
@@ -16,8 +18,7 @@ Solidity File
   PsiElement())(')')
   PsiWhiteSpace(' ')
   PsiElement(Identifier)('modifier1')
-  PsiErrorElement:';' or '=' expected, got '('
-    PsiElement(()('(')
+  PsiElement(()('(')
   PsiElement())(')')
   PsiWhiteSpace(' ')
   PsiElement(returns)('returns')

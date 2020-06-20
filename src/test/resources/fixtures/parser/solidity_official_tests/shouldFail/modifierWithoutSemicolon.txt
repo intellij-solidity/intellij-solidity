@@ -33,10 +33,10 @@ Solidity File
                 SolNumberLiteralImpl(NUMBER_LITERAL)
                   PsiElement(decimalNumber)('0')
             PsiElement())(')')
+        PsiErrorElement:else expected, got '_'
+          <empty list>
         PsiWhiteSpace(' ')
         PsiElement(Identifier)('_')
-        PsiErrorElement:'}' unexpected
-          <empty list>
         PsiWhiteSpace(' ')
         PsiElement(})('}')
     PsiWhiteSpace('\n')

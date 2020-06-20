@@ -84,7 +84,7 @@ private fun deduceSemicolonOrBracket(editor: Editor, file: SolidityFile, startOf
 object FunctionCompletionProvider : CompletionProvider<CompletionParameters>() {
   override fun addCompletions(
     parameters: CompletionParameters,
-    context: ProcessingContext?,
+    context: ProcessingContext,
     result: CompletionResultSet
   ) {
     val position = parameters.originalPosition

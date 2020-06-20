@@ -30,5 +30,5 @@ Solidity File
           PsiElement(;)(';')
         PsiWhiteSpace(' ')
         PsiElement(})('}')
-    PsiErrorElement:<state variable declaration>, constructor, enum, event, function, modifier, struct, using or '}' expected, unexpected end of file
+    PsiErrorElement:<state variable declaration>, constructor, enum, event, function, modifier, struct, using or '}' expected
       <empty list>

@@ -45,10 +45,11 @@ Solidity File
                 PsiElement(Identifier)('a')
             PsiWhiteSpace(' ')
             PsiElement(=)('=')
+            PsiErrorElement:<expression> or <primary expression> expected, got '['
+              <empty list>
           PsiWhiteSpace(' ')
           PsiElement([)('[')
-          PsiErrorElement:<expression>, <primary expression> or ']' expected, got ','
-            PsiElement(,)(',')
+          PsiElement(,)(',')
           PsiElement(decimalNumber)('2')
           PsiElement(,)(',')
           PsiElement(decimalNumber)('3')

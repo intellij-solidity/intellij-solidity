@@ -2,12 +2,13 @@ package me.serce.solidity.ide.navigation
 
 import com.intellij.codeInsight.navigation.GotoImplementationHandler
 import com.intellij.codeInsight.navigation.GotoTargetHandler.GotoData
+import com.intellij.openapi.ui.GenericListComponentUpdater
 import com.intellij.openapi.util.Disposer
 import com.intellij.openapi.util.Ref
+import com.intellij.psi.PsiElement
 import com.intellij.ui.components.JBList
 import com.intellij.ui.popup.AbstractPopup
 import com.intellij.ui.popup.ComponentPopupBuilderImpl
-import com.intellij.usages.UsageView
 import com.intellij.util.ui.UIUtil
 import me.serce.solidity.lang.psi.SolContractDefinition
 import me.serce.solidity.utils.SolTestBase
@@ -43,7 +44,13 @@ class GoToImplementationTest : SolTestBase() {
     if (data.listUpdaterTask != null) {
       val list = JBList<String>()
       val popup = ComponentPopupBuilderImpl(list, null).createPopup()
-      data.listUpdaterTask.init(popup as AbstractPopup, list, Ref<UsageView>())
+      data.listUpdaterTask.init(popup as AbstractPopup, object: GenericListComponentUpdater<PsiElement> {
+        override fun replaceModel(data: MutableList<out PsiElement>) {
+        }
+
+        override fun paintBusy(paintBusy: Boolean) {
+        }
+      }, Ref())
       data.listUpdaterTask.queue()
 
       try {

@@ -11,7 +11,7 @@ const val KEYWORD_PRIORITY = 10.0
 class SolKeywordCompletionProvider(private vararg val keywords: String) : CompletionProvider<CompletionParameters>() {
   override fun addCompletions(
     parameters: CompletionParameters,
-    context: ProcessingContext?,
+    context: ProcessingContext,
     result: CompletionResultSet
   ) {
     keywords
@@ -26,7 +26,7 @@ class SolKeywordCompletionContributor : CompletionContributor(), DumbAware {
       CompletionType.BASIC, rootDeclaration(),
       SolKeywordCompletionProvider("pragma ", "import ", "contract ", "library "))
     extend(CompletionType.BASIC, rootDeclaration(), object : CompletionProvider<CompletionParameters>() {
-      override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext?, result: CompletionResultSet) {
+      override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext, result: CompletionResultSet) {
         val pragmaBuilder = LookupElementBuilder
           .create("pragma solidity")
           .bold()

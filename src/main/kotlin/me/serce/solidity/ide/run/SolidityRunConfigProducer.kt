@@ -16,11 +16,11 @@ import me.serce.solidity.lang.psi.SolFunctionDefinition
 import me.serce.solidity.lang.psi.elementType
 
 class SolidityRunConfigProducer : RunConfigurationProducer<SolidityRunConfigBase>(SolidityConfigurationType.getInstance()) {
-  override fun isConfigurationFromContext(configuration: SolidityRunConfigBase?, context: ConfigurationContext?): Boolean {
+  override fun isConfigurationFromContext(configuration: SolidityRunConfigBase, context: ConfigurationContext): Boolean {
     return ifSolidityRunConfig(configuration) { config ->
       val funcName = config.getPersistentData().functionName ?: return@ifSolidityRunConfig false
       val contrName = config.getPersistentData().contractName ?: return@ifSolidityRunConfig false
-      val psiElement = context?.location?.psiElement ?: return@ifSolidityRunConfig false
+      val psiElement = context.location?.psiElement ?: return@ifSolidityRunConfig false
       val func = searchFunction(psiElement) ?: return@ifSolidityRunConfig false
       return@ifSolidityRunConfig funcName == func.name && contrName == func.contract.name
     }
@@ -35,10 +35,7 @@ class SolidityRunConfigProducer : RunConfigurationProducer<SolidityRunConfigBase
     return false
   }
 
-  override fun setupConfigurationFromContext(configuration: SolidityRunConfigBase?, context: ConfigurationContext?, sourceElement: Ref<PsiElement>?): Boolean {
-    if (context == null || configuration == null || sourceElement == null) {
-      return false
-    }
+  override fun setupConfigurationFromContext(configuration: SolidityRunConfigBase, context: ConfigurationContext, sourceElement: Ref<PsiElement>): Boolean {
     val solFunctionDefinition = searchFunction(sourceElement.get()) ?: return false
     if (!SearchUtils.runnableFilter.invoke(solFunctionDefinition)) {
       return false

@@ -64,7 +64,7 @@ class SolidityConfigurablePanel {
       }
     }
     evmPath.textField.document.addDocumentListener(object : DocumentAdapter() {
-      override fun textChanged(e: javax.swing.event.DocumentEvent?) {
+      override fun textChanged(e: DocumentEvent) {
         updateSolcControlAvailability()
       }
     })
@@ -75,7 +75,7 @@ class SolidityConfigurablePanel {
     standaloneSolc.addBrowseFolderListener(solcDescriptor.title, solcDescriptor.description, null, solcDescriptor)
 
     standaloneSolc.textField.document.addDocumentListener(object : DocumentAdapter() {
-      override fun textChanged(e: DocumentEvent?) {
+      override fun textChanged(e: DocumentEvent) {
         updateSolcControlAvailability()
       }
     })

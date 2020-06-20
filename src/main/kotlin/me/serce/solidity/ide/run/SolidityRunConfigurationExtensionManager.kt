@@ -4,4 +4,4 @@ import com.intellij.execution.RunConfigurationExtension
 import com.intellij.execution.configuration.RunConfigurationExtensionsManager
 import com.intellij.execution.configurations.RunConfigurationBase
 
-class SolidityRunConfigurationExtensionManager : RunConfigurationExtensionsManager<RunConfigurationBase, RunConfigurationExtension>(RunConfigurationExtension.EP_NAME)
+class SolidityRunConfigurationExtensionManager : RunConfigurationExtensionsManager<RunConfigurationBase<*>, RunConfigurationExtension>(RunConfigurationExtension.EP_NAME)

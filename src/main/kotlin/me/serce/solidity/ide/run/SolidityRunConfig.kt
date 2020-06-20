@@ -25,7 +25,7 @@ import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
 
-abstract class SolidityRunConfigBase(configurationModule: SolidityRunConfigModule, factory: ConfigurationFactory) : ModuleBasedConfiguration<SolidityRunConfigModule>(configurationModule, factory), RunConfigurationWithSuppressedDefaultDebugAction
+abstract class SolidityRunConfigBase(configurationModule: SolidityRunConfigModule, factory: ConfigurationFactory) : ModuleBasedConfiguration<SolidityRunConfigModule, Element>(configurationModule, factory), RunConfigurationWithSuppressedDefaultDebugAction
 
 class UnsupportedSolidityRunConfig(configurationModule: SolidityRunConfigModule, factory: ConfigurationFactory) : SolidityRunConfigBase(configurationModule, factory) {
   override fun getConfigurationEditor(): SettingsEditor<out RunConfiguration> {
@@ -146,7 +146,7 @@ class SolidityRunConfig(configurationModule: SolidityRunConfigModule, factory: C
 
   override fun readExternal(element: Element) {
     super.readExternal(element)
-    JavaRunConfigurationExtensionManager.getInstance().readExternal(this, element)
+    JavaRunConfigurationExtensionManager.instance.readExternal(this, element)
     XmlSerializer.deserializeInto(this, element)
     XmlSerializer.deserializeInto(myData, element)
 
@@ -156,7 +156,7 @@ class SolidityRunConfig(configurationModule: SolidityRunConfigModule, factory: C
 
   override fun writeExternal(element: Element) {
     super.writeExternal(element)
-    JavaRunConfigurationExtensionManager.getInstance().writeExternal(this, element)
+    JavaRunConfigurationExtensionManager.instance.writeExternal(this, element)
     XmlSerializer.serializeInto(this, element)
     XmlSerializer.serializeInto(myData, element)
     writeModule(element)

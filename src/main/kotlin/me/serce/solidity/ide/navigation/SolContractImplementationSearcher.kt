@@ -15,7 +15,7 @@ private const val MAX_IMPLEMENTATIONS = 250
 
 class SolContractImplementationSearcher : QueryExecutorBase<PsiElement, SearchParameters>(true) {
 
-  override fun processQuery(queryParameters: SearchParameters, consumer: Processor<PsiElement>) {
+  override fun processQuery(queryParameters: SearchParameters, consumer: Processor<in PsiElement>) {
     val contract = queryParameters.element
     if (contract !is SolContractDefinition) {
       return

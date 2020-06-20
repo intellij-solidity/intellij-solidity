@@ -1,6 +1,7 @@
 package me.serce.solidity.ide.run.compile
 
 import com.intellij.notification.NotificationGroup
+import com.intellij.notification.NotificationListener
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.compiler.CompileContext
 import com.intellij.openapi.compiler.CompilerMessageCategory
@@ -105,30 +106,30 @@ object SolcMessageProcessor {
     val notification = (if (result.success) NotificationGroup.logOnlyGroup(notificationGroupId) else NotificationGroup.balloonGroup(notificationGroupId)).createNotification(
       title, message,
       messageType.toNotificationType()
-    ) { _, hlu ->
-      val url = hlu.url ?: return@createNotification
+      , NotificationListener { _, hlu ->
+      val url = hlu.url ?: return@NotificationListener
 
       val (urlPart, filePart) = url.toString().split("?", limit = 2)
       val (lineNum, colNum) = filePart.split(",", limit = 2)
       // VirtualFileManager can't handle urls without '//' schema part
       val urlPartFixed = if (!urlPart.contains("://")) urlPart.replaceFirst(":/", ":///") else urlPart
 
-      val file = VirtualFileManager.getInstance().findFileByUrl(urlPartFixed) ?: return@createNotification
+      val file = VirtualFileManager.getInstance().findFileByUrl(urlPartFixed) ?: return@NotificationListener
       val open = OpenFileDescriptor(project, file,
         Math.max(0, lineNum.toInt() - 1),
         Math.max(0, colNum.toInt() - 1))
       open.navigate(true)
-    }
+    })
       .setImportant(false)
     notification.notify(project)
   }
 
   fun showNoEvmMessage(project: Project) {
     NotificationGroup.balloonGroup(notificationGroupId)
-      .createNotification("SolcJ compiler is not found", "<a href=\"#\">Please configure EthereumJ bundle</a>", NotificationType.INFORMATION)
-      { _, _ ->
-        SoliditySettingsConfigurable(SoliditySettings.instance).getQuickFix(project).run()
-      }.notify(project)
+      .createNotification("SolcJ compiler is not found", "<a href=\"#\">Please configure EthereumJ bundle</a>", NotificationType.INFORMATION,
+        NotificationListener { _, _ ->
+          SoliditySettingsConfigurable(SoliditySettings.instance).getQuickFix(project).run()
+        }).notify(project)
   }
 }
 

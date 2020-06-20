@@ -39,9 +39,9 @@ object DependencyConfigurator {
       }
     })
     ApplicationManager.getApplication().messageBus.connect().subscribe(ProjectManager.TOPIC, object : ProjectManagerListener {
-      override fun projectOpened(project: Project?) {
+      override fun projectOpened(project: Project) {
         if (SoliditySettings.instance.dependenciesAutoRefresh) {
-          refreshProject(project ?: return)
+          refreshProject(project)
         }
       }
     })

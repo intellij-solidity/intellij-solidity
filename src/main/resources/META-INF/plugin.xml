@@ -1,4 +1,4 @@
-<idea-plugin version="2">
+<idea-plugin>
     <id>me.serce.solidity</id>
     <name>Intellij-Solidity</name>
     <vendor email="sergeicelov@gmail.com" url="https://github.com/intellij-solidity">Intellij Solidity</vendor>
@@ -50,10 +50,12 @@
     ]]>
     </change-notes>
 
-    <idea-version since-build="163.0"/>
-
+    <idea-version since-build="201"/>
 
     <depends>com.intellij.modules.lang</depends>
+    <!-- TODO(sergey): Remove the module to keep the plugin compatible with non-java IDEs -->
+    <depends>com.intellij.modules.java</depends>
+    <depends>com.intellij.modules.java-capable</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <configurationType implementation="me.serce.solidity.ide.run.SolidityConfigurationType" />

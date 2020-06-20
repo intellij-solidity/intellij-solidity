@@ -5,11 +5,11 @@ buildscript {
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "com.github.JetBrains:gradle-grammar-kit-plugin:2018.1.1"
     }
 }
 
 plugins {
+    id "org.jetbrains.grammarkit" version "2020.1.4"
     id 'org.jetbrains.intellij' version '0.4.21'
     id 'net.researchgate.release' version '2.8.1'
 }
@@ -46,16 +46,15 @@ clean.doFirst {
 intellij {
     pluginName 'Intellij-Solidity'
 
-    version '2016.3.2'
+    version '2020.1.1'
     downloadSources true
     updateSinceUntilBuild = false
+    // TODO(sergey): remove
+    plugins = [
+        'java'
+    ]
 
     sandboxDirectory project.rootDir.canonicalPath + "/.sandbox"
-}
-
-grammarKit {
-    grammarKitRelease = '1.5.0'
-    jflexRelease = '1.7.0'
 }
 
 repositories {
@@ -69,9 +68,9 @@ configurations {
 }
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    compile"io.sentry:sentry:$sentry_version"
+    compile "io.sentry:sentry:$sentry_version"
 
     // https://mvnrepository.com/artifact/org.ethereum/ethereumj-core
     compileOnly( group: 'org.ethereum', name: 'ethereumj-core', version: '1.7.0-RELEASE') {

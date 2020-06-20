@@ -26,7 +26,7 @@ class SolContextCompletionContributor : CompletionContributor(), DumbAware {
     // beginning of a statement inside a block
     extend(CompletionType.BASIC, startStatementInsideBlock(),
       object : CompletionProvider<CompletionParameters>() {
-        override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext?, result: CompletionResultSet) {
+        override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext, result: CompletionResultSet) {
           val position = parameters.originalPosition
           if (position != null) {
             SolCompleter.completeLiteral(position)
@@ -40,7 +40,7 @@ class SolContextCompletionContributor : CompletionContributor(), DumbAware {
     // new expression after '=' inside a block
     extend(CompletionType.BASIC, eqExpressionInsideBlock(),
       object : CompletionProvider<CompletionParameters>() {
-        override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext?, result: CompletionResultSet) {
+        override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext, result: CompletionResultSet) {
           val position = parameters.originalPosition
           if (position != null) {
             SolCompleter.completeLiteral(position)
@@ -51,7 +51,7 @@ class SolContextCompletionContributor : CompletionContributor(), DumbAware {
 
     extend(CompletionType.BASIC, emitStartStatement(),
       object : CompletionProvider<CompletionParameters>() {
-        override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext?, result: CompletionResultSet) {
+        override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext, result: CompletionResultSet) {
           SolCompleter
             .completeEventName(parameters.position)
             .map { it.insertParenthesis(true) }
@@ -84,7 +84,7 @@ class SolBaseTypesCompletionContributor : CompletionContributor(), DumbAware {
   init {
     extend(CompletionType.BASIC, stateVarInsideContract(),
       object : CompletionProvider<CompletionParameters>() {
-        override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext?, result: CompletionResultSet) {
+        override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext, result: CompletionResultSet) {
           baseTypes()
             .asSequence()
             .map { "$it " }

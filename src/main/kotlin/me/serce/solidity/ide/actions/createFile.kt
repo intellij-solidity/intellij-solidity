@@ -14,7 +14,7 @@ private const val CAPTION = "New Solidity File"
 
 class SolCreateFileAction : CreateFileFromTemplateAction(CAPTION, "", SolidityIcons.FILE_ICON), DumbAware {
 
-  override fun getActionName(directory: PsiDirectory?, newName: String?, templateName: String?) = CAPTION
+  override fun getActionName(directory: PsiDirectory?, newName: String, templateName: String?) = CAPTION
 
   override fun buildDialog(
     project: Project?,

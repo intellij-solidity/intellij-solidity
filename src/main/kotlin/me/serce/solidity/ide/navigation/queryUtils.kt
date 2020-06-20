@@ -4,7 +4,7 @@ import com.intellij.openapi.util.Condition
 import com.intellij.util.*
 
 fun <U, V> Query<U>.mapQuery(f: (U) -> V) = object : AbstractQuery<V>() {
-  override fun processResults(consumer: Processor<V>): Boolean {
+  override fun processResults(consumer: Processor<in V>): Boolean {
     return this@mapQuery.forEach(Processor<U> { t -> consumer.process(f(t)) })
   }
 }

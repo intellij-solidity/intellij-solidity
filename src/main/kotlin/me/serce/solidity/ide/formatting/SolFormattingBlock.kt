@@ -87,7 +87,7 @@ class SolFormattingBlock(
 
   private fun newChildIndent(childIndex: Int): Indent? = when {
     node.elementType in listOf(BLOCK, ASSEMBLY_BLOCK, CONTRACT_DEFINITION, STRUCT_DEFINITION, ENUM_DEFINITION) -> {
-      val lbraceIndex = subBlocks.indexOfFirst { it is ASTBlock && it.node.elementType == LBRACE }
+      val lbraceIndex = subBlocks.indexOfFirst { it is ASTBlock && it.node?.elementType == LBRACE }
       if (lbraceIndex != -1 && lbraceIndex < childIndex) {
         Indent.getNormalIndent()
       } else {

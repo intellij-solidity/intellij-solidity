@@ -15,8 +15,9 @@ Solidity File
       PsiWhiteSpace(' ')
       SolEnumValueImpl(ENUM_VALUE)
         PsiElement(Identifier)('WARNING')
+    PsiErrorElement:',', function or '}' expected, got ','
+      <empty list>
   PsiElement(,)(',')
-  PsiErrorElement:Identifier expected, got '}'
-    PsiElement(})('}')
+  PsiElement(})('}')
   PsiWhiteSpace('\n')
   PsiElement(})('}')
