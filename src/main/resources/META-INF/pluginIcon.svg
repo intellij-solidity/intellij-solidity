@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<svg width="880" height="880" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
+    <title>solidity_intellij_plugin</title>
+    <g>
+        <title>Layer 1</title>
+        <g id="solidity">
+            <g id="Group">
+                <path d="m405.15472,31.45614l-130.704,232.302l-261.226,0l130.614,-232.302l261.316,0" opacity="0.45"
+                      id="Shape"/>
+                <path fill="black" d="m274.45072,263.75814l261.318,0l-130.614,-232.302l-261.316,0l130.612,232.302z"
+                      opacity="0.6" id="Shape_1_"/>
+                <path fill="black"
+                      d="m143.83872,495.97014l130.612,-232.212l-130.612,-232.302l-130.614,232.302l130.614,232.212z"
+                      opacity="0.8" id="Shape_2_"/>
+                <path fill="black" d="m472.21482,849.16388l130.704,-232.303l261.318,0l-130.705,232.303l-261.317,0"
+                      opacity="0.45" id="Shape_3_"/>
+                <path fill="black" d="m602.91782,616.86188l-261.317,0l130.613,232.303l261.317,0l-130.613,-232.303z"
+                      opacity="0.6" id="Shape_4_"/>
+                <path fill="black"
+                      d="m733.53182,384.64988l-130.614,232.212l130.614,232.303l130.704,-232.303l-130.704,-232.212z"
+                      opacity="0.8" id="Shape_5_"/>
+            </g>
+        </g>
+        <text transform="matrix(12.428571701049803,0,0,12.428571701049803,-3865.2747824490066,-5002.370491862295) " xml:space="preserve" text-anchor="middle" font-family="Sans-serif" font-size="24" id="svg_7" y="442.666664" x="344" stroke-linecap="null" stroke-linejoin="null" stroke-dasharray="null" stroke-width="0" fill="#ffffff">SL</text>
+        <g id="svg_1">
+            <rect fill="black" id="svg_2" height="450.33" width="450.33" y="221.222212" x="209.753084"/>
+            <rect id="svg_5" fill="#fff" height="5.12" width="32" y="13.812212" x="69.623084"/>
+            <path id="svg_17"
+                  d="m332.49616,625.20803l15.10324,0l0,15.10323l-15.10324,0l0,-15.10323zm1.76205,-13.34119l0,11.57914l11.57914,0l0,-11.57914l-11.57914,0z"
+                  stroke-linecap="null" stroke-linejoin="null" stroke-dasharray="null" stroke-width="null"
+                  fill="black"/>
+        </g>
+        <rect id="svg_20" height="23.247423" width="212.00001" y="580.802463" x="236.641973" stroke-linecap="null"
+              stroke-linejoin="null" stroke-dasharray="null" stroke-width="null" fill="#ffffff"/>
+        <text transform="matrix(11.654572536641838,0,0,11.654572536641838,-4381.3602269365865,-5089.9781569193065) " xml:space="preserve" text-anchor="middle" font-family="Sans-serif" font-size="24" id="svg_9" y="479.669227" x="409.996124" stroke-linecap="null" stroke-linejoin="null" stroke-dasharray="null" stroke-width="0" fill="#ffffff">SL</text>
+        <rect id="svg_15" height="1.333333" width="0" y="836.148149" x="205.333333" stroke-linecap="null"
+              stroke-linejoin="null" stroke-dasharray="null" stroke-width="0" fill="#ffffff"/>
+    </g>
+</svg>

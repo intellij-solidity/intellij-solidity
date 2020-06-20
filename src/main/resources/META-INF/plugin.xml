@@ -53,14 +53,13 @@
     <idea-version since-build="201"/>
 
     <depends>com.intellij.modules.lang</depends>
-    <!-- TODO(sergey): Remove the module to keep the plugin compatible with non-java IDEs -->
-    <depends>com.intellij.modules.java</depends>
-    <depends>com.intellij.modules.java-capable</depends>
+    <!--
+        Various IDEs, e.g. WebStorm might not have dependency on java module. Therefore,
+        the solidity runner configuration is defined in its own config.
+    -->
+    <depends optional="true" config-file="solRunnerPlugin.xml">com.intellij.modules.java</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <configurationType implementation="me.serce.solidity.ide.run.SolidityConfigurationType" />
-        <applicationService serviceImplementation="me.serce.solidity.ide.run.SolidityRunConfigurationExtensionManager"/>
-
         <fileTypeFactory implementation="me.serce.solidity.lang.SolidityFileTypeFactory"/>
 
         <lang.parserDefinition language="Solidity"
@@ -142,7 +141,7 @@
                                    implementationClass="me.serce.solidity.ide.inspections.SolInspectionSuppressor"/>
 
         <localInspection language="Solidity" groupName="Solidity"
-                         displayName="suicide is deprecated. Use seldestruct instead EIP 6"
+                         displayName="Suicide is deprecated. Use seldestruct instead EIP 6"
                          enabledByDefault="true"
                          level="WARNING"
                          implementationClass="me.serce.solidity.ide.inspections.SelfdestructRenameInspection"/>
@@ -172,11 +171,6 @@
                          implementationClass="me.serce.solidity.ide.inspections.LinearizationImpossibleInspection"/>
 
         <errorHandler implementation="me.serce.solidity.ide.SentryReportSubmitter"/>
-        <runConfigurationProducer implementation="me.serce.solidity.ide.run.SolidityRunConfigProducer"/>
-        <runLineMarkerContributor language="Solidity" implementationClass="me.serce.solidity.ide.run.SolidityRunLineMarkerProvider"/>
-        <applicationService serviceInterface="me.serce.solidity.ide.settings.SoliditySettings" serviceImplementation="me.serce.solidity.ide.settings.SoliditySettings"/>
-        <applicationConfigurable groupId="language" displayName="Solidity" id="preferences.Solidity" instance="me.serce.solidity.ide.settings.SoliditySettingsConfigurable"/>
-        <compilerFactory implementation="me.serce.solidity.ide.run.compile.SolidityCompileFactory"/>
     </extensions>
 
     <actions>
@@ -185,18 +179,6 @@
                 text="Smart contract" description="Create new solidity contract">
             <add-to-group group-id="NewGroup" anchor="after" relative-to-action="NewDir"/>
         </action>
-
-        <group id="myGroupId">
-            <separator/>
-            <action id="Solidity.Compile"
-                    class="me.serce.solidity.ide.run.compile.SolCompileAction"
-                    text="Compile _Solidity" description="Compile Solidity files">
-
-                <keyboard-shortcut keymap="$default" first-keystroke="shift ctrl S"/>
-            </action>
-            <separator/>
-            <add-to-group group-id="BuildMenu" relative-to-action="CompileProject" anchor="before"/>
-        </group>
     </actions>
 
     <application-components>

@@ -51,7 +51,7 @@ intellij {
     updateSinceUntilBuild = false
     // TODO(sergey): remove
     plugins = [
-        'java'
+        'java',
     ]
 
     sandboxDirectory project.rootDir.canonicalPath + "/.sandbox"
