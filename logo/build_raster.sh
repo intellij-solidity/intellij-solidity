@@ -5,6 +5,8 @@
 set -eu
 set -o pipefail
 
+REPO_DIR=$(git rev-parse --show-toplevel)
+
 usage() {
   local prog=$(basename "$0")
   cat <<EOF
@@ -26,7 +28,7 @@ main() {
   fi
 
   local size=$1
-  rsvg-convert logo.svg -o "logo_${size}.png" -w "${size}" -h "${size}"
+  rsvg-convert "${REPO_DIR}"/src/main/resources/META-INF/pluginIcon.svg -o "${REPO_DIR}/logo/logo_${size}.png" -w "${size}" -h "${size}"
 }
 
 main "$@"
