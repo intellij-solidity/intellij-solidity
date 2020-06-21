@@ -5,37 +5,12 @@ import com.intellij.openapi.projectRoots.ProjectJdkTable
 import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PsiTreeUtil
-import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase
-import com.intellij.util.ObjectUtils
-import com.intellij.util.PlatformUtils
+import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import com.intellij.util.containers.ContainerUtil
 
-abstract class SolLightPlatformCodeInsightFixtureTestCase : LightPlatformCodeInsightFixtureTestCase {
+abstract class SolLightPlatformCodeInsightFixtureTestCase : BasePlatformTestCase() {
   private var myBackedUpPlatformPrefix: String? = null
-  private val myIsSmallIde: Boolean
-
-  protected constructor(isSmallIde: Boolean) {
-    myIsSmallIde = isSmallIde
-  }
-
-  protected constructor() {
-    myIsSmallIde = false
-  }
-
-  override fun setUp() {
-    if (myIsSmallIde) {
-      myBackedUpPlatformPrefix = PlatformUtils.getPlatformPrefix()
-      System.setProperty(PlatformUtils.PLATFORM_PREFIX_KEY, PlatformUtils.PYCHARM_PREFIX)
-    }
-    super.setUp()
-  }
-
-  override fun tearDown() {
-    if (myIsSmallIde) {
-      System.setProperty(PlatformUtils.PLATFORM_PREFIX_KEY, myBackedUpPlatformPrefix!!)
-    }
-    super.tearDown()
-  }
+  private val myIsSmallIde: Boolean = false
 
   protected fun setUpProjectSdk() {
     ApplicationManager.getApplication().runWriteAction {
@@ -61,6 +36,6 @@ abstract class SolLightPlatformCodeInsightFixtureTestCase : LightPlatformCodeIns
   protected fun <T : PsiElement> getElementAtCaret(clazz: Class<T>): T {
     val offset = myFixture.editor.caretModel.offset
     val focused = myFixture.file.findElementAt(offset)
-    return ObjectUtils.assertNotNull(PsiTreeUtil.getParentOfType(focused, clazz))
+    return PsiTreeUtil.getParentOfType(focused, clazz)!!
   }
 }

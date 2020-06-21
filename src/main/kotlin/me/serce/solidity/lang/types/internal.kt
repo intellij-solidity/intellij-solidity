@@ -1,16 +1,16 @@
 package me.serce.solidity.lang.types
 
-import com.intellij.openapi.components.AbstractProjectComponent
+import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.project.Project
 import me.serce.solidity.lang.psi.SolPsiFactory
 import me.serce.solidity.lang.types.SolInteger.Companion.UINT_256
 
-class SolInternalTypeFactory(project: Project) : AbstractProjectComponent(project) {
+class SolInternalTypeFactory(project: Project) {
   private val psiFactory: SolPsiFactory = SolPsiFactory(project)
 
   companion object {
     fun of(project: Project): SolInternalTypeFactory {
-      return project.getComponent(SolInternalTypeFactory::class.java)
+      return ServiceManager.getService(project, SolInternalTypeFactory::class.java)
     }
   }
 

@@ -1,6 +1,6 @@
 package me.serce.solidity.ide
 
-import com.intellij.ide.plugins.PluginManager
+import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.diagnostic.ErrorReportSubmitter
 import com.intellij.openapi.diagnostic.IdeaLoggingEvent
@@ -27,7 +27,7 @@ class SentryReportSubmitter : ErrorReportSubmitter() {
     Sentry.init(dsn)
   }
 
-  private val pluginVersion = PluginManager.getPlugin(PluginId.getId("me.serce.solidity"))?.version ?: "unknown"
+  private val pluginVersion = PluginManagerCore.getPlugin(PluginId.getId("me.serce.solidity"))?.version ?: "unknown"
 
   override fun getReportActionText() = "Submit error to IntelliJ Solidity maintainers"
 

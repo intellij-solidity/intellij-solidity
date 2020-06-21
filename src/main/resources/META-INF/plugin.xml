@@ -46,7 +46,8 @@
     ]]>
     </change-notes>
 
-    <idea-version since-build="201"/>
+    <!-- 201.4515.24 is IntelliJ IDEA 2020.1 EAP -->
+    <idea-version since-build="201.4515.24"/>
 
     <depends>com.intellij.modules.lang</depends>
     <!--
@@ -56,7 +57,12 @@
     <depends optional="true" config-file="solRunnerPlugin.xml">com.intellij.modules.java</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <fileTypeFactory implementation="me.serce.solidity.lang.SolidityFileTypeFactory"/>
+        <fileType name="Solidity file"
+                  language="Solidity"
+                  implementationClass="me.serce.solidity.lang.SolidityFileType"
+                  extensions="sol"
+                  fieldName="INSTANCE"/>
+        <projectService serviceImplementation="me.serce.solidity.lang.types.SolInternalTypeFactory"/>
 
         <lang.parserDefinition language="Solidity"
                                implementationClass="me.serce.solidity.lang.core.SolidityParserDefinition"/>
@@ -176,21 +182,5 @@
             <add-to-group group-id="NewGroup" anchor="after" relative-to-action="NewDir"/>
         </action>
     </actions>
-
-    <application-components>
-        <!-- Add your project components here -->
-    </application-components>
-
-    <project-components>
-        <component>
-            <interface-class>me.serce.solidity.lang.types.SolInternalTypeFactory</interface-class>
-            <implementation-class>me.serce.solidity.lang.types.SolInternalTypeFactory</implementation-class>
-        </component>
-    </project-components>
-
-    <module-components>
-        <!-- Add your modules components here -->
-    </module-components>
-
 
 </idea-plugin>

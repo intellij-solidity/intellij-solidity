@@ -14,7 +14,7 @@ class SolExpressionTypeProvider : ExpressionTypeProvider<SolExpression>() {
       .toList()
   }
 
-  override fun getInformationHint(element: SolExpression): String = StringUtil.escapeXml(element.type.toString())
+  override fun getInformationHint(element: SolExpression): String = StringUtil.escapeXmlEntities(element.type.toString())
 
   override fun getErrorHint() = "Select an expression"
 }

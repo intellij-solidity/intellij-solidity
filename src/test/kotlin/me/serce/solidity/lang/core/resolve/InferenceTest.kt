@@ -78,7 +78,7 @@ class InferenceTest : SolResolveTestBase() {
   }
 
   private fun checkType(type: SolType, @Language("Solidity") code: String) {
-    val (refElement, data) = resolveInCode<SolExpression>(code)
+    val (refElement, _) = resolveInCode<SolExpression>(code)
     TestCase.assertEquals(type, refElement.type)
   }
 }

@@ -79,8 +79,9 @@ class ImportFileAction(
       }
     }
 
-    val popup = object : ListPopupImpl(step) {
+    val popup = object : ListPopupImpl(project, step) {
       override fun getListElementRenderer(): ListCellRenderer<PsiFile> {
+        @Suppress("UNCHECKED_CAST")
         val baseRenderer = super.getListElementRenderer() as PopupListElementRenderer<PsiFile>
         val psiRenderer = DefaultPsiElementCellRenderer()
         return ListCellRenderer { list, value, index, isSelected, cellHasFocus ->

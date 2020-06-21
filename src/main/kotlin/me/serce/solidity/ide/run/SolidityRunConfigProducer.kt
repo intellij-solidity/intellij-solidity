@@ -2,7 +2,8 @@ package me.serce.solidity.ide.run
 
 import com.google.common.base.Strings
 import com.intellij.execution.actions.ConfigurationContext
-import com.intellij.execution.actions.RunConfigurationProducer
+import com.intellij.execution.actions.LazyRunConfigurationProducer
+import com.intellij.execution.configurations.ConfigurationFactory
 import com.intellij.execution.lineMarker.ExecutorAction
 import com.intellij.execution.lineMarker.RunLineMarkerContributor
 import com.intellij.icons.AllIcons
@@ -15,7 +16,10 @@ import me.serce.solidity.lang.core.SolElementType
 import me.serce.solidity.lang.psi.SolFunctionDefinition
 import me.serce.solidity.lang.psi.elementType
 
-class SolidityRunConfigProducer : RunConfigurationProducer<SolidityRunConfigBase>(SolidityConfigurationType.getInstance()) {
+class SolidityRunConfigProducer : LazyRunConfigurationProducer<SolidityRunConfigBase>() {
+  override fun getConfigurationFactory() =
+    SolidityConfigurationType.getInstance().configurationFactories[0]
+
   override fun isConfigurationFromContext(configuration: SolidityRunConfigBase, context: ConfigurationContext): Boolean {
     return ifSolidityRunConfig(configuration) { config ->
       val funcName = config.getPersistentData().functionName ?: return@ifSolidityRunConfig false
@@ -43,10 +47,10 @@ class SolidityRunConfigProducer : RunConfigurationProducer<SolidityRunConfigBase
     if (Strings.isNullOrEmpty(solFunctionDefinition.name)) {
       return false
     }
-    return ifSolidityRunConfig(configuration) { configuration ->
-      configuration.setModule(context.module)
-      configuration.getPersistentData().setFunction(solFunctionDefinition)
-      configuration.name = solFunctionDefinition.contract.name + "." + solFunctionDefinition.name
+    return ifSolidityRunConfig(configuration) { config ->
+      config.setModule(context.module)
+      config.getPersistentData().setFunction(solFunctionDefinition)
+      config.name = solFunctionDefinition.contract.name + "." + solFunctionDefinition.name
       true
     }
   }

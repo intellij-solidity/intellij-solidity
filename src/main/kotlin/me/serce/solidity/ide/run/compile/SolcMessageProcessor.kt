@@ -7,6 +7,7 @@ import com.intellij.openapi.compiler.CompileContext
 import com.intellij.openapi.compiler.CompilerMessageCategory
 import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.ui.MessageType
 import com.intellij.openapi.vfs.VirtualFileManager
 import me.serce.solidity.ide.settings.SoliditySettings
@@ -65,7 +66,7 @@ object SolcMessageProcessor {
           val mGroups = link.groupValues
           val curMessage = Message(
             levels[curLevel] ?: defaultLevel,
-            "${project.baseDir}/${mGroups[1]}",
+            "${project.guessProjectDir()}/${mGroups[1]}",
             mGroups[2].toIntOrNull() ?: -1,
             mGroups[3].toIntOrNull() ?: -1
           )

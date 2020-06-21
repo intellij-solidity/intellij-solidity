@@ -4,6 +4,7 @@ import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.util.PsiTreeUtil
+import com.intellij.testFramework.fixtures.CodeInsightTestFixture
 import org.intellij.lang.annotations.Language
 
 abstract class SolTestBase : SolLightPlatformCodeInsightFixtureTestCase() {
@@ -25,12 +26,15 @@ abstract class SolTestBase : SolLightPlatformCodeInsightFixtureTestCase() {
   private val fileName: String
     get() = "${getTestName(true)}.sol"
 
+  val fixture: CodeInsightTestFixture
+    get() = super.myFixture
+
   protected fun replaceCaretMarker(text: String) = text.replace("/*caret*/", "<caret>")
 
   inline fun <reified T : PsiElement> findElementAndDataInEditor(marker: String = "^"): Pair<T, String> {
     val caretMarker = "//$marker"
     val (elementAtMarker, data) = run {
-      val text = myFixture.file.text
+      val text = fixture.file.text
       val markerOffset = text.indexOf(caretMarker)
       check(markerOffset != -1) { "No `$marker` marker:\n$text" }
       check(text.indexOf(caretMarker, startIndex = markerOffset + 1) == -1) {
@@ -38,10 +42,10 @@ abstract class SolTestBase : SolLightPlatformCodeInsightFixtureTestCase() {
       }
 
       val data = text.drop(markerOffset).removePrefix(caretMarker).takeWhile { it != '\n' }.trim()
-      val markerPosition = myFixture.editor.offsetToLogicalPosition(markerOffset + caretMarker.length - 1)
+      val markerPosition = fixture.editor.offsetToLogicalPosition(markerOffset + caretMarker.length - 1)
       val previousLine = LogicalPosition(markerPosition.line - 1, markerPosition.column)
-      val elementOffset = myFixture.editor.logicalPositionToOffset(previousLine)
-      myFixture.file.findElementAt(elementOffset)!! to data
+      val elementOffset = fixture.editor.logicalPositionToOffset(previousLine)
+      fixture.file.findElementAt(elementOffset)!! to data
     }
     val element = elementAtMarker.parentOfType<T>(strict = false)
       ?: error("No ${T::class.java.simpleName} at ${elementAtMarker.text}")
