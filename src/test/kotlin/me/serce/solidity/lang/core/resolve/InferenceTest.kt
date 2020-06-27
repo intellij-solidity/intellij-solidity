@@ -9,6 +9,39 @@ import org.intellij.lang.annotations.Language
 
 class InferenceTest : SolResolveTestBase() {
 
+  fun testCyclicImportsDontCrashIDE() {
+    InlineFile(
+      code = """
+         import "./base2.sol";
+         contract Contract1 {
+                  //x
+
+         }
+      """,
+      name = "base1.sol"
+    )
+    InlineFile(
+      code = """
+         import "./base1.sol";
+         contract Contract2 {
+                  //x
+
+         }
+      """,
+      name = "base2.sol"
+    )
+
+    checkType(SolAddress, """
+        import './base1.sol';
+        contract Test  {
+            function test() {
+                var test = address(this);
+                test;
+               //^
+            }
+        }""")
+  }
+
   fun testCastContract() {
     InlineFile(
       code = """

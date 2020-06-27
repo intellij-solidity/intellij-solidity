@@ -257,11 +257,16 @@ object SolResolver {
         RecursionManager.doPreventingRecursion(scope.name, true) {
           val contracts = scope.children.asSequence()
             .filterIsInstance<SolContractDefinition>()
+
+          // NOTE: Imports are intentionally resolved eagerly rather than lazily to ensure that
+          // cyclic imports don't cause infinite recursion.
           val imports = scope.children.asSequence().filterIsInstance<SolImportDirective>()
             .mapNotNull { nullIfError { it.importPath?.reference?.resolve()?.containingFile } }
             .mapNotNull { lexicalDeclarations(it, place) }
             .flatten()
-          imports + contracts
+            .toList()
+            .asSequence()
+           imports + contracts
         } ?: emptySequence()
       }
 
