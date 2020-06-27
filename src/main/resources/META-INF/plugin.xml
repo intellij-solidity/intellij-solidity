@@ -17,6 +17,16 @@
 
     <change-notes><![CDATA[
       <p>
+        <b>v2.2.1</b>
+        <ul>
+          <li>
+            v2.2.1 fixes a few critical bugs. Are you actively using IntelliJ Solidity plugin for your projects? Please
+            fill in the survey: <a href="https://forms.gle/TLY1hJevy6N4qdjDA">https://forms.gle/TLY1hJevy6N4qdjDA</a> to
+            help determine the future of the plugin!
+          </li>
+          <li>Fix infinite recursion on cyclic imports causing 100% CPU usage.</li>
+          <li>Fix parsing bytes array expression.</li>
+        </ul>
         <b>v2.2.0</b>
         <ul>
           <li>
@@ -26,21 +36,6 @@
           <li>Multiple improvements around function call resolving, thanks @0v1se!</li>
           <li>Improvements around function call resolving, thanks @0v1se!</li>
           <li>Parameter info improvements, thanks @0v1se!</li>
-        </ul>
-        <b>v2.1.6</b>
-        <ul>
-          <p>
-            Huge kudos to @0v1se for working on all of the features for this release!
-          </p>
-          <li>Fixes for functional calls, thanks @0v1se!</li>
-          <li>C3 linearization warning for contract inheritance, thanks @0v1se!</li>
-          <li>Type inference fixes, thanks @0v1se!</li>
-          <li>Inference fixes for type casts, thanks @0v1se!</li>
-          <li>
-            "No return" inspection is enabled by default, thanks @0v1se!
-            Inspection to catch possible errors when function doesn't return a result.
-            Let us know what you think!
-          </li>
         </ul>
       </p>
     ]]>
@@ -178,7 +173,7 @@
     <actions>
         <action id="solidity.file.create"
                 class="me.serce.solidity.ide.actions.SolCreateFileAction"
-                text="Smart contract" description="Create new solidity contract">
+                text="Smart Contract" description="Create new solidity contract">
             <add-to-group group-id="NewGroup" anchor="after" relative-to-action="NewDir"/>
         </action>
     </actions>
