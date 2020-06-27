@@ -117,13 +117,12 @@ PRAGMAALL=[^ ][^;]*
   "internal"              { return INTERNAL; }
   "private"               { return PRIVATE; }
   "constant"              { return CONSTANT; }
-  "calldata"              { return CALLDATA; }
   "using"                 { return USING; }
   "for"                   { return FOR; }
   "struct"                { return STRUCT; }
   "modifier"              { return MODIFIER; }
-  "constructor"           { return CONSTRUCTOR; }
   "external"              { return EXTERNAL; }
+  "constructor"           { return CONSTRUCTOR; }
   "function"              { return FUNCTION; }
   "returns"               { return RETURNS; }
   "event"                 { return EVENT; }
@@ -134,6 +133,7 @@ PRAGMAALL=[^ ][^;]*
   "mapping"               { return MAPPING; }
   "memory"                { return MEMORY; }
   "storage"               { return STORAGE; }
+  "calldata"              { return CALLDATA; }
   "pure"                  { return PURE; }
   "view"                  { return VIEW; }
   "payable"               { return PAYABLE; }
@@ -160,8 +160,8 @@ PRAGMAALL=[^ ][^;]*
   "weeks"                 { return WEEKS; }
   "years"                 { return YEARS; }
   "address"               { return ADDRESS; }
-  "bool"                  { return BOOL; }
   "string"                { return STRING; }
+  "bool"                  { return BOOL; }
   "let"                   { return LET; }
 
   {COMMENT}               { return COMMENT; }

@@ -266,11 +266,11 @@ VariableDeclaration ::=
     mixin = "me.serce.solidity.lang.psi.impl.SolVariableDeclarationMixin"
 }
 
-TypeName ::= ElementaryTypeName
-         | MappingTypeName
+TypeName ::= MappingTypeName
          | UserDefinedLocationTypeName
          | BytesArrayTypeName
          | ArrayTypeName
+         | ElementaryTypeName
          | FunctionTypeName {
     stubClass = "me.serce.solidity.lang.stubs.SolTypeRefStub"
     extends = "me.serce.solidity.lang.psi.impl.SolStubbedElementImpl<?>"
@@ -453,7 +453,7 @@ ElementaryTypeName ::= ( address payable ) | address | bool | string | var | Num
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
 
-NumberType ::= intNumType | uIntNumType | byteNumType | fixedNumType | uFixedNumType
+NumberType ::= intNumType | uIntNumType | byteNumType | bytesNumType | fixedNumType | uFixedNumType
 
 // http://solidity.readthedocs.io/en/develop/assembly.html#parsing-grammar
 

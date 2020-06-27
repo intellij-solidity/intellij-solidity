@@ -22,6 +22,7 @@ class SolidityCompleteCustomParsingTest : SolidityParsingTestBase("fixtures/pars
   fun testArrays() = doTest(true)
   fun testAssembly() = doTest(true)
   fun testAssignments() = doTest(true)
+  fun testBytes() = doTest(true)
   fun testCallChain() = doTest(true)
   fun testComments() = doTest(true)
   fun testConstructor() = doTest(true)
