@@ -1,38 +1,49 @@
 package me.serce.solidity.ide.hints
 
 import com.intellij.codeInsight.lookup.LookupElement
-import com.intellij.lang.parameterInfo.*
+import com.intellij.lang.parameterInfo.ParameterInfoContext
+import com.intellij.lang.parameterInfo.ParameterInfoUIContext
+import com.intellij.lang.parameterInfo.ParameterInfoUtils
+import com.intellij.lang.parameterInfo.UpdateParameterInfoContext
 import com.intellij.openapi.util.TextRange
-import com.intellij.psi.PsiElement
-import me.serce.solidity.lang.psi.*
+import com.intellij.psi.PsiFile
+import me.serce.solidity.lang.core.SolidityTokenTypes
+import me.serce.solidity.lang.psi.SolCallable
+import me.serce.solidity.lang.psi.SolFunctionCallArguments
+import me.serce.solidity.lang.psi.SolFunctionCallExpression
 import me.serce.solidity.lang.resolve.canBeApplied
 import me.serce.solidity.lang.resolve.ref.SolFunctionCallReference
+import me.serce.solidity.lang.types.findParentOrNull
 
-private const val INVALID_INDEX: Int = -2
+class SolParameterInfoHandler : AbstractParameterInfoHandler<SolFunctionCallExpression, SolArgumentsDescription>() {
+  override fun couldShowInLookup() = true
 
-class SolParameterInfoHandler : ParameterInfoHandler<PsiElement, SolArgumentsDescription> {
-  override fun findElementForParameterInfo(context: CreateParameterInfoContext): PsiElement? {
-    val contextElement = context.file?.findElementAt(context.editor.caretModel.offset) ?: return null
-    return findElementForParameterInfo(contextElement)
+  override fun getParametersForLookup(item: LookupElement, context: ParameterInfoContext?): Array<out Any>? = null
+
+  override fun findTargetElement(file: PsiFile, offset: Int): SolFunctionCallExpression? {
+    return file.findElementAt(offset)?.findParentOrNull()
   }
 
-  override fun showParameterInfo(element: PsiElement, context: CreateParameterInfoContext) {
-    if (element !is SolFunctionCallExpression) {
-      return
-    }
-    val descriptions = SolArgumentsDescription.findDescriptions(element)
-    context.itemsToShow = descriptions.toTypedArray()
-    context.showHint(element, element.textRange.startOffset, this)
+  override fun calculateParameterInfo(element: SolFunctionCallExpression): Array<SolArgumentsDescription>? {
+    val result = SolArgumentsDescription.findDescriptions(element)
+    if (result.isEmpty()) return null
+    return result.toTypedArray()
   }
 
-  override fun findElementForUpdatingParameterInfo(context: UpdateParameterInfoContext) =
-    context.file.findElementAt(context.editor.caretModel.offset)
-
-  override fun updateUI(p: SolArgumentsDescription?, context: ParameterInfoUIContext) {
-    if (p == null) {
-      context.isUIComponentEnabled = false
+  override fun updateParameterInfo(parameterOwner: SolFunctionCallExpression, context: UpdateParameterInfoContext) {
+    if (context.parameterOwner != parameterOwner) {
+      context.removeHint()
       return
     }
+    val currentParameterIndex = if (parameterOwner.startOffset == context.offset) {
+      -1
+    } else {
+      ParameterInfoUtils.getCurrentParameterIndex(parameterOwner.functionCallArguments.node, context.offset, SolidityTokenTypes.COMMA)
+    }
+    context.setCurrentParameter(currentParameterIndex)
+  }
+
+  override fun updateUI(p: SolArgumentsDescription, context: ParameterInfoUIContext) {
     val range = p.getArgumentRange(context.currentParameterIndex)
     context.setupUIComponentPresentation(
       p.presentText,
@@ -44,62 +55,12 @@ class SolParameterInfoHandler : ParameterInfoHandler<PsiElement, SolArgumentsDes
       if (p.valid) context.defaultParameterColor.brighter() else context.defaultParameterColor)
   }
 
-  override fun updateParameterInfo(parameterOwner: PsiElement, context: UpdateParameterInfoContext) {
-    val argIndex = findArgumentIndex(parameterOwner)
-    if (argIndex == INVALID_INDEX) {
-      context.removeHint()
-      return
-    }
-    context.setCurrentParameter(argIndex)
-    when {
-      context.parameterOwner == null -> {
-        context.parameterOwner = parameterOwner
-      }
-      context.parameterOwner != findElementForParameterInfo(parameterOwner) -> {
-        context.removeHint()
-        return
-      }
-    }
-    context.objectsToView.indices.map { context.setUIComponentEnabled(it, true) }
-  }
-
-  override fun getParametersForDocumentation(p: SolArgumentsDescription, context: ParameterInfoContext?) =
-    p.arguments
-
-  override fun getParametersForLookup(item: LookupElement, context: ParameterInfoContext?): Array<out Any>? {
-    val el = item.`object` as? PsiElement ?: return null
-    val p = el.parent?.parent
-    return if (p is SolFunctionCallExpression) arrayOf(p) else emptyArray()
-  }
-
-  private fun findArgumentIndex(place: PsiElement): Int {
-    val callArgs = place.parentOfType<SolFunctionCallExpression>()
-    @Suppress("FoldInitializerAndIfToElvis")
-    if (callArgs == null) {
-      return INVALID_INDEX
-    }
-    val descriptions = SolArgumentsDescription.findDescriptions(callArgs)
-    if (descriptions.isEmpty()) {
-      return INVALID_INDEX
-    }
-    var index = -1
-    val arguments = callArgs.functionCallArguments
-    if (arguments != null) {
-      index += generateSequence(arguments.firstChild) { c -> c.nextSibling }
-        .filter { it.text == "," }
-        .count { it.textRange.startOffset < place.textRange.startOffset } + 1
-    }
-    return index
-  }
-
-  private fun findElementForParameterInfo(contextElement: PsiElement) =
-    contextElement.parentOfType<SolFunctionCallExpression>()
-
   override fun getParameterCloseChars() = ",)"
 
   override fun tracksParameterIndex() = true
 
-  override fun couldShowInLookup() = true
+  override fun getParametersForDocumentation(p: SolArgumentsDescription, context: ParameterInfoContext?) =
+    p.arguments
 }
 
 class SolArgumentsDescription(
@@ -120,13 +81,15 @@ class SolArgumentsDescription(
   }
 
   companion object {
-    fun findDescriptions(element: SolFunctionCallExpression): List<SolArgumentsDescription> {
-      val ref = element.reference
+    fun findDescriptions(call: SolFunctionCallExpression): List<SolArgumentsDescription> {
+      val ref = call.reference
       return if (ref is SolFunctionCallReference) {
         ref.resolveFunctionCall()
           .map { def ->
             val parameters = def.parseParameters()
-            SolArgumentsDescription(def, element.functionCallArguments, parameters.map { "${it.second}${it.first?.let { name -> " $name" } ?: ""}" }.toTypedArray())
+              .map { "${it.second}${it.first?.let { name -> " $name" } ?: ""}" }
+              .toTypedArray()
+            SolArgumentsDescription(def, call.functionCallArguments, parameters)
           }
       } else {
         emptyList()
