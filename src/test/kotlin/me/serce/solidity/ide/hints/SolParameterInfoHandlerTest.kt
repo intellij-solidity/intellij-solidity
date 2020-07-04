@@ -166,6 +166,7 @@ class SolParameterInfoHandlerTest : SolTestBase() {
 
     val updateContext = MockUpdateParameterInfoContext(myFixture.editor, myFixture.file)
     val element = handler.findElementForUpdatingParameterInfo(updateContext) ?: throw AssertionFailedError("Parameter not found")
+    updateContext.parameterOwner = element
     handler.updateParameterInfo(element, updateContext)
     TestCase.assertEquals(index, updateContext.currentParameter)
   }
