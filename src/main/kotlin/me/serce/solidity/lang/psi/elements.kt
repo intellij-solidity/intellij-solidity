@@ -49,7 +49,7 @@ inline fun <reified T : Enum<*>> safeValueOf(name: String): T? =
   T::class.java.enumConstants.firstOrNull { it.name == name }
 
 interface SolFunctionCallElement : SolReferenceElement {
-  val expression: SolExpression
+  val expression: SolExpression?
   val functionCallArguments: SolFunctionCallArguments
 
   fun getBaseAndReferenceNameElement(): Pair<SolExpression?, PsiElement>

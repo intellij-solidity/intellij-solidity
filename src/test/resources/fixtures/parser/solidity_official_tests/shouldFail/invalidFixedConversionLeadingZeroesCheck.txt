@@ -31,7 +31,7 @@ Solidity File
             SolPrimaryExpressionImpl(PRIMARY_EXPRESSION)
               SolNumberLiteralImpl(NUMBER_LITERAL)
                 PsiElement(fixedNumber)('1.0')
-          PsiErrorElement:<number unit> expected, got 'x2'
+          PsiErrorElement:'(', <number unit> or '{' expected, got 'x2'
             PsiElement(Identifier)('x2')
           PsiElement(;)(';')
         PsiWhiteSpace('\n  ')

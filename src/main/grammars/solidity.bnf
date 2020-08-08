@@ -417,20 +417,21 @@ VarLiteral ::= Identifier {
     implements = "me.serce.solidity.lang.psi.SolReferenceElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolVarLiteralMixin"
 }
-FunctionCallExpression ::= Expression '(' FunctionCallArguments? ')' {
+FunctionCallExpression ::= Expression FunctionInvocation {
     implements = "me.serce.solidity.lang.psi.SolFunctionCallElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolFunctionCallMixin"
 }
 
+private FunctionInvocation ::= MapExpression? '(' FunctionCallArguments? ')'
 FunctionCallArguments ::= MapExpression | Expression? ( ',' Expression )*
 private MapExpressionClause ::= Identifier ':' Expression {pin=2}
-MapExpression ::= '{' MapExpressionClause (',' MapExpressionClause )* '}' {pin=1}
+private MapExpression ::= '{' MapExpressionClause (',' MapExpressionClause )* '}' {pin=1}
 
 NewExpression ::= new ( Identifier | PrimitiveLiteral ) NewExpressionEnd* {
     implements = "me.serce.solidity.lang.psi.SolReferenceElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolNewExpressionElement"
 }
-private NewExpressionEnd ::='(' FunctionCallArguments')' | '[' Expression? ']'
+private NewExpressionEnd ::= FunctionInvocation | '[' Expression? ']'
 
 MemberAccessExpression ::= Expression '.' Identifier {
     pin = 2

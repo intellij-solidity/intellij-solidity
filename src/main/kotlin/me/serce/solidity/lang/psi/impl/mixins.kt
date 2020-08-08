@@ -256,7 +256,7 @@ abstract class SolStructDefMixin : SolStubbedNamedElementImpl<SolStructDefStub>,
   override val callablePriority = 1000
 }
 
-abstract class SolFunctionCallMixin(node: ASTNode) : SolNamedElementImpl(node), SolFunctionCallElement {
+abstract class SolFunctionCallMixin(node: ASTNode) : SolNamedElementImpl(node), SolFunctionCallElement, SolFunctionCallExpression {
   override fun getBaseAndReferenceNameElement(): Pair<SolExpression?, PsiElement> {
     return when (val expr = expression) {
       is SolPrimaryExpression ->
@@ -267,6 +267,9 @@ abstract class SolFunctionCallMixin(node: ASTNode) : SolNamedElementImpl(node), 
       else -> throw IllegalStateException("unable to extract reference name element from $this")
     }
   }
+
+  override val expression: SolExpression?
+    get() = expressionList[0]
 
   override val referenceNameElement: PsiElement
     get() = getBaseAndReferenceNameElement().second

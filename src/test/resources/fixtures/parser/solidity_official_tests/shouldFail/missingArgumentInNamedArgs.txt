@@ -138,28 +138,27 @@ Solidity File
                   PsiElement(Identifier)('a')
               PsiElement(()('(')
               SolFunctionCallArgumentsImpl(FUNCTION_CALL_ARGUMENTS)
-                SolMapExpressionImpl(MAP_EXPRESSION)
-                  PsiElement({)('{')
-                  PsiElement(Identifier)('a')
-                  PsiElement(:)(':')
-                  PsiErrorElement:<expression> expected, got ','
-                    <empty list>
-                  PsiWhiteSpace(' ')
-                  PsiElement(,)(',')
-                  PsiWhiteSpace(' ')
-                  PsiElement(Identifier)('b')
-                  PsiElement(:)(':')
-                  PsiErrorElement:<expression> expected, got ','
-                    <empty list>
-                  PsiWhiteSpace(' ')
-                  PsiElement(,)(',')
-                  PsiWhiteSpace(' ')
-                  PsiElement(Identifier)('c')
-                  PsiElement(:)(':')
-                  PsiErrorElement:<expression> expected, got '}'
-                    <empty list>
-                  PsiWhiteSpace(' ')
-                  PsiElement(})('}')
+                PsiElement({)('{')
+                PsiElement(Identifier)('a')
+                PsiElement(:)(':')
+                PsiErrorElement:<expression> expected, got ','
+                  <empty list>
+                PsiWhiteSpace(' ')
+                PsiElement(,)(',')
+                PsiWhiteSpace(' ')
+                PsiElement(Identifier)('b')
+                PsiElement(:)(':')
+                PsiErrorElement:<expression> expected, got ','
+                  <empty list>
+                PsiWhiteSpace(' ')
+                PsiElement(,)(',')
+                PsiWhiteSpace(' ')
+                PsiElement(Identifier)('c')
+                PsiElement(:)(':')
+                PsiErrorElement:<expression> expected, got '}'
+                  <empty list>
+                PsiWhiteSpace(' ')
+                PsiElement(})('}')
               PsiElement())(')')
           PsiElement(;)(';')
         PsiWhiteSpace(' ')

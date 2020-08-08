@@ -35,7 +35,7 @@ Solidity File
               SolNumberTypeImpl(NUMBER_TYPE)
                 PsiElement(uIntNumType)('uint')
           PsiWhiteSpace(' ')
-          PsiErrorElement:<storage location> or Identifier expected, got 'constant'
+          PsiErrorElement:'(', <storage location>, Identifier or '{' expected, got 'constant'
             PsiElement(constant)('constant')
           PsiWhiteSpace(' ')
           PsiElement(Identifier)('local')
