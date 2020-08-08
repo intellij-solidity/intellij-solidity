@@ -357,7 +357,7 @@ BreakSt ::= break
 ReturnSt ::= return Expression? {pin=1}
 ThrowSt ::= throw
 EmitStatement ::= emit FunctionCallExpression {pin=1}
-SeqExpression ::= '(' ','? Expression (',' Expression)* ','? ')'
+SeqExpression ::= '(' ','* (Expression ',')* Expression? ','* ')' {pin=1}
 VariableDefinition ::= VariableDeclaration ( '=' Expression )?
 
 // see https://solidity.readthedocs.io/en/v0.4.21/miscellaneous.html#order-of-precedence-of-operators
@@ -385,7 +385,7 @@ private HighestPriorityGroup ::= IncrementExpression
                       | IndexAccessExpression
                       | MemberAccessExpression
                       | FunctionCallExpression
-                      | ParenExpression
+                      | SeqExpression
 
 AssignmentExpression ::= Expression ('=' | '|=' | '^=' | '&=' | '<<=' | '>>=' | '+=' | '-=' | '*=' | '/=' | '%=') Expression { rightAssociative=true }
 InlineArrayExpression ::= '[' Expression (',' Expression)* ']'
@@ -404,7 +404,6 @@ MultDivExpression ::= Expression ('*' | '/' | '%') Expression
 ExponentExpression ::= Expression '**' Expression
 UnaryExpression ::= ('!' | '~' | delete | '++' | '--' | '+' | '-') Expression {pin=1}
 IncrementExpression ::= Expression ('++' | '--')
-ParenExpression ::= '(' Expression ')' { pin = 1 }
 
 PrimaryExpression ::= VarLiteral
                   | BooleanLiteral

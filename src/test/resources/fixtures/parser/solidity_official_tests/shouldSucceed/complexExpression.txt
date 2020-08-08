@@ -38,7 +38,7 @@ Solidity File
               SolIndexAccessExpressionImpl(INDEX_ACCESS_EXPRESSION)
                 SolFunctionCallExpressionImpl(FUNCTION_CALL_EXPRESSION)
                   SolMemberAccessExpressionImpl(MEMBER_ACCESS_EXPRESSION)
-                    SolParenExpressionImpl(PAREN_EXPRESSION)
+                    SolSeqExpressionImpl(SEQ_EXPRESSION)
                       PsiElement(()('(')
                       SolPlusMinExpressionImpl(PLUS_MIN_EXPRESSION)
                         SolPrimaryExpressionImpl(PRIMARY_EXPRESSION)

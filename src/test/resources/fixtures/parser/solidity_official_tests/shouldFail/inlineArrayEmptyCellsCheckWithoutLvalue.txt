@@ -48,9 +48,9 @@ Solidity File
           SolReturnStImpl(RETURN_ST)
             PsiElement(return)('return')
             PsiWhiteSpace(' ')
-            SolParenExpressionImpl(PAREN_EXPRESSION)
+            SolSeqExpressionImpl(SEQ_EXPRESSION)
               PsiElement(()('(')
-              PsiErrorElement:')', ',', <expression> or <primary expression> expected, got '['
+              PsiErrorElement:')', ';', <expression> or <primary expression> expected, got '['
                 <empty list>
           PsiElement([)('[')
           PsiElement(decimalNumber)('3')

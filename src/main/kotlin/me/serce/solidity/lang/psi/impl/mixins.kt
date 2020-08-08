@@ -264,6 +264,8 @@ abstract class SolFunctionCallMixin(node: ASTNode) : SolNamedElementImpl(node), 
           ?: expr.elementaryTypeName?.let { Pair(null, it) }!!
       is SolMemberAccessExpression ->
         Pair(expr.expression, expr.identifier!!)
+      is SolFunctionCallExpression ->
+        Pair(expr.expression, expr.firstChild)
       else -> throw IllegalStateException("unable to extract reference name element from $this")
     }
   }

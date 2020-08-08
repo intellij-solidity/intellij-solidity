@@ -156,7 +156,7 @@ Solidity File
                       PsiElement(Identifier)('result')
                   PsiElement(,)(',')
                   PsiWhiteSpace(' ')
-                  SolParenExpressionImpl(PAREN_EXPRESSION)
+                  SolSeqExpressionImpl(SEQ_EXPRESSION)
                     PsiElement(()('(')
                     SolPrimaryExpressionImpl(PRIMARY_EXPRESSION)
                       SolElementaryTypeNameImpl(ELEMENTARY_TYPE_NAME)

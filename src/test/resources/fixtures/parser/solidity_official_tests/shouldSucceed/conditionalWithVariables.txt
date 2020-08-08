@@ -61,7 +61,7 @@ Solidity File
             PsiElement(=)('=')
             PsiWhiteSpace(' ')
             SolTernaryExpressionImpl(TERNARY_EXPRESSION)
-              SolParenExpressionImpl(PAREN_EXPRESSION)
+              SolSeqExpressionImpl(SEQ_EXPRESSION)
                 PsiElement(()('(')
                 SolCompExpressionImpl(COMP_EXPRESSION)
                   SolPrimaryExpressionImpl(PRIMARY_EXPRESSION)
