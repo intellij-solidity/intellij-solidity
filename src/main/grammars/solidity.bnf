@@ -438,7 +438,7 @@ MemberAccessExpression ::= Expression '.' Identifier {
     implements = "me.serce.solidity.lang.psi.SolReferenceElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolMemberAccessElement"
 }
-IndexAccessExpression ::= Expression '[' Expression? ']'
+IndexAccessExpression ::= Expression '[' ( Expression? ':' Expression? | Expression? ) ']' {pin=2}
 
 BooleanLiteral ::= booleanLiteral
 NumberLiteral ::= ( HexNumber | DecimalNumber | FixedNumber | ScientificNumber) NumberUnit?

@@ -48,6 +48,7 @@ class SolidityCompleteCustomParsingTest : SolidityParsingTestBase("fixtures/pars
   fun testNew() = doTest(true)
   fun testPragma() = doTest(true)
   fun testReturnTuples() = doTest(true)
+  fun testSlice() = doTest(true)
   fun testStateMutability() = doTest(true)
   fun testStateVars() = doTest(true)
   fun testTernary() = doTest(true)
