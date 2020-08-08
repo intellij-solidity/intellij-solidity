@@ -131,10 +131,10 @@ private ImportDirectivePart ::= import ( ImportPath (as ImportAlias)?
 ImportDirective ::= ImportDirectivePart ';'
 
 
-ContractDefinition ::= ( contract | library | interface ) Identifier
+ContractDefinition ::= abstract? ( contract | library | interface ) Identifier
                      ( is InheritanceSpecifier (',' InheritanceSpecifier )* )?
                      '{' ContractPart* '}' {
-    pin = 1
+    pin = 2
     implements = "me.serce.solidity.lang.psi.SolContractOrLibElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolContractOrLibMixin"
     stubClass = "me.serce.solidity.lang.stubs.SolContractOrLibDefStub"
