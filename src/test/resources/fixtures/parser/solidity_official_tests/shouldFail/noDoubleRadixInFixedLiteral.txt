@@ -26,7 +26,7 @@ Solidity File
   SolPrimaryExpressionImpl(PRIMARY_EXPRESSION)
     SolNumberLiteralImpl(NUMBER_LITERAL)
       PsiElement(fixedNumber)('.15')
-  PsiErrorElement:<contract definition>, <expression>, <number unit>, import or pragma expected, got ';'
+  PsiErrorElement:<contract definition>, <expression>, <number unit>, enum, import or pragma expected, got ';'
     PsiElement(;)(';')
   PsiWhiteSpace('\n')
   PsiElement(})('}')
