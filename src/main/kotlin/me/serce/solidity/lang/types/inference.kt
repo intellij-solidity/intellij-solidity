@@ -189,8 +189,10 @@ fun inferExprType(expr: SolExpression?): SolType {
         ?.parseType()
         ?: SolUnknown
     }
-    is SolParenExpression ->
-      inferExprType(expr.expression)
+    is SolSeqExpression -> when {
+      expr.expressionList.isEmpty() -> SolUnknown
+      else -> inferExprType(expr.expressionList[0])
+    }
     is SolUnaryExpression ->
       inferExprType(expr.expression)
     else -> SolUnknown
