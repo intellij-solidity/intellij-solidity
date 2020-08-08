@@ -142,6 +142,8 @@ PRAGMAALL=[^ ][^;]*
   "return"                { return RETURN; }
   "if"                    { return IF; }
   "else"                  { return ELSE; }
+  "try"                   { return TRY; }
+  "catch"                 { return CATCH; }
   "while"                 { return WHILE; }
   "assembly"              { return ASSEMBLY; }
   "do"                    { return DO; }
