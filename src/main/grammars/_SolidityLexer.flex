@@ -121,6 +121,8 @@ PRAGMAALL=[^ ][^;]*
   "for"                   { return FOR; }
   "struct"                { return STRUCT; }
   "modifier"              { return MODIFIER; }
+  "virtual"               { return VIRTUAL; }
+  "override"              { return OVERRIDE; }
   "external"              { return EXTERNAL; }
   "constructor"           { return CONSTRUCTOR; }
   "function"              { return FUNCTION; }

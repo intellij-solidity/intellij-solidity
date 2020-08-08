@@ -177,7 +177,7 @@ StructDefinition ::= struct Identifier '{'
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
 
-ModifierDefinition ::= modifier Identifier ParameterList? Block {
+ModifierDefinition ::= modifier Identifier ParameterList? ( VirtualSpecifier | OverrideSpecifier )* Block {
     pin = 1
     implements = "me.serce.solidity.lang.psi.SolModifierElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolModifierDefMixin"
@@ -185,7 +185,10 @@ ModifierDefinition ::= modifier Identifier ParameterList? Block {
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
 
-FunctionVisibilitySpecifier ::= external | public | internal | 'private'
+VirtualSpecifier ::= virtual {pin=1}
+OverrideSpecifier ::= override ( '(' UserDefinedTypeName (',' UserDefinedTypeName)* ')' )? {pin=1}
+
+FunctionVisibilitySpecifier ::= external | public | internal | 'private' | VirtualSpecifier | OverrideSpecifier
 ModifierInvocation ::= VarLiteral ('(' ModifierInvocationCallArguments ')')? {
     implements = "me.serce.solidity.lang.psi.SolModifierInvocationElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolModifierInvocationMixin"

@@ -29,4 +29,12 @@ contract MyToken {
     receive () external payable { }
 
     fallback () external { }
+
+    receive () external payable virtual {
+        emit PaymentReceived(_msgSender(), msg.value);
+    }
+
+    function totalSupply() public view override(IERC20, IERC777) returns (uint256) {
+        return _totalSupply;
+    }
 }
