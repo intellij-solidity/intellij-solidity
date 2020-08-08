@@ -95,7 +95,7 @@
 }
 
 
-SourceUnit ::= (PragmaDirective | ImportDirective | ContractDefinition | EnumDefinition | Expression)*
+SourceUnit ::= (PragmaDirective | ImportDirective | ContractDefinition | EnumDefinition | StructDefinition | Expression)*
 
 private UntilSemicolonRecover ::= !(';')
 private UntilBraceRecover ::= !('}')
