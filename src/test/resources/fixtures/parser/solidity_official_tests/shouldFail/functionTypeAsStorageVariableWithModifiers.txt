@@ -5,7 +5,7 @@ Solidity File
     PsiElement(Identifier)('test')
     PsiWhiteSpace(' ')
     PsiElement({)('{')
-    PsiErrorElement:<number type>, <type name>, constructor, enum, event, function, import, modifier, pragma, struct, using or '}' expected, got 'function'
+    PsiErrorElement:<number type>, <type name>, constructor, enum, event, fallback, function, import, modifier, pragma, receive, struct, using or '}' expected, got 'function'
       <empty list>
   PsiWhiteSpace('\n  ')
   PsiElement(function)('function')

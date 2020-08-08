@@ -200,7 +200,10 @@ ConstructorDefinition ::= constructor ParameterList
     mixin = "me.serce.solidity.lang.psi.impl.SolConstructorDefMixin"
 }
 
-FunctionDefinition ::= OrdinaryFunctionDefinition | FallbackFunctionDefinition {
+FunctionDefinition ::=
+    OrdinaryFunctionDefinition
+    | FallbackFunctionDefinition
+    | UnnamedFunctionDefinition {
     implements = "me.serce.solidity.lang.psi.SolFunctionDefElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolFunctionDefMixin"
     stubClass = "me.serce.solidity.lang.stubs.SolFunctionDefStub"
@@ -214,6 +217,7 @@ private OrdinaryFunctionDefinition ::= function Identifier ParameterList
 }
 
 private FallbackFunctionDefinition ::= function ParameterList (FunctionVisibilitySpecifier | StateMutability)* Block
+private UnnamedFunctionDefinition ::= (fallback | receive) ParameterList (FunctionVisibilitySpecifier | StateMutability)* Block
 
 EventDefinition ::= event Identifier IndexedParameterList anonymous? ';' {
     pin = 1

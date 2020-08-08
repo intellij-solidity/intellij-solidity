@@ -25,4 +25,8 @@ contract MyToken {
     function hello() internal constant returns (string memory str) {
         return "hel";
     }
+
+    receive () external payable { }
+
+    fallback () external { }
 }

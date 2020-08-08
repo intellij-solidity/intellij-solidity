@@ -5,7 +5,7 @@ Solidity File
     PsiElement(Identifier)('Foo')
     PsiWhiteSpace(' ')
     PsiElement({)('{')
-    PsiErrorElement:<type name>, constructor, enum, event, function, import, intNumType, modifier, pragma, struct, uIntNumType, using or '}' expected, got 'uint'
+    PsiErrorElement:<function definition>, <type name>, constructor, enum, event, import, intNumType, modifier, pragma, struct, uIntNumType, using or '}' expected, got 'uint'
       <empty list>
   PsiWhiteSpace('\n  ')
   SolPrimaryExpressionImpl(PRIMARY_EXPRESSION)

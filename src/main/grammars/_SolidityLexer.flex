@@ -125,6 +125,8 @@ PRAGMAALL=[^ ][^;]*
   "constructor"           { return CONSTRUCTOR; }
   "function"              { return FUNCTION; }
   "returns"               { return RETURNS; }
+  "fallback"              { return FALLBACK; }
+  "receive"               { return RECEIVE; }
   "event"                 { return EVENT; }
   "anonymous"             { return ANONYMOUS; }
   "enum"                  { return ENUM; }
