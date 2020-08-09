@@ -1,5 +1,6 @@
 package me.serce.solidity.ide
 
+import com.intellij.diagnostic.IdeaReportingEvent
 import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.diagnostic.ErrorReportSubmitter
@@ -17,6 +18,7 @@ import io.sentry.event.Event
 import io.sentry.event.EventBuilder
 import io.sentry.event.interfaces.ExceptionInterface
 import java.awt.Component
+
 
 class SentryReportSubmitter : ErrorReportSubmitter() {
 
@@ -47,7 +49,6 @@ class SentryReportSubmitter : ErrorReportSubmitter() {
       consumer.consume(SubmittedReportInfo(null, "Error submission is disabled in dev versions", FAILED))
       return false
     }
-    val error = ijEvent.throwable
     val eventBuilder = EventBuilder()
       .withMessage(ijEvent.message)
       .withLevel(Event.Level.ERROR)
@@ -58,6 +59,10 @@ class SentryReportSubmitter : ErrorReportSubmitter() {
       .withTag("os_arch", SystemInfo.OS_ARCH)
       .withTag("java_version", SystemInfo.JAVA_VERSION)
       .withTag("java_runtime_version", SystemInfo.JAVA_RUNTIME_VERSION)
+    val error = when (ijEvent) {
+      is IdeaReportingEvent -> ijEvent.data.throwable
+      else -> ijEvent.throwable
+    }
     if (error != null) {
       eventBuilder.withSentryInterface(ExceptionInterface(error))
     }
