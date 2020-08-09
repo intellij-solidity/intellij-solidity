@@ -7,7 +7,8 @@
       IntelliJ solidity support
 
       <p>
-        You can support the plugin development by clicking star on <a href="https://github.com/intellij-solidity/intellij-solidity">GitHub</a>
+        You can support the plugin development by <a href="https://github.com/intellij-solidity/intellij-solidity">sponsoring</a> ❤️ the plugin on Github, by clicking star on
+        <a href="https://github.com/intellij-solidity/intellij-solidity">GitHub</a>
         and rating it on the <a href="https://plugins.jetbrains.com/plugin/9475-intellij-solidity">plugin page</a>.
       </p>
       <p>
@@ -17,25 +18,21 @@
 
     <change-notes><![CDATA[
       <p>
+        <b>v2.3.0</b>
+        <ul>
+          <li>
+            v2.2.1 introduces the initial support for Solidity v6. Does the plugin help you in your developer life?
+            Please consider sponsoring or convincing your employer to support the plugin on
+            <a href="https://github.com/intellij-solidity/intellij-solidity">GitHub</a> to support keeping up with the
+            Solidity language development and releasing of the new features.
+          </li>
+          <li>fix parameter info handler, thanks @evgenynacu!</li>
+        </ul>
         <b>v2.2.1</b>
         <ul>
-          <li>
-            v2.2.1 fixes a few critical bugs. Are you actively using IntelliJ Solidity plugin for your projects? Please
-            fill in the survey: <a href="https://forms.gle/TLY1hJevy6N4qdjDA">https://forms.gle/TLY1hJevy6N4qdjDA</a> to
-            help determine the future of the plugin!
-          </li>
+          <li>v2.2.1 fixes a few critical bugs. </li>
           <li>Fix infinite recursion on cyclic imports causing 100% CPU usage.</li>
           <li>Fix parsing bytes array expression.</li>
-        </ul>
-        <b>v2.2.0</b>
-        <ul>
-          <li>
-            The plugin was updated to be compatible with IntelliJ 2020.1+. The minimum required IntelliJ version now is
-            now 2020.1.
-          </li>
-          <li>Multiple improvements around function call resolving, thanks @0v1se!</li>
-          <li>Improvements around function call resolving, thanks @0v1se!</li>
-          <li>Parameter info improvements, thanks @0v1se!</li>
         </ul>
       </p>
     ]]>

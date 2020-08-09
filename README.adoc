@@ -8,12 +8,7 @@ image:./logo/logo_256.png[link=https://plugins.jetbrains.com/idea/plugin/9475-in
 
 == Current status
 
-This plugin is in alpha stage.
-
-You can support the plugin development by
-clicking ★ on GitHub
-and rating it on the link:https://plugins.jetbrains.com/idea/plugin/9475-intellij-solidity[plugin page]
-
+You can support the development by sponsoring the plugin ❤️ on Github, clicking ★ on GitHub and rating it on the link:https://plugins.jetbrains.com/idea/plugin/9475-intellij-solidity[plugin page].
 
 == Features
 
