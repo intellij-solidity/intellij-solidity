@@ -6,4 +6,7 @@ contract A {
     uint constant e = 1;
     uint constant public f = 1;
     uint g = 1;
+    uint immutable h = 1;
+    uint internal immutable i = 1;
+    uint immutable public j = 1;
 }
