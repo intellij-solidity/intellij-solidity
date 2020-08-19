@@ -118,6 +118,7 @@ PRAGMAALL=[^ ][^;]*
   "internal"              { return INTERNAL; }
   "private"               { return PRIVATE; }
   "constant"              { return CONSTANT; }
+  "immutable"             { return IMMUTABLE; }
   "using"                 { return USING; }
   "for"                   { return FOR; }
   "struct"                { return STRUCT; }

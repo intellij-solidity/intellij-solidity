@@ -15,7 +15,7 @@ Solidity File
   PsiWhiteSpace(' ')
   PsiElement(private)('private')
   PsiWhiteSpace(' ')
-  PsiErrorElement:Identifier or constant expected, got 'internal'
+  PsiErrorElement:<mutation modifier> or Identifier expected, got 'internal'
     PsiElement(internal)('internal')
   PsiWhiteSpace(' ')
   PsiElement(Identifier)('a')
