@@ -322,7 +322,7 @@ FunctionTypeName ::= function ParameterList ( internal | external | StateMutabil
 }
 
 StorageLocation ::= memory | storage | calldata
-StateMutability ::= pure | constant | view | payable
+StateMutability ::= pure | constant | view | 'payable'
 
 private UnfinishedBlock ::= '{' Statement* {
     pin = 1
@@ -454,11 +454,11 @@ private FixedNumber ::= fixedNumber
 private DecimalNumber ::= decimalNumber
 private ScientificNumber ::= scientificNumber
 
-private PrimitiveLiteral ::= intNumType | uIntNumType | byteNumType | bytesNumType | fixedNumType | uFixedNumType | booleanLiteral | ( address payable ) | address | string | bool
+private PrimitiveLiteral ::= intNumType | uIntNumType | byteNumType | bytesNumType | fixedNumType | uFixedNumType | booleanLiteral | ( address 'payable' ) | address | string | bool
 
 private ElementaryTypeNameExpression ::= ElementaryTypeName
 
-ElementaryTypeName ::= ( address payable ) | address | bool | string | var | NumberType {
+ElementaryTypeName ::= ( address 'payable' ) | address | bool | string | var | NumberType {
     stubClass = "me.serce.solidity.lang.stubs.SolTypeRefStub"
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }

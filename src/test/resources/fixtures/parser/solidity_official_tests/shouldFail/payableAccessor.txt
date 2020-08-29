@@ -13,10 +13,14 @@ Solidity File
       SolNumberTypeImpl(NUMBER_TYPE)
         PsiElement(uIntNumType)('uint')
   PsiWhiteSpace(' ')
-  PsiErrorElement:'(', <contract definition>, <expression>, <mutation modifier>, <visibility modifier>, Identifier, enum, import, pragma, struct or '{' expected, got 'payable'
-    PsiElement(payable)('payable')
+  SolPrimaryExpressionImpl(PRIMARY_EXPRESSION)
+    SolVarLiteralImpl(VAR_LITERAL)
+      PsiElement(Identifier)('payable')
   PsiWhiteSpace(' ')
-  PsiElement(Identifier)('x')
-  PsiElement(;)(';')
+  SolPrimaryExpressionImpl(PRIMARY_EXPRESSION)
+    SolVarLiteralImpl(VAR_LITERAL)
+      PsiElement(Identifier)('x')
+  PsiErrorElement:'(', <contract definition>, <expression>, enum, import, pragma, struct or '{' expected, got ';'
+    PsiElement(;)(';')
   PsiWhiteSpace('\n')
   PsiElement(})('}')

@@ -142,7 +142,6 @@ PRAGMAALL=[^ ][^;]*
   "calldata"              { return CALLDATA; }
   "pure"                  { return PURE; }
   "view"                  { return VIEW; }
-  "payable"               { return PAYABLE; }
   "return"                { return RETURN; }
   "if"                    { return IF; }
   "else"                  { return ELSE; }
