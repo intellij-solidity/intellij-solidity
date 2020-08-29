@@ -18,6 +18,12 @@
 
     <change-notes><![CDATA[
       <p>
+        <b>v2.3.1</b>
+        <ul>
+          <li>allow for typenames in mappings</li>
+          <li>allow for casting using 'payable'</li>
+          <li>update grammar to include immutable keyword, thanks @patitonar</li>
+        </ul>
         <b>v2.3.0</b>
         <ul>
           <li>
@@ -27,12 +33,6 @@
             Solidity language development and releasing of the new features.
           </li>
           <li>fix parameter info handler, thanks @evgenynacu!</li>
-        </ul>
-        <b>v2.2.1</b>
-        <ul>
-          <li>v2.2.1 fixes a few critical bugs. </li>
-          <li>Fix infinite recursion on cyclic imports causing 100% CPU usage.</li>
-          <li>Fix parsing bytes array expression.</li>
         </ul>
       </p>
     ]]>
