@@ -32,7 +32,7 @@ class SolKeywordCompletionContributor : CompletionContributor(), DumbAware {
           .bold()
           .withTailText(" ^...")
           .withInsertHandler { ctx, _ ->
-            ctx.document.insertString(ctx.selectionEndOffset, " ^0.4.4;")
+            ctx.document.insertString(ctx.selectionEndOffset, " ^0.5.4;")
             EditorModificationUtil.moveCaretRelatively(ctx.editor, 9)
           }
         result.addElement(PrioritizedLookupElement.withPriority(pragmaBuilder, KEYWORD_PRIORITY - 5))
