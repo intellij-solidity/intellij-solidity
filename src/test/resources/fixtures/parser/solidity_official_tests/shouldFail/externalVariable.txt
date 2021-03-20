@@ -13,7 +13,7 @@ Solidity File
       SolNumberTypeImpl(NUMBER_TYPE)
         PsiElement(uIntNumType)('uint')
   PsiWhiteSpace(' ')
-  PsiErrorElement:'(', <contract definition>, <expression>, <mutation modifier>, <visibility modifier>, Identifier, enum, import, pragma, struct or '{' expected, got 'external'
+  PsiErrorElement:'(', <contract definition>, <expression>, <mutation modifier>, <visibility modifier>, Identifier, enum, import, override, pragma, struct or '{' expected, got 'external'
     PsiElement(external)('external')
   PsiWhiteSpace(' ')
   PsiElement(Identifier)('x')
