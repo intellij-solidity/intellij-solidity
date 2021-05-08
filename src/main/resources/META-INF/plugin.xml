@@ -18,21 +18,19 @@
 
     <change-notes><![CDATA[
       <p>
+        <b>v2.3.2</b>
+        <ul>
+          <li>Huge thank you to Tyler Smith (@tyler-smith) for sponsoring the plugin development!❤️</li>
+          <li>Support .slot and .offset within assembly blocks, yours @SerCeMan</li>
+          <li>Support unchecked blocks, yours @SerCeMan</li>
+          <li>Support state variable override, thanks Gerardo Nardelli! (@patitonar)</li>
+          <li>Use v.0.5.x as the recommended stable version, thanks @pironmind!</li>
+        </ul>
         <b>v2.3.1</b>
         <ul>
           <li>allow for typenames in mappings</li>
           <li>allow for casting using 'payable'</li>
           <li>update grammar to include immutable keyword, thanks @patitonar</li>
-        </ul>
-        <b>v2.3.0</b>
-        <ul>
-          <li>
-            v2.2.1 introduces the initial support for Solidity v6. Does the plugin help you in your developer life?
-            Please consider sponsoring or convincing your employer to support the plugin on
-            <a href="https://github.com/intellij-solidity/intellij-solidity">GitHub</a> to support keeping up with the
-            Solidity language development and releasing of the new features.
-          </li>
-          <li>fix parameter info handler, thanks @evgenynacu!</li>
         </ul>
       </p>
     ]]>
