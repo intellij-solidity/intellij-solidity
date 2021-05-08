@@ -492,14 +492,17 @@ AssemblyItem ::=
     | NumberLiteral
     | StringLiteral
     | HexLiteral
-    | Identifier
+    | IdentifierOrInterop
 
-FunctionalAssemblyExpression ::= (AmbiguousAssemblyBytecode | Identifier) '(' AssemblyItem? ( ',' AssemblyItem )* ')'
+FunctionalAssemblyExpression ::= (AmbiguousAssemblyBytecode | Identifier) '(' AssemblyItem? ( ',' AssemblyItem )* ')' {pin=2}
 AssemblyLocalDefinition ::= let IdentifierOrList ( ':=' FunctionalAssemblyAssignmentOrIdentifier )? {pin=1}
 FunctionalAssemblyAssignment ::= IdentifierOrList ':=' FunctionalAssemblyAssignmentOrIdentifier {pin=2}
 IdentifierOrList ::= IdentifierList | '(' IdentifierList ')'
-private IdentifierList ::= Identifier ( ',' Identifier)*
-AssemblyAssignment ::= '=:' Identifier {pin=1}
+// allow for .slot and .offset,
+// see https://docs.soliditylang.org/en/v0.8.4/assembly.html#access-to-external-variables-functions-and-libraries
+private IdentifierOrInterop ::= (Identifier '.' Identifier) | Identifier {pin=2}
+private IdentifierList ::= IdentifierOrInterop ( ',' IdentifierOrInterop)*
+AssemblyAssignment ::= '=:' IdentifierOrInterop {pin=1}
 LabelDefinition ::= Identifier ':'
 AssemblyIf ::= 'if' FunctionalAssemblyAssignmentOrIdentifier AssemblyBlock {pin=1}
 AssemblySwitch ::= 'switch' FunctionalAssemblyAssignmentOrIdentifier AssemblyCase* ( 'default' AssemblyBlock )? {pin=1}

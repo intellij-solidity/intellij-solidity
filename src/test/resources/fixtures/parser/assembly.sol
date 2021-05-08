@@ -84,6 +84,12 @@ contract Foo {
         }
     }
 
+    function f(uint x) public view returns (uint r) {
+        assembly {
+            r := mul(x, sload(b.slot))
+        }
+    }
+
     function _copyToBytes(uint btsPtr, bytes memory tgt, uint btsLen) {
         assembly {
             let i := 0 // Start at arr + 0x20

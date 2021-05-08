@@ -187,7 +187,7 @@ private fun SolAssemblyBlock.hasAssignment(el: SolNamedElement): Boolean =
 
 private fun SolAssemblyItem.hasAssignment(el: SolNamedElement): Boolean {
   this.assemblyAssignment?.let {
-    if (it.identifier?.text == el.name) {//todo better
+    if (it.children.any { identifier -> identifier.text == el.name }) {//todo better
       return true
     }
   }
