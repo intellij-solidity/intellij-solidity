@@ -54,6 +54,7 @@ class SolidityCompleteCustomParsingTest : SolidityParsingTestBase("fixtures/pars
   fun testStateVars() = doTest(true)
   fun testTernary() = doTest(true)
   fun testTryCatch() = doTest(true)
+  fun testUnchecked() = doTest(true)
 }
 
 class SolidityCompleteOfficialSuccessfulParsingTest :

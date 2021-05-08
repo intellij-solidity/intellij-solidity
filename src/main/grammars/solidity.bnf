@@ -324,7 +324,14 @@ FunctionTypeName ::= function ParameterList ( internal | external | StateMutabil
 StorageLocation ::= memory | storage | calldata
 StateMutability ::= pure | constant | view | 'payable'
 
-private UnfinishedBlock ::= '{' Statement* {
+private UnfinishedUncheckedBlock ::= unchecked '{' Statement* {
+    pin = 1
+    recoverWhile = UntilBraceRecover
+}
+
+private UncheckedBlock ::= UnfinishedUncheckedBlock '}'
+
+private UnfinishedBlock ::= '{' (UncheckedBlock | Statement)* {
     pin = 1
     recoverWhile = UntilBraceRecover
 }

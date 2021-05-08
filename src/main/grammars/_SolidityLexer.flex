@@ -142,6 +142,7 @@ PRAGMAALL=[^ ][^;]*
   "calldata"              { return CALLDATA; }
   "pure"                  { return PURE; }
   "view"                  { return VIEW; }
+  "unchecked"             { return UNCHECKED; }
   "return"                { return RETURN; }
   "if"                    { return IF; }
   "else"                  { return ELSE; }
