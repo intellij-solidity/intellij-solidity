@@ -5,10 +5,8 @@ import com.intellij.lang.annotation.Annotator
 import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.psi.PsiElement
 import me.serce.solidity.ide.colors.SolColor
-import me.serce.solidity.lang.psi.SolElement
-import me.serce.solidity.lang.psi.SolElementaryTypeName
-import me.serce.solidity.lang.psi.SolNumberType
-import me.serce.solidity.lang.psi.SolUserDefinedTypeName
+import me.serce.solidity.lang.psi.*
+import me.serce.solidity.lang.psi.impl.SolErrorDefMixin
 
 class SolidityAnnotator : Annotator {
   override fun annotate(element: PsiElement, holder: AnnotationHolder) {
@@ -28,6 +26,8 @@ class SolidityAnnotator : Annotator {
     return when (element) {
       is SolNumberType -> element to SolColor.KEYWORD
       is SolElementaryTypeName -> element to SolColor.KEYWORD
+      is SolErrorDefMixin -> element.identifier to SolColor.KEYWORD
+      is SolRevertStatement -> element.firstChild to SolColor.KEYWORD
       is SolUserDefinedTypeName -> element to SolColor.CONTRACT_REFERENCE
       else -> null
     }

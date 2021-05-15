@@ -46,7 +46,7 @@ object SolHighlighter : SyntaxHighlighterBase() {
   ).mapValues { it.value.textAttributesKey }
 
   private fun keywords() = setOf<IElementType>(
-    // Note, the ERROR/REVERT ar
+    // Note, the ERROR/REVERT are not keywords and are excluded
     IMPORT, AS, PRAGMA, NEW, DELETE, EMIT, /*REVERT,*/ CONSTRUCTOR,
     CONTRACT, LIBRARY, INTERFACE, IS, STRUCT, FUNCTION, ENUM,
     PUBLIC, PRIVATE, INTERNAL, EXTERNAL, CONSTANT, PURE, VIEW,
@@ -72,4 +72,3 @@ object SolHighlighter : SyntaxHighlighterBase() {
   )
 }
 
-private inline fun <reified T : Any?> T?.asArray(): Array<out T> = if (this == null) emptyArray() else arrayOf(this)
