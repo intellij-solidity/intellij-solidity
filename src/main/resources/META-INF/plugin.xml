@@ -103,6 +103,7 @@
         <stubIndex implementation="me.serce.solidity.lang.stubs.SolGotoClassIndex"/>
         <stubIndex implementation="me.serce.solidity.lang.stubs.SolModifierIndex"/>
         <stubIndex implementation="me.serce.solidity.lang.stubs.SolEventIndex"/>
+        <stubIndex implementation="me.serce.solidity.lang.stubs.SolErrorIndex"/>
         <stubIndex implementation="me.serce.solidity.lang.stubs.SolFunctionIndex"/>
         <stubIndex implementation="me.serce.solidity.lang.stubs.SolImportIndex"/>
 

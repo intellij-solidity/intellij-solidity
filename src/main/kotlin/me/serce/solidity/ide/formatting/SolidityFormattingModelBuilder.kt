@@ -78,6 +78,8 @@ class SolidityFormattingModelBuilder : FormattingModelBuilder {
         .between(IMPORT_DIRECTIVE, IMPORT_DIRECTIVE).blankLines(0)
         // 0 lines between event definitions
         .between(EVENT_DEFINITION, EVENT_DEFINITION).blankLines(0)
+        // 0 lines between error definitions
+        .between(ERROR_DEFINITION, ERROR_DEFINITION).blankLines(0)
         // 1 line between pragma and import/contract definition
         .between(PRAGMA_DIRECTIVE, TokenSet.create(IMPORT_DIRECTIVE, CONTRACT_DEFINITION)).blankLines(1)
         // 1 line between pragma/import and contract definition
@@ -87,8 +89,8 @@ class SolidityFormattingModelBuilder : FormattingModelBuilder {
         // allow for 0 lines between state variable declarations
         .between(STATE_VARIABLE_DECLARATION, STATE_VARIABLE_DECLARATION).blankLines(0)
         .between(
-          TokenSet.create(FUNCTION_DEFINITION, EVENT_DEFINITION, STRUCT_DEFINITION, STATE_VARIABLE_DECLARATION),
-          TokenSet.create(FUNCTION_DEFINITION, EVENT_DEFINITION, STRUCT_DEFINITION, STATE_VARIABLE_DECLARATION)
+          TokenSet.create(FUNCTION_DEFINITION, EVENT_DEFINITION, ERROR_DEFINITION, STRUCT_DEFINITION, STATE_VARIABLE_DECLARATION),
+          TokenSet.create(FUNCTION_DEFINITION, EVENT_DEFINITION, ERROR_DEFINITION, STRUCT_DEFINITION, STATE_VARIABLE_DECLARATION)
         ).blankLines(1)
     }
   }

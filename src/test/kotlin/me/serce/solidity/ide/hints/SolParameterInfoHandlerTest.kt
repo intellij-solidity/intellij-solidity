@@ -21,6 +21,16 @@ class SolParameterInfoHandlerTest : SolTestBase() {
         }
     """, "uint256, string", 0)
 
+  fun testError() = checkByText("""
+        contract A {
+            error AnError(uint value, string s);
+        
+            function main() {
+                revert AnError(/*caret*/);
+            }
+        }
+    """, "uint256, string", 0)
+
   fun testStruct() = checkByText("""
       contract B {
           struct Prop {

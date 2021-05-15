@@ -148,6 +148,7 @@ private ContractPart ::=
     | StructDefinition
     | ModifierDefinition
     | EventDefinition
+    | ErrorDefinition
     | EnumDefinition
     | ConstructorDefinition
 
@@ -228,6 +229,15 @@ EventDefinition ::= event Identifier IndexedParameterList anonymous? ';' {
     implements = "me.serce.solidity.lang.psi.SolCallableElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolEventDefMixin"
     stubClass = "me.serce.solidity.lang.stubs.SolEventDefStub"
+    elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
+}
+
+// Note, error can't be a keyword as it could be used as e.g. a variable name
+ErrorDefinition ::= 'error' Identifier IndexedParameterList ';' {
+    pin = 2
+    implements = "me.serce.solidity.lang.psi.SolCallableElement"
+    mixin = "me.serce.solidity.lang.psi.impl.SolErrorDefMixin"
+    stubClass = "me.serce.solidity.lang.stubs.SolErrorDefStub"
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
 
@@ -337,7 +347,16 @@ private UnfinishedBlock ::= '{' (UncheckedBlock | Statement)* {
 }
 Block ::= UnfinishedBlock '}'
 
-private FinishedStatement ::= DoWhileStatement | PlaceholderStatement | ContinueSt | BreakSt | ReturnSt | ThrowSt | EmitStatement | SimpleStatement {
+private FinishedStatement ::=
+    DoWhileStatement
+    | PlaceholderStatement
+    | ContinueSt
+    | BreakSt
+    | ReturnSt
+    | ThrowSt
+    | EmitStatement
+    | RevertStatement
+    | SimpleStatement {
     recoverWhile = UntilSemicolonRecover
 }
 Statement ::= IfStatement | TryStatement | WhileStatement | ForStatement | Block | InlineAssemblyStatement | TupleStatement | ReturnTupleStatement | FinishedStatement ';'
@@ -364,7 +383,11 @@ ContinueSt ::= continue
 BreakSt ::= break
 ReturnSt ::= return Expression? {pin=1}
 ThrowSt ::= throw
+/* An emit statement. The contained expression needs to refer to an event. */
 EmitStatement ::= emit FunctionCallExpression {pin=1}
+/* A revert statement. The contained expression needs to refer to an error. */
+// Note, revert can't be a keyword as it could be used as e.g. a function name
+RevertStatement ::= 'revert' FunctionCallExpression
 SeqExpression ::= '(' ','* (Expression ',')* Expression? ','* ')' {pin=1}
 VariableDefinition ::= VariableDeclaration ( '=' Expression )?
 

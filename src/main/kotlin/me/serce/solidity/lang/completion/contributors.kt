@@ -59,6 +59,17 @@ class SolContextCompletionContributor : CompletionContributor(), DumbAware {
         }
       }
     )
+
+    extend(CompletionType.BASIC, revertStartStatement(),
+      object : CompletionProvider<CompletionParameters>() {
+        override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext, result: CompletionResultSet) {
+          SolCompleter
+            .completeErrorName(parameters.position)
+            .map { it.insertParenthesis(true) }
+            .forEach(result::addElement)
+        }
+      }
+    )
   }
 
   private fun startStatementInsideBlock() = psiElement<PsiElement>()

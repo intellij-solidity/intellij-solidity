@@ -4,16 +4,23 @@ import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.patterns.StandardPatterns
 import com.intellij.psi.PsiElement
+import me.serce.solidity.lang.core.SolElementType
 import me.serce.solidity.lang.core.SolidityFile
 import me.serce.solidity.lang.core.SolidityTokenTypes
 import me.serce.solidity.lang.psi.SolFunctionCallArguments
 import me.serce.solidity.lang.psi.SolFunctionCallExpression
 import me.serce.solidity.lang.psi.SolPrimaryExpression
+import me.serce.solidity.lang.psi.SolRevertStatement
 
 
 fun emitStartStatement() =
   psiElement(SolidityTokenTypes.IDENTIFIER)
     .afterLeaf(psiElement(SolidityTokenTypes.EMIT))
+
+fun revertStartStatement() =
+  psiElement(SolidityTokenTypes.IDENTIFIER)
+    .inside(SolRevertStatement::class.java)
+    .afterLeaf("revert")
 
 fun stateVarInsideContract() =
   psiElement(SolidityTokenTypes.IDENTIFIER)

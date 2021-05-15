@@ -378,6 +378,32 @@ abstract class SolEventDefMixin : SolStubbedNamedElementImpl<SolEventDefStub>, S
   override val callablePriority = 1000
 }
 
+abstract class SolErrorDefMixin : SolStubbedNamedElementImpl<SolErrorDefStub>, SolErrorDefinition, SolCallableElement {
+  constructor(node: ASTNode) : super(node)
+  constructor(stub: SolErrorDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
+
+  //todo add error args identifiers
+  override fun parseParameters(): List<Pair<String?, SolType>> {
+    return indexedParameterList?.typeNameList
+      ?.map { null to getSolType(it) }
+      ?: emptyList()
+  }
+
+  override fun getNameIdentifier(): PsiElement? {
+    // use the second identifier because "error" isn't a keyword but also an identifier
+    return findChildrenByType<PsiElement>(IDENTIFIER).getOrNull(1)
+  }
+
+  override fun parseType(): SolType {
+    return SolUnknown
+  }
+
+  override fun resolveElement() = this
+
+  override val callablePriority = 1000
+}
+
+
 abstract class SolUsingForMixin(node: ASTNode) : SolElementImpl(node), SolUsingForElement {
   override val type: SolType?
     get() {

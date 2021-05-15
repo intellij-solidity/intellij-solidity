@@ -29,6 +29,7 @@ class NoReturnInspectionTest : SolInspectionsTestBase(NoReturnInspection()) {
       }
   """)
 
+  /*
   fun testRevertShadowing() = checkByText("""
         contract a {
             function revert() {
@@ -40,6 +41,7 @@ class NoReturnInspectionTest : SolInspectionsTestBase(NoReturnInspection()) {
             }/*@/warning@*/
         }
     """)
+  */
 
   fun testReturnWithIf() = checkByText("""
         contract a {

@@ -53,6 +53,10 @@ private fun SolStatement.hasAssignment(el: SolNamedElement): Boolean {
     return true
   }
 
+  this.revertStatement?.let {
+    return true
+  }
+
   this.variableDefinition?.let {
     return it.hasAssignment(el)
   }
@@ -115,6 +119,10 @@ private val SolStatement.returns: Boolean
       if (it is SolFunctionCallExpression && it.revert) {
         return true
       }
+    }
+
+    this.revertStatement?.let {
+      return true
     }
 
     this.inlineAssemblyStatement.let { st ->

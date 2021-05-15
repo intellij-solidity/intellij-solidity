@@ -108,8 +108,8 @@ PRAGMAALL=[^ ][^;]*
                             return PRAGMA;
                           }
   "as"                    { return AS; }
-  "abstract"              { return ABSTRACT; }
   "import"                { return IMPORT; }
+  "abstract"              { return ABSTRACT; }
   "contract"              { return CONTRACT; }
   "library"               { return LIBRARY; }
   "interface"             { return INTERFACE; }

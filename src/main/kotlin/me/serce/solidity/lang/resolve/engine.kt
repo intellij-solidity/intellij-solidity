@@ -224,7 +224,7 @@ object SolResolver {
           scope.enumDefinitionList,
           scope.structDefinitionList).flatten()
           .map { lexicalDeclarations(it, place) }
-          .flatten() + scope.structDefinitionList + scope.eventDefinitionList
+          .flatten() + scope.structDefinitionList + scope.eventDefinitionList + scope.errorDefinitionList
         val extendsScope = scope.supers.asSequence()
           .map { resolveTypeName(it).firstOrNull() }
           .filterNotNull()

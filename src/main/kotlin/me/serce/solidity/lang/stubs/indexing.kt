@@ -37,6 +37,12 @@ fun IndexSink.indexEventDef(stub: SolEventDefStub) {
   indexGotoClass(stub)
 }
 
+fun IndexSink.indexErrorDef(stub: SolErrorDefStub) {
+  indexNamedStub(stub)
+  indexError(stub)
+  indexGotoClass(stub)
+}
+
 fun IndexSink.indexImportPathDef(stub: SolImportPathDefStub) {
   indexNamedStub(stub)
   indexImportPath(stub)
@@ -63,6 +69,12 @@ private fun IndexSink.indexGotoClass(stub: SolNamedStub) {
 private fun IndexSink.indexEvent(stub: SolEventDefStub) {
   stub.name?.let {
     occurrence(SolEventIndex.KEY, it)
+  }
+}
+
+private fun IndexSink.indexError(stub: SolErrorDefStub) {
+  stub.name?.let {
+    occurrence(SolErrorIndex.KEY, it)
   }
 }
 

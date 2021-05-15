@@ -14,7 +14,7 @@ class SolidityFileStub(file: SolidityFile?) : PsiFileStubImpl<SolidityFile>(file
 
   object Type : IStubFileElementType<SolidityFileStub>(SolidityLanguage) {
     // bump version every time stub tree changes
-    override fun getStubVersion() = 12
+    override fun getStubVersion() = 13
 
     override fun getBuilder(): StubBuilder = object : DefaultStubBuilder() {
       override fun createStubForFile(file: PsiFile) = SolidityFileStub(file as SolidityFile)
@@ -35,6 +35,7 @@ fun factory(name: String): SolStubElementType<*, *> = when (name) {
   "MODIFIER_DEFINITION" -> SolModifierDefStub.Type
   "STRUCT_DEFINITION" -> SolStructDefStub.Type
   "EVENT_DEFINITION" -> SolEventDefStub.Type
+  "ERROR_DEFINITION" -> SolErrorDefStub.Type
   "STATE_VARIABLE_DECLARATION" -> SolStateVarDeclStub.Type
   "IMPORT_PATH" -> SolImportPathDefStub.Type
 
@@ -233,6 +234,30 @@ class SolEventDefStub(
     override fun indexStub(stub: SolEventDefStub, sink: IndexSink) = sink.indexEventDef(stub)
   }
 }
+
+class SolErrorDefStub(
+  parent: StubElement<*>?,
+  elementType: IStubElementType<*, *>,
+  override val name: String?
+) : StubBase<SolErrorDefinition>(parent, elementType), SolNamedStub {
+
+  object Type : SolStubElementType<SolErrorDefStub, SolErrorDefinition>("ERROR_DEFINITION") {
+    override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?) =
+      SolErrorDefStub(parentStub, this, dataStream.readNameAsString())
+
+    override fun serialize(stub: SolErrorDefStub, dataStream: StubOutputStream) = with(dataStream) {
+      writeName(stub.name)
+    }
+
+    override fun createPsi(stub: SolErrorDefStub) = SolErrorDefinitionImpl(stub, this)
+
+    override fun createStub(psi: SolErrorDefinition, parentStub: StubElement<*>?) =
+      SolErrorDefStub(parentStub, this, psi.name)
+
+    override fun indexStub(stub: SolErrorDefStub, sink: IndexSink) = sink.indexErrorDef(stub)
+  }
+}
+
 
 class SolImportPathDefStub(
   parent: StubElement<*>?,
