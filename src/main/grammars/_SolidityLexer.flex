@@ -31,7 +31,7 @@ WHITE_SPACE=\s+
 // TODO: proper grammar instead of this regex hell
 COMMENT=("//".*)|(\/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\/)
 HEXLITERAL=(hex\"([_0-9a-fA-F]+)\"|hex\'([_0-9a-fA-F]+)\')
-STRINGLITERAL=(\"([^\"\r\n\\]|\\.)*\")|(\'([^\'\r\n\\]|\\.)*\')
+STRINGLITERAL=(\"([^\"\r\n\\]|\\.)*\")|(\'([^\'\r\n\\]|\\.)*\')|unicode(\"([^\"])*\")
 DECIMALNUMBER=[0-9][_0-9]*
 FIXEDNUMBER=(([0-9][_0-9]*)+\.[_0-9]*|([0-9][_0-9]*)*\.([0-9][_0-9]*))
 SCIENTIFICNUMBER=((([0-9][_0-9]*)+|([0-9][_0-9]*)+\.[_0-9]*|([0-9][_0-9]*|[0-9])*\.([0-9][_0-9]*))[Ee][+-]?[_0-9]+)

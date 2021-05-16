@@ -16,7 +16,7 @@
   tokens = [
     comment='regexp:(//.*)|(/\\*(?:.|[\\n\\r])*?\\*/)'
     hexLiteral='regexp:hex"([0-9a-fA-F]+)"'
-    stringLiteral='regexp:("([^"\r\n\\]|\\.)*")'
+    stringLiteral='regexp:("([^"\r\n\\]|\\.)*")|unicode("([^"])*")'
     decimalNumber='regexp:([0-9][_0-9]*)'
     fixedNumber='regexp:(([0-9][_0-9]*)+\.[_0-9]*|([0-9][_0-9]*)*\.([0-9][_0-9]*))'
     scientificNumber='regexp:((([0-9][_0-9]*)+|([0-9][_0-9]*)+\.[_0-9]*|([0-9][_0-9]*|[0-9])*\.[_0-9]+)[Ee][+-]?[_0-9]+)'
@@ -441,6 +441,7 @@ PrimaryExpression ::= VarLiteral
                   | NumberLiteral
                   | HexLiteral
                   | StringLiteral
+                  | UnicodeStringLiteral
                   | ElementaryTypeNameExpression
 
 VarLiteral ::= Identifier {
@@ -476,8 +477,7 @@ NumberUnit ::= wei | szabo | finney | ether
              | seconds | minutes | hours | days | weeks | years
 // https://github.com/ethereum/solidity/pull/832
 private HexLiteral ::= hexLiteral
-private StringLiteral ::= stringLiteral
-
+private StringLiteral ::= stringLiteral | unicodeStrLit
 
 private HexNumber ::= hexNumber
 private FixedNumber ::= fixedNumber
