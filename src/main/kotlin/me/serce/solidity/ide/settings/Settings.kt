@@ -69,7 +69,7 @@ class SoliditySettings : PersistentStateComponent<SoliditySettings> {
 
     private fun checkJars(path: String): Boolean {
       val files = getUrls(path).toMutableList()
-      
+
       if (files.isEmpty()) return false
 
       val ethJar = files.indexOfFirst { it.fileName.toString().contains("ethereumj") }
@@ -90,8 +90,11 @@ class SoliditySettings : PersistentStateComponent<SoliditySettings> {
   }
 }
 
-class SoliditySettingsConfigurable(private val mySettings: SoliditySettings) : SearchableConfigurable, Configurable.NoScroll {
+class SoliditySettingsConfigurable : SearchableConfigurable, Configurable.NoScroll {
   private var myPanel: SolidityConfigurablePanel? = null
+
+  private val mySettings: SoliditySettings
+    get() = SoliditySettings.instance
 
   @Nls
   override fun getDisplayName(): String {
