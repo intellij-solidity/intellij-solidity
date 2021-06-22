@@ -93,7 +93,10 @@ object SolCompleter {
     return element.expression.getMembers()
       .mapNotNull {
         when (it.getPossibleUsage(contextType)) {
-          Usage.CALLABLE -> (it as SolCallableElement).toFunctionLookup()
+          Usage.CALLABLE -> {
+            // could also be a builtin, me.serce.solidity.lang.types.BuiltinCallable
+            (it as? SolCallableElement)?.toFunctionLookup()
+          }
           Usage.VARIABLE -> it.getName()?.let { name ->
             PrioritizedLookupElement.withPriority(
               LookupElementBuilder.create(name).withIcon(SolidityIcons.STATE_VAR),
