@@ -88,7 +88,11 @@ object SolResolver {
           ?: emptySet()
 
         else -> element.parentOfType<SolContractDefinition>()
-          ?.let { resolveInnerType(it, names[0].nameOrText!!, f) }
+          ?.let {
+            names[0].nameOrText?.let { nameOrText ->
+              resolveInnerType(it, nameOrText, f)
+            }
+          }
           ?: emptySet()
       }
     }
