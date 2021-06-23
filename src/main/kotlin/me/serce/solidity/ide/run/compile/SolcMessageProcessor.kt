@@ -10,7 +10,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.ui.MessageType
 import com.intellij.openapi.vfs.VirtualFileManager
-import me.serce.solidity.ide.settings.SoliditySettings
 import me.serce.solidity.ide.settings.SoliditySettingsConfigurable
 
 object SolcMessageProcessor {
@@ -129,7 +128,7 @@ object SolcMessageProcessor {
     NotificationGroup.balloonGroup(notificationGroupId)
       .createNotification("SolcJ compiler is not found", "<a href=\"#\">Please configure EthereumJ bundle</a>", NotificationType.INFORMATION,
         NotificationListener { _, _ ->
-          SoliditySettingsConfigurable(SoliditySettings.instance).getQuickFix(project).run()
+          SoliditySettingsConfigurable().getQuickFix(project).run()
         }).notify(project)
   }
 }

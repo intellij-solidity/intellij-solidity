@@ -19,7 +19,6 @@ import me.serce.solidity.ide.settings.SoliditySettingsConfigurable
 import me.serce.solidity.lang.psi.SolContractDefinition
 import me.serce.solidity.lang.psi.SolFunctionDefinition
 import org.jdom.Element
-import java.util.*
 import javax.swing.BorderFactory
 import javax.swing.JComponent
 import javax.swing.JLabel
@@ -221,7 +220,7 @@ class SolidityRunConfig(configurationModule: SolidityRunConfigModule, factory: C
 
   override fun checkConfiguration() {
     if (!SoliditySettings.instance.useSolcJ || !SoliditySettings.instance.validateEvm()) {
-      throw RuntimeConfigurationError("EVM is not configured", SoliditySettingsConfigurable(SoliditySettings.instance).getQuickFix(project))
+      throw RuntimeConfigurationError("EVM is not configured", SoliditySettingsConfigurable().getQuickFix(project))
     }
     if (configurationModule.module == null) {
       throw RuntimeConfigurationError("Module is not specified")
