@@ -18,6 +18,15 @@
 
     <change-notes><![CDATA[
       <p>
+        <b>v2.3.3</b>
+        <ul>
+          <li>Huge thank you to Tyler Smith (@tyler-smith) and Bryan Green (@bryangreen) for sponsoring the plugin development!❤️</li>
+          <li>Huge thank you to all gitcoin supporters https://gitcoin.co/grants/1047/intellij-solidity!❤️</li>
+          <li>Support error definitions, yours @SerCeMan</li>
+          <li>Error/revert definition highlighting, yours @SerCeMan</li>
+          <li>Support unicode literals, yours @SerCeMan</li>
+          <li>Fix various collected error reports, yours @SerCeMan</li>
+        </ul>
         <b>v2.3.2</b>
         <ul>
           <li>Huge thank you to Tyler Smith (@tyler-smith) for sponsoring the plugin development!❤️</li>
@@ -25,12 +34,6 @@
           <li>Support unchecked blocks, yours @SerCeMan</li>
           <li>Support state variable override, thanks Gerardo Nardelli! (@patitonar)</li>
           <li>Use v.0.5.x as the recommended stable version, thanks @pironmind!</li>
-        </ul>
-        <b>v2.3.1</b>
-        <ul>
-          <li>allow for typenames in mappings</li>
-          <li>allow for casting using 'payable'</li>
-          <li>update grammar to include immutable keyword, thanks @patitonar</li>
         </ul>
       </p>
     ]]>
