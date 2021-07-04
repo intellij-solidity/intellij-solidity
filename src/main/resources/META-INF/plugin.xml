@@ -1,6 +1,6 @@
 <idea-plugin>
     <id>me.serce.solidity</id>
-    <name>Intellij-Solidity</name>
+    <name>Solidity</name>
     <vendor email="sergeicelov@gmail.com" url="https://github.com/intellij-solidity">Intellij Solidity</vendor>
 
     <description><![CDATA[
@@ -26,6 +26,7 @@
           <li>Error/revert definition highlighting, yours @SerCeMan</li>
           <li>Support unicode literals, yours @SerCeMan</li>
           <li>Fix various collected error reports, yours @SerCeMan</li>
+          <li>Rename IntelliJ Solidity to Solidity to follow the guidelines</li>
         </ul>
         <b>v2.3.2</b>
         <ul>
