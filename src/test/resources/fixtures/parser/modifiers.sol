@@ -5,4 +5,6 @@ contract Purchase {
 
     function abort() onlySeller {
     }
+
+    receive() external onlySeller payable {}
 }

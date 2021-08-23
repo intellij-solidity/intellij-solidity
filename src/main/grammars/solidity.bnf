@@ -216,13 +216,13 @@ FunctionDefinition ::=
 }
 
 private OrdinaryFunctionDefinition ::= function Identifier ParameterList
-                     ( ModifierInvocation | FunctionVisibilitySpecifier | StateMutability)*
+                     ( FunctionVisibilitySpecifier | StateMutability | ModifierInvocation)*
                      ( returns ParameterList )? ( ';' | Block ) {
     pin = 2
 }
 
-private FallbackFunctionDefinition ::= function ParameterList (FunctionVisibilitySpecifier | StateMutability)* Block
-private UnnamedFunctionDefinition ::= (fallback | receive) ParameterList (FunctionVisibilitySpecifier | StateMutability)* Block
+private FallbackFunctionDefinition ::= function ParameterList (FunctionVisibilitySpecifier | StateMutability | ModifierInvocation)* Block
+private UnnamedFunctionDefinition ::= (fallback | receive) ParameterList (FunctionVisibilitySpecifier | StateMutability | ModifierInvocation)* Block
 
 EventDefinition ::= event Identifier IndexedParameterList anonymous? ';' {
     pin = 1
