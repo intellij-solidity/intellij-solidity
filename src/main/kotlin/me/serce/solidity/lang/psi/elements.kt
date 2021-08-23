@@ -52,7 +52,7 @@ interface SolFunctionCallElement : SolReferenceElement {
   val expression: SolExpression?
   val functionCallArguments: SolFunctionCallArguments
 
-  fun getBaseAndReferenceNameElement(): Pair<SolExpression?, PsiElement>
+  fun getBaseAndReferenceNameElement(): Pair<SolExpression?, PsiElement>?
 }
 
 interface SolModifierInvocationElement : SolReferenceElement {
