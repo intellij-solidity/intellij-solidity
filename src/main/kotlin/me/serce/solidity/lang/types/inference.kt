@@ -153,16 +153,16 @@ fun inferExprType(expr: SolExpression?): SolType {
         ?: SolUnknown
     }
     is SolPlusMinExpression -> getNumericExpressionType(
-      inferExprType(expr.expressionList[0]),
-      inferExprType(expr.expressionList[1])
+      inferExprType(expr.expressionList.firstOrNull()),
+      inferExprType(expr.expressionList.secondOrNull())
     )
     is SolMultDivExpression -> getNumericExpressionType(
-      inferExprType(expr.expressionList[0]),
-      inferExprType(expr.expressionList[1])
+      inferExprType(expr.expressionList.firstOrNull()),
+      inferExprType(expr.expressionList.secondOrNull())
     )
     is SolExponentExpression -> getNumericExpressionType(
-      inferExprType(expr.expressionList[0]),
-      inferExprType(expr.expressionList[1])
+      inferExprType(expr.expressionList.firstOrNull()),
+      inferExprType(expr.expressionList.secondOrNull())
     )
     is SolFunctionCallExpression -> {
       (expr.reference as SolFunctionCallReference)
@@ -175,9 +175,9 @@ fun inferExprType(expr: SolExpression?): SolType {
     is SolOrExpression,
     is SolEqExpression,
     is SolCompExpression -> SolBoolean
-    is SolTernaryExpression -> inferExprType(expr.expressionList[1])
+    is SolTernaryExpression -> inferExprType(expr.expressionList.secondOrNull())
     is SolIndexAccessExpression -> {
-      when (val arrType = inferExprType(expr.expressionList[0])) {
+      when (val arrType = inferExprType(expr.expressionList.firstOrNull())) {
         is SolArray -> arrType.type
         is SolMapping -> arrType.to
         else -> SolUnknown
@@ -191,12 +191,16 @@ fun inferExprType(expr: SolExpression?): SolType {
     }
     is SolSeqExpression -> when {
       expr.expressionList.isEmpty() -> SolUnknown
-      else -> inferExprType(expr.expressionList[0])
+      else -> inferExprType(expr.expressionList.firstOrNull())
     }
     is SolUnaryExpression ->
       inferExprType(expr.expression)
     else -> SolUnknown
   }
+}
+
+private fun <E> List<E>.secondOrNull(): E? {
+  return if (size < 2) null else this[1]
 }
 
 private fun getNumericExpressionType(firstType: SolType, secondType: SolType): SolType {
