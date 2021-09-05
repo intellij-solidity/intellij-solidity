@@ -94,8 +94,15 @@
   extends(".*TypeName")=TypeName
 }
 
-
-SourceUnit ::= (PragmaDirective | ImportDirective | ContractDefinition | EnumDefinition | StructDefinition | Expression)*
+SourceUnit ::= (
+    PragmaDirective
+    | ImportDirective
+    | ContractDefinition
+    | FunctionDefinition
+    | EnumDefinition
+    | StructDefinition
+    | Expression
+  )*
 
 private UntilSemicolonRecover ::= !(';')
 private UntilBraceRecover ::= !('}')

@@ -1,3 +1,10 @@
+// https://github.com/intellij-solidity/intellij-solidity/issues/227
+function sum(uint[] memory _arr) pure returns (uint s) {
+    for (uint i = 0; i < _arr.length; i++) {
+        s += _arr[i];
+    }
+}
+
 contract MyToken {
     string public standard = 'Token 0.1';
     string public name;
