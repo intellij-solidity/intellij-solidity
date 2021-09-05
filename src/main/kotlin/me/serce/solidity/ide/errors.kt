@@ -37,7 +37,7 @@ class SentryReportSubmitter : ErrorReportSubmitter() {
     events: Array<out IdeaLoggingEvent>,
     additionalInfo: String?,
     parentComponent: Component,
-    consumer: Consumer<in SubmittedReportInfo>
+    consumer: Consumer<SubmittedReportInfo>
   ): Boolean {
     val ijEvent = events.firstOrNull()
     if (ijEvent == null) {
