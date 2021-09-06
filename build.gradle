@@ -57,6 +57,10 @@ intellij {
     sandboxDirectory project.rootDir.canonicalPath + "/.sandbox"
 }
 
+runIde {
+    maxHeapSize = "1G"
+}
+
 repositories {
     mavenCentral()
     // ethereumj isn't available on maven central
