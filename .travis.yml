@@ -1,6 +1,6 @@
 language: java
 jdk:
-  - openjdk8
+  - openjdk11
 
 # https://docs.travis-ci.com/user/languages/java/#Caching
 before_cache:
