@@ -1,5 +1,6 @@
 {
   parserClass="me.serce.solidity.SolidityParser"
+  parserImports=["static me.serce.solidity.lang.core.ParserUtil.recursion_guard_"]
 
   psiClassPrefix="Sol"
   psiImplClassSuffix="Impl"
