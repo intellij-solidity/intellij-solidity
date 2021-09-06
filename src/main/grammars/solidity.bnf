@@ -99,6 +99,7 @@ SourceUnit ::= (
     | ImportDirective
     | ContractDefinition
     | FunctionDefinition
+    | ConstantVariableDeclaration
     | EnumDefinition
     | StructDefinition
     | Expression
@@ -129,7 +130,8 @@ ImportPath ::= StringLiteral {
     stubClass = "me.serce.solidity.lang.stubs.SolImportPathDefStub"
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
-private ImportDirectivePart ::= import ( ImportPath (as ImportAlias)?
+private ImportDirectivePart ::= import
+        ( ImportPath (as ImportAlias)?
         | ('*' | UserDefinedTypeName) (as ImportAlias)? 'from' ImportPath
         | '{' ImportRuleSet '}' 'from' ImportPath ) {
  pin = 1
@@ -170,6 +172,12 @@ StateVariableDeclaration ::= TypeName (VisibilityModifier MutationModifier Overr
     stubClass = "me.serce.solidity.lang.stubs.SolStateVarDeclStub"
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
+
+/**
+ * The declaration of a constant variable.
+ */
+// TODO: add mixins/stubs
+ConstantVariableDeclaration ::= TypeName MutationModifier Identifier ('=' Expression)? ';'
 
 UsingForDeclaration ::= using UserDefinedTypeName for ('*' | TypeName) ';' {
     pin=1
