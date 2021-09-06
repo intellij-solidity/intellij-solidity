@@ -151,8 +151,10 @@ ContractDefinition ::= abstract? ( contract | library | interface ) Identifier
 }
 
 private ContractPart ::=
-    FunctionDefinition
-    | StateVariableDeclaration
+    // the of StateVariableDeclaration and FunctionDefinition is important to ensure that
+    // function type state variables are parsed correctly.
+    StateVariableDeclaration
+    | FunctionDefinition
     | UsingForDeclaration
     | StructDefinition
     | ModifierDefinition
@@ -236,8 +238,8 @@ private OrdinaryFunctionDefinition ::= function Identifier ParameterList
     pin = 2
 }
 
-private FallbackFunctionDefinition ::= function ParameterList (FunctionVisibilitySpecifier | StateMutability | ModifierInvocation)* Block
-private UnnamedFunctionDefinition ::= (fallback | receive) ParameterList (FunctionVisibilitySpecifier | StateMutability | ModifierInvocation)* Block
+private FallbackFunctionDefinition ::= function ParameterList (FunctionVisibilitySpecifier | StateMutability | ModifierInvocation)* ( ';' | Block )
+private UnnamedFunctionDefinition ::= (fallback | receive) ParameterList (FunctionVisibilitySpecifier | StateMutability | ModifierInvocation)* ( ';' | Block )
 
 EventDefinition ::= event Identifier IndexedParameterList anonymous? ';' {
     pin = 1
