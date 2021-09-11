@@ -170,7 +170,6 @@ PRAGMAALL=[^ ][^;]*
   "address"               { return ADDRESS; }
   "string"                { return STRING; }
   "bool"                  { return BOOL; }
-  "let"                   { return LET; }
 
   {COMMENT}               { return COMMENT; }
   {HEXLITERAL}            { return HEXLITERAL; }

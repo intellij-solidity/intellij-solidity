@@ -36,6 +36,8 @@ class SolidityFormattingModelBuilder : FormattingModelBuilder {
         .after(TokenSet.create(LPAREN, LBRACE, LBRACKET)).none()
         // Some old versions do not support .before(TokenSet), so we use more verbose form
         // https://github.com/JetBrains/intellij-community/commit/fd4c8224c17d041bf53d556f5c74ffaf20acffe3
+        // no spaces between - and > to prevent the formatter from breaking -> which could be separate tokens.
+        .between(MINUS, MORE).none()
         .before(RPAREN).none()
         .before(RBRACE).none()
         .before(RBRACKET).none()

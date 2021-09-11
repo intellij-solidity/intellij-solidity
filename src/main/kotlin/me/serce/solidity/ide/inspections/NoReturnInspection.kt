@@ -25,11 +25,11 @@ private fun SolFunctionDefinition.inspectReturns(holder: ProblemsHolder) {
       if (!block.returns) {
         val shouldReturn = returns.parameterDefList.any { it.name == null }
         if (shouldReturn) {
-          holder.registerProblem(this, "no return statement")
+          holder.registerProblem(this, "No return statement")
         } else {
           for (returnParam in returns.parameterDefList) {
             if (!block.hasAssignment(returnParam)) {
-              holder.registerProblem(returnParam, "return variable not assigned")
+              holder.registerProblem(returnParam, "Return variable not assigned")
             }
           }
         }
@@ -70,7 +70,7 @@ private fun SolStatement.hasAssignment(el: SolNamedElement): Boolean {
   }
 
   this.inlineAssemblyStatement.let { st ->
-    st?.assemblyBlock?.let {
+    st?.yulBlock?.let {
       return it.hasAssignment(el)
     }
   }
@@ -126,7 +126,7 @@ private val SolStatement.returns: Boolean
     }
 
     this.inlineAssemblyStatement.let { st ->
-      st?.assemblyBlock?.let {
+      st?.yulBlock?.let {
         return it.returns
       }
     }
@@ -154,17 +154,17 @@ private val SolStatement.returns: Boolean
     return false
   }
 
-private val SolAssemblyItem.returns: Boolean
+private val SolYulStatement.returns: Boolean
   get() {
-    functionalAssemblyExpression?.let {
+    yulFunctionCall?.let {
       return it.text.startsWith("return")//todo better
     }
     return false
   }
 
-private val SolAssemblyBlock.returns: Boolean
+private val SolYulBlock.returns: Boolean
   get() {
-    return this.assemblyItemList.any { it.returns }
+    return this.yulStatementList.any { it.returns }
   }
 
 private val SolBlock.returns: Boolean
@@ -190,17 +190,12 @@ private fun SolIfStatement.hasAssignment(el: SolNamedElement): Boolean =
 private fun SolVariableDefinition.hasAssignment(el: SolNamedElement): Boolean =
   this.variableDeclaration.reference?.resolve() == el
 
-private fun SolAssemblyBlock.hasAssignment(el: SolNamedElement): Boolean =
-  this.assemblyItemList.any { it.hasAssignment(el) }
+private fun SolYulBlock.hasAssignment(el: SolNamedElement): Boolean =
+  this.yulStatementList.any { it.hasAssignment(el) }
 
-private fun SolAssemblyItem.hasAssignment(el: SolNamedElement): Boolean {
-  this.assemblyAssignment?.let {
+private fun SolYulStatement.hasAssignment(el: SolNamedElement): Boolean {
+  this.yulAssignment?.let {
     if (it.children.any { identifier -> identifier.text == el.name }) {//todo better
-      return true
-    }
-  }
-  this.functionalAssemblyAssignment?.let {
-    if (it.identifierOrList.text == el.name) {//todo better
       return true
     }
   }
