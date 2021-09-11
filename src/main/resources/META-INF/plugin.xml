@@ -4,11 +4,11 @@
     <vendor email="sergeicelov@gmail.com" url="https://github.com/intellij-solidity">Intellij Solidity</vendor>
 
     <description><![CDATA[
-      IntelliJ solidity support
+      Solidity support for IntelliJ.
 
       <p>
-        You can support the plugin development by <a href="https://github.com/intellij-solidity/intellij-solidity">sponsoring</a> ❤️ the plugin on Github, by clicking star on
-        <a href="https://github.com/intellij-solidity/intellij-solidity">GitHub</a>
+        You can support the plugin development by <a href="https://github.com/intellij-solidity/intellij-solidity">sponsoring</a> ❤️ the plugin on Github,
+        supporting the project on <a href="https://gitcoin.co/grants/1047/intellij-solidity">GitCoin</a>, or by clicking star on <a href="https://github.com/intellij-solidity/intellij-solidity">GitHub</a>
         and rating it on the <a href="https://plugins.jetbrains.com/plugin/9475-intellij-solidity">plugin page</a>.
       </p>
       <p>
@@ -18,6 +18,17 @@
 
     <change-notes><![CDATA[
       <p>
+        <b>v2.3.5</b>
+        Thank you for your support.
+        <p>Huge thank you to Yenwen Feng (@tempofeng) in particular, and all GitCoin supporters https://gitcoin.co/grants/1047/intellij-solidity!❤️</p>
+        <p>Huge thank you to Tyler Smith (@tyler-smith), Jason Zong (@dyzz), Bryan Green (@bryangreen) for sponsoring the plugin development on GitHub!❤️</p>
+        In this release:
+        <ul>
+          <li>Support top level functions, yours @SerCeMan</li>
+          <li>Allow for receive/fallback in interfaces, yours @SerCeMan</li>
+          <li>Support top level constant variable declarations, yours @SerCeMan</li>
+          <li>Fixing multiple inference exceptions, yours @SerCeMan</li>
+        </ul>
         <b>v2.3.3</b>
         <ul>
           <li>Huge thank you to Tyler Smith (@tyler-smith) and Bryan Green (@bryangreen) for sponsoring the plugin development!❤️</li>
@@ -27,14 +38,6 @@
           <li>Support unicode literals, yours @SerCeMan</li>
           <li>Fix various collected error reports, yours @SerCeMan</li>
           <li>Rename IntelliJ Solidity to Solidity to follow the guidelines</li>
-        </ul>
-        <b>v2.3.2</b>
-        <ul>
-          <li>Huge thank you to Tyler Smith (@tyler-smith) for sponsoring the plugin development!❤️</li>
-          <li>Support .slot and .offset within assembly blocks, yours @SerCeMan</li>
-          <li>Support unchecked blocks, yours @SerCeMan</li>
-          <li>Support state variable override, thanks Gerardo Nardelli! (@patitonar)</li>
-          <li>Use v.0.5.x as the recommended stable version, thanks @pironmind!</li>
         </ul>
       </p>
     ]]>
