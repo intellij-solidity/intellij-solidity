@@ -1,6 +1,7 @@
 contract a {
 function b() {
 assembly {
+function f(x) -> y {a := 1}
 mstore(0x40, sload(0))
 byte(0)
 add(x, y)

@@ -394,7 +394,8 @@ WhileStatement ::= while '(' Expression ')' Statement {pin = 1}
 PlaceholderStatement ::= '_'
 private SimpleStatement ::= VariableDefinition | ExpressionStatement
 ForStatement ::= for '(' (SimpleStatement)? ';' (Expression)? ';' (ExpressionStatement)? ')' Statement {pin=1}
-InlineAssemblyStatement ::= assembly AssemblyBlock {pin=1}
+InlineAssemblyStatement ::= assembly AssemblyDialect? YulBlock {pin=1}
+private AssemblyDialect ::= Identifier
 DoWhileStatement ::= do Statement while '(' Expression ')' {pin=1}
 ContinueSt ::= continue
 BreakSt ::= break
@@ -458,7 +459,6 @@ PrimaryExpression ::= VarLiteral
                   | NumberLiteral
                   | HexLiteral
                   | StringLiteral
-                  | UnicodeStringLiteral
                   | ElementaryTypeNameExpression
 
 VarLiteral ::= Identifier {
@@ -494,7 +494,7 @@ NumberUnit ::= wei | szabo | finney | ether
              | seconds | minutes | hours | days | weeks | years
 // https://github.com/ethereum/solidity/pull/832
 private HexLiteral ::= hexLiteral
-private StringLiteral ::= stringLiteral | unicodeStrLit
+private StringLiteral ::= stringLiteral
 
 private HexNumber ::= hexNumber
 private FixedNumber ::= fixedNumber
@@ -512,46 +512,125 @@ ElementaryTypeName ::= ( address 'payable' ) | address | bool | string | var | N
 
 NumberType ::= intNumType | uIntNumType | byteNumType | bytesNumType | fixedNumType | uFixedNumType
 
+// Yul Assembly
+//
+private YulLeave ::= 'leave'
+private YulBreak ::= 'break'
+private YulContinue ::= 'continue'
+private YulLBrace ::= '{'
+private YulRBrace ::= '}'
+private YulLet ::= 'let'
+private YulAssign ::= ':='
+private YulComma ::= ','
+private YulIf ::= 'if'
+private YulFor ::= 'for'
+private YulCase ::= 'case'
+private YulSwitch ::= 'switch'
+private YulDefault ::= 'default'
+private YulLParen ::= '('
+private YulRParen ::= ')'
+private YulArrow ::= '->'
+private YulIdentifier ::= Identifier
+// TODO: this potentially won't be needed if jflex lexer is changed not to parse the
+//   tokens within the ass
+private YulEVMBuiltin ::= 'return' | 'address' | 'byte'
+private YulFunction ::= 'function'
+private YulPeriod ::= '.'
+private YulTrue ::= 'true'
+private YulFalse ::= 'false'
+private YulDecimalNumber ::= DecimalNumber
+private YulStringLiteral ::= StringLiteral
+private YulHexNumber ::= HexNumber
+private YulHexStringLiteral ::= HexLiteral
+
+// exempt from Solidity.bnf
+// replace:
+// 'yul' with 'Yul'
+// ':' with ' ::=', and ';' with ''
+// (cond\=|init\=|body\=|arguments\+\=|variables\+\=|post\=|returnParameters\+\=|\;) with ''
+// add pins everywhere, and reorder the expression priority
+
+
 // http://solidity.readthedocs.io/en/develop/assembly.html#parsing-grammar
+/**
+ * A Yul statement within an inline assembly block.
+ * continue and break statements are only valid within for loops.
+ * leave statements are only valid within function bodies.
+ */
+YulStatement ::=
+	YulBlock
+	| YulVariableDeclaration
+	| YulAssignment
+	| YulFunctionCall
+	| YulIfStatement
+	| YulForStatement
+	| YulSwitchStatement
+	| YulLeave
+	| YulBreak
+	| YulContinue
+	| YulFunctionDefinition
+	// Only support for backwards compatibility
+	| YulLabel
 
-AssemblyBlock ::= '{' AssemblyItem* '}' {pin=1}
+YulBlock ::= YulLBrace YulStatement* YulRBrace { pin=1 }
 
-AssemblyItem ::=
-    AssemblyBlock
-    | FunctionalAssemblyExpression
-    | AssemblyLocalDefinition
-    | FunctionalAssemblyAssignment
-    | AssemblyAssignment
-    | LabelDefinition
-    | AssemblyIf
-    | AssemblySwitch
-    | AssemblyFunctionDefinition
-    | AssemblyFor
-    | SubAssembly
-    | LinkerSymbol
-    | NumberLiteral
-    | StringLiteral
-    | HexLiteral
-    | IdentifierOrInterop
+/**
+ * The declaration of one or more Yul variables with optional initial value.
+ * If multiple variables are declared, only a function call is a valid initial value.
+ */
+YulVariableDeclaration ::= YulLet YulIdentifier
+    (YulAssign YulExpression
+	 | (YulComma YulIdentifier)* (YulAssign YulFunctionCall))?  { pin=1 }
 
-FunctionalAssemblyExpression ::= (AmbiguousAssemblyBytecode | Identifier) '(' AssemblyItem? ( ',' AssemblyItem )* ')' {pin=2}
-AssemblyLocalDefinition ::= let IdentifierOrList ( ':=' FunctionalAssemblyAssignmentOrIdentifier )? {pin=1}
-FunctionalAssemblyAssignment ::= IdentifierOrList ':=' FunctionalAssemblyAssignmentOrIdentifier {pin=2}
-IdentifierOrList ::= IdentifierList | '(' IdentifierList ')'
-// allow for .slot and .offset,
-// see https://docs.soliditylang.org/en/v0.8.4/assembly.html#access-to-external-variables-functions-and-libraries
-private IdentifierOrInterop ::= (Identifier '.' Identifier) | Identifier {pin=2}
-private IdentifierList ::= IdentifierOrInterop ( ',' IdentifierOrInterop)*
-AssemblyAssignment ::= '=:' IdentifierOrInterop {pin=1}
-LabelDefinition ::= Identifier ':'
-AssemblyIf ::= 'if' FunctionalAssemblyAssignmentOrIdentifier AssemblyBlock {pin=1}
-AssemblySwitch ::= 'switch' FunctionalAssemblyAssignmentOrIdentifier AssemblyCase* ( 'default' AssemblyBlock )? {pin=1}
-AssemblyCase ::= 'case' FunctionalAssemblyAssignmentOrIdentifier AssemblyBlock {pin=1}
-AssemblyFunctionDefinition ::= 'function' Identifier '(' IdentifierOrList? ')'
-    ( '->' IdentifierOrList )? AssemblyBlock {pin=1}
-AssemblyFor ::= 'for' ( AssemblyBlock | FunctionalAssemblyExpression)
-    FunctionalAssemblyExpression ( AssemblyBlock | FunctionalAssemblyExpression) AssemblyBlock {pin=1}
-SubAssembly ::= 'assembly' Identifier AssemblyBlock {pin=1}
-LinkerSymbol ::= 'linkerSymbol' '(' StringLiteral ')' {pin=1}
-private AmbiguousAssemblyBytecode ::= 'return' | 'address' | 'byte' | 'break' | 'continue' | 'function'
-private FunctionalAssemblyAssignmentOrIdentifier ::= FunctionalAssemblyExpression | NumberLiteral | Identifier
+
+/**
+ * Any expression can be assigned to a single Yul variable, whereas
+ * multi-assignments require a function call on the right-hand side.
+ */
+YulAssignment ::=
+    YulPath YulAssign YulExpression
+    | (YulPath (YulComma YulPath)+) YulAssign YulFunctionCall
+    // Only support =: for backwards compatibility
+    | '=:' YulIdentifier
+
+YulIfStatement ::= YulIf YulExpression YulBlock { pin=1 }
+
+YulForStatement ::= YulFor YulBlock YulExpression YulBlock YulBlock { pin=1 }
+
+//@doc ::=inline
+YulSwitchCase ::= YulCase YulLiteral YulBlock { pin=1 }
+/**
+ * A Yul switch statement can consist of only a default-case (deprecated) or
+ * one or more non-default cases optionally followed by a default-case.
+ */
+YulSwitchStatement ::=
+	YulSwitch YulExpression
+	(
+		(YulSwitchCase+ (YulDefault YulBlock)?)
+		| (YulDefault YulBlock)
+	) { pin=1 }
+
+YulFunctionDefinition ::=
+	YulFunction YulIdentifier
+	YulLParen (YulIdentifier (YulComma YulIdentifier)*)? YulRParen
+	(YulArrow YulIdentifier (YulComma YulIdentifier)*)?
+	YulBlock { pin=1 }
+
+// TODO: remove as lables have been deprecated, and removed, see
+// https://docs.soliditylang.org/en/v0.5.6/assembly.html#labels
+YulLabel ::= Identifier ':'
+
+/**
+ * While only identifiers without dots can be declared within inline assembly,
+ * paths containing dots can refer to declarations outside the inline assembly block.
+ */
+YulPath ::= YulIdentifier (YulPeriod YulIdentifier)*
+/**
+ * A call to a function with return values can only occur as right-hand side of an assignment or
+ * a variable declaration.
+ */
+YulFunctionCall ::= (YulIdentifier | YulEVMBuiltin) YulLParen (YulExpression (YulComma YulExpression)*)? YulRParen { pin=2 }
+YulBoolean ::= YulTrue | YulFalse
+YulLiteral ::= YulDecimalNumber | YulStringLiteral | YulHexNumber | YulBoolean | YulHexStringLiteral
+// note the parsing order YulPath will match anything
+YulExpression ::= YulFunctionCall | YulLiteral | YulPath

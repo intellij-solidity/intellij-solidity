@@ -3,7 +3,7 @@ package me.serce.solidity.ide.inspections
 class NoReturnInspectionTest : SolInspectionsTestBase(NoReturnInspection()) {
   fun testNoReturnVarName() = checkByText("""
         contract a {
-            /*@warning descr="no return statement"@*/function a() returns (uint) {
+            /*@warning descr="No return statement"@*/function a() returns (uint) {
                 var test = 5;
             }/*@/warning@*/
         }
@@ -93,7 +93,7 @@ class NoReturnInspectionTest : SolInspectionsTestBase(NoReturnInspection()) {
 
   fun testHasReturnVarName() = checkByText("""
         contract a {
-            function a() returns (/*@warning descr="return variable not assigned"@*/uint a/*@/warning@*/) {
+            function a() returns (/*@warning descr="Return variable not assigned"@*/uint a/*@/warning@*/) {
                 var test = 5;
             }
         }
