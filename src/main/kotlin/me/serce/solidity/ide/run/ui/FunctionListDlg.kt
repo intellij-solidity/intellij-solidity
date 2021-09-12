@@ -34,7 +34,7 @@ class FunctionListDialog(private val myContract: SolContractDefinition, filter: 
         }
         append(function.name!!, StructureNodeRenderer.applyDeprecation(function, SimpleTextAttributes.REGULAR_ATTRIBUTES))
         val contract = function.contract
-        if (myContract != contract)
+        if (myContract != contract && contract != null)
           append(" (" + contract.name + ")", StructureNodeRenderer.applyDeprecation(contract, SimpleTextAttributes.GRAY_ATTRIBUTES))
       }
     }

@@ -311,6 +311,20 @@ class SolFunctionResolveTest : SolResolveTestBase() {
         }
   """)
 
+  fun testResolveFreeFunctions() = checkByCode("""
+        function min(uint x, uint y) pure returns (uint) {
+                //x
+            return x < y ? x : y;
+        }
+        
+        contract B {
+            function test() public {
+                min(1, 2);
+                //^
+            }
+        }
+  """)
+
   fun testResolveFunctionEnum() = checkByCode("""
         contract B {
             enum Test {

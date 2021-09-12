@@ -176,13 +176,13 @@ abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefSt
       null
     }
 
-  override val contract: SolContractDefinition
+  override val contract: SolContractDefinition?
     get() = this.ancestors.asSequence()
       .filterIsInstance<SolContractDefinition>()
-      .first()
+      .firstOrNull()
 
   override val isConstructor: Boolean
-    get() = contract.name == name
+    get() = contract?.name == name
 
   constructor(node: ASTNode) : super(node)
   constructor(stub: SolFunctionDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)

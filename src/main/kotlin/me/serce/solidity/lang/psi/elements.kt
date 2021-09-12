@@ -37,7 +37,8 @@ interface SolStateVarElement : SolMember, SolCallableElement {
 }
 
 interface SolFunctionDefElement : SolHasModifiersElement, SolMember, SolCallableElement {
-  val contract: SolContractDefinition
+  /** The contract can be null in the case of free functions. */
+  val contract: SolContractDefinition?
   val modifiers: List<SolModifierInvocation>
   val parameters: List<SolParameterDef>
   val returns: SolParameterList?
