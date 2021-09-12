@@ -26,7 +26,7 @@ class SolidityRunConfigProducer : LazyRunConfigurationProducer<SolidityRunConfig
       val contrName = config.getPersistentData().contractName ?: return@ifSolidityRunConfig false
       val psiElement = context.location?.psiElement ?: return@ifSolidityRunConfig false
       val func = searchFunction(psiElement) ?: return@ifSolidityRunConfig false
-      return@ifSolidityRunConfig funcName == func.name && contrName == func.contract.name
+      return@ifSolidityRunConfig funcName == func.name && contrName == func.contract?.name
     }
   }
 
@@ -50,7 +50,7 @@ class SolidityRunConfigProducer : LazyRunConfigurationProducer<SolidityRunConfig
     return ifSolidityRunConfig(configuration) { config ->
       config.setModule(context.module)
       config.getPersistentData().setFunction(solFunctionDefinition)
-      config.name = solFunctionDefinition.contract.name + "." + solFunctionDefinition.name
+      config.name = solFunctionDefinition.contract?.name + "." + solFunctionDefinition.name
       true
     }
   }

@@ -262,6 +262,9 @@ object SolResolver {
           val contracts = scope.children.asSequence()
             .filterIsInstance<SolContractDefinition>()
 
+          val freeFunctions = scope.children.asSequence()
+            .filterIsInstance<SolFunctionDefinition>()
+
           // NOTE: Imports are intentionally resolved eagerly rather than lazily to ensure that
           // cyclic imports don't cause infinite recursion.
           val imports = scope.children.asSequence().filterIsInstance<SolImportDirective>()
@@ -270,7 +273,7 @@ object SolResolver {
             .flatten()
             .toList()
             .asSequence()
-           imports + contracts
+           imports + contracts + freeFunctions
         } ?: emptySequence()
       }
 

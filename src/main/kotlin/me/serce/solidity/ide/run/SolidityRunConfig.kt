@@ -213,7 +213,7 @@ class SolidityRunConfig(configurationModule: SolidityRunConfigModule, factory: C
     }
 
     fun setFunction(methodLocation: SolFunctionDefinition) {
-      setContract(methodLocation.contract)
+      methodLocation.contract?.let { setContract(it) }
       functionName = methodLocation.name
     }
   }
