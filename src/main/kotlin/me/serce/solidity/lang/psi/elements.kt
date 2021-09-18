@@ -36,6 +36,8 @@ interface SolStateVarElement : SolMember, SolCallableElement {
   val visibility: Visibility
 }
 
+interface SolConstantVariable : SolNamedElement {}
+
 interface SolFunctionDefElement : SolHasModifiersElement, SolMember, SolCallableElement {
   /** The contract can be null in the case of free functions. */
   val contract: SolContractDefinition?

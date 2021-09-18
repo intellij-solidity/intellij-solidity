@@ -90,6 +90,8 @@ class SolidityFormattingModelBuilder : FormattingModelBuilder {
         .between(CONTRACT_DEFINITION, CONTRACT_DEFINITION).blankLines(1)
         // allow for 0 lines between state variable declarations
         .between(STATE_VARIABLE_DECLARATION, STATE_VARIABLE_DECLARATION).blankLines(0)
+        // allow for 0 lines between state constant variable declarations
+        .between(CONSTANT_VARIABLE_DECLARATION, CONSTANT_VARIABLE_DECLARATION).blankLines(0)
         .between(
           TokenSet.create(FUNCTION_DEFINITION, EVENT_DEFINITION, ERROR_DEFINITION, STRUCT_DEFINITION, STATE_VARIABLE_DECLARATION),
           TokenSet.create(FUNCTION_DEFINITION, EVENT_DEFINITION, ERROR_DEFINITION, STRUCT_DEFINITION, STATE_VARIABLE_DECLARATION)

@@ -14,7 +14,7 @@ class SolidityFileStub(file: SolidityFile?) : PsiFileStubImpl<SolidityFile>(file
 
   object Type : IStubFileElementType<SolidityFileStub>(SolidityLanguage) {
     // bump version every time stub tree changes
-    override fun getStubVersion() = 13
+    override fun getStubVersion() = 14
 
     override fun getBuilder(): StubBuilder = object : DefaultStubBuilder() {
       override fun createStubForFile(file: PsiFile) = SolidityFileStub(file as SolidityFile)
@@ -37,6 +37,7 @@ fun factory(name: String): SolStubElementType<*, *> = when (name) {
   "EVENT_DEFINITION" -> SolEventDefStub.Type
   "ERROR_DEFINITION" -> SolErrorDefStub.Type
   "STATE_VARIABLE_DECLARATION" -> SolStateVarDeclStub.Type
+  "CONSTANT_VARIABLE_DECLARATION" -> SolConstantVariableDeclStub.Type
   "IMPORT_PATH" -> SolImportPathDefStub.Type
 
   "ELEMENTARY_TYPE_NAME" -> SolTypeRefStub.Type("ELEMENTARY_TYPE_NAME", ::SolElementaryTypeNameImpl)
@@ -163,6 +164,29 @@ class SolStateVarDeclStub(
       SolStateVarDeclStub(parentStub, this, psi.name)
 
     override fun indexStub(stub: SolStateVarDeclStub, sink: IndexSink) = sink.indexStateVarDecl(stub)
+  }
+}
+
+class SolConstantVariableDeclStub(
+  parent: StubElement<*>?,
+  elementType: IStubElementType<*, *>,
+  override val name: String?
+) : StubBase<SolConstantVariableDeclaration>(parent, elementType), SolNamedStub {
+
+  object Type : SolStubElementType<SolConstantVariableDeclStub, SolConstantVariableDeclaration>("CONSTANT_VARIABLE_DECLARATION") {
+    override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?) =
+      SolConstantVariableDeclStub(parentStub, this, dataStream.readNameAsString())
+
+    override fun serialize(stub: SolConstantVariableDeclStub, dataStream: StubOutputStream) = with(dataStream) {
+      writeName(stub.name)
+    }
+
+    override fun createPsi(stub: SolConstantVariableDeclStub) = SolConstantVariableDeclarationImpl(stub, this)
+
+    override fun createStub(psi: SolConstantVariableDeclaration, parentStub: StubElement<*>?) =
+      SolConstantVariableDeclStub(parentStub, this, psi.name)
+
+    override fun indexStub(stub: SolConstantVariableDeclStub, sink: IndexSink) = sink.indexConstantVariableDecl(stub)
   }
 }
 

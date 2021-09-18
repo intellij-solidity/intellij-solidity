@@ -70,6 +70,18 @@ class SolVarResolveTest : SolResolveTestBase() {
       }
   """)
 
+  fun testConstantVariable() = checkByCode("""
+      uint constant X = 32**22 + 8;
+                  //x
+    
+      contract C { 
+          function other() public {
+              uint local = X;
+                         //^
+          }
+      }
+  """)
+
   fun testFunctionParams() = checkByCode("""
         contract B {
             function B(uint abc) {

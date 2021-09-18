@@ -178,8 +178,12 @@ StateVariableDeclaration ::= TypeName (VisibilityModifier MutationModifier Overr
 /**
  * The declaration of a constant variable.
  */
-// TODO: add mixins/stubs
-ConstantVariableDeclaration ::= TypeName MutationModifier Identifier ('=' Expression)? ';'
+ConstantVariableDeclaration ::= TypeName MutationModifier Identifier ('=' Expression)? ';' {
+    implements = "me.serce.solidity.lang.psi.SolConstantVariable"
+    mixin = "me.serce.solidity.lang.psi.impl.SolConstantVariableDeclMixin"
+    stubClass = "me.serce.solidity.lang.stubs.SolConstantVariableDeclStub"
+    elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
+}
 
 UsingForDeclaration ::= using UserDefinedTypeName for ('*' | TypeName) ';' {
     pin=1

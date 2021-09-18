@@ -234,6 +234,14 @@ abstract class SolStateVarDeclMixin : SolStubbedNamedElementImpl<SolStateVarDecl
     get() = visibilityModifier?.text?.let { safeValueOf<Visibility>(it.toUpperCase()) } ?: Visibility.INTERNAL
 }
 
+abstract class SolConstantVariableDeclMixin : SolStubbedNamedElementImpl<SolConstantVariableDeclStub>, SolConstantVariableDeclaration {
+  constructor(node: ASTNode) : super(node)
+  constructor(stub: SolConstantVariableDeclStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
+
+  // TODO: does it need a separate icon?
+  override fun getIcon(flags: Int) = SolidityIcons.STATE_VAR
+}
+
 abstract class SolStructDefMixin : SolStubbedNamedElementImpl<SolStructDefStub>, SolStructDefinition, SolCallableElement {
   constructor(node: ASTNode) : super(node)
   constructor(stub: SolStructDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
