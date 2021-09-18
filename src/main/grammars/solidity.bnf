@@ -531,9 +531,20 @@ private YulLParen ::= '('
 private YulRParen ::= ')'
 private YulArrow ::= '->'
 private YulIdentifier ::= Identifier
-// TODO: this potentially won't be needed if jflex lexer is changed not to parse the
-//   tokens within the ass
-private YulEVMBuiltin ::= 'return' | 'address' | 'byte'
+// Keep in sync with
+// https://github.com/ethereum/solidity/blob/develop/docs/grammar/SolidityLexer.g4#L274-L288
+private YulEVMBuiltin ::=
+        	'stop' | 'add' | 'sub' | 'mul' | 'div' | 'sdiv' | 'mod' | 'smod' | 'exp' | 'not'
+        	| 'lt' | 'gt' | 'slt' | 'sgt' | 'eq' | 'iszero' | 'and' | 'or' | 'xor' | 'byte'
+        	| 'shl' | 'shr' | 'sar' | 'addmod' | 'mulmod' | 'signextend' | 'keccak256'
+        	| 'pop' | 'mload' | 'mstore' | 'mstore8' | 'sload' | 'sstore' | 'msize' | 'gas'
+        	| 'address' | 'balance' | 'selfbalance' | 'caller' | 'callvalue' | 'calldataload'
+        	| 'calldatasize' | 'calldatacopy' | 'extcodesize' | 'extcodecopy' | 'returndatasize'
+        	| 'returndatacopy' | 'extcodehash' | 'create' | 'create2' | 'call' | 'callcode'
+        	| 'delegatecall' | 'staticcall' | 'return' | 'revert' | 'selfdestruct' | 'invalid'
+        	| 'log0' | 'log1' | 'log2' | 'log3' | 'log4' | 'chainid' | 'origin' | 'gasprice'
+        	| 'blockhash' | 'coinbase' | 'timestamp' | 'number' | 'difficulty' | 'gaslimit'
+        	| 'basefee';
 private YulFunction ::= 'function'
 private YulPeriod ::= '.'
 private YulTrue ::= 'true'
