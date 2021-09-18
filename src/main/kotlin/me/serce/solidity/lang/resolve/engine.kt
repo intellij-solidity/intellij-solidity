@@ -262,6 +262,9 @@ object SolResolver {
           val contracts = scope.children.asSequence()
             .filterIsInstance<SolContractDefinition>()
 
+          val constantVariables = scope.children.asSequence()
+            .filterIsInstance<SolConstantVariable>()
+
           val freeFunctions = scope.children.asSequence()
             .filterIsInstance<SolFunctionDefinition>()
 
@@ -273,7 +276,7 @@ object SolResolver {
             .flatten()
             .toList()
             .asSequence()
-           imports + contracts + freeFunctions
+           imports + contracts + constantVariables + freeFunctions
         } ?: emptySequence()
       }
 

@@ -31,6 +31,10 @@ fun IndexSink.indexStateVarDecl(stub: SolStateVarDeclStub) {
   indexNamedStub(stub)
 }
 
+fun IndexSink.indexConstantVariableDecl(stub: SolConstantVariableDeclStub) {
+  indexNamedStub(stub)
+}
+
 fun IndexSink.indexEventDef(stub: SolEventDefStub) {
   indexNamedStub(stub)
   indexEvent(stub)
