@@ -4,7 +4,7 @@ class SelfdestructInspectionTest : SolInspectionsTestBase(SelfdestructRenameInsp
   fun test() = checkByText("""
         contract a {
             function a() {
-                /*@warning descr="suicide is deprecated. rename to selfdestruct. EIP 6"@*/suicide(owner)/*@/warning@*/;
+                /*@warning descr="Suicide is deprecated. rename to selfdestruct. EIP 6"@*/suicide(owner)/*@/warning@*/;
             }
         }
     """)
