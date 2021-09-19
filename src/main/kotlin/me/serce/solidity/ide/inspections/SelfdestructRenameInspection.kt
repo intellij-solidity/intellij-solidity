@@ -20,7 +20,7 @@ class SelfdestructRenameInspection : LocalInspectionTool() {
   private fun inspectCall(expr: SolFunctionCallExpression, holder: ProblemsHolder) {
     val name = expr.referenceName
     if (name == "suicide") {
-      holder.registerProblem(expr, "suicide is deprecated. rename to selfdestruct. EIP 6",
+      holder.registerProblem(expr, "Suicide is deprecated. rename to selfdestruct. EIP 6",
         RenameFix(expr, "selfdestruct"))
     }
   }
