@@ -25,11 +25,18 @@ import static me.serce.solidity.lang.core.SolidityTokenTypes.*;
 %state PRAGMA_OPEN
 %state PRAGMA_REST
 
-EOL=\R
+%state IN_COMMENT
+
+%{
+  /**
+   * Dedicated nested-comment level counter
+   */
+  private int solCommentLevel = 0;
+%}
+
 WHITE_SPACE=\s+
 
-// TODO: proper grammar instead of this regex hell
-COMMENT=("//".*)|(\/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\/)
+EOL_COMMENT="/""/"[^\n]*
 HEXLITERAL=(hex\"([_0-9a-fA-F]+)\"|hex\'([_0-9a-fA-F]+)\')
 STRINGLITERAL=(\"([^\"\r\n\\]|\\.)*\")|(\'([^\'\r\n\\]|\\.)*\')|unicode(\"([^\"])*\")
 DECIMALNUMBER=[0-9][_0-9]*
@@ -101,8 +108,12 @@ PRAGMAALL=[^ ][^;]*
   ">>"                    { return RSHIFT; }
   ":="                    { return LEFT_ASSEMBLY; }
   "=:"                    { return RIGHT_ASSEMBLY; }
-  "/*"                    { return DOC_COMMENT_BEGIN; }
-  "*/"                    { return DOC_COMMENT_END; }
+  "/*"                    {
+                            yybegin(IN_COMMENT);
+                            // jump 2 symbols back, the state would handle the beginning
+                            // of the comment.
+                            yypushback(2);
+                          }
   "pragma"                {
                             yybegin(PRAGMA_OPEN);
                             return PRAGMA;
@@ -171,7 +182,7 @@ PRAGMAALL=[^ ][^;]*
   "string"                { return STRING; }
   "bool"                  { return BOOL; }
 
-  {COMMENT}               { return COMMENT; }
+  {EOL_COMMENT}           { return COMMENT; }
   {HEXLITERAL}            { return HEXLITERAL; }
   {STRINGLITERAL}         { return STRINGLITERAL; }
   {DECIMALNUMBER}         { return DECIMALNUMBER; }
@@ -188,6 +199,21 @@ PRAGMAALL=[^ ][^;]*
   {BOOLEANLITERAL}        { return BOOLEANLITERAL; }
   {SPACE}                 { return SPACE; }
   {IDENTIFIER}            { return IDENTIFIER; }
+}
+
+<IN_COMMENT> {
+  "/*"    { solCommentLevel++; }
+
+  "*/"    {
+            if (--solCommentLevel == 0) {
+              yybegin(YYINITIAL);
+              return COMMENT;
+            }
+          }
+
+  <<EOF>> { solCommentLevel = 0; return COMMENT; }
+
+  [^]     { }
 }
 
 <PRAGMA_OPEN> {
