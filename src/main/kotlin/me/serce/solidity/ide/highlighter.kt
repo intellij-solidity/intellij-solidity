@@ -21,6 +21,7 @@ object SolHighlighter : SyntaxHighlighterBase() {
 
   private val tokenMapping: Map<IElementType, TextAttributesKey> = mapOf(
     COMMENT to SolColor.LINE_COMMENT,
+    NAT_SPEC_TAG to SolColor.NAT_SPEC_TAG,
 
     LBRACE to SolColor.BRACES,
     RBRACE to SolColor.BRACES,

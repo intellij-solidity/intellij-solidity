@@ -26,10 +26,14 @@ import static me.serce.solidity.lang.core.SolidityTokenTypes.*;
 %state PRAGMA_REST
 
 EOL=\R
+%state IN_BLOCK_COMMENT
+%state IN_EOL_COMMENT
+
 WHITE_SPACE=\s+
 
-// TODO: proper grammar instead of this regex hell
-COMMENT=("//".*)|(\/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\/)
+EOL_COMMENT="/""/"[^\n]*
+// see https://docs.soliditylang.org/en/v0.8.7/natspec-format.html for NatSpec tags support
+NAT_SPEC_TAG=@[a-zA-Z_0-9:]*
 HEXLITERAL=(hex\"([_0-9a-fA-F]+)\"|hex\'([_0-9a-fA-F]+)\')
 STRINGLITERAL=(\"([^\"\r\n\\]|\\.)*\")|(\'([^\'\r\n\\]|\\.)*\')|unicode(\"([^\"])*\")
 DECIMALNUMBER=[0-9][_0-9]*
@@ -101,8 +105,14 @@ PRAGMAALL=[^ ][^;]*
   ">>"                    { return RSHIFT; }
   ":="                    { return LEFT_ASSEMBLY; }
   "=:"                    { return RIGHT_ASSEMBLY; }
-  "/*"                    { return DOC_COMMENT_BEGIN; }
-  "*/"                    { return DOC_COMMENT_END; }
+  "/*"                    {
+                            yybegin(IN_BLOCK_COMMENT);
+                            yypushback(2);
+                          }
+  "//"                    {
+                            yybegin(IN_EOL_COMMENT);
+                            yypushback(2);
+                          }
   "pragma"                {
                             yybegin(PRAGMA_OPEN);
                             return PRAGMA;
@@ -171,7 +181,6 @@ PRAGMAALL=[^ ][^;]*
   "string"                { return STRING; }
   "bool"                  { return BOOL; }
 
-  {COMMENT}               { return COMMENT; }
   {HEXLITERAL}            { return HEXLITERAL; }
   {STRINGLITERAL}         { return STRINGLITERAL; }
   {DECIMALNUMBER}         { return DECIMALNUMBER; }
@@ -188,6 +197,47 @@ PRAGMAALL=[^ ][^;]*
   {BOOLEANLITERAL}        { return BOOLEANLITERAL; }
   {SPACE}                 { return SPACE; }
   {IDENTIFIER}            { return IDENTIFIER; }
+}
+
+// nested block comments are not supported, so don't track the occurrences of /*
+<IN_BLOCK_COMMENT> {
+  // to avoid tokenizing by whitespaces, and only split the comment into parts if
+  // NatSpec tags are included.
+  " @"                     {
+                            yypushback(1);
+                            return COMMENT;
+                          }
+
+  "*/"                    {
+                                yybegin(YYINITIAL);
+                                return COMMENT;
+                          }
+
+  {NAT_SPEC_TAG}          { return NAT_SPEC_TAG; }
+
+  <<EOF>>                 { yybegin(YYINITIAL); }
+
+  [^]                     { }
+}
+
+<IN_EOL_COMMENT> {
+  // to avoid tokenizing by whitespaces, and only split the comment into parts if
+  // NatSpec tags are included.
+  " @"                    {
+                            yypushback(1);
+                            return COMMENT;
+                          }
+
+  {NAT_SPEC_TAG}          { return NAT_SPEC_TAG; }
+
+  {EOL}                  {
+                            yybegin(YYINITIAL);
+                            // do not include '\n' in the comment
+                            yypushback(1);
+                            return COMMENT;
+                         }
+
+  [^]                     { }
 }
 
 <PRAGMA_OPEN> {

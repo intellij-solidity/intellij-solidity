@@ -82,8 +82,7 @@
     RSHIFT='>>'
     LEFT_ASSEMBLY=':='
     RIGHT_ASSEMBLY='=:'
-    DOC_COMMENT_BEGIN='/*'
-    DOC_COMMENT_END='*/'
+    NAT_SPEC_TAG='regexp:@[a-zA-Z_0-9:]*'
 
     // this is a special grammar for "preview only" because grammar-kit seems to not
     // support whitespaces
