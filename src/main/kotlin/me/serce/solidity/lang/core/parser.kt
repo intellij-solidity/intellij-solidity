@@ -38,7 +38,7 @@ class SolidityParserDefinition : ParserDefinition {
 
   companion object {
     val WHITE_SPACES: TokenSet = TokenSet.create(TokenType.WHITE_SPACE)
-    val COMMENTS: TokenSet = TokenSet.create(SolidityTokenTypes.COMMENT)
+    val COMMENTS: TokenSet = TokenSet.create(SolidityTokenTypes.COMMENT, NAT_SPEC_TAG)
     val BINARY_OPERATORS: TokenSet = TokenSet.create(
       PLUS, MINUS, MULT, DIV, EXPONENT,
       ASSIGN, TO, EQ, NEQ,

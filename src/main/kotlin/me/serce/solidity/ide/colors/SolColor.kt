@@ -6,6 +6,7 @@ import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as Defaults
 
 enum class SolColor(humanName: String, default: TextAttributesKey) {
   LINE_COMMENT("Comment", Defaults.LINE_COMMENT),
+  NAT_SPEC_TAG("NatSpecTag", Defaults.DOC_COMMENT_TAG),
 
   BRACES("Braces", Defaults.BRACES),
   BRACKETS("Brackets", Defaults.BRACKETS),
