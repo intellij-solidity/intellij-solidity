@@ -95,6 +95,8 @@
                                 implementationClass="me.serce.solidity.lang.completion.SolFunctionCompletionContributor"/>
         <completion.contributor language="Solidity"
                                 implementationClass="me.serce.solidity.lang.completion.SolContextCompletionContributor"/>
+        <completion.contributor language="Solidity"
+                                implementationClass="me.serce.solidity.lang.completion.SolNatSpecCompletionContributor"/>
 
         <lang.formatter language="Solidity"
                         implementationClass="me.serce.solidity.ide.formatting.SolidityFormattingModelBuilder"/>
