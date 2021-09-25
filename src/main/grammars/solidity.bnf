@@ -478,11 +478,11 @@ FunctionCallArguments ::= MapExpression | Expression? ( ',' Expression )*
 private MapExpressionClause ::= Identifier ':' Expression {pin=2}
 private MapExpression ::= '{' MapExpressionClause (',' MapExpressionClause )* '}' {pin=1}
 
-NewExpression ::= new ( Identifier | PrimitiveLiteral ) NewExpressionEnd* {
+NewExpression ::= new TypeName {
     implements = "me.serce.solidity.lang.psi.SolReferenceElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolNewExpressionElement"
+    pin = 1
 }
-private NewExpressionEnd ::= FunctionInvocation | '[' Expression? ']'
 
 MemberAccessExpression ::= Expression '.' Identifier {
     pin = 2

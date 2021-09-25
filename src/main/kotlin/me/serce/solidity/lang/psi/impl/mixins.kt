@@ -361,7 +361,7 @@ abstract class SolMemberAccessElement(node: ASTNode) : SolNamedElementImpl(node)
 
 abstract class SolNewExpressionElement(node: ASTNode) : SolNamedElementImpl(node), SolNewExpression {
   override val referenceNameElement: PsiElement
-    get() = findChildByType(IDENTIFIER) ?: firstChild
+    get() = typeName ?: firstChild
   override val referenceName: String
     get() = referenceNameElement.text
 
