@@ -4,6 +4,7 @@ import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import me.serce.solidity.lang.completion.SolCompleter
 import me.serce.solidity.lang.psi.*
+import me.serce.solidity.lang.psi.impl.SolNewExpressionElement
 import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.resolve.canBeApplied
 import me.serce.solidity.lang.resolve.function.SolFunctionResolver
@@ -11,7 +12,13 @@ import me.serce.solidity.lang.types.*
 import me.serce.solidity.wrap
 
 class SolUserDefinedTypeNameReference(element: SolUserDefinedTypeName) : SolReferenceBase<SolUserDefinedTypeName>(element), SolReference {
-  override fun multiResolve() = SolResolver.resolveTypeNameUsingImports(element)
+  override fun multiResolve(): Collection<PsiElement> {
+    val parent = element.parent
+    if (parent is SolNewExpressionElement) {
+      return SolResolver.resolveNewExpression(parent)
+    }
+    return SolResolver.resolveTypeNameUsingImports(element)
+  }
 
   override fun getVariants() = SolCompleter.completeTypeName(element)
 }
@@ -50,14 +57,14 @@ class SolMemberAccessReference(element: SolMemberAccessExpression) : SolReferenc
   override fun getVariants() = SolCompleter.completeMemberAccess(element)
 }
 
-class SolNewExpressionReference(element: SolNewExpression) : SolReferenceBase<SolNewExpression>(element), SolReference {
+class SolNewExpressionReference(val element: SolNewExpression) : SolReferenceBase<SolNewExpression>(element), SolReference {
 
   override fun calculateDefaultRangeInElement(): TextRange {
     return element.referenceNameElement.parentRelativeRange
   }
 
   override fun multiResolve(): Collection<PsiElement> {
-    val types = SolResolver.resolveTypeNameUsingImports(element)
+    val types = SolResolver.resolveTypeNameUsingImports(element.referenceNameElement)
     return types
       .filterIsInstance(SolContractDefinition::class.java)
       .flatMap {

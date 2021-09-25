@@ -10,6 +10,7 @@ import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiModificationTracker
 import me.serce.solidity.lang.core.SolidityFile
 import me.serce.solidity.lang.psi.*
+import me.serce.solidity.lang.psi.impl.SolNewExpressionElement
 import me.serce.solidity.lang.resolve.ref.SolFunctionCallReference
 import me.serce.solidity.lang.stubs.SolGotoClassIndex
 import me.serce.solidity.lang.stubs.SolModifierIndex
@@ -294,6 +295,10 @@ object SolResolver {
 
       else -> emptySequence()
     }
+  }
+
+  fun resolveNewExpression(parentNew: SolNewExpressionElement): Collection<PsiElement> {
+    return parentNew.reference.multiResolve()
   }
 }
 
