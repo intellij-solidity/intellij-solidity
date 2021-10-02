@@ -144,6 +144,7 @@ PRAGMAALL=[^ ][^;]*
   "event"                 { return EVENT; }
   "anonymous"             { return ANONYMOUS; }
   "enum"                  { return ENUM; }
+  "type"                  { return TYPE; }
   "indexed"               { return INDEXED; }
   "var"                   { return VAR; }
   "mapping"               { return MAPPING; }

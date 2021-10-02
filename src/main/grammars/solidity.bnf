@@ -33,7 +33,6 @@
 
     Identifier='regexp:[a-zA-Z_$][a-zA-Z_$0-9]*'
 
-
     DOT='.'
     COLON=':'
     SEMICOLON=';'
@@ -100,6 +99,7 @@ SourceUnit ::= (
     | FunctionDefinition
     | ConstantVariableDeclaration
     | EnumDefinition
+    | UserDefinedValueTypeDefinition
     | StructDefinition
     | Expression
   )*
@@ -160,6 +160,7 @@ private ContractPart ::=
     | EventDefinition
     | ErrorDefinition
     | EnumDefinition
+    | UserDefinedValueTypeDefinition
     | ConstructorDefinition
 
 InheritanceSpecifier ::= UserDefinedTypeName ( '(' Expression ( ',' Expression )* ')' )?
@@ -272,6 +273,10 @@ EnumDefinition ::= enum Identifier '{' EnumValue? (',' EnumValue)* '}' {
     mixin = "me.serce.solidity.lang.psi.impl.SolEnumItemImplMixin"
     stubClass = "me.serce.solidity.lang.stubs.SolEnumDefStub"
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
+}
+
+UserDefinedValueTypeDefinition ::= type Identifier is ElementaryTypeName ';' {
+    pin = 1
 }
 
 IndexedParameterList ::= '(' ( TypeName indexed?  Identifier? (',' TypeName indexed?  Identifier?)* )? ')'
