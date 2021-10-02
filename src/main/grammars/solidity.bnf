@@ -277,6 +277,10 @@ EnumDefinition ::= enum Identifier '{' EnumValue? (',' EnumValue)* '}' {
 
 UserDefinedValueTypeDefinition ::= type Identifier is ElementaryTypeName ';' {
     pin = 1
+    implements = "me.serce.solidity.lang.psi.SolUserDefinedValueTypeDefElement"
+    mixin = "me.serce.solidity.lang.psi.impl.SolUserDefinedValueTypeDefMixin"
+    stubClass = "me.serce.solidity.lang.stubs.SolUserDefinedValueTypeDefStub"
+    elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
 
 IndexedParameterList ::= '(' ( TypeName indexed?  Identifier? (',' TypeName indexed?  Identifier?)* )? ')'

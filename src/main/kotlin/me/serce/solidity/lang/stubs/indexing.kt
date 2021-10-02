@@ -7,6 +7,11 @@ fun IndexSink.indexEnumDef(stub: SolEnumDefStub) {
   indexGotoClass(stub)
 }
 
+fun IndexSink.indexUserDefinedValueTypeDef(stub: SolUserDefinedValueTypeDefStub) {
+  indexNamedStub(stub)
+  indexGotoClass(stub)
+}
+
 fun IndexSink.indexContractDef(stub: SolContractOrLibDefStub) {
   indexNamedStub(stub)
   indexGotoClass(stub)

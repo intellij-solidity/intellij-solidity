@@ -67,6 +67,8 @@ interface SolEnumDefElement : SolNamedElement {
   val contract: SolContractDefinition
 }
 
+interface SolUserDefinedValueTypeDefElement : SolNamedElement
+
 interface SolEnumItemElement : SolEnumDefElement, SolMember
 
 interface SolModifierElement : SolNamedElement {

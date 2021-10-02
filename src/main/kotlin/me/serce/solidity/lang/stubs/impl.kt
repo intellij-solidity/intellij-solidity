@@ -14,7 +14,7 @@ class SolidityFileStub(file: SolidityFile?) : PsiFileStubImpl<SolidityFile>(file
 
   object Type : IStubFileElementType<SolidityFileStub>(SolidityLanguage) {
     // bump version every time stub tree changes
-    override fun getStubVersion() = 14
+    override fun getStubVersion() = 15
 
     override fun getBuilder(): StubBuilder = object : DefaultStubBuilder() {
       override fun createStubForFile(file: PsiFile) = SolidityFileStub(file as SolidityFile)
@@ -36,6 +36,7 @@ fun factory(name: String): SolStubElementType<*, *> = when (name) {
   "STRUCT_DEFINITION" -> SolStructDefStub.Type
   "EVENT_DEFINITION" -> SolEventDefStub.Type
   "ERROR_DEFINITION" -> SolErrorDefStub.Type
+  "USER_DEFINED_VALUE_TYPE_DEFINITION" -> SolUserDefinedValueTypeDefStub.Type
   "STATE_VARIABLE_DECLARATION" -> SolStateVarDeclStub.Type
   "CONSTANT_VARIABLE_DECLARATION" -> SolConstantVariableDeclStub.Type
   "IMPORT_PATH" -> SolImportPathDefStub.Type
@@ -74,6 +75,30 @@ class SolEnumDefStub(
     override fun indexStub(stub: SolEnumDefStub, sink: IndexSink) = sink.indexEnumDef(stub)
   }
 }
+
+class SolUserDefinedValueTypeDefStub(
+  parent: StubElement<*>?,
+  elementType: IStubElementType<*, *>,
+  override val name: String?
+) : StubBase<SolUserDefinedValueTypeDefinition>(parent, elementType), SolNamedStub {
+
+  object Type : SolStubElementType<SolUserDefinedValueTypeDefStub, SolUserDefinedValueTypeDefinition>("USER_DEFINED_VALUE_TYPE_DEFINITION") {
+    override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?) =
+      SolUserDefinedValueTypeDefStub(parentStub, this, dataStream.readNameAsString())
+
+    override fun serialize(stub: SolUserDefinedValueTypeDefStub, dataStream: StubOutputStream) = with(dataStream) {
+      writeName(stub.name)
+    }
+
+    override fun createPsi(stub: SolUserDefinedValueTypeDefStub) = SolUserDefinedValueTypeDefinitionImpl(stub, this)
+
+    override fun createStub(psi: SolUserDefinedValueTypeDefinition, parentStub: StubElement<*>?) =
+      SolUserDefinedValueTypeDefStub(parentStub, this, psi.name)
+
+    override fun indexStub(stub: SolUserDefinedValueTypeDefStub, sink: IndexSink) = sink.indexUserDefinedValueTypeDef(stub)
+  }
+}
+
 
 class SolFunctionDefStub(
   parent: StubElement<*>?,

@@ -42,6 +42,12 @@ abstract class SolEnumItemImplMixin : SolStubbedNamedElementImpl<SolEnumDefStub>
   override fun getIcon(flags: Int) = SolidityIcons.ENUM
 }
 
+abstract class SolUserDefinedValueTypeDefMixin : SolStubbedNamedElementImpl<SolUserDefinedValueTypeDefStub>,
+  SolUserDefinedValueTypeDefinition {
+  constructor(node: ASTNode) : super(node)
+  constructor(stub: SolUserDefinedValueTypeDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
+}
+
 abstract class SolEnumValueMixin(node: ASTNode) : SolNamedElementImpl(node), SolEnumValue {
   override val contract: SolContractDefinition
     get() = ancestors.firstInstance()

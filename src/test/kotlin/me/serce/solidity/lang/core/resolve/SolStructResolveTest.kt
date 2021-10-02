@@ -13,6 +13,19 @@ class SolStructResolveTest : SolResolveTestBase() {
       }
   """)
 
+  fun testStructResolveTopLevel() = checkByCode("""
+      struct Prop {
+            //x
+          uint8 prop;
+      }
+          
+      contract B {
+          Prop[] aa;
+          //^
+      }
+  """)
+
+
   fun testStructResolveFromLibrary() = checkByCode("""
       library Library {
           struct Prop {
