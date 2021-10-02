@@ -13,6 +13,21 @@ class SolEnumResolveTest : SolResolveTestBase() {
         }
   """)
 
+  // TODO: implement top level enum resolution
+  /*
+  fun testEnumResolveInFile() = checkByCode("""
+      enum B { A1, A2 }
+         //x
+
+      contract A {
+          function f() public {
+              B.A2;
+            //^
+          }
+      }
+  """)
+  */
+
   fun testEnumItself() = checkByCode("""
         contract A {
             enum B { A1, A2 }

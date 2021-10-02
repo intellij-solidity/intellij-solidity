@@ -19,17 +19,23 @@ import me.serce.solidity.nullIfError
 import me.serce.solidity.wrap
 
 object SolResolver {
-  fun resolveTypeNameUsingImports(element: PsiElement): Set<SolNamedElement> = CachedValuesManager.getCachedValue(element) {
-    val result = resolveContractUsingImports(element, element.containingFile, true) +
-      resolveEnum(element) +
-      resolveStruct(element)
-    CachedValueProvider.Result.create(result, PsiModificationTracker.MODIFICATION_COUNT)
-  }
+  fun resolveTypeNameUsingImports(element: PsiElement): Set<SolNamedElement> =
+    CachedValuesManager.getCachedValue(element) {
+      val result = resolveContractUsingImports(element, element.containingFile, true) +
+        resolveEnum(element) +
+        resolveStruct(element) +
+        resolveUserDefinedValueType(element)
+      CachedValueProvider.Result.create(result, PsiModificationTracker.MODIFICATION_COUNT)
+    }
 
   /**
    * @param withAliases aliases are not recursive, so count them only at the first level of recursion
    */
-  private fun resolveContractUsingImports(element: PsiElement, file: PsiFile, withAliases: Boolean): Set<SolContractDefinition> =
+  private fun resolveContractUsingImports(
+    element: PsiElement,
+    file: PsiFile,
+    withAliases: Boolean
+  ): Set<SolContractDefinition> =
     RecursionManager.doPreventingRecursion(ResolveContractKey(element.nameOrText, file), true) {
       if (element is SolUserDefinedTypeName && element.findIdentifiers().size > 1) {
         emptySet()
@@ -65,12 +71,28 @@ object SolResolver {
     } ?: emptySet()
 
   private fun resolveEnum(element: PsiElement): Set<SolNamedElement> =
-    resolveInnerType<SolEnumDefinition>(element) { it.enumDefinitionList }
+    resolveInFile<SolEnumDefinition>(element) + resolveInnerType<SolEnumDefinition>(element) { it.enumDefinitionList }
 
   private fun resolveStruct(element: PsiElement): Set<SolNamedElement> =
-    resolveInnerType<SolStructDefinition>(element) { it.structDefinitionList }
+    resolveInFile<SolStructDefinition>(element) + resolveInnerType<SolStructDefinition>(element) { it.structDefinitionList }
 
-  private fun <T : SolNamedElement> resolveInnerType(element: PsiElement, f: (SolContractDefinition) -> List<T>): Set<T> {
+  private fun resolveUserDefinedValueType(element: PsiElement): Set<SolNamedElement> =
+    resolveInFile<SolUserDefinedValueTypeDefinition>(element) + resolveInnerType<SolUserDefinedValueTypeDefinition>(
+      element,
+      { it.userDefinedValueTypeDefinitionList })
+
+  private inline fun <reified T : SolNamedElement> resolveInFile(element: PsiElement) : Set<T> {
+    return element.parentOfType<SolidityFile>()
+      ?.children
+      ?.filterIsInstance<T>()
+      ?.filter { it.name == element.text }
+      ?.toSet() ?: emptySet()
+  }
+
+  private fun <T : SolNamedElement> resolveInnerType(
+    element: PsiElement,
+    f: (SolContractDefinition) -> List<T>
+  ): Set<T> {
     val inheritanceSpecifier = element.parentOfType<SolInheritanceSpecifier>()
     return if (inheritanceSpecifier != null) {
       emptySet()
@@ -106,7 +128,11 @@ object SolResolver {
       this.text
     }
 
-  private fun <T : SolNamedElement> resolveInnerType(contract: SolContractDefinition, name: String, f: (SolContractDefinition) -> List<T>): Set<T> {
+  private fun <T : SolNamedElement> resolveInnerType(
+    contract: SolContractDefinition,
+    name: String,
+    f: (SolContractDefinition) -> List<T>
+  ): Set<T> {
     val supers = contract.collectSupers
       .mapNotNull { it.reference?.resolve() }.filterIsInstance<SolContractDefinition>() + contract
     return supers.flatMap(f)
@@ -227,7 +253,8 @@ object SolResolver {
         val childrenScope = sequenceOf(
           scope.stateVariableDeclarationList as List<PsiElement>,
           scope.enumDefinitionList,
-          scope.structDefinitionList).flatten()
+          scope.structDefinitionList
+        ).flatten()
           .map { lexicalDeclarations(it, place) }
           .flatten() + scope.structDefinitionList + scope.eventDefinitionList + scope.errorDefinitionList
         val extendsScope = scope.supers.asSequence()
@@ -277,7 +304,7 @@ object SolResolver {
             .flatten()
             .toList()
             .asSequence()
-           imports + contracts + constantVariables + freeFunctions
+          imports + contracts + constantVariables + freeFunctions
         } ?: emptySequence()
       }
 
