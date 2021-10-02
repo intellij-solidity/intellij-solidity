@@ -38,6 +38,3 @@ library FixedMath {
         return UFixed.wrap(a * multiplier);
     }
 }
-
-
-
