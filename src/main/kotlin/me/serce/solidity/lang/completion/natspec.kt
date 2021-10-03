@@ -36,10 +36,10 @@ class SolNatSpecCompletionContributor : CompletionContributor(), DumbAware {
     extend(
       CompletionType.BASIC,
       psiElement(SolidityTokenTypes.NAT_SPEC_TAG),
-      NatSpecCompletionProvider("@"))
+      NatSpecCompletionProvider(""))
     extend(
       CompletionType.BASIC,
       psiElement(SolidityTokenTypes.COMMENT),
-      NatSpecCompletionProvider(""))
+      NatSpecCompletionProvider("@"))
   }
 }

@@ -204,17 +204,23 @@ PRAGMAALL=[^ ][^;]*
 <IN_BLOCK_COMMENT> {
   // to avoid tokenizing by whitespaces, and only split the comment into parts if
   // NatSpec tags are included.
-  " @"                     {
+  " @"                    {
                             yypushback(1);
                             return COMMENT;
                           }
 
   "*/"                    {
-                                yybegin(YYINITIAL);
-                                return COMMENT;
+                            yybegin(YYINITIAL);
+                            return COMMENT;
                           }
 
-  {NAT_SPEC_TAG}          { return NAT_SPEC_TAG; }
+  {NAT_SPEC_TAG}         {
+                            //
+                            if (yycharat(-1) == ' ') {
+                                return NAT_SPEC_TAG;
+                            }
+                            return COMMENT;
+                          }
 
   <<EOF>>                 { yybegin(YYINITIAL); }
 
@@ -229,14 +235,20 @@ PRAGMAALL=[^ ][^;]*
                             return COMMENT;
                           }
 
-  {NAT_SPEC_TAG}          { return NAT_SPEC_TAG; }
+  {NAT_SPEC_TAG}          {
+                              //
+                              if (yycharat(-1) == ' ') {
+                                  return NAT_SPEC_TAG;
+                              }
+                              return COMMENT;
+                          }
 
-  {EOL}                  {
+  {EOL}                   {
                             yybegin(YYINITIAL);
                             // do not include '\n' in the comment
                             yypushback(1);
                             return COMMENT;
-                         }
+                          }
 
   [^]                     { }
 }

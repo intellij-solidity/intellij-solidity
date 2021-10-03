@@ -10,10 +10,11 @@ abstract class SolCompletionTestBase : SolTestBase() {
     checkNotNull(variants) {
       "Expected completions that contain $required, but no completions found"
     }
+    val completions = variants.map { it.lookupString }.toHashSet()
     if (strict) {
-      assertEquals(required.toHashSet(), variants.map { it.lookupString }.toHashSet())
+      assertEquals(required.toHashSet(), completions)
     } else {
-      assertTrue(variants.map { it.lookupString }.toHashSet().containsAll(required))
+      assertTrue("$completions doesn't contain all $required", completions.containsAll(required))
     }
   }
 }
