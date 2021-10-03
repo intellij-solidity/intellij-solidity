@@ -282,6 +282,8 @@ abstract class SolFunctionCallMixin(node: ASTNode) : SolNamedElementImpl(node), 
         Pair(expr.expression, expr.firstChild)
       is SolIndexAccessExpression ->
         Pair(expr.expressionList.first(), expr.firstChild)
+      is SolNewExpression ->
+        Pair(expr, expr.typeName as PsiElement)
       else -> throw IllegalStateException("unable to extract reference name element from $this")
     }
   }

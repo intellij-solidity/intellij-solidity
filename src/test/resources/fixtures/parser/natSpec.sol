@@ -2,16 +2,18 @@
 pragma solidity >=0.8.2 < 0.9.0;
 
 /// @title A simulator for trees
-/// @author Larry A. Gardner
+/// @author Larry A. Gardner <test@example.com>
 /// @notice You can use this contract for only the most basic simulation
 /// @dev All function calls are currently implemented without side effects
 /// @custom:experimental This is an experimental contract.
 contract Tree {
     /**
+     * @dev
      * @notice Calculate tree age in years, rounded up, for live trees
      * @dev The Alexandr N. Tetearing algorithm could increase precision
      * @param rings The number of rings from dendrochronological sample
      * @return Age in years, rounded up for partial years
+     * @author Larry A. Gardner <test @example.com>
      */
     function age(uint256 rings) external virtual pure returns (uint256) {
         return rings + 1;
