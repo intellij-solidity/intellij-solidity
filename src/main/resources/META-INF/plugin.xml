@@ -147,7 +147,7 @@
                                    implementationClass="me.serce.solidity.ide.inspections.SolInspectionSuppressor"/>
 
         <localInspection language="Solidity" groupName="Solidity"
-                         displayName="Suicide is deprecated. Use seldestruct instead EIP 6"
+                         displayName="Suicide is deprecated. Use selfdestruct instead EIP 6"
                          enabledByDefault="true"
                          level="WARNING"
                          implementationClass="me.serce.solidity.ide.inspections.SelfdestructRenameInspection"/>
