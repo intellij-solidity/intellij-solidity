@@ -18,6 +18,20 @@
 
     <change-notes><![CDATA[
       <p>
+        Thank you for your support!
+        <p>Huge thank you to all participants of the last GitCoin round, and Yenwen Feng (@tempofeng)  https://gitcoin.co/grants/1047/intellij-solidity!❤️</p>
+        <p>Huge thank you to all of you who sponsor the plugin development on GitHub, and Tyler Smith in particular (@tyler-smith)!❤️</p>
+
+        <b>v2.3.6</b>
+        In this release:
+        <ul>
+          <li>Highlighting and autocomplete for NatSpec syntax in comment, yours @SerCeMan</li>
+          <li>Support user defined value types, yours @SerCeMan</li>
+          <li>Rewrite yul parser to support the latest assembly syntax, yours @SerCeMan</li>
+          <li>Indexing and navigation for free functions and constant variables, yours @SerCeMan</li>
+          <li>Allow top level error definitions, yours @SerCeMan</li>
+          <li>Fix unprotected function inspection, yours @SerCeMan</li>
+        </ul>
         <b>v2.3.5</b>
         Thank you for your support.
         <p>Huge thank you to Yenwen Feng (@tempofeng) in particular, and all GitCoin supporters https://gitcoin.co/grants/1047/intellij-solidity!❤️</p>
@@ -28,16 +42,6 @@
           <li>Allow for receive/fallback in interfaces, yours @SerCeMan</li>
           <li>Support top level constant variable declarations, yours @SerCeMan</li>
           <li>Fixing multiple inference exceptions, yours @SerCeMan</li>
-        </ul>
-        <b>v2.3.3</b>
-        <ul>
-          <li>Huge thank you to Tyler Smith (@tyler-smith) and Bryan Green (@bryangreen) for sponsoring the plugin development!❤️</li>
-          <li>Huge thank you to all gitcoin supporters https://gitcoin.co/grants/1047/intellij-solidity!❤️</li>
-          <li>Support error definitions, yours @SerCeMan</li>
-          <li>Error/revert definition highlighting, yours @SerCeMan</li>
-          <li>Support unicode literals, yours @SerCeMan</li>
-          <li>Fix various collected error reports, yours @SerCeMan</li>
-          <li>Rename IntelliJ Solidity to Solidity to follow the guidelines</li>
         </ul>
       </p>
     ]]>
