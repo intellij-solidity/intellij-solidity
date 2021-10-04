@@ -12,6 +12,10 @@ class UnprotectedFunctionInspectionTest : SolInspectionsTestBase(UnprotectedFunc
         function /*@warning descr="${UnprotectedFunctionInspection.MESSAGE}"@*/setOwner/*@/warning@*/(address owner) {
           owner = msg.sender;
         }
+        
+        function setOwnerInternal(address owner) internal {
+          owner = msg.sender;
+        }
       }
   """)
 

@@ -24,7 +24,7 @@ class UnprotectedFunctionInspection : LocalInspectionTool() {
   }
 
   private fun inspectFunctionDefinition(funDef: SolFunctionDefinition, holder: ProblemsHolder) {
-    if (funDef.modifiers.isEmpty() && !funDef.isConstructor) {
+    if (funDef.modifiers.isEmpty() && funDef.functionVisibilitySpecifierList.isEmpty() && !funDef.isConstructor) {
       for (statement in funDef.block?.statementList ?: emptyList()) {
         val expression = statement.expression
         if (expression is SolAssignmentExpression) {
