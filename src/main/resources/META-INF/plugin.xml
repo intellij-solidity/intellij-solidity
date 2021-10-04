@@ -47,8 +47,11 @@
     ]]>
     </change-notes>
 
-    <!-- 201.4515.24 is IntelliJ IDEA 2020.1 EAP -->
-    <idea-version since-build="201.4515.24"/>
+    <!--
+        See https://plugins.jetbrains.com/docs/intellij/build-number-ranges.html
+        203.8084.24 is IntelliJ IDEA 2020.3.4
+    -->
+    <idea-version since-build="203.8084.24"/>
 
     <depends>com.intellij.modules.lang</depends>
     <!--
