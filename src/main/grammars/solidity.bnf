@@ -98,9 +98,10 @@ SourceUnit ::= (
     | ContractDefinition
     | FunctionDefinition
     | ConstantVariableDeclaration
+    | StructDefinition
     | EnumDefinition
     | UserDefinedValueTypeDefinition
-    | StructDefinition
+    | ErrorDefinition
     | Expression
   )*
 

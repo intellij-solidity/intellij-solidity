@@ -1,5 +1,7 @@
 pragma solidity ^0.8.4;
 
+error Unauthorized();
+
 contract Coin {
     error InsufficientBalance(uint requested, uint available);
 
