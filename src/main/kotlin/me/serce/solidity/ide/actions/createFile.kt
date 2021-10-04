@@ -17,8 +17,8 @@ class SolCreateFileAction : CreateFileFromTemplateAction(CAPTION, "", SolidityIc
   override fun getActionName(directory: PsiDirectory?, newName: String, templateName: String?) = CAPTION
 
   override fun buildDialog(
-    project: Project?,
-    directory: PsiDirectory?,
+    project: Project,
+    directory: PsiDirectory,
     builder: CreateFileFromTemplateDialog.Builder
   ) {
     builder.setTitle(CAPTION)
