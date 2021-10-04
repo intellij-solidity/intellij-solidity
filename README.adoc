@@ -6,10 +6,6 @@ image:https://badges.gitter.im/intellij-solidity/intellij-solidity.svg[link="htt
 
 image:./logo/logo_256.png[link=https://plugins.jetbrains.com/idea/plugin/9475-intellij-solidity,width=128,height=128]
 
-== Current status
-
-You can support the development by sponsoring the plugin ❤️ on Github, clicking ★ on GitHub and rating it on the link:https://plugins.jetbrains.com/idea/plugin/9475-intellij-solidity[plugin page].
-
 == Features
 
 * Syntax highlighting
@@ -18,6 +14,10 @@ You can support the development by sponsoring the plugin ❤️ on Github, click
 * Goto declaration
 * Find usages
 * Code formatting
+
+== Supporting the plugin
+
+You can support the development by sponsoring the plugin on Github ❤️, supporting the plugin with crypto through the link:https://gitcoin.co/grants/1047/intellij-solidity[Gitcoin grant], or even simply clicking ★ on GitHub and rating it on the link:https://plugins.jetbrains.com/idea/plugin/9475-intellij-solidity[plugin page].
 
 == Reporting an issue
 
