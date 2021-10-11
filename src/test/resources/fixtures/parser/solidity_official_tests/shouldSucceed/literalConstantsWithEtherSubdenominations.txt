@@ -91,5 +91,5 @@ Solidity File
       PsiWhiteSpace(' ')
       PsiElement(Identifier)('c')
       PsiElement(;)(';')
-    PsiWhiteSpace('\n  ')
+    PsiWhiteSpace('\n')
     PsiElement(})('}')
