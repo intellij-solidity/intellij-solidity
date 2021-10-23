@@ -23,7 +23,7 @@ abstract class SolTestBase : SolLightPlatformCodeInsightFixtureTestCase() {
     }
   }
 
-  private val fileName: String
+  protected val fileName: String
     get() = "${getTestName(true)}.sol"
 
   val fixture: CodeInsightTestFixture
