@@ -437,6 +437,7 @@ Expression ::=
   | PlusMinExpression
   | MultDivExpression
   | ExponentExpression
+  | MetaTypeExpression
   | UnaryExpression
   | HighestPriorityGroup
   | InlineArrayExpression
@@ -466,6 +467,8 @@ MultDivExpression ::= Expression ('*' | '/' | '%') Expression
 ExponentExpression ::= Expression '**' Expression
 UnaryExpression ::= ('!' | '~' | delete | '++' | '--' | '+' | '-') Expression {pin=1}
 IncrementExpression ::= Expression ('++' | '--')
+// see https://docs.soliditylang.org/en/v0.8.8/units-and-global-variables.html#type-information
+MetaTypeExpression ::= type '(' TypeName ')'
 
 PrimaryExpression ::= VarLiteral
                   | BooleanLiteral
