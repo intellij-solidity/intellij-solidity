@@ -52,7 +52,7 @@ Solidity File
                     PsiElement(decimalNumber)('7')
                     PsiWhiteSpace(' ')
                     SolNumberUnitImpl(NUMBER_UNIT)
-                      PsiElement(gwei)('gwei')
+                      PsiElement(szabo)('szabo')
               PsiWhiteSpace(' ')
               PsiElement(-)('-')
               PsiWhiteSpace(' ')
