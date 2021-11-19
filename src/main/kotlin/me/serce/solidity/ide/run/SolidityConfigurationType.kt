@@ -21,6 +21,10 @@ class SolidityConfigurationType : ConfigurationTypeBase("SolidityConfigurationTy
         else UnsupportedSolidityRunConfig(configurationModule, this)
       }
 
+      override fun getId(): String {
+        return "Solidity"
+      }
+
       override fun getIcon(): Icon {
         return SolidityIcons.FUNCTION
       }
