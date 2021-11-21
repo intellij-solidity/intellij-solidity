@@ -22,8 +22,16 @@
         <p>Huge thank you to all participants of the last GitCoin round, and Yenwen Feng (@tempofeng)  https://gitcoin.co/grants/1047/intellij-solidity!❤️</p>
         <p>Huge thank you to all of you who sponsor the plugin development on GitHub, and Tyler Smith in particular (@tyler-smith)!❤️</p>
 
-        <b>v2.3.6</b>
+        <b>v2.3.7</b>
         In this release:
+        <ul>
+          <li>Fix deprecation error in run configuration, thanks @mbolotov</li>
+          <li>Support for gwei, thanks @ualtinok</li>
+          <li>Resolving bugfixes, yours @SerCeMan</li>
+          <li>Support for metatype expressions, yours @SerCeMan</li>
+          <li>The required Intelli version is now 2020.3, yours @SerCeMan</li>
+        </ul>
+        <b>v2.3.6</b>
         <ul>
           <li>Highlighting and autocomplete for NatSpec syntax in comment, yours @SerCeMan</li>
           <li>Support user defined value types, yours @SerCeMan</li>
@@ -31,17 +39,6 @@
           <li>Indexing and navigation for free functions and constant variables, yours @SerCeMan</li>
           <li>Allow top level error definitions, yours @SerCeMan</li>
           <li>Fix unprotected function inspection, yours @SerCeMan</li>
-        </ul>
-        <b>v2.3.5</b>
-        Thank you for your support.
-        <p>Huge thank you to Yenwen Feng (@tempofeng) in particular, and all GitCoin supporters https://gitcoin.co/grants/1047/intellij-solidity!❤️</p>
-        <p>Huge thank you to Tyler Smith (@tyler-smith), Jason Zong (@dyzz), Bryan Green (@bryangreen) for sponsoring the plugin development on GitHub!❤️</p>
-        In this release:
-        <ul>
-          <li>Support top level functions, yours @SerCeMan</li>
-          <li>Allow for receive/fallback in interfaces, yours @SerCeMan</li>
-          <li>Support top level constant variable declarations, yours @SerCeMan</li>
-          <li>Fixing multiple inference exceptions, yours @SerCeMan</li>
         </ul>
       </p>
     ]]>
