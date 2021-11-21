@@ -165,7 +165,7 @@ class SolFunctionCallReference(element: SolFunctionCallExpression) : SolReferenc
             val usingType = it.type
             usingType == null || usingType == type
           }
-          .map { it.library }
+          .mapNotNull { it.library }
         return libraries
           .distinct()
           .flatMap { it.functionDefinitionList }

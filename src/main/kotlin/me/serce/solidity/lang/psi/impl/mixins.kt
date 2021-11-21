@@ -15,7 +15,6 @@ import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.resolve.ref.*
 import me.serce.solidity.lang.stubs.*
 import me.serce.solidity.lang.types.*
-import java.util.*
 import javax.naming.OperationNotSupportedException
 
 open class SolImportPathElement : SolStubbedNamedElementImpl<SolImportPathDefStub>, SolReferenceElement {
@@ -432,8 +431,8 @@ abstract class SolUsingForMixin(node: ASTNode) : SolElementImpl(node), SolUsingF
         null
       }
     }
-  override val library: SolContractDefinition
+  override val library: SolContractDefinition?
     get() = SolResolver.resolveTypeNameUsingImports(getTypeNameList()[0] as SolUserDefinedTypeName)
       .filterIsInstance<SolContractDefinition>()
-      .first()
+      .firstOrNull()
 }
