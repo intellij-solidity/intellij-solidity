@@ -21,7 +21,7 @@ class SolidityParserDefinition : ParserDefinition {
 
   override fun createFile(viewProvider: FileViewProvider): PsiFile = SolidityFile(viewProvider)
 
-  override fun spaceExistanceTypeBetweenTokens(left: ASTNode?, right: ASTNode?): ParserDefinition.SpaceRequirements? =
+  override fun spaceExistanceTypeBetweenTokens(left: ASTNode?, right: ASTNode?): ParserDefinition.SpaceRequirements =
     LanguageUtil.canStickTokensTogetherByLexer(left, right, SolidityLexer())
 
   override fun getStringLiteralElements(): TokenSet = TokenSet.EMPTY
@@ -30,7 +30,7 @@ class SolidityParserDefinition : ParserDefinition {
 
   override fun getCommentTokens(): TokenSet = COMMENTS
 
-  override fun getFileNodeType(): IFileElementType? = SolidityFileStub.Type
+  override fun getFileNodeType(): IFileElementType = SolidityFileStub.Type
 
   override fun createLexer(project: Project?): Lexer = SolidityLexer()
 
