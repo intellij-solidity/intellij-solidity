@@ -19,6 +19,7 @@ import me.serce.solidity.lang.psi.SolImportDirective
 import me.serce.solidity.lang.psi.SolPragmaDirective
 import me.serce.solidity.lang.psi.SolPsiFactory
 import java.awt.BorderLayout
+import java.io.File
 import java.nio.file.Paths
 import javax.swing.Icon
 import javax.swing.JPanel
@@ -126,16 +127,19 @@ class ImportFileAction(
 
     fun buildImportPath(source: VirtualFile, destination: VirtualFile): String {
       return Paths.get(source.path).parent.relativize(Paths.get(destination.path)).toString().let {
-        if (it.contains("node_modules/")) {
-          val idx = it.indexOf("node_modules/")
-          it.substring(idx + "node_modules/".length)
-        } else if (it.contains("installed_contracts/")) {
-          val idx = it.indexOf("installed_contracts/")
-          it.substring(idx + "installed_contracts/".length).replaceFirst("/contracts/", "/")
-        } else if (!it.startsWith(".")) {
-          "./$it"
-        } else {
-          it
+        val separator = File.separator
+        when {
+            it.contains("node_modules$separator") -> {
+              val idx = it.indexOf("node_modules$separator")
+              it.substring(idx + "node_modules$separator".length)
+            }
+            it.contains("installed_contracts$separator") -> {
+              val idx = it.indexOf("installed_contracts$separator")
+              it.substring(idx + "installed_contracts$separator".length)
+                .replaceFirst("${separator}contracts${separator}", separator)
+            }
+            !it.startsWith(".") -> ".$separator$it"
+            else -> it
         }
       }
     }
