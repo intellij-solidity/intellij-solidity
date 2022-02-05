@@ -124,7 +124,7 @@ ImportAliasedPair ::= UserDefinedTypeName (as ImportAlias)?
 private ImportRuleSet ::= ImportAliasedPair ( ',' ImportAliasedPair )* {
     recoverWhile = ClosedBracketRecover
 }
-ImportPath ::= StringLiteral {
+ImportPath ::= stringLiteral {
     implements = "me.serce.solidity.lang.psi.SolNamedElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolImportPathElement"
     stubClass = "me.serce.solidity.lang.stubs.SolImportPathDefStub"
@@ -509,8 +509,11 @@ NumberLiteral ::= ( HexNumber | DecimalNumber | FixedNumber | ScientificNumber) 
 NumberUnit ::= wei | gwei | szabo | finney | ether
              | seconds | minutes | hours | days | weeks | years
 // https://github.com/ethereum/solidity/pull/832
-private HexLiteral ::= hexLiteral
-private StringLiteral ::= stringLiteral
+// A full hex string literal that consists of either one or several consecutive hex strings.
+HexLiteral ::= hexLiteral+
+// A full string literal consists of either one or several consecutive quoted strings.
+// A full unicode string literal that consists of either one or several consecutive unicode strings.
+StringLiteral ::= stringLiteral+
 
 private HexNumber ::= hexNumber
 private FixedNumber ::= fixedNumber
