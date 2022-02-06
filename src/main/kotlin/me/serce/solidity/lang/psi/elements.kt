@@ -54,8 +54,6 @@ inline fun <reified T : Enum<*>> safeValueOf(name: String): T? =
 interface SolFunctionCallElement : SolReferenceElement {
   val expression: SolExpression?
   val functionCallArguments: SolFunctionCallArguments
-
-  fun getBaseAndReferenceNameElement(): Pair<SolExpression?, PsiElement>?
 }
 
 interface SolModifierInvocationElement : SolReferenceElement {

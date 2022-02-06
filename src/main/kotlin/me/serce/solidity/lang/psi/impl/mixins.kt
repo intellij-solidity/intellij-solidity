@@ -270,28 +270,31 @@ abstract class SolStructDefMixin : SolStubbedNamedElementImpl<SolStructDefStub>,
 }
 
 abstract class SolFunctionCallMixin(node: ASTNode) : SolNamedElementImpl(node), SolFunctionCallElement, SolFunctionCallExpression {
-  override fun getBaseAndReferenceNameElement(): Pair<SolExpression?, PsiElement> {
-    return when (val expr = expression) {
+
+  private fun getReferenceNameElement(expr: SolExpression): PsiElement {
+    return when (expr) {
       is SolPrimaryExpression ->
-        expr.varLiteral?.let { Pair(null, it) }
-          ?: expr.elementaryTypeName?.let { Pair(null, it) }!!
+        expr.varLiteral ?: expr.elementaryTypeName!!
       is SolMemberAccessExpression ->
-        Pair(expr.expression, expr.identifier!!)
+        expr.identifier!!
       is SolFunctionCallExpression ->
-        Pair(expr.expression, expr.firstChild)
+        expr.firstChild
       is SolIndexAccessExpression ->
-        Pair(expr.expressionList.first(), expr.firstChild)
+        expr.firstChild
       is SolNewExpression ->
-        Pair(expr, expr.typeName as PsiElement)
-      else -> throw IllegalStateException("unable to extract reference name element from $this")
+        expr.typeName as PsiElement
+      is SolSeqExpression ->
+        getReferenceNameElement(expr.expressionList.first())
+      // unable to extract reference name element
+      else -> expr
     }
   }
 
-  override val expression: SolExpression?
-    get() = expressionList[0]
+  override val expression: SolExpression
+    get() = expressionList.first()
 
   override val referenceNameElement: PsiElement
-    get() = getBaseAndReferenceNameElement().second
+    get() = getReferenceNameElement(expression)
 
   override val referenceName: String
     get() = referenceNameElement.text
