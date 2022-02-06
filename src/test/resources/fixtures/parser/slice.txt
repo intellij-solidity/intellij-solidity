@@ -28,9 +28,10 @@ Solidity File
             PsiElement(=)('=')
             PsiWhiteSpace(' ')
             SolPrimaryExpressionImpl(PRIMARY_EXPRESSION)
-              PsiElement(stringLiteral)(''0xabcd'')
+              SolStringLiteralImpl(STRING_LITERAL)
+                PsiElement(stringLiteral)(''0xabcd'')
           PsiWhiteSpace('\n        ')
-          PsiErrorElement:'(' or '{' expected, got 'exampleBytes'
+          PsiErrorElement:'(', stringLiteral or '{' expected, got 'exampleBytes'
             PsiElement(Identifier)('exampleBytes')
           PsiElement([)('[')
           PsiElement(decimalNumber)('2')
