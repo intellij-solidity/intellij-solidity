@@ -60,6 +60,7 @@ class SolidityCompleteCustomParsingTest : SolidityParsingTestBase("fixtures/pars
   fun testTypeExpression() = doTest(true)
   fun testUnchecked() = doTest(true)
   fun testUserDefinedValueTypes() = doTest(true)
+  fun testUsing() = doTest(true)
 }
 
 class SolidityCompleteOfficialSuccessfulParsingTest :
