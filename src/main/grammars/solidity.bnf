@@ -408,8 +408,9 @@ WhileStatement ::= while '(' Expression ')' Statement {pin = 1}
 PlaceholderStatement ::= '_'
 private SimpleStatement ::= VariableDefinition | ExpressionStatement
 ForStatement ::= for '(' (SimpleStatement)? ';' (Expression)? ';' (ExpressionStatement)? ')' Statement {pin=1}
-InlineAssemblyStatement ::= assembly AssemblyDialect? YulBlock {pin=1}
-private AssemblyDialect ::= Identifier
+InlineAssemblyStatement ::= assembly AssemblyDialect? AssemblyFlags? YulBlock {pin=1}
+private AssemblyDialect ::= StringLiteral // "evmasm"
+AssemblyFlags ::= '(' StringLiteral (',' StringLiteral)* ')'
 DoWhileStatement ::= do Statement while '(' Expression ')' {pin=1}
 ContinueSt ::= continue
 BreakSt ::= break

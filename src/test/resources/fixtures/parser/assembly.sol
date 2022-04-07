@@ -141,6 +141,12 @@ contract Foo {
     }
 }
 
+function safe() pure returns (uint256 x) {
+    assembly ("memory-safe") { mstore(0, 0) }
+    assembly "evmasm" ("memory-safe") { mstore(0, 0) }
+    assembly "evmasm" ("a", "b", "c", "c") {}
+}
+
 contract C {
     function f() public pure {
         function() external g;
