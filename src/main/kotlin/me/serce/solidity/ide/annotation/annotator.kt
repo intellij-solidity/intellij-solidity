@@ -46,7 +46,7 @@ class SolidityAnnotator : Annotator {
       is SolConstantVariableDeclaration -> applyColor(holder, element.identifier, SolColor.CONSTANT_NAME)
       is SolStateVariableDeclaration -> {
         if (element.mutationModifier?.textMatches("constant") == true) {
-          applyColor(holder, element.identifier, SolColor.STATE_VARIABLE_NAME)
+          applyColor(holder, element.identifier, SolColor.CONSTANT_STATE_VARIABLE_NAME)
         } else {
           applyColor(holder, element.identifier, SolColor.STATE_VARIABLE_NAME)
         }
