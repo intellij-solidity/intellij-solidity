@@ -108,7 +108,7 @@ class SolFunctionCallReference(element: SolFunctionCallExpression) : SolReferenc
       else ->
         emptyList()
     }
-    return removeOverrides(resolved.groupBy { it.callablePriority }.entries.minBy { it.key }?.value ?: emptyList())
+    return removeOverrides(resolved.groupBy { it.callablePriority }.entries.minByOrNull { it.key }?.value ?: emptyList())
   }
 
   private fun removeOverrides(callables: Collection<SolCallable>): Collection<SolCallable> {

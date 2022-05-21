@@ -137,7 +137,7 @@ data class SolInteger(val unsigned: Boolean, val size: Int) : SolNumeric {
         return it.text.removePrefix("0x").toBigInteger(16)
       }
       this.scientificNumber?.let {
-        return it.text.replace("_", "").toLowerCase().toBigDecimal().toBigInteger()
+        return it.text.replace("_", "").lowercase().toBigDecimal().toBigInteger()
       }
       //todo
       return BigInteger.ZERO

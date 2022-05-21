@@ -154,7 +154,7 @@ abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefSt
 
   override val visibility
     get() = functionVisibilitySpecifierList
-      .map { it.text.toUpperCase() }
+      .map { it.text.uppercase() }
       .mapNotNull { safeValueOf<Visibility>(it) }
       .firstOrNull()
       ?: Visibility.PUBLIC
@@ -236,7 +236,7 @@ abstract class SolStateVarDeclMixin : SolStubbedNamedElementImpl<SolStateVarDecl
   override fun resolveElement() = this
 
   override val visibility
-    get() = visibilityModifier?.text?.let { safeValueOf<Visibility>(it.toUpperCase()) } ?: Visibility.INTERNAL
+    get() = visibilityModifier?.text?.let { safeValueOf<Visibility>(it.uppercase()) } ?: Visibility.INTERNAL
 }
 
 abstract class SolConstantVariableDeclMixin : SolStubbedNamedElementImpl<SolConstantVariableDeclStub>, SolConstantVariableDeclaration {

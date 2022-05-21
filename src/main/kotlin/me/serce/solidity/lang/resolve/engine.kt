@@ -180,7 +180,7 @@ object SolResolver {
   private fun <T : Any> List<T>.findBest(priorities: (T) -> Int): List<T> {
     return this
       .groupBy { priorities(it) }
-      .minBy { it.key }
+      .minByOrNull { it.key }
       ?.value
       ?: emptyList()
   }
