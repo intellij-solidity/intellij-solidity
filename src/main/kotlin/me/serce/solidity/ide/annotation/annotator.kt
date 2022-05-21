@@ -49,6 +49,7 @@ class SolidityAnnotator : Annotator {
       }
       is SolContractDefinition -> element.identifier?.let { applyColor(holder, it, SolColor.CONTRACT_NAME) }
       is SolStructDefinition -> element.identifier?.let { applyColor(holder, it, SolColor.STRUCT_NAME) }
+      is SolEnumDefinition -> element.identifier?.let { applyColor(holder, it, SolColor.ENUM_NAME) }
       is SolEventDefinition -> element.identifier?.let { applyColor(holder, it, SolColor.EVENT_NAME) }
       is SolConstantVariableDeclaration -> applyColor(holder, element.identifier, SolColor.CONSTANT)
       is SolStateVariableDeclaration -> {
@@ -67,8 +68,6 @@ class SolidityAnnotator : Annotator {
           is SolStructDefinition -> applyColor(holder, element, SolColor.STRUCT_NAME)
           is SolEnumDefinition -> applyColor(holder, element, SolColor.ENUM_NAME)
           is SolUserDefinedValueTypeDefinition -> applyColor(holder, element, SolColor.USER_DEFINED_VALUE_TYPE)
-          is SolEventDefinition -> applyColor(holder, element, SolColor.EVENT_NAME)
-          is SolErrorDefinition -> applyColor(holder, element, SolColor.ERROR_NAME)
         }
       }
       is SolFunctionCallElement -> when(SolResolver.resolveTypeNameUsingImports(element).firstOrNull()) {
