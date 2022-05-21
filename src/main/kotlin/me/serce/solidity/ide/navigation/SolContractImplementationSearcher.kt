@@ -1,6 +1,8 @@
 package me.serce.solidity.ide.navigation
 
 import com.intellij.openapi.application.QueryExecutorBase
+import com.intellij.openapi.progress.EmptyProgressIndicator
+import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.util.Condition
 import com.intellij.psi.PsiElement
 import com.intellij.psi.search.searches.DefinitionsScopedSearch.SearchParameters
@@ -34,9 +36,11 @@ fun SolContractDefinition.findAllImplementations(): HashSet<SolContractDefinitio
     if (!implementations.add(current)) {
       continue
     }
-    current.findImplementations()
-      .filterQuery(Condition { !implementations.contains(it) })
-      .forEach(implQueue::add)
+    ProgressManager.getInstance().runProcess({
+      current.findImplementations()
+        .filterQuery(Condition { !implementations.contains(it) })
+        .forEach(Processor { implQueue.add(it) })
+    }, EmptyProgressIndicator())
   }
   implementations.remove(this)
   return implementations
