@@ -23,11 +23,9 @@ class SolidityAnnotator : Annotator {
     when (element) {
       is SolNumberType -> applyColor(holder, element, SolColor.TYPE)
       is SolElementaryTypeName -> applyColor(holder, element, SolColor.TYPE)
-      is SolVarLiteral -> {
-        when(element.identifier.text) {
-          "super" -> applyColor(holder, element, SolColor.KEYWORD)
-          "msg", "block", "abi" -> applyColor(holder, element, SolColor.GLOBAL)
-        }
+      is SolMemberAccessExpression -> when(element.expression.firstChild.text) {
+        "super" -> applyColor(holder, element.expression.firstChild, SolColor.KEYWORD)
+        "msg", "block", "abi" -> applyColor(holder, element.expression.firstChild, SolColor.GLOBAL)
       }
       is SolErrorDefMixin -> {
         applyColor(holder, element.identifier, SolColor.KEYWORD)
@@ -70,10 +68,14 @@ class SolidityAnnotator : Annotator {
           is SolUserDefinedValueTypeDefinition -> applyColor(holder, element, SolColor.USER_DEFINED_VALUE_TYPE)
         }
       }
-      is SolFunctionCallElement -> when(SolResolver.resolveTypeNameUsingImports(element).firstOrNull()) {
-        is SolErrorDefinition -> applyColor(holder, element.referenceNameElement, SolColor.ERROR_NAME)
-        is SolEventDefinition -> applyColor(holder, element.referenceNameElement, SolColor.EVENT_NAME)
-        else -> applyColor(holder, element.referenceNameElement, SolColor.FUNCTION_CALL)
+      is SolFunctionCallElement -> when(element.firstChild.text) {
+        "keccak256" -> applyColor(holder, element.firstChild, SolColor.GLOBAL_FUNCTION_CALL)
+        "require" -> applyColor(holder, element.firstChild, SolColor.KEYWORD)
+        else -> when(SolResolver.resolveTypeNameUsingImports(element).firstOrNull()) {
+          is SolErrorDefinition -> applyColor(holder, element.referenceNameElement, SolColor.ERROR_NAME)
+          is SolEventDefinition -> applyColor(holder, element.referenceNameElement, SolColor.EVENT_NAME)
+          else -> applyColor(holder, element.referenceNameElement, SolColor.FUNCTION_CALL)
+        }
       }
     }
   }

@@ -2,21 +2,21 @@
 
 <KEYWORD>import</KEYWORD> './Ownable.sol';
 
-<TYPE>uint8</TYPE> <KEYWORD>constant</KEYWORD> <CONSTANT_NAME>MASK</CONSTANT_NAME> = 0x01;
+<TYPE>uint8</TYPE> <KEYWORD>constant</KEYWORD> <CONSTANT>MASK</CONSTANT> = 0x01;
 
 /**
  * @title Claimable
  * @dev Extension for the Ownable contract, where the ownership needs to be claimed.
  * This allows the new owner to accept the transfer.
  */
-<KEYWORD>contract</KEYWORD> <CONTRACT_NAME>Claimable</CONTRACT_NAME> <KEYWORD>is</KEYWORD> <CONTRACT_REFERENCE>Ownable</CONTRACT_REFERENCE> {
+<KEYWORD>contract</KEYWORD> <CONTRACT_NAME>Claimable</CONTRACT_NAME> <KEYWORD>is</KEYWORD> <CONTRACT_NAME>Ownable</CONTRACT_NAME> {
 
     <KEYWORD>error</KEYWORD> <ERROR_NAME>InvalidAddress</ERROR_NAME>(<TYPE>address</TYPE> addr);
 
     <KEYWORD>event</KEYWORD> <EVENT_NAME>TokenTransfer</EVENT_NAME>(<TYPE>uint256</TYPE> tokenId, <TYPE>address</TYPE> recipient);
 
-    <TYPE>bytes</TYPE> <KEYWORD>public</KEYWORD> <KEYWORD>constant</KEYWORD> <CONSTANT_STATE_VARIABLE_NAME>DATA</CONSTANT_STATE_VARIABLE_NAME> = <KEYWORD>hex</KEYWORD><STRING>"48656C6C6F2C20576F726C6421"</STRING>;
-    <TYPE>address</TYPE> <KEYWORD>public</KEYWORD> <STATE_VARIABLE_NAME>pendingOwner</STATE_VARIABLE_NAME>;
+    <TYPE>bytes</TYPE> <KEYWORD>public</KEYWORD> <KEYWORD>constant</KEYWORD> <CONSTANT>DATA</CONSTANT> = <KEYWORD>hex</KEYWORD><STRING>"48656C6C6F2C20576F726C6421"</STRING>;
+    <TYPE>address</TYPE> <KEYWORD>public</KEYWORD> <STATE_VARIABLE>pendingOwner</STATE_VARIABLE>;
 
     <KEYWORD>struct</KEYWORD> <STRUCT_NAME>Struct</STRUCT_NAME> {
         <TYPE>bool</TYPE> flag;
@@ -24,7 +24,7 @@
     }
 
     <KEYWORD>modifier</KEYWORD> <FUNCTION_DECLARATION>onlyPendingOwner</FUNCTION_DECLARATION>() {
-        require(msg.sender == pendingOwner);
+        <KEYWORD>require</KEYWORD>(<GLOBAL>msg</GLOBAL>.sender == pendingOwner);
         _;
     }
 
@@ -37,8 +37,8 @@
         pendingOwner = 0x0;
     }
 
-    <KEYWORD>function</KEYWORD> <FUNCTION_DECLARATION>reclaimToken</FUNCTION_DECLARATION>(<CONTRACT_REFERENCE>ERC20Basic</CONTRACT_REFERENCE> token) <KEYWORD>external</KEYWORD> <FUNCTION_CALL>onlyPendingOwner</FUNCTION_CALL> {
-        <TYPE>uint256</TYPE> balance = token.balanceOf(this);
-        token.transfer(pendingOwner, balance);
+    <KEYWORD>function</KEYWORD> <FUNCTION_DECLARATION>reclaimToken</FUNCTION_DECLARATION>(<CONTRACT_NAME>ERC20Basic</CONTRACT_NAME> token) <KEYWORD>external</KEYWORD> <FUNCTION_CALL>onlyPendingOwner</FUNCTION_CALL> {
+        <TYPE>uint256</TYPE> balance = token.<FUNCTION_CALL>balanceOf</FUNCTION_CALL>(this);
+        token.<FUNCTION_CALL>transfer</FUNCTION_CALL>(pendingOwner, balance);
     }
 }

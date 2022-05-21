@@ -22,7 +22,11 @@ object SolResolver {
   fun resolveTypeNameUsingImports(element: PsiElement): Set<SolNamedElement> =
     CachedValuesManager.getCachedValue(element) {
       val result = if (element is SolFunctionCallElement) {
-        resolveEvent(element) + resolveError(element)
+        resolveError(element) +
+          resolveEvent(element) +
+          resolveContractUsingImports(element, element.containingFile, true) +
+          resolveEnum(element) +
+          resolveUserDefinedValueType(element)
       } else {
         resolveContractUsingImports(element, element.containingFile, true) +
           resolveEnum(element) +
