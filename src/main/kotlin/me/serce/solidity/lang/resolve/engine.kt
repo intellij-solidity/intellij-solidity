@@ -21,10 +21,14 @@ import me.serce.solidity.wrap
 object SolResolver {
   fun resolveTypeNameUsingImports(element: PsiElement): Set<SolNamedElement> =
     CachedValuesManager.getCachedValue(element) {
-      val result = resolveContractUsingImports(element, element.containingFile, true) +
-        resolveEnum(element) +
-        resolveStruct(element) +
-        resolveUserDefinedValueType(element)
+      val result = if (element is SolFunctionCallElement) {
+        resolveEvent(element) + resolveError(element)
+      } else {
+        resolveContractUsingImports(element, element.containingFile, true) +
+          resolveEnum(element) +
+          resolveStruct(element) +
+          resolveUserDefinedValueType(element)
+      }
       CachedValueProvider.Result.create(result, PsiModificationTracker.MODIFICATION_COUNT)
     }
 
@@ -80,6 +84,12 @@ object SolResolver {
     resolveInFile<SolUserDefinedValueTypeDefinition>(element) + resolveInnerType<SolUserDefinedValueTypeDefinition>(
       element,
       { it.userDefinedValueTypeDefinitionList })
+
+  private fun resolveEvent(element: PsiElement): Set<SolNamedElement> =
+    resolveInnerType<SolEventDefinition>(element) { it.eventDefinitionList }
+
+  private fun resolveError(element: PsiElement): Set<SolNamedElement> =
+    resolveInnerType<SolErrorDefinition>(element) { it.errorDefinitionList }
 
   private inline fun <reified T : SolNamedElement> resolveInFile(element: PsiElement) : Set<T> {
     return element.parentOfType<SolidityFile>()
