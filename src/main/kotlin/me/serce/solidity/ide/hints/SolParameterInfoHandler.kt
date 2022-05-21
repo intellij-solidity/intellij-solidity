@@ -76,7 +76,7 @@ class SolArgumentsDescription(
     if (index < 0 || index >= arguments.size) {
       return TextRange.EMPTY_RANGE
     }
-    val start = arguments.take(index).sumBy { it.length + 2 }
+    val start = arguments.take(index).sumOf { it.length + 2 }
     return TextRange(start, start + arguments[index].length)
   }
 

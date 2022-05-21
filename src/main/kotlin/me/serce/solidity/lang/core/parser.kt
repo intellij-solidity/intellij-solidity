@@ -21,7 +21,7 @@ class SolidityParserDefinition : ParserDefinition {
 
   override fun createFile(viewProvider: FileViewProvider): PsiFile = SolidityFile(viewProvider)
 
-  override fun spaceExistanceTypeBetweenTokens(left: ASTNode?, right: ASTNode?): ParserDefinition.SpaceRequirements =
+  override fun spaceExistanceTypeBetweenTokens(left: ASTNode, right: ASTNode): ParserDefinition.SpaceRequirements =
     LanguageUtil.canStickTokensTogetherByLexer(left, right, SolidityLexer())
 
   override fun getStringLiteralElements(): TokenSet = TokenSet.EMPTY

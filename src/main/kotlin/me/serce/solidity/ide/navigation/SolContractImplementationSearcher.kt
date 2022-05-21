@@ -36,7 +36,7 @@ fun SolContractDefinition.findAllImplementations(): HashSet<SolContractDefinitio
     }
     current.findImplementations()
       .filterQuery(Condition { !implementations.contains(it) })
-      .forEach(implQueue::add)
+      .forEach(Processor { implQueue.add(it) })
   }
   implementations.remove(this)
   return implementations
