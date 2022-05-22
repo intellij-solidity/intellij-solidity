@@ -1,33 +1,44 @@
-pragma solidity ^0.4.11;
+<KEYWORD>pragma</KEYWORD> solidity ^0.4.11;
 
+<KEYWORD>import</KEYWORD> './Ownable.sol';
 
-import './Ownable.sol';
-
+<TYPE>uint8</TYPE> <KEYWORD>constant</KEYWORD> <CONSTANT>MASK</CONSTANT> = 0x01;
 
 /**
  * @title Claimable
  * @dev Extension for the Ownable contract, where the ownership needs to be claimed.
  * This allows the new owner to accept the transfer.
  */
-contract Claimable is <CONTRACT_REFERENCE>Ownable</CONTRACT_REFERENCE> {
-    <KEYWORD>address</KEYWORD> public pendingOwner;
+<KEYWORD>contract</KEYWORD> <CONTRACT_NAME>Claimable</CONTRACT_NAME> <KEYWORD>is</KEYWORD> <CONTRACT_NAME>Ownable</CONTRACT_NAME> {
 
-    modifier onlyPendingOwner() {
-        require(msg.sender == pendingOwner);
+    <KEYWORD>error</KEYWORD> <ERROR_NAME>InvalidAddress</ERROR_NAME>(<TYPE>address</TYPE> addr);
+
+    <KEYWORD>event</KEYWORD> <EVENT_NAME>TokenTransfer</EVENT_NAME>(<TYPE>uint256</TYPE> tokenId, <TYPE>address</TYPE> recipient);
+
+    <TYPE>bytes</TYPE> <KEYWORD>public</KEYWORD> <KEYWORD>constant</KEYWORD> <CONSTANT>DATA</CONSTANT> = <KEYWORD>hex</KEYWORD><STRING>"48656C6C6F2C20576F726C6421"</STRING>;
+    <TYPE>address</TYPE> <KEYWORD>public</KEYWORD> <STATE_VARIABLE>pendingOwner</STATE_VARIABLE>;
+
+    <KEYWORD>struct</KEYWORD> <STRUCT_NAME>Struct</STRUCT_NAME> {
+        <TYPE>bool</TYPE> flag;
+        <TYPE>uint</TYPE> count;
+    }
+
+    <KEYWORD>modifier</KEYWORD> <FUNCTION_DECLARATION>onlyPendingOwner</FUNCTION_DECLARATION>() {
+        <KEYWORD>require</KEYWORD>(<GLOBAL>msg</GLOBAL>.sender == pendingOwner);
         _;
     }
 
-    function transferOwnership(<KEYWORD>address</KEYWORD> newOwner) onlyOwner {
+    <KEYWORD>function</KEYWORD> <FUNCTION_DECLARATION>transferOwnership</FUNCTION_DECLARATION>(<TYPE>address</TYPE> newOwner) <FUNCTION_CALL>onlyOwner</FUNCTION_CALL> {
         pendingOwner = newOwner;
     }
 
-    function claimOwnership() onlyPendingOwner {
+    <KEYWORD>function</KEYWORD> <FUNCTION_DECLARATION>claimOwnership</FUNCTION_DECLARATION>() <FUNCTION_CALL>onlyPendingOwner</FUNCTION_CALL> {
         owner = pendingOwner;
         pendingOwner = 0x0;
     }
 
-    function reclaimToken(<CONTRACT_REFERENCE>ERC20Basic</CONTRACT_REFERENCE> token) external onlyPendingOwner {
-        <KEYWORD>uint256</KEYWORD> balance = token.balanceOf(this);
-        token.transfer(pendingOwner, balance);
+    <KEYWORD>function</KEYWORD> <FUNCTION_DECLARATION>reclaimToken</FUNCTION_DECLARATION>(<CONTRACT_NAME>ERC20Basic</CONTRACT_NAME> token) <KEYWORD>external</KEYWORD> <FUNCTION_CALL>onlyPendingOwner</FUNCTION_CALL> {
+        <TYPE>uint256</TYPE> balance = token.<FUNCTION_CALL>balanceOf</FUNCTION_CALL>(this);
+        token.<FUNCTION_CALL>transfer</FUNCTION_CALL>(pendingOwner, balance);
     }
 }

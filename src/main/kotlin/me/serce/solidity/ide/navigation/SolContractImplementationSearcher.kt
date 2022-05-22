@@ -1,6 +1,8 @@
 package me.serce.solidity.ide.navigation
 
 import com.intellij.openapi.application.QueryExecutorBase
+import com.intellij.openapi.progress.EmptyProgressIndicator
+import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.util.Condition
 import com.intellij.psi.PsiElement
 import com.intellij.psi.search.searches.DefinitionsScopedSearch.SearchParameters
@@ -29,15 +31,20 @@ fun SolContractDefinition.findAllImplementations(): HashSet<SolContractDefinitio
   val implementations = HashSet<SolContractDefinition>()
   val implQueue = ArrayDeque<SolContractDefinition>(MAX_IMPLEMENTATIONS)
   implQueue.add(this)
-  while (implQueue.isNotEmpty() && implQueue.size < MAX_IMPLEMENTATIONS && implementations.size < MAX_IMPLEMENTATIONS) {
-    val current = implQueue.poll()
-    if (!implementations.add(current)) {
-      continue
+  // Run the implementation resolution under an empty progress to avoid the noisy
+  // "Must be executed under progress indicator" error, see https://github.com/intellij-solidity/intellij-solidity/issues/295
+  // TODO: would it be worth using a real progress here?   
+  ProgressManager.getInstance().runProcess({
+    while (implQueue.isNotEmpty() && implQueue.size < MAX_IMPLEMENTATIONS && implementations.size < MAX_IMPLEMENTATIONS) {
+      val current = implQueue.poll()
+      if (!implementations.add(current)) {
+        continue
+      }
+      current.findImplementations()
+        .filterQuery(Condition { !implementations.contains(it) })
+        .forEach(Processor { implQueue.add(it) })
     }
-    current.findImplementations()
-      .filterQuery(Condition { !implementations.contains(it) })
-      .forEach(Processor { implQueue.add(it) })
-  }
+  }, EmptyProgressIndicator())
   implementations.remove(this)
   return implementations
 }

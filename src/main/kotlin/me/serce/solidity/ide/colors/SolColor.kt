@@ -5,20 +5,33 @@ import com.intellij.openapi.options.colors.AttributesDescriptor
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as Defaults
 
 enum class SolColor(humanName: String, default: TextAttributesKey) {
-  LINE_COMMENT("Comment", Defaults.LINE_COMMENT),
-  NAT_SPEC_TAG("NatSpecTag", Defaults.DOC_COMMENT_TAG),
+  LINE_COMMENT("Comments//Comment", Defaults.LINE_COMMENT),
+  NAT_SPEC_TAG("Comments//NatSpecTag", Defaults.DOC_COMMENT_TAG),
 
-  BRACES("Braces", Defaults.BRACES),
-  BRACKETS("Brackets", Defaults.BRACKETS),
-  PARENTHESES("Parentheses", Defaults.PARENTHESES),
-  SEMICOLON("Semicolon", Defaults.SEMICOLON),
+  CONTRACT_NAME("Types//Contract name", Defaults.CLASS_NAME),
+  STRUCT_NAME("Types//Struct name", Defaults.CLASS_NAME),
+  ERROR_NAME("Types//Error name", Defaults.CLASS_NAME),
+  EVENT_NAME("Types//Event name", Defaults.CLASS_NAME),
+  ENUM_NAME("Types//Enum name", Defaults.CLASS_NAME),
+  TYPE("Types//Value type", Defaults.KEYWORD),
+  USER_DEFINED_VALUE_TYPE("Types//User-defined value type", Defaults.CLASS_NAME),
 
-  NUMBER("Number", Defaults.NUMBER),
-  STRING("String", Defaults.STRING),
-  KEYWORD("Keyword", Defaults.KEYWORD),
+  GLOBAL("Identifiers//Global", Defaults.GLOBAL_VARIABLE),
+  CONSTANT("Identifiers//Constant", Defaults.STATIC_FIELD),
+  STATE_VARIABLE("Identifiers//State variable", Defaults.INSTANCE_FIELD),
 
-  OPERATION_SIGN("Operation signs", Defaults.OPERATION_SIGN),
-  CONTRACT_REFERENCE("Contract reference", Defaults.CLASS_REFERENCE),
+  FUNCTION_DECLARATION("Functions//Function declaration", Defaults.FUNCTION_DECLARATION),
+  FUNCTION_CALL("Functions//Function call", Defaults.FUNCTION_CALL),
+  GLOBAL_FUNCTION_CALL("Functions//Global function call", Defaults.GLOBAL_VARIABLE),
+
+  BRACES("Other//Braces", Defaults.BRACES),
+  BRACKETS("Other//Brackets", Defaults.BRACKETS),
+  PARENTHESES("Other//Parentheses", Defaults.PARENTHESES),
+  SEMICOLON("Other//Semicolon", Defaults.SEMICOLON),
+  NUMBER("Other//Number", Defaults.NUMBER),
+  STRING("Other//String", Defaults.STRING),
+  KEYWORD("Other//Keyword", Defaults.KEYWORD),
+  OPERATION_SIGN("Other//Operation signs", Defaults.OPERATION_SIGN),
   ;
 
   val textAttributesKey = TextAttributesKey.createTextAttributesKey("me.serce.solidity.$name", default)
