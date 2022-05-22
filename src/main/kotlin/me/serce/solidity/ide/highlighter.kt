@@ -44,6 +44,8 @@ object SolHighlighter : SyntaxHighlighterBase() {
     literals().map { it to SolColor.KEYWORD }
   ).plus(
     operators().map { it to SolColor.OPERATION_SIGN }
+  ).plus(
+    types().map { it to SolColor.TYPE }
   ).mapValues { it.value.textAttributesKey }
 
   private fun keywords() = setOf<IElementType>(
@@ -52,10 +54,14 @@ object SolHighlighter : SyntaxHighlighterBase() {
     CONTRACT, LIBRARY, INTERFACE, IS, STRUCT, FUNCTION, ENUM,
     PUBLIC, PRIVATE, INTERNAL, EXTERNAL, CONSTANT, PURE, VIEW,
     IF, ELSE, FOR, WHILE, DO, BREAK, CONTINUE, THROW, USING, RETURN, RETURNS,
-    MAPPING, EVENT, /*ERROR,*/ ANONYMOUS, MODIFIER, ASSEMBLY, BYTENUMTYPE, BYTESNUMTYPE,
-    FIXEDNUMTYPE, INTNUMTYPE, UFIXEDNUMTYPE, UINTNUMTYPE, STRING, BOOL, ADDRESS,
+    MAPPING, EVENT, /*ERROR,*/ ANONYMOUS, MODIFIER, ASSEMBLY,
     VAR, STORAGE, MEMORY, WEI, ETHER, GWEI, SZABO, FINNEY, SECONDS, MINUTES, HOURS,
-    DAYS, WEEKS, YEARS, TYPE
+    DAYS, WEEKS, YEARS, TYPE, VIRTUAL, OVERRIDE
+  )
+
+  private fun types() = setOf<IElementType>(
+    BYTENUMTYPE, BYTESNUMTYPE, FIXEDNUMTYPE, INTNUMTYPE, UFIXEDNUMTYPE, UINTNUMTYPE,
+    STRING, BOOL, ADDRESS,
   )
 
   private fun literals() = setOf<IElementType>(BOOLEANLITERAL)
