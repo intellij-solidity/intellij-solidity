@@ -7,7 +7,7 @@
 gen
 lib
 .sandbox
-
+.DS_Store
 /out/
 
 ### Java ###
