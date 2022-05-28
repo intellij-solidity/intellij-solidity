@@ -25,14 +25,14 @@ class SolImportPathReference(element: SolImportPathElement) : SolReferenceBase<S
       directFile
     } else {
       val npmFile = findNpmImportFile(file, path)
-      val ethPmFile = findEthPMImportFile(file, path)
-      when {
-        npmFile != null -> npmFile
-        else -> when {
-          ethPmFile != null -> ethPmFile
-          else -> findFoundryImportFile(file, path)
-        }
+      if (npmFile != null) {
+        return npmFile
       }
+      val ethPmFile = findEthPMImportFile(file, path)
+      if (ethPmFile != null) {
+        return ethPmFile
+      }
+      findFoundryImportFile(file, path)
     }
   }
 
@@ -48,11 +48,11 @@ class SolImportPathReference(element: SolImportPathElement) : SolReferenceBase<S
   // default lib located at: forge-std/Test.sol => lib/forge-std/src/Test.sol
   private fun findFoundryImportFile(file: VirtualFile, path: String): VirtualFile? {
     val count = Paths.get(path).nameCount;
-    if (count<2) {
+    if (count < 2) {
       return null;
     }
-    val libName = Paths.get(path).subpath(0,1).toString();
-    val libFile = Paths.get(path).subpath(1,count).toString();
+    val libName = Paths.get(path).subpath(0, 1).toString();
+    val libFile = Paths.get(path).subpath(1, count).toString();
     val test = file.findFileByRelativePath("lib/$libName/src/$libFile");
     return when {
       test != null -> test
