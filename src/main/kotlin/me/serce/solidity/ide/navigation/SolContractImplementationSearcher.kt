@@ -1,8 +1,9 @@
 package me.serce.solidity.ide.navigation
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.QueryExecutorBase
+import com.intellij.openapi.application.ex.ApplicationEx
 import com.intellij.openapi.progress.EmptyProgressIndicator
-import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.util.ProgressIndicatorUtils
 import com.intellij.openapi.util.Condition
 import com.intellij.psi.PsiElement
@@ -34,20 +35,34 @@ fun SolContractDefinition.findAllImplementations(): HashSet<SolContractDefinitio
   implQueue.add(this)
   // Run the implementation resolution under an empty progress to avoid the noisy
   // "Must be executed under progress indicator" error, see https://github.com/intellij-solidity/intellij-solidity/issues/295
-  // TODO: would it be worth using a real progress here?   
-  ProgressIndicatorUtils.runInReadActionWithWriteActionPriority({
-    while (implQueue.isNotEmpty() && implQueue.size < MAX_IMPLEMENTATIONS && implementations.size < MAX_IMPLEMENTATIONS) {
-      val current = implQueue.poll()
-      if (!implementations.add(current)) {
-        continue
-      }
-      current.findImplementations()
-        .filterQuery(Condition { !implementations.contains(it) })
-        .forEach(Processor { implQueue.add(it) })
-    }
-  }, EmptyProgressIndicator())
+  // TODO: would it be worth using a real progress here?
+  // TODO: would resolution from EDT only be called in tests? If not, it might trigger a warning again. If yes, then
+  //    need to find a way to run tests from a non dispatcher thread.
+  val application = ApplicationManager.getApplication() as ApplicationEx
+  if (application.isDispatchThread) {
+    findAllImplementationsInAction(implQueue, implementations)
+  } else {
+    ProgressIndicatorUtils.runInReadActionWithWriteActionPriority({
+      findAllImplementationsInAction(implQueue, implementations)
+    }, EmptyProgressIndicator())
+  }
   implementations.remove(this)
   return implementations
+}
+
+private fun findAllImplementationsInAction(
+  implQueue: ArrayDeque<SolContractDefinition>,
+  implementations: HashSet<SolContractDefinition>
+) {
+  while (implQueue.isNotEmpty() && implQueue.size < MAX_IMPLEMENTATIONS && implementations.size < MAX_IMPLEMENTATIONS) {
+    val current = implQueue.poll()
+    if (!implementations.add(current)) {
+      continue
+    }
+    current.findImplementations()
+      .filterQuery(Condition { !implementations.contains(it) })
+      .forEach(Processor { implQueue.add(it) })
+  }
 }
 
 fun SolContractDefinition.findImplementations(): Query<SolContractDefinition> {
