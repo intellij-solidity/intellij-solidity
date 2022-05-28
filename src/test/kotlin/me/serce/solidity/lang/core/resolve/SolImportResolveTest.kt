@@ -51,6 +51,19 @@ class SolImportResolveTest : SolResolveTestBase() {
     assertEquals(file1.name, resolved.containingFile.name)
   }
 
+  fun testImportPathResolveFoundry() {
+    val file1 = myFixture.configureByFile("lib/util/src/TestImport.sol")
+    myFixture.configureByFile("contracts/ImportUsageFoundry.sol")
+
+    val (refElement) = findElementAndDataInEditor<SolNamedElement>("^")
+
+    val resolved = checkNotNull(refElement.reference?.resolve()) {
+      "Failed to resolve ${refElement.text}"
+    }
+
+    assertEquals(file1.name, resolved.containingFile.name)
+  }
+
   fun testResolveFrom() {
     val file1 = InlineFile(
       code = "contract A {}",
