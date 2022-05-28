@@ -75,12 +75,13 @@ configurations {
     lexer
     parser
     runtime.exclude group: "org.slf4j"  // IntelliJ uses slf4j which results in a class loader conflict
+    implementation.exclude group: "org.slf4j"  // IntelliJ uses slf4j which results in a class loader conflict
 }
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    implementation "io.sentry:sentry:$sentry_version"
+    implementation("io.sentry:sentry:$sentry_version")
 
     // https://mvnrepository.com/artifact/org.ethereum/ethereumj-core
     compileOnly( group: 'org.ethereum', name: 'ethereumj-core', version: '1.7.0-RELEASE') {
