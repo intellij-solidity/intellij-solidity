@@ -22,6 +22,14 @@
         <p>Huge thank you to all participants of the last GitCoin round, Yenwen Feng (@tempofeng), and LevX (@LevxApp) in particular! https://gitcoin.co/grants/1047/intellij-solidity!❤️</p>
         <p>Huge thank you to all of you who sponsor the plugin development on GitHub, and Tyler Smith in particular (@tyler-smith)!❤️</p>
 
+        <b>v2.3.9</b>
+        In this release:
+        <ul>
+          <li>Adding basic support for foundry, thanks @dyzz<!/li>
+          <li>Improve syntax highlighting, thanks @apottere!</li>
+          <li>Run find implementation under a progress, yours @SerCeMan</li>
+          <li>Tooling upgrades to keep up with IJ releases</li>
+        </ul>
         <b>v2.3.8</b>
         The main theme of this release is support for the new Solidity 0.8.13 Release.
         <ul>
@@ -31,15 +39,6 @@
             <li>Fix incorrect auto-import paths on windows, yours @SerCeMan</li>
             <li>Support multi-literal string, yours @SerCeMan</li>
             <li>resolving bugfixes, yours @SerCeMan</li>
-        </ul>
-        <b>v2.3.7</b>
-        In this release:
-        <ul>
-          <li>Fix deprecation error in run configuration, thanks @mbolotov</li>
-          <li>Support for gwei, thanks @ualtinok</li>
-          <li>Resolving bugfixes, yours @SerCeMan</li>
-          <li>Support for metatype expressions, yours @SerCeMan</li>
-          <li>The required Intelli version is now 2020.3, yours @SerCeMan</li>
         </ul>
       </p>
     ]]>
