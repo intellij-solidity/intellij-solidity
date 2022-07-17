@@ -36,4 +36,13 @@ abstract class SolReferenceBase<T : SolReferenceElement>(element: T) : PsiPolyVa
     check(identifier.elementType == IDENTIFIER)
     identifier.replace(SolPsiFactory(identifier.project).createIdentifier(newName.replace(".sol", "")))
   }
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (javaClass != other?.javaClass) return false
+    other as SolReferenceBase<*>
+    return element == other.element
+  }
+
+  override fun hashCode() = element.hashCode()
 }
