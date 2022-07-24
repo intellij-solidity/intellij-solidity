@@ -11,6 +11,7 @@ contract a {
         string cstr = "\xf0\x9f\xa6\x84";
         string dstr = unicode"😃, 😭,\
 and 😈";
+        string memory estr = unicode'😃';
         bytes32 escapeCharacters1 = unicode"foo" unicode"😃, 😭, and 😈" unicode"!";
         bytes32 escapeCharacters2 = "first" "second" "third";
     }
