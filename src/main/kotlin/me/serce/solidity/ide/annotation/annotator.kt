@@ -74,7 +74,13 @@ class SolidityAnnotator : Annotator {
         else -> when(SolResolver.resolveTypeNameUsingImports(element).firstOrNull()) {
           is SolErrorDefinition -> applyColor(holder, element.referenceNameElement, SolColor.ERROR_NAME)
           is SolEventDefinition -> applyColor(holder, element.referenceNameElement, SolColor.EVENT_NAME)
-          else -> applyColor(holder, element.referenceNameElement, SolColor.FUNCTION_CALL)
+          else -> element.firstChild.let {
+            if (it is SolPrimaryExpression && SolResolver.resolveTypeNameUsingImports(element.firstChild).filterIsInstance<SolStructDefinition>().isNotEmpty()) {
+              applyColor(holder, element.referenceNameElement, SolColor.STRUCT_NAME)
+            } else {
+              applyColor(holder, element.referenceNameElement, SolColor.FUNCTION_CALL)
+            }
+          }
         }
       }
     }

@@ -82,21 +82,21 @@ object SolResolver {
   private fun resolveContract(element: PsiElement): Set<SolContractDefinition> =
     resolveUsingImports(SolContractDefinition::class.java, element, element.containingFile, true)
   private fun resolveEnum(element: PsiElement): Set<SolNamedElement> =
-    resolveUsingImports(SolEnumDefinition::class.java, element, element.containingFile, true) + resolveInnerType<SolEnumDefinition>(element) { it.enumDefinitionList }
+    resolveInnerType<SolEnumDefinition>(element) { it.enumDefinitionList } + resolveUsingImports(SolEnumDefinition::class.java, element, element.containingFile, true)
 
   private fun resolveStruct(element: PsiElement): Set<SolNamedElement> =
-    resolveUsingImports(SolStructDefinition::class.java, element, element.containingFile, true) + resolveInnerType<SolStructDefinition>(element) { it.structDefinitionList }
+    resolveInnerType<SolStructDefinition>(element) { it.structDefinitionList } + resolveUsingImports(SolStructDefinition::class.java, element, element.containingFile, true)
 
   private fun resolveUserDefinedValueType(element: PsiElement): Set<SolNamedElement> =
-    resolveUsingImports(SolUserDefinedValueTypeDefinition::class.java, element, element.containingFile, true) + resolveInnerType<SolUserDefinedValueTypeDefinition>(
+    resolveInnerType<SolUserDefinedValueTypeDefinition>(
       element,
-      { it.userDefinedValueTypeDefinitionList })
+      { it.userDefinedValueTypeDefinitionList }) + resolveUsingImports(SolUserDefinedValueTypeDefinition::class.java, element, element.containingFile, true)
 
   private fun resolveEvent(element: PsiElement): Set<SolNamedElement> =
     resolveInnerType<SolEventDefinition>(element) { it.eventDefinitionList }
 
   private fun resolveError(element: PsiElement): Set<SolNamedElement> =
-    resolveInnerType<SolErrorDefinition>(element) { it.errorDefinitionList }
+    resolveInnerType<SolErrorDefinition>(element) { it.errorDefinitionList } + resolveUsingImports(SolErrorDefinition::class.java, element, element.containingFile, true)
 
   private inline fun <reified T : SolNamedElement> resolveInFile(element: PsiElement) : Set<T> {
     return element.parentOfType<SolidityFile>()
