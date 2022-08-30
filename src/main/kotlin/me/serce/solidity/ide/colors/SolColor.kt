@@ -13,6 +13,7 @@ enum class SolColor(humanName: String, default: TextAttributesKey) {
   ERROR_NAME("Types//Error name", Defaults.CLASS_NAME),
   EVENT_NAME("Types//Event name", Defaults.CLASS_NAME),
   ENUM_NAME("Types//Enum name", Defaults.CLASS_NAME),
+  ENUM_VALUE("Types//Enum value", Defaults.STATIC_FIELD),
   TYPE("Types//Value type", Defaults.KEYWORD),
   USER_DEFINED_VALUE_TYPE("Types//User-defined value type", Defaults.CLASS_NAME),
 
@@ -21,6 +22,7 @@ enum class SolColor(humanName: String, default: TextAttributesKey) {
   STATE_VARIABLE("Identifiers//State variable", Defaults.INSTANCE_FIELD),
 
   FUNCTION_DECLARATION("Functions//Function declaration", Defaults.FUNCTION_DECLARATION),
+  RECEIVE_FALLBACK_DECLARATION("Functions//Receive/Fallback declaration", Defaults.STATIC_METHOD),
   FUNCTION_CALL("Functions//Function call", Defaults.FUNCTION_CALL),
   GLOBAL_FUNCTION_CALL("Functions//Global function call", Defaults.GLOBAL_VARIABLE),
 
