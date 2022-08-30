@@ -73,6 +73,7 @@ private fun getSolTypeFromUserDefinedTypeName(type: SolUserDefinedTypeName): Sol
         is SolContractDefinition -> SolContract(it)
         is SolStructDefinition -> SolStruct(it)
         is SolEnumDefinition -> SolEnum(it)
+        is SolUserDefinedValueTypeDefinition -> getSolType(it.elementaryTypeName)
         else -> null
       }
     }
