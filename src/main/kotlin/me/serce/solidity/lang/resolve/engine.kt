@@ -24,11 +24,11 @@ object SolResolver {
       val result = if (element is SolFunctionCallElement) {
         resolveError(element) +
           resolveEvent(element) +
-          resolveContractUsingImports(element, element.containingFile, true) +
+          resolveContract(element) +
           resolveEnum(element) +
           resolveUserDefinedValueType(element)
       } else {
-        resolveContractUsingImports(element, element.containingFile, true) +
+        resolveContract(element) +
           resolveEnum(element) +
           resolveStruct(element) +
           resolveUserDefinedValueType(element)
@@ -39,17 +39,18 @@ object SolResolver {
   /**
    * @param withAliases aliases are not recursive, so count them only at the first level of recursion
    */
-  private fun resolveContractUsingImports(
+  private fun <T: SolNamedElement>resolveUsingImports(
+    target: Class<T>,
     element: PsiElement,
     file: PsiFile,
-    withAliases: Boolean
-  ): Set<SolContractDefinition> =
-    RecursionManager.doPreventingRecursion(ResolveContractKey(element.nameOrText, file), true) {
+    withAliases: Boolean,
+  ): Set<T> =
+    RecursionManager.doPreventingRecursion(ResolveUsingImportsKey(element.nameOrText, file), true) {
       if (element is SolUserDefinedTypeName && element.findIdentifiers().size > 1) {
         emptySet()
       } else {
         val inFile = file.children
-          .filterIsInstance<SolContractDefinition>()
+          .filterIsInstance(target)
           .filter { it.name == element.nameOrText }
 
         val resolvedViaAlias = when (withAliases) {
@@ -64,7 +65,7 @@ object SolResolver {
                   }
                 }
             }.flatMap { (alias, resolvedFile) ->
-              resolveContractUsingImports(alias, resolvedFile.containingFile, false)
+              resolveUsingImports(target, alias, resolvedFile.containingFile, false)
             }
           else -> emptyList()
         }
@@ -72,20 +73,22 @@ object SolResolver {
         val imported = file.children
           .filterIsInstance<SolImportDirective>()
           .mapNotNull { nullIfError { it.importPath?.reference?.resolve()?.containingFile } }
-          .flatMap { resolveContractUsingImports(element, it, false) }
+          .flatMap { resolveUsingImports(target, element, it, false) }
 
         (inFile + resolvedViaAlias + imported).toSet()
       }
     } ?: emptySet()
 
+  private fun resolveContract(element: PsiElement): Set<SolContractDefinition> =
+    resolveUsingImports(SolContractDefinition::class.java, element, element.containingFile, true)
   private fun resolveEnum(element: PsiElement): Set<SolNamedElement> =
-    resolveInFile<SolEnumDefinition>(element) + resolveInnerType<SolEnumDefinition>(element) { it.enumDefinitionList }
+    resolveUsingImports(SolEnumDefinition::class.java, element, element.containingFile, true) + resolveInnerType<SolEnumDefinition>(element) { it.enumDefinitionList }
 
   private fun resolveStruct(element: PsiElement): Set<SolNamedElement> =
-    resolveInFile<SolStructDefinition>(element) + resolveInnerType<SolStructDefinition>(element) { it.structDefinitionList }
+    resolveUsingImports(SolStructDefinition::class.java, element, element.containingFile, true) + resolveInnerType<SolStructDefinition>(element) { it.structDefinitionList }
 
   private fun resolveUserDefinedValueType(element: PsiElement): Set<SolNamedElement> =
-    resolveInFile<SolUserDefinedValueTypeDefinition>(element) + resolveInnerType<SolUserDefinedValueTypeDefinition>(
+    resolveUsingImports(SolUserDefinedValueTypeDefinition::class.java, element, element.containingFile, true) + resolveInnerType<SolUserDefinedValueTypeDefinition>(
       element,
       { it.userDefinedValueTypeDefinitionList })
 
@@ -343,7 +346,7 @@ object SolResolver {
   }
 }
 
-data class ResolveContractKey(val name: String?, val file: PsiFile)
+data class ResolveUsingImportsKey(val name: String?, val file: PsiFile)
 
 private fun <T> Sequence<T>.takeWhileInclusive(pred: (T) -> Boolean): Sequence<T> {
   var shouldContinue = true
