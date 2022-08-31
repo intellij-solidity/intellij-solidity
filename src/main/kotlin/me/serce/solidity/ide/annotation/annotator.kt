@@ -11,6 +11,7 @@ import me.serce.solidity.ide.hints.startOffset
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.psi.impl.SolErrorDefMixin
 import me.serce.solidity.lang.resolve.SolResolver
+import me.serce.solidity.lang.types.SolInternalTypeFactory
 
 class SolidityAnnotator : Annotator {
   override fun annotate(element: PsiElement, holder: AnnotationHolder) {
@@ -23,9 +24,13 @@ class SolidityAnnotator : Annotator {
     when (element) {
       is SolNumberType -> applyColor(holder, element, SolColor.TYPE)
       is SolElementaryTypeName -> applyColor(holder, element, SolColor.TYPE)
-      is SolMemberAccessExpression -> when(element.expression.firstChild.text) {
+      is SolMemberAccessExpression -> when(val name = element.expression.firstChild.text) {
         "super" -> applyColor(holder, element.expression.firstChild, SolColor.KEYWORD)
-        "msg", "block", "abi" -> applyColor(holder, element.expression.firstChild, SolColor.GLOBAL)
+        else -> {
+          if (SolInternalTypeFactory.of(element.project).globals.members.any { it.name == name }) {
+            applyColor(holder, element.expression.firstChild, SolColor.GLOBAL)
+          }
+        }
       }
       is SolErrorDefMixin -> {
         applyColor(holder, element.identifier, SolColor.KEYWORD)
@@ -68,13 +73,18 @@ class SolidityAnnotator : Annotator {
           is SolUserDefinedValueTypeDefinition -> applyColor(holder, element, SolColor.USER_DEFINED_VALUE_TYPE)
         }
       }
-      is SolFunctionCallElement -> when(element.firstChild.text) {
-        "keccak256" -> applyColor(holder, element.firstChild, SolColor.GLOBAL_FUNCTION_CALL)
-        "require" -> applyColor(holder, element.firstChild, SolColor.KEYWORD)
-        else -> when(SolResolver.resolveTypeNameUsingImports(element).firstOrNull()) {
+      is SolFunctionCallElement -> when(element.expression) {
+        is SolMemberAccessExpression -> when(SolResolver.resolveTypeNameUsingImports(element).firstOrNull()) {
           is SolErrorDefinition -> applyColor(holder, element.referenceNameElement, SolColor.ERROR_NAME)
           is SolEventDefinition -> applyColor(holder, element.referenceNameElement, SolColor.EVENT_NAME)
           else -> applyColor(holder, element.referenceNameElement, SolColor.FUNCTION_CALL)
+        }
+        else -> {
+          if (SolInternalTypeFactory.of(element.project).globals.functions.any { it.name == element.name }) {
+            applyColor(holder, element.referenceNameElement, SolColor.GLOBAL_FUNCTION_CALL)
+          } else {
+            applyColor(holder, element.referenceNameElement, SolColor.FUNCTION_CALL)
+          }
         }
       }
     }

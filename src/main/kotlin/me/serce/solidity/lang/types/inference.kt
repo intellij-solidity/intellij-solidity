@@ -62,8 +62,8 @@ fun getSolType(type: SolTypeName?): SolType {
 
 private fun getSolTypeFromUserDefinedTypeName(type: SolUserDefinedTypeName): SolType {
   val name = type.name
-  if (name != null && isInternal(name)) {
-    val internalType = SolInternalTypeFactory.of(type.project).byName(name)
+  if (name != null && type.referenceNameElement.isGlobal()) {
+    val internalType = SolInternalTypeFactory.of(type.project).globals.types[name]
     return internalType ?: SolUnknown
   }
   val resolvedTypes = SolResolver.resolveTypeNameUsingImports(type)

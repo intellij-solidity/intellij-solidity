@@ -72,7 +72,7 @@ object SolAddress : SolPrimitiveType {
   override fun toString() = "address"
 
   override fun getMembers(project: Project): List<SolMember> {
-    return SolInternalTypeFactory.of(project).addressType.ref.functionDefinitionList
+    return SolInternalTypeFactory.of(project).globals.addressScope.ref.functionDefinitionList
   }
 }
 
@@ -298,7 +298,7 @@ sealed class SolArray(val type: SolType) : SolType {
     }
 
     override fun getMembers(project: Project): List<SolMember> {
-      return SolInternalTypeFactory.of(project).arrayType.ref
+      return SolInternalTypeFactory.of(project).globals.arrayScope.ref
         .functionDefinitionList
         .map {
           val parameters = it.parseParameters()

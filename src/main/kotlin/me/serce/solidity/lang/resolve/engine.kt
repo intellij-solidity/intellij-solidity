@@ -242,7 +242,7 @@ object SolResolver {
   }
 
   fun lexicalDeclarations(place: PsiElement, stop: (PsiElement) -> Boolean = { false }): Sequence<SolNamedElement> {
-    val globalType = SolInternalTypeFactory.of(place.project).globalType
+    val globalType = SolInternalTypeFactory.of(place.project).globals.scope
     return lexicalDeclarations(globalType.ref, place) + lexicalDeclRec(place, stop).distinct()
   }
 
