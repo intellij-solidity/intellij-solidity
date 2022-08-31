@@ -90,7 +90,7 @@ object FunctionCompletionProvider : CompletionProvider<CompletionParameters>() {
     val position = parameters.originalPosition
 
     val availableRefs = getParentOfType(position, SolFunctionDefinition::class.java)?.contract?.let { contract ->
-      val globalRef = SolInternalTypeFactory.of(contract.project).globalType.ref
+      val globalRef = SolInternalTypeFactory.of(contract.project).globals.scope.ref
       contract.collectSupers.flatMap { SolResolver.resolveTypeName(it) } + globalRef + contract
     }?.filterIsInstance<SolContractDefinition>() ?: emptyList()
 

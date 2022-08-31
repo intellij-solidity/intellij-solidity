@@ -4,8 +4,7 @@ import com.intellij.codeInspection.LocalInspectionTool
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.psi.PsiElementVisitor
 import me.serce.solidity.lang.psi.*
-import me.serce.solidity.lang.types.SolInternalTypeFactory
-import me.serce.solidity.lang.types.findContract
+import me.serce.solidity.lang.types.isGlobal
 
 class NoReturnInspection : LocalInspectionTool() {
   override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
@@ -208,9 +207,4 @@ private fun SolDeclarationItem.hasAssignment(el: SolNamedElement): Boolean {
 
 private fun SolTypedDeclarationItem.hasAssignment(el: SolNamedElement): Boolean {
   return this.identifier?.text == el.name
-}
-
-private fun SolElement.isGlobal(): Boolean {
-  val contract = this.findContract()
-  return contract == SolInternalTypeFactory.of(this.project).globalType.ref
 }
