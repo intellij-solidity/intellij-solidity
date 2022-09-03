@@ -103,8 +103,4 @@ class SolStructResolveTest : SolResolveTestBase() {
 
     testResolveBetweenFiles(file1, file2)
   }
-
-
-
 }
-
