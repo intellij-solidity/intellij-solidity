@@ -393,6 +393,31 @@ class SolFunctionResolveTest : SolResolveTestBase() {
   """)
   }
 
+  fun testResolveImportedError() {
+    val file1 = InlineFile(
+      code = "error XyzError(uint x);",
+      name = "Xyz.sol"
+    )
+
+    InlineFile("""
+        import "./Xyz.sol";
+        contract B { 
+            function doit(uint256[] storage array) {
+                revert XyzError(1);
+                        //^
+            }
+        }
+    """)
+
+    val (refElement) = findElementAndDataInEditor<SolNamedElement>("^")
+
+    val resolved = checkNotNull(refElement.reference?.resolve()) {
+      "Failed to resolve ${refElement.text}"
+    }
+
+    assertEquals(file1.name, resolved.containingFile.name)
+  }
+
   fun checkIsResolved(@Language("Solidity") code: String) {
     val (refElement, _) = resolveInCode<SolFunctionCallExpression>(code)
     assertNotNull(refElement.reference?.resolve())

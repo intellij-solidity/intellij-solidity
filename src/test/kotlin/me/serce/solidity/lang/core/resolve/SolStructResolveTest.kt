@@ -1,5 +1,7 @@
 package me.serce.solidity.lang.core.resolve
 
+import me.serce.solidity.lang.psi.SolNamedElement
+
 class SolStructResolveTest : SolResolveTestBase() {
   fun testStructResolve() = checkByCode("""
       contract B {
@@ -78,4 +80,34 @@ class SolStructResolveTest : SolResolveTestBase() {
                       //^
       }
   """)
+
+  fun testResolveImportedStruct() {
+    val file1 = InlineFile(
+      code = """
+        struct Proposal {
+            uint256 id;
+        }
+      """.trimIndent(),
+      name = "Abc.sol"
+    )
+
+    InlineFile("""
+        import "./Abc.sol";
+        contract B { 
+            function doit(uint256[] storage array) {
+                Proposal prop = Proposal(1);
+                                   //^
+            }
+        }
+    """)
+
+    val (refElement) = findElementAndDataInEditor<SolNamedElement>("^")
+
+    val resolved = checkNotNull(refElement.reference?.resolve()) {
+      "Failed to resolve ${refElement.text}"
+    }
+
+    assertEquals(file1.name, resolved.containingFile.name)
+  }
+
 }
