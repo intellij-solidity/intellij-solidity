@@ -93,6 +93,15 @@ class SolFunctionCallReference(element: SolFunctionCallExpression) : SolReferenc
   }
 
   fun resolveFunctionCall(): Collection<SolCallable> {
+    if (element.parent is SolRevertStatement) {
+      return SolResolver.resolveTypeNameUsingImports(element).filterIsInstance<SolErrorDefinition>()
+    }
+    if (element.firstChild is SolPrimaryExpression) {
+      val structs = SolResolver.resolveTypeNameUsingImports(element.firstChild).filterIsInstance<SolStructDefinition>()
+      if (structs.isNotEmpty()) {
+        return structs
+      }
+    }
     val resolved: Collection<SolCallable> = when (val expr = element.expression) {
       is SolPrimaryExpression -> {
         val regular = expr.varLiteral?.let { SolResolver.resolveVarLiteral(it) }
