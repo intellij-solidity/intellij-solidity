@@ -4,6 +4,13 @@
 
 <TYPE>uint8</TYPE> <KEYWORD>constant</KEYWORD> <CONSTANT>MASK</CONSTANT> = 0x01;
 
+<KEYWORD>enum</KEYWORD> <ENUM_NAME>Types</ENUM_NAME> {
+    <ENUM_VALUE>Type1</ENUM_VALUE>,
+    <ENUM_VALUE>Type2</ENUM_VALUE>
+}
+
+<KEYWORD>type</KEYWORD> <USER_DEFINED_VALUE_TYPE>Arg</USER_DEFINED_VALUE_TYPE> <KEYWORD>is</KEYWORD> <TYPE>uint256</TYPE>;
+
 /**
  * @title Claimable
  * @dev Extension for the Ownable contract, where the ownership needs to be claimed.
@@ -27,6 +34,9 @@
         <KEYWORD>require</KEYWORD>(<GLOBAL>msg</GLOBAL>.sender == pendingOwner);
         _;
     }
+
+    <RECEIVE_FALLBACK_DECLARATION>receive</RECEIVE_FALLBACK_DECLARATION>() <KEYWORD>external</KEYWORD> <KEYWORD>payable</KEYWORD> {}
+    <RECEIVE_FALLBACK_DECLARATION>fallback</RECEIVE_FALLBACK_DECLARATION>() <KEYWORD>external</KEYWORD> {}
 
     <KEYWORD>function</KEYWORD> <FUNCTION_DECLARATION>transferOwnership</FUNCTION_DECLARATION>(<TYPE>address</TYPE> newOwner) <FUNCTION_CALL>onlyOwner</FUNCTION_CALL> {
         pendingOwner = newOwner;
