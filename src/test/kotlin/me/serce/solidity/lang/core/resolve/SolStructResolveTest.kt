@@ -78,4 +78,28 @@ class SolStructResolveTest : SolResolveTestBase() {
                       //^
       }
   """)
+
+  fun testResolveImportedStruct() {
+    val file1 = InlineFile(
+      code = """
+        struct Proposal {
+                //x
+            uint256 id;
+        }
+      """.trimIndent(),
+      name = "Abc.sol"
+    )
+
+    val file2 = InlineFile("""
+        import "./Abc.sol";
+        contract B { 
+            function doit(uint256[] storage array) {
+                Proposal prop = Proposal(1);
+                                   //^
+            }
+        }
+    """)
+
+    testResolveBetweenFiles(file1, file2)
+  }
 }
