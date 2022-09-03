@@ -1,6 +1,5 @@
 package me.serce.solidity.lang.core.resolve
 
-import me.serce.solidity.lang.psi.SolNamedElement
 class SolStructResolveTest : SolResolveTestBase() {
   fun testStructResolve() = checkByCode("""
       contract B {
