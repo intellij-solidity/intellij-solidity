@@ -5,7 +5,7 @@
 *.ipr
 *.iws
 gen
-lib
+/lib
 .sandbox
 .DS_Store
 /out/
