@@ -80,10 +80,6 @@ class SolImportPathReference(element: SolImportPathElement) : SolReferenceBase<S
           remappings.add(Pair(splitMapping[0].trim(),splitMapping[1].trim()))
         }
       }
-    } else {
-      // add default mapping for forge-std and openzeppelin
-      remappings.add(Pair("forge-std/","lib/forge-std/src/"));
-      remappings.add(Pair("@openzeppelin/", "lib/openzeppelin-contracts/"));
     }
 
     val remappedPath = applyRemappings(remappings, path);
