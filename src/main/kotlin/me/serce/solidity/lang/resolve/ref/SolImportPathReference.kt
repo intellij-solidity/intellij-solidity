@@ -45,17 +45,50 @@ class SolImportPathReference(element: SolImportPathElement) : SolReferenceBase<S
     }
   }
 
-  // default lib located at: forge-std/Test.sol => lib/forge-std/src/Test.sol
-  private fun findFoundryImportFile(file: VirtualFile, path: String): VirtualFile? {
+  // apply foundry remappings to import path
+  private fun applyRemappings(remappings: ArrayList<Pair<String,String>>, path: String):String {
+    var output = path;
+    remappings.forEach { (prefix, target) ->
+      if (path.contains(prefix)) {
+        output = path.replace(prefix, target)
+        return output
+      }
+    }
+    return output;
+  }
+
+  private fun foundryDefaultFallback(file: VirtualFile, path: String): VirtualFile? {
     val count = Paths.get(path).nameCount;
-    if (count < 2) {
+    if (count<2) {
       return null;
     }
-    val libName = Paths.get(path).subpath(0, 1).toString();
-    val libFile = Paths.get(path).subpath(1, count).toString();
+    val libName = Paths.get(path).subpath(0,1).toString();
+    val libFile = Paths.get(path).subpath(1,count).toString();
     val test = file.findFileByRelativePath("lib/$libName/src/$libFile");
+    return test;
+  }
+
+  // default lib located at: forge-std/Test.sol => lib/forge-std/src/Test.sol
+  private fun findFoundryImportFile(file: VirtualFile, path: String): VirtualFile? {
+    val testRemappingFile = file.findFileByRelativePath("remappings.txt");
+    val remappings = arrayListOf<Pair<String, String>>();
+    if (testRemappingFile != null) {
+      val mappingsContents = testRemappingFile.contentsToByteArray().toString(Charsets.UTF_8).split("[\r\n]+".toRegex());
+      mappingsContents.forEach { mapping ->
+        val splitMapping = mapping.split("=")
+        if (splitMapping.size == 2) {
+          remappings.add(Pair(splitMapping[0].trim(),splitMapping[1].trim()))
+        }
+      }
+    }
+
+    val remappedPath = applyRemappings(remappings, path);
+    val testRemappedPath = file.findFileByRelativePath(remappedPath);
+    val testFoundryFallback = foundryDefaultFallback(file, path);
+
     return when {
-      test != null -> test
+      testRemappedPath != null -> testRemappedPath
+      testFoundryFallback != null -> testFoundryFallback
       file.parent != null -> findFoundryImportFile(file.parent, path)
       else -> null
     }
