@@ -25,6 +25,7 @@ class SolCreateFileAction : CreateFileFromTemplateAction(CAPTION, "", SolidityIc
   ) {
     builder.setTitle(CAPTION)
       .addKind("Smart contract", SolidityIcons.FILE_ICON, SMART_CONTRACT_TEMPLATE)
+      .addKind("Smart contract interface", SolidityIcons.FILE_ICON, "Solidity Contract Interface")
       .addKind("Solidity library", SolidityIcons.FILE_ICON, "Solidity Library")
       .setValidator(object : InputValidatorEx {
         override fun checkInput(inputString: String): Boolean {
