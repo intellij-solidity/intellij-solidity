@@ -29,10 +29,11 @@ class SolCreateFileActionTest: SolLightPlatformCodeInsightFixtureTestCase() {
     val file = dir.findFile("myContract.sol")!!
     @Language("Solidity")
     val content = """
+      // SPDX-License-Identifier: UNLICENSED
       pragma solidity ^0.8.0;
       
       contract myContract {
-          function myContract(){
+          constructor(){
       
           }
       }
