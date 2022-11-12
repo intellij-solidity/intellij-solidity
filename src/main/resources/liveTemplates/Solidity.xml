@@ -1,0 +1,82 @@
+<templateSet group="Solidity">
+    <template name="stru" value="struct $NAME$ {&#10;  $END$&#10;}" description="Define a struct"
+              toReformat="true" toShortenFQNames="true">
+        <variable name="NAME" expression="complete()" defaultValue="" alwaysStopAt="true"/>
+        <context>
+            <option name="SOLIDITY" value="true"/>
+        </context>
+    </template>
+    <template name="using" value="using $LIBRARY$ for $TYPE$;"
+              description="Using library for some type" toReformat="true" toShortenFQNames="true">
+        <variable name="LIBRARY" expression="complete()" defaultValue="" alwaysStopAt="true"/>
+        <variable name="TYPE" expression="complete()" defaultValue="" alwaysStopAt="true"/>
+        <context>
+            <option name="SOLIDITY" value="true"/>
+        </context>
+    </template>
+    <template name="mapp" value="mapping($KEY$ =&gt; $VALUE$) $ACCESSOR$ $NAME$;"
+              description="Define a mapping" toReformat="true" toShortenFQNames="true">
+        <variable name="KEY" expression="complete()" defaultValue="uint256" alwaysStopAt="true"/>
+        <variable name="VALUE" expression="complete()" defaultValue="uint256" alwaysStopAt="true"/>
+        <variable name="ACCESSOR" expression="complete()" defaultValue="public" alwaysStopAt="true"/>
+        <variable name="NAME" expression="complete()" defaultValue="" alwaysStopAt="true"/>
+        <context>
+            <option name="SOLIDITY" value="true"/>
+        </context>
+    </template>
+    <template name="pragabi" value="pragma abicoder v2;$END$" description="Declare a pragma abicoder"
+              toReformat="true" toShortenFQNames="true"/>
+    <template name="imp" value="import &quot;$PATH$&quot;;$END$"
+              description="Declare a import statement" toReformat="true" toShortenFQNames="true">
+        <variable name="PATH" expression="complete()" defaultValue="" alwaysStopAt="true"/>
+        <context>
+            <option name="SOLIDITY" value="true"/>
+        </context>
+    </template>
+    <template name="const" value="constructor($VARIABLES$) {&#10;  $END$&#10;}"
+              description="Declare a constructor method" toReformat="true" toShortenFQNames="true">
+        <variable name="VARIABLES" expression="methodParameters()" defaultValue="" alwaysStopAt="true"/>
+        <context>
+            <option name="SOLIDITY" value="true"/>
+        </context>
+    </template>
+    <template name="modi"
+              value="modifier $NAME$($VARIABLES$) {&#10;  $_BEFORE$;&#10;  _;&#10;  $_END$;&#10;}"
+              description="Declare a modifer" toReformat="true" toShortenFQNames="true">
+        <variable name="NAME" expression="methodName()" defaultValue="" alwaysStopAt="true"/>
+        <variable name="VARIABLES" expression="methodParameters()" defaultValue="" alwaysStopAt="true"/>
+        <variable name="_BEFORE" expression="complete()" defaultValue="" alwaysStopAt="true"/>
+        <variable name="_END" expression="complete()" defaultValue="" alwaysStopAt="true"/>
+        <context>
+            <option name="SOLIDITY" value="true"/>
+        </context>
+    </template>
+    <template name="func" value="function $NAME$($VARIABLES$) $ACCESSOR$ {&#10;  $END$&#10;}"
+              description="Declare a function" toReformat="true" toShortenFQNames="true">
+        <variable name="NAME" expression="methodName()" defaultValue="" alwaysStopAt="true"/>
+        <variable name="VARIABLES" expression="methodParameters()" defaultValue="" alwaysStopAt="true"/>
+        <variable name="ACCESSOR" expression="external" defaultValue="" alwaysStopAt="true"/>
+        <context>
+            <option name="SOLIDITY" value="true"/>
+        </context>
+    </template>
+    <template name="funcr"
+              value="function $NAME$($VARIABLES$) $ACCESSOR$ returns ($RETURNS$) {&#10;  $END$&#10;}"
+              description="Declare a function and return some values" toReformat="true"
+              toShortenFQNames="true">
+        <variable name="NAME" expression="methodName()" defaultValue="" alwaysStopAt="true"/>
+        <variable name="VARIABLES" expression="methodParameters()" defaultValue="" alwaysStopAt="true"/>
+        <variable name="ACCESSOR" expression="external" defaultValue="" alwaysStopAt="true"/>
+        <variable name="RETURNS" expression="complete()" defaultValue="" alwaysStopAt="true"/>
+        <context>
+            <option name="SOLIDITY" value="true"/>
+        </context>
+    </template>
+    <template name="spdx" value="SPDX-License-Identifier: $LICENSE$"
+              description="Declare a SPDX header" toReformat="true" toShortenFQNames="true">
+        <variable name="LICENSE" expression="" defaultValue="UNLICENSED" alwaysStopAt="true"/>
+        <context>
+            <option name="SOLIDITY" value="true"/>
+        </context>
+    </template>
+</templateSet>
