@@ -483,7 +483,7 @@ FunctionCallExpression ::= Expression FunctionInvocation {
 private FunctionInvocation ::= MapExpression? '(' FunctionCallArguments? ')'
 FunctionCallArguments ::= MapExpression | Expression? ( ',' Expression )*
 private MapExpressionClause ::= Identifier ':' Expression {pin=2}
-private MapExpression ::= '{' MapExpressionClause (',' MapExpressionClause )* '}' {pin=1}
+private MapExpression ::= '{' MapExpressionClause (',' MapExpressionClause )* '}'
 
 NewExpression ::= new TypeName {
     implements = "me.serce.solidity.lang.psi.SolReferenceElement"
