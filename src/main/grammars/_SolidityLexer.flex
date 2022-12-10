@@ -15,6 +15,11 @@ import static me.serce.solidity.lang.core.SolidityTokenTypes.*;
   }
 %}
 
+%{
+  // indicates the start of the comment
+  private int zzBlockCommentStarted = -1;
+%}
+
 %public
 %class _SolidityLexer
 %implements FlexLexer
@@ -108,6 +113,7 @@ PRAGMAALL=[^ ][^;]*
   "/*"                    {
                             yybegin(IN_BLOCK_COMMENT);
                             yypushback(2);
+                            zzBlockCommentStarted = zzCurrentPos;
                           }
   "//"                    {
                             yybegin(IN_EOL_COMMENT);
@@ -211,8 +217,11 @@ PRAGMAALL=[^ ][^;]*
                           }
 
   "*/"                    {
-                            yybegin(YYINITIAL);
-                            return COMMENT;
+                            // do not treat /*/ as a comment
+                            if (zzCurrentPos - zzBlockCommentStarted >= 2) {
+                                yybegin(YYINITIAL);
+                                return COMMENT;
+                            }
                           }
 
   {NAT_SPEC_TAG}         {
