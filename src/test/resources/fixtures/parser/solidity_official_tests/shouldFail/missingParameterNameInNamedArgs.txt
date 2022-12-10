@@ -137,7 +137,7 @@ Solidity File
                 PsiElement(Identifier)('a')
           PsiElement(()('(')
           PsiElement({)('{')
-          PsiErrorElement:')', ',', Identifier or '}' expected, got ':'
+          PsiErrorElement:Identifier expected, got ':'
             PsiElement(:)(':')
           PsiWhiteSpace(' ')
           PsiElement(decimalNumber)('1')
