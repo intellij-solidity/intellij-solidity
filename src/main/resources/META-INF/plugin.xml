@@ -22,20 +22,23 @@
         <p>Huge thank you to all participants of the last GitCoin round, Yenwen Feng (@tempofeng), and LevX (@LevxApp) in particular! https://gitcoin.co/grants/1047/intellij-solidity!❤️</p>
         <p>Huge thank you to all of you who sponsor the plugin development on GitHub, and Tyler Smith (@tyler-smith) and Kevin Upton (@kevupton) in particular!❤️</p>
 
+        <b>v2.3.11</b>
+        In this release:
+        <ul>
+          <li>Allow destructuring inside try-catch block, yours @SerCeMan</li>
+          <li>Fix block comment parsing when it includes /*/, yours @SerCeMan</li>
+          <li>Support adding "Live Templates", thanks @carter-ya!</li>
+          <li>Support create smart contract interface, thanks @carter-ya!</li>
+          <li>Add remappings.txt support for foundry, thanks @dyzz!</li>
+          <li>Fix highlighting for payable, immutable, receive, fallback, and enum values, thanks @apottere!</li>
+          <li>Resolve top-level Enums, Structs, Errors, and user-defined types, thanks @apottere!</li>
+        </ul>
         <b>v2.3.10</b>
         In this release:
         <ul>
           <li>Support returns in fallback functions, yours @SerCeMan</li>
           <li>Support single-quoted unicode strings, yours @SerCeMan</li>
           <li>Resolve the infinite recursion issue on resolve. The fix also provides performance improvements, yours @SerCeMan</li>
-        </ul>
-        <b>v2.3.9</b>
-        In this release:
-        <ul>
-          <li>Adding basic support for foundry, thanks @dyzz<!/li>
-          <li>Improve syntax highlighting, thanks @apottere!</li>
-          <li>Run find implementation under a progress, yours @SerCeMan</li>
-          <li>Tooling upgrades to keep up with IJ releases</li>
         </ul>
       </p>
     ]]>
