@@ -1,0 +1,48 @@
+= link:https://solidity.readthedocs.io/[Solidity] plugin for IntelliJ
+
+image:https://api.travis-ci.com/intellij-solidity/intellij-solidity.svg?branch=master["Build Status", link="https://travis-ci.org/intellij-solidity/intellij-solidity"]
+image:https://img.shields.io/jetbrains/plugin/d/9475-intellij-solidity.svg[JetBrains plugins]
+image:https://badges.gitter.im/intellij-solidity/intellij-solidity.svg[link="https://gitter.im/intellij-solidity/intellij-solidity?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge"]
+
+image:./logo/logo_256.png[link=https://plugins.jetbrains.com/idea/plugin/9475-intellij-solidity,width=128,height=128]
+
+==功能
+
+*语法高亮
+*自动补全
+*文件模板
+跳转到声明
+查找用法
+*代码格式设置
+
+==支持插件
+
+您可以通过在Github上赞助插件来支持开发❤️, 通过链接支持加密插件：https://gitcoin.co/grants/1047/intellij-solidity[Gitcoin grant]，甚至只需在GitHub上单击★并在链接上对其进行评级：https://plugins.jetbrains.com/idea/plugin/9475-intellij-solidity[插件页]。
+
+==报告问题
+
+如果可能，请附上每个问题的截图。这将使问题更加清晰和容易理解。
+
+==构建
+
+[source，bash]
+--
+/gradlew buildPlugin
+--
+
+==运行
+
+[source，bash]
+--
+♥Gradlev  runIdea
+--
+
+==贡献
+
+我们欢迎您的贡献！
+
+如果您只是以Intellij插件开发人员的身份起步，请随时联系链接：https://gitter.im/intellij-solidity/intellij-solidity[我们]，我们将帮助您使用IDE
+设置并指导您完成代码，以便您能够做出第一次贡献并修复让你发疯了的那个烦人的错误！然后，如果你感兴趣的话，你可以深入到词法分析器、解析器、类型、重构和代码分析器的奇妙世界。
+
+有关开发文档，请参阅链接：DEVELING.adoc[DEVOLDING]。
+
