@@ -340,7 +340,9 @@ UserDefinedTypeName ::= Identifier ( '.' Identifier )* {
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
 
-MappingTypeName ::= mapping '(' (BytesArrayTypeName | ElementaryTypeName | UserDefinedTypeName ) '=>' TypeName ')' {
+private MappingKey ::= (BytesArrayTypeName | ElementaryTypeName | UserDefinedTypeName ) Identifier?
+private MappingValue ::= TypeName Identifier?
+MappingTypeName ::= mapping '(' MappingKey '=>' MappingValue ')' {
     pin = 1
     stubClass = "me.serce.solidity.lang.stubs.SolTypeRefStub"
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
