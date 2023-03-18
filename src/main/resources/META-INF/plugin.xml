@@ -52,11 +52,6 @@
     <idea-version since-build="222.4554.10"/>
 
     <depends>com.intellij.modules.lang</depends>
-    <!--
-        Various IDEs, e.g. WebStorm might not have dependency on java module. Therefore,
-        the solidity runner configuration is defined in its own config.
-    -->
-    <depends optional="true" config-file="solRunnerPlugin.xml">com.intellij.modules.java</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <fileType name="Solidity file"
