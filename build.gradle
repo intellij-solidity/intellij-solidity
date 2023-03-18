@@ -1,3 +1,6 @@
+import org.jetbrains.grammarkit.tasks.GenerateLexer
+import org.jetbrains.grammarkit.tasks.GenerateParser
+
 buildscript {
     repositories {
         mavenCentral()
@@ -110,10 +113,10 @@ release {
 }
 
 
-task codegen(dependsOn: ['lexer', 'parser']) {}
-tasks.compileKotlin.dependsOn codegen
+tasks.register('codegen') { dependsOn(['lexer', 'parser']) }
+tasks.compileKotlin.dependsOn 'codegen'
 
-task lexer(type: org.jetbrains.grammarkit.tasks.GenerateLexer) {
+task lexer(type: GenerateLexer) {
     def lexerName = "_SolidityLexer"
     source = "$project.projectDir/src/main/grammars/${lexerName}.flex"
     targetDir = "gen/me/serce/solidity"
@@ -122,7 +125,7 @@ task lexer(type: org.jetbrains.grammarkit.tasks.GenerateLexer) {
     purgeOldFiles = true
 }
 
-task parser(type: org.jetbrains.grammarkit.tasks.GenerateParser) {
+task parser(type: GenerateParser) {
     dependsOn lexer
 
     def pkg = 'me/serce/solidity'
