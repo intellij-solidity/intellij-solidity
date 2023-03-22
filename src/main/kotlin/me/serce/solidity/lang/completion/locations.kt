@@ -4,13 +4,9 @@ import com.intellij.patterns.ElementPattern
 import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.patterns.StandardPatterns
 import com.intellij.psi.PsiElement
-import me.serce.solidity.lang.core.SolElementType
 import me.serce.solidity.lang.core.SolidityFile
 import me.serce.solidity.lang.core.SolidityTokenTypes
-import me.serce.solidity.lang.psi.SolFunctionCallArguments
-import me.serce.solidity.lang.psi.SolFunctionCallExpression
-import me.serce.solidity.lang.psi.SolPrimaryExpression
-import me.serce.solidity.lang.psi.SolRevertStatement
+import me.serce.solidity.lang.psi.*
 
 
 fun emitStartStatement() =
@@ -44,4 +40,8 @@ fun primaryExpression(): ElementPattern<PsiElement> =
 
 fun functionCallArguments(): ElementPattern<PsiElement> =
   psiElement(SolidityTokenTypes.IDENTIFIER).inside(SolFunctionCallArguments::class.java)
+
+fun mapExpression(): ElementPattern<PsiElement> =
+  psiElement(SolidityTokenTypes.IDENTIFIER).inside(SolMapExpression::class.java)
+
 

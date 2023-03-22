@@ -96,22 +96,26 @@ Solidity File
                     SolPrimaryExpressionImpl(PRIMARY_EXPRESSION)
                       SolVarLiteralImpl(VAR_LITERAL)
                         PsiElement(Identifier)('x')
+                    SolFunctionInvocationImpl(FUNCTION_INVOCATION)
+                      PsiElement(()('(')
+                      SolFunctionCallArgumentsImpl(FUNCTION_CALL_ARGUMENTS)
+                        <empty list>
+                      PsiElement())(')')
+                  SolFunctionInvocationImpl(FUNCTION_INVOCATION)
                     PsiElement(()('(')
                     SolFunctionCallArgumentsImpl(FUNCTION_CALL_ARGUMENTS)
                       <empty list>
                     PsiElement())(')')
+                SolFunctionInvocationImpl(FUNCTION_INVOCATION)
                   PsiElement(()('(')
                   SolFunctionCallArgumentsImpl(FUNCTION_CALL_ARGUMENTS)
                     <empty list>
                   PsiElement())(')')
+              SolFunctionInvocationImpl(FUNCTION_INVOCATION)
                 PsiElement(()('(')
                 SolFunctionCallArgumentsImpl(FUNCTION_CALL_ARGUMENTS)
                   <empty list>
                 PsiElement())(')')
-              PsiElement(()('(')
-              SolFunctionCallArgumentsImpl(FUNCTION_CALL_ARGUMENTS)
-                <empty list>
-              PsiElement())(')')
           PsiElement(;)(';')
         PsiWhiteSpace('\n  ')
         PsiElement(})('}')

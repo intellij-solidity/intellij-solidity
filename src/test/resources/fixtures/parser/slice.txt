@@ -31,7 +31,7 @@ Solidity File
               SolStringLiteralImpl(STRING_LITERAL)
                 PsiElement(stringLiteral)(''0xabcd'')
           PsiWhiteSpace('\n        ')
-          PsiErrorElement:'(', stringLiteral or '{' expected, got 'exampleBytes'
+          PsiErrorElement:<function invocation> or stringLiteral expected, got 'exampleBytes'
             PsiElement(Identifier)('exampleBytes')
           PsiElement([)('[')
           PsiElement(decimalNumber)('2')

@@ -7,8 +7,8 @@ contract Coin {
     function send(address receiver, uint amount) public {
         if (amount > balances[msg.sender]) {
             revert InsufficientBalance({
-            requested : amount,
-            available : balances[msg.sender]
+                    requested: amount,
+                    available: balances[msg.sender]
             });
         }
     }
