@@ -290,9 +290,6 @@ abstract class SolFunctionCallMixin(node: ASTNode) : SolNamedElementImpl(node), 
     }
   }
 
-  override val expression: SolExpression
-    get() = expressionList.first()
-
   override val referenceNameElement: PsiElement
     get() = getReferenceNameElement(expression)
 
