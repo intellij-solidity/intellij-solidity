@@ -2,7 +2,9 @@ package me.serce.solidity.lang.resolve.ref
 
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
+import com.intellij.psi.util.descendants
 import me.serce.solidity.lang.completion.SolCompleter
+import me.serce.solidity.lang.core.SolidityTokenTypes
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.psi.impl.SolNewExpressionElement
 import me.serce.solidity.lang.resolve.SolResolver
@@ -44,6 +46,11 @@ class SolModifierReference(
   }
 
   override fun getVariants() = SolCompleter.completeModifier(modifierElement)
+
+  override fun doRename(identifier: PsiElement, newName: String) {
+    val modifierId = modifierElement.descendants().filter { it.elementType == SolidityTokenTypes.IDENTIFIER }.firstOrNull() ?: return
+    super.doRename(modifierId, newName)
+  }
 }
 
 class SolMemberAccessReference(element: SolMemberAccessExpression) : SolReferenceBase<SolMemberAccessExpression>(element), SolReference {
