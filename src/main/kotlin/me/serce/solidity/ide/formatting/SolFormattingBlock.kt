@@ -69,18 +69,16 @@ class SolFormattingBlock(
       type == STRUCT_DEFINITION && childType == VARIABLE_DECLARATION -> Indent.getNormalIndent()
 
     // inside a block, list of parameters, etc..
-      parentType in listOf(BLOCK, ENUM_DEFINITION, YUL_BLOCK, PARAMETER_LIST, INDEXED_PARAMETER_LIST, MAP_EXPRESSION, MAP_EXPRESSION_CLAUSE) -> Indent.getNormalIndent()
+      parentType in listOf(BLOCK, ENUM_DEFINITION, YUL_BLOCK, PARAMETER_LIST, INDEXED_PARAMETER_LIST, MAP_EXPRESSION) -> Indent.getNormalIndent()
 
     // all expressions inside parens should have indentation when lines are split
       parentType in listOf(IF_STATEMENT, WHILE_STATEMENT, DO_WHILE_STATEMENT, FOR_STATEMENT) && childType != BLOCK -> {
         Indent.getNormalIndent()
       }
 
-      type == MAP_EXPRESSION -> if (child.text == "}") Indent.getNoneIndent() else Indent.getNormalIndent()
 
       // all function calls
-      parentType in listOf(FUNCTION_CALL_ARGUMENTS) -> Indent.getNormalIndent()
-
+      parentType in listOf(FUNCTION_INVOCATION) -> Indent.getNormalIndent()
 
       else -> Indent.getNoneIndent()
     }
