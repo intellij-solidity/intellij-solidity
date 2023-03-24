@@ -208,4 +208,16 @@ class SolVarResolveTest : SolResolveTestBase() {
             }
         }
   """)
+
+  fun testResolveForLoopVariable() = checkByCode("""
+        contract B {
+            function test() {
+                for (var i = 0; i < 2; i++ ) {
+                       //x
+                    var g = i;
+                          //^
+                }
+            }
+        }          
+    """)
 }
