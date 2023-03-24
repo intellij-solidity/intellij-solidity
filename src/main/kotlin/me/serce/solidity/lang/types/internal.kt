@@ -3,7 +3,7 @@ package me.serce.solidity.lang.types
 import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.project.Project
 import me.serce.solidity.lang.psi.SolPsiFactory
-import me.serce.solidity.lang.types.SolInteger.Companion.UINT_256
+import org.intellij.lang.annotations.Language
 
 class SolInternalTypeFactory(project: Project) {
   private val psiFactory: SolPsiFactory = SolPsiFactory(project)
@@ -25,56 +25,65 @@ class SolInternalTypeFactory(project: Project) {
   fun byName(name: String): SolType? = registry[name]
 
   val msgType: SolType by lazy {
-    SolStruct(psiFactory.createStruct("""
+    struct("""
       struct ${internalise("Msg")} {
           bytes data;
           uint gas;
           address sender;
           uint value;
       }
-    """))
+    """)
   }
 
   val txType: SolType by lazy {
-    SolStruct(psiFactory.createStruct("""
+    struct("""
       struct ${internalise("Tx")} {
           uint gasprice;
           address origin;
       }
-    """))
+    """)
   }
 
   val addressType: SolContract by lazy {
-    SolContract(psiFactory.createContract("""
-      contract ${internalise("Address")} {
-          function transfer(uint value);
-          
-          function send(uint value) returns (bool);
-      }
-    """))
+    contract("""
+            contract ${internalise("Address")} {
+                function transfer(uint value);
+                
+                function send(uint value) returns (bool);
+            }
+          """)
   }
 
+
   val arrayType: SolContract by lazy {
-    SolContract(psiFactory.createContract("""
+    contract("""
       contract ${internalise("Array")} {
+          uint256 length;
+          
+          function push();
           function push(uint value);
+          function pop();
       }
-    """))
+    """)
   }
 
   val blockType: SolType by lazy {
-    BuiltinType(internalise("Block"), listOf(
-      BuiltinCallable(listOf(), SolAddress, "coinbase", null, Usage.VARIABLE),
-      BuiltinCallable(listOf(), UINT_256, "difficulty", null, Usage.VARIABLE),
-      BuiltinCallable(listOf(), UINT_256, "gasLimit", null, Usage.VARIABLE),
-      BuiltinCallable(listOf(), UINT_256, "number", null, Usage.VARIABLE),
-      BuiltinCallable(listOf(), UINT_256, "timestamp", null, Usage.VARIABLE),
-      BuiltinCallable(listOf("blockNumber" to UINT_256), SolFixedBytes(32), "blockhash", null, Usage.VARIABLE)
-    ))
+    contract("""
+        contract ${internalise("Block")}{
+             address coinbase;
+             uint difficulty;
+             uint gasLimit;
+             uint number;
+             uint timestamp;
+             
+             function blockhash(uint blockNumber) returns (bytes32);
+
+        }      
+    """)
   }
 
   val globalType: SolContract by lazy {
-    SolContract(psiFactory.createContract("""
+    contract("""
       contract Global {
           $blockType block;
           $msgType msg;
@@ -95,6 +104,13 @@ class SolInternalTypeFactory(project: Project) {
           function mulmod(uint x, uint y, uint k) returns (uint) private returns (uint) {}
           function selfdestruct(address recipient) private {};
       }
-    """))
+    """)
   }
+
+  private fun contract(@Language("Solidity") contractBody: String) =
+    SolContract(psiFactory.createContract(contractBody), true)
+
+  private fun struct(@Language("Solidity") contractBody: String) =
+    SolStruct(psiFactory.createStruct(contractBody), true)
+
 }
