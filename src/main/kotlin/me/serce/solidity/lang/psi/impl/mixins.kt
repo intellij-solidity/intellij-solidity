@@ -3,10 +3,12 @@ package me.serce.solidity.lang.psi.impl
 import com.intellij.lang.ASTNode
 import com.intellij.openapi.util.RecursionManager
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.stubs.IStubElementType
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiModificationTracker
+import com.intellij.psi.util.nextLeaf
 import me.serce.solidity.firstInstance
 import me.serce.solidity.ide.SolidityIcons
 import me.serce.solidity.lang.core.SolidityTokenTypes.*
@@ -95,6 +97,18 @@ abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrL
 
   override fun resolveElement() = this
   override val callablePriority = 1000
+
+  override val isAbstract: Boolean
+    get() = firstChild?.elementType == ABSTRACT
+  override val contractType: ContractType
+    get() {
+      val typeEl = (if (isAbstract) firstChild?.nextLeaf { it !is PsiWhiteSpace } else firstChild) ?: return ContractType.COMMON
+      return when (typeEl.elementType) {
+        LIBRARY -> ContractType.LIBRARY
+        INTERFACE -> ContractType.INTERFACE
+        else -> ContractType.COMMON
+      }
+    }
 }
 
 abstract class SolConstructorDefMixin(node: ASTNode) : SolElementImpl(node), SolConstructorDefinition {
@@ -223,12 +237,11 @@ abstract class SolStateVarDeclMixin : SolStubbedNamedElementImpl<SolStateVarDecl
 
   override fun getPossibleUsage(contextType: ContextType): Usage? {
     val visibility = this.visibility
-    return if (contextType == ContextType.SUPER)
-      Usage.VARIABLE
-    else if (contextType == ContextType.EXTERNAL && visibility == Visibility.PUBLIC)
-      Usage.CALLABLE
-    else
-      null
+    return when {
+        contextType == ContextType.SUPER || contextType == ContextType.BUILTIN || mutability == Mutability.CONSTANT -> Usage.VARIABLE
+        contextType == ContextType.EXTERNAL && visibility == Visibility.PUBLIC -> Usage.CALLABLE
+        else -> null
+    }
   }
 
   override val callablePriority = 0
@@ -236,7 +249,11 @@ abstract class SolStateVarDeclMixin : SolStubbedNamedElementImpl<SolStateVarDecl
   override fun resolveElement() = this
 
   override val visibility
-    get() = visibilityModifier?.text?.let { safeValueOf<Visibility>(it.uppercase()) } ?: Visibility.INTERNAL
+    get() = visibilityModifier?.text?.let { safeValueOf(it.uppercase()) } ?: Visibility.INTERNAL
+
+  override val mutability: Mutability?
+    get() = mutationModifier?.text?.let { safeValueOf(it.uppercase()) }
+
 }
 
 abstract class SolConstantVariableDeclMixin : SolStubbedNamedElementImpl<SolConstantVariableDeclStub>, SolConstantVariableDeclaration {
