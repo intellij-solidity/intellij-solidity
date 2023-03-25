@@ -1,19 +1,14 @@
 package me.serce.solidity.ide.navigation
 
-import com.intellij.codeInsight.navigation.GotoImplementationHandler
-import com.intellij.codeInsight.navigation.GotoTargetHandler.GotoData
-import com.intellij.openapi.ui.GenericListComponentUpdater
-import com.intellij.openapi.util.Disposer
-import com.intellij.openapi.util.Ref
-import com.intellij.psi.PsiElement
-import com.intellij.ui.components.JBList
-import com.intellij.ui.popup.AbstractPopup
-import com.intellij.ui.popup.ComponentPopupBuilderImpl
-import com.intellij.util.ui.UIUtil
-import me.serce.solidity.lang.psi.SolContractDefinition
+import com.intellij.codeInsight.navigation.GotoTargetHandler
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.runReadAction
+import com.intellij.openapi.progress.util.ProgressIndicatorUtils
+import com.intellij.testFramework.fixtures.CodeInsightTestUtil
 import me.serce.solidity.utils.SolTestBase
 import org.intellij.lang.annotations.Language
 import org.junit.Assert
+import java.util.concurrent.Callable
 
 class GoToImplementationTest : SolTestBase() {
 
@@ -30,36 +25,23 @@ class GoToImplementationTest : SolTestBase() {
 
   private fun testImplementations(@Language("Solidity") code: String, options: Set<String>) {
     InlineFile(code).withCaret()
-    val handler = GotoImplementationHandler()
-
-    val data: GotoData? = handler.getSourceAndTargetElements(myFixture.editor, myFixture.file)
-    if (data == null) {
-      throw RuntimeException("Can't find implementations")
-    }
-    drainGoToDataEvents(data)
-    Assert.assertEquals(options, data.targets.map { (it as SolContractDefinition).name }.toSet())
+    val actual = doGoToImplementation()
+    Assert.assertEquals(options, actual)
   }
 
-  private fun drainGoToDataEvents(data: GotoData) {
-    if (data.listUpdaterTask != null) {
-      val list = JBList<String>()
-      val popup = ComponentPopupBuilderImpl(list, null).createPopup()
-      data.listUpdaterTask.init(popup as AbstractPopup, object: GenericListComponentUpdater<PsiElement> {
-        override fun replaceModel(data: MutableList<out PsiElement>) {
-        }
+  // Thank you, IntelliJ Rust authors who spared me from writing this code, as I was able to copy it from
+  // https://github.com/intellij-rust/intellij-rust/blob/a0ab79286ab29e723c2d890ee123dacb43560184/src/test/kotlin/org/rust/ide/navigation/goto/RsGotoImplementationsTest.kt#L220-L232
+  // Forever grateful.
+  private fun doGoToImplementation(): Set<String> {
+    val data = CodeInsightTestUtil.gotoImplementation(myFixture.editor, myFixture.file)
 
-        override fun paintBusy(paintBusy: Boolean) {
-        }
-      }, Ref())
-      data.listUpdaterTask.queue()
-
-      try {
-        while (!data.listUpdaterTask.isFinished) {
-          UIUtil.dispatchAllInvocationEvents()
-        }
-      } finally {
-        Disposer.dispose(popup)
+    val future = ApplicationManager.getApplication().executeOnPooledThread(Callable {
+      runReadAction {
+        @Suppress("UnstableApiUsage") data.targets.map { GotoTargetHandler.computePresentation(it, data.hasDifferentNames()) }
+          // Copied from `com.intellij.codeInsight.navigation.GotoTargetHandler.GotoData.getComparingObject`
+          .map { listOfNotNull(it.presentableText, it.containerText, it.locationText).joinToString(" ") }
       }
-    }
+    })
+    return ProgressIndicatorUtils.awaitWithCheckCanceled(future).map { it.trim() }.toSet()
   }
 }

@@ -5,7 +5,7 @@ import me.serce.solidity.utils.SolTestBase
 import org.intellij.lang.annotations.Language
 
 abstract class SolQuickFixTestBase : SolTestBase() {
-  fun testQuickFix(@Language("Solidity") code: String, expected: String) {
+  fun checkQuickFix(@Language("Solidity") code: String, expected: String) {
     InlineFile(code)
     val errors = myFixture.doHighlighting(HighlightSeverity.WARNING)
     assertEquals(1, errors.size)

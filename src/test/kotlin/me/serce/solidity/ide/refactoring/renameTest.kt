@@ -86,6 +86,24 @@ class RenameTest : SolTestBase() {
         }
     """)
 
+  fun testFunctionModifier() = doTest("Newname", """
+        contract BBB {
+            modifier /*caret*/oldModifier {
+            }
+
+            function doSomething() public oldModifier {
+            }
+        }
+    """, """
+        contract BBB {
+            modifier Newname {
+            }
+
+            function doSomething() public Newname {
+            }
+        }
+    """)
+
   fun testFileRename() {
     val labFile = myFixture.configureByFile("imports/Lab.sol")
     val importingFile = myFixture.configureByFile("imports/nested/ImportingFile.sol")
