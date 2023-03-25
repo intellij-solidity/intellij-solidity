@@ -223,12 +223,11 @@ abstract class SolStateVarDeclMixin : SolStubbedNamedElementImpl<SolStateVarDecl
 
   override fun getPossibleUsage(contextType: ContextType): Usage? {
     val visibility = this.visibility
-    return if (contextType == ContextType.SUPER)
-      Usage.VARIABLE
-    else if (contextType == ContextType.EXTERNAL && visibility == Visibility.PUBLIC)
-      Usage.CALLABLE
-    else
-      null
+    return when {
+        contextType == ContextType.SUPER || contextType == ContextType.BUILTIN -> Usage.VARIABLE
+        contextType == ContextType.EXTERNAL && visibility == Visibility.PUBLIC -> Usage.CALLABLE
+        else -> null
+    }
   }
 
   override val callablePriority = 0
