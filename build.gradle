@@ -9,10 +9,10 @@ buildscript {
 }
 
 plugins {
-    id "org.jetbrains.grammarkit" version "2021.1.3"
+    id "org.jetbrains.grammarkit" version "2022.3.1"
     // Avoid 1.5.3 due to issues with hot reloading, see https://github.com/JetBrains/gradle-intellij-plugin/issues/959
-    id "org.jetbrains.intellij" version "1.5.2"
-    id 'net.researchgate.release' version '2.8.1'
+    id "org.jetbrains.intellij" version "1.13.2"
+    id 'net.researchgate.release' version '3.0.2'
 }
 
 
@@ -23,10 +23,14 @@ apply plugin: 'org.jetbrains.intellij'
 apply plugin: 'idea'
 apply plugin: 'jacoco'
 
-sourceCompatibility = 11
-targetCompatibility = 11
+def JVM_TARGET = 17
+sourceCompatibility = JVM_TARGET
+targetCompatibility = JVM_TARGET
 compileKotlin {
-    kotlinOptions.jvmTarget = 11
+    kotlinOptions.jvmTarget = JVM_TARGET
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = JVM_TARGET
 }
 
 idea {
@@ -48,7 +52,7 @@ clean.doFirst {
 intellij {
     pluginName = 'Intellij-Solidity'
 
-    version = '2021.1.3'
+    version = '2022.2.5'
     downloadSources = true
     updateSinceUntilBuild = false
     // TODO(sergey): remove
@@ -57,6 +61,10 @@ intellij {
     ]
 
     sandboxDir = project.rootDir.canonicalPath + "/.sandbox"
+}
+
+grammarKit {
+//    intellijRelease = '2022.2.5'
 }
 
 runIde {
@@ -83,17 +91,6 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     implementation("io.sentry:sentry:$sentry_version")
 
-    // https://mvnrepository.com/artifact/org.ethereum/ethereumj-core
-    compileOnly( group: 'org.ethereum', name: 'ethereumj-core', version: '1.7.0-RELEASE') {
-        exclude group: 'org.ethereum', module: 'solcJ-all'
-        exclude group: 'org.ethereum', module: 'rocksdbjni'
-    }
-
-    def web3jVersion = "4.0.1"
-    implementation group: 'org.web3j', name: 'core', version: web3jVersion
-    implementation group: 'org.web3j', name: 'codegen', version: web3jVersion
-    implementation group: 'org.web3j', name: 'abi', version: web3jVersion
-
     testImplementation group: 'junit', name: 'junit', version: '4.11'
 }
 
@@ -101,26 +98,27 @@ release {
     newVersionCommitMessage = '[Intellij-Solidity Release] - '
     preTagCommitMessage = '[Intellij-Solidity Release] - pre tag commit: '
     buildTasks = ['buildPlugin']
+    git {
+        requireBranch.set('master')
+    }
 }
 
 
-task codegen(dependsOn: ['lexer', 'parser']) {}
-tasks.compileKotlin.dependsOn codegen
+tasks.register('codegen') { dependsOn(['generateLexer', 'generateParser']) }
+tasks.compileKotlin.dependsOn 'codegen'
 
-task lexer(type: org.jetbrains.grammarkit.tasks.GenerateLexer) {
-    def lexerName = "_SolidityLexer"
-    source = "$project.projectDir/src/main/grammars/${lexerName}.flex"
+generateLexer {
+    def solLexerName = "_SolidityLexer"
+    sourceFile = new File("$project.projectDir/src/main/grammars/${solLexerName}.flex")
     targetDir = "gen/me/serce/solidity"
-    targetClass = "$lexerName"
-    skeleton = 'src/main/grammars/idea-flex.skeleton'
+    targetClass = "$solLexerName"
+    skeleton = new File('src/main/grammars/idea-flex.skeleton')
     purgeOldFiles = true
 }
 
-task parser(type: org.jetbrains.grammarkit.tasks.GenerateParser) {
-    dependsOn lexer
-
+generateParser {
     def pkg = 'me/serce/solidity'
-    source = "$project.projectDir/src/main/grammars/solidity.bnf"
+    sourceFile = new File("$project.projectDir/src/main/grammars/solidity.bnf")
     targetRoot = 'gen'
     pathToParser = "$pkg/SolidityParser.java"
     pathToPsiRoot = "$pkg/psi"

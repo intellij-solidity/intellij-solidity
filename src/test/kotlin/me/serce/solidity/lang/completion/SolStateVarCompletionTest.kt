@@ -59,4 +59,14 @@ class SolStateVarCompletionTest : SolCompletionTestBase() {
             }
         }
   """, strict = true)
+
+  fun testBuiltinMemberAccess() = checkCompletion(hashSetOf("length", "push", "pop"), """
+        contract B {
+            int[] c;
+
+            function doit() {
+                c./*caret*/;
+            }
+        }
+  """)
 }

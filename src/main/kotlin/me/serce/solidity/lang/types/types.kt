@@ -16,7 +16,8 @@ import java.util.*
 
 enum class ContextType {
   SUPER,
-  EXTERNAL
+  EXTERNAL,
+  BUILTIN // for accessing a state variable within a builtin contract definition
 }
 
 enum class Usage {
@@ -36,6 +37,13 @@ interface SolType {
   fun getMembers(project: Project): List<SolMember> {
     return emptyList()
   }
+  val isBuiltin: Boolean
+    get() = true
+}
+
+interface SolUserType : SolType {
+  override val isBuiltin: Boolean
+    get() = false
 }
 
 interface SolPrimitiveType : SolType
@@ -69,11 +77,10 @@ object SolAddress : SolPrimitiveType {
       else -> UINT_160.isAssignableFrom(other)
     }
 
+  override fun getMembers(project: Project) = getSdkMembers(SolInternalTypeFactory.of(project).addressType)
+
   override fun toString() = "address"
 
-  override fun getMembers(project: Project): List<SolMember> {
-    return SolInternalTypeFactory.of(project).addressType.ref.functionDefinitionList
-  }
 }
 
 data class SolInteger(val unsigned: Boolean, val size: Int) : SolNumeric {
@@ -161,7 +168,7 @@ data class SolInteger(val unsigned: Boolean, val size: Int) : SolNumeric {
   override fun toString() = "${if (unsigned) "u" else ""}int$size"
 }
 
-data class SolContract(val ref: SolContractDefinition) : SolType, Linearizable<SolContract> {
+data class SolContract(val ref: SolContractDefinition, val builtin: Boolean = false) : SolUserType, Linearizable<SolContract> {
   override fun linearize(): List<SolContract> {
     return RecursionManager.doPreventingRecursion(ref, true) {
       CachedValuesManager.getCachedValue(ref) {
@@ -199,10 +206,12 @@ data class SolContract(val ref: SolContractDefinition) : SolType, Linearizable<S
     return SolResolver.resolveContractMembers(ref, false)
   }
 
+  override val isBuiltin get() = builtin
+
   override fun toString() = ref.name ?: ref.text ?: "$ref"
 }
 
-data class SolStruct(val ref: SolStructDefinition) : SolType {
+data class SolStruct(val ref: SolStructDefinition, val builtin : Boolean = false) : SolUserType {
   override fun isAssignableFrom(other: SolType): Boolean =
     other is SolStruct && ref == other.ref
 
@@ -212,6 +221,9 @@ data class SolStruct(val ref: SolStructDefinition) : SolType {
     return ref.variableDeclarationList
       .map { SolStructVariableDeclaration(it) }
   }
+
+  override val isBuiltin: Boolean
+    get() = builtin
 }
 
 data class SolStructVariableDeclaration(
@@ -226,7 +238,7 @@ data class SolStructVariableDeclaration(
   override fun getPossibleUsage(contextType: ContextType) = Usage.VARIABLE
 }
 
-data class SolEnum(val ref: SolEnumDefinition) : SolType {
+data class SolEnum(val ref: SolEnumDefinition) : SolUserType {
   override fun isAssignableFrom(other: SolType): Boolean =
     other is SolEnum && ref == other.ref
 
@@ -275,6 +287,8 @@ sealed class SolArray(val type: SolType) : SolType {
     override fun hashCode(): Int {
       return Objects.hash(size, type)
     }
+
+    override fun getMembers(project: Project) = SolInternalTypeFactory.of(project).arrayType.ref.stateVariableDeclarationList;
   }
 
   class SolDynamicArray(type: SolType) : SolArray(type) {
@@ -298,12 +312,14 @@ sealed class SolArray(val type: SolType) : SolType {
     }
 
     override fun getMembers(project: Project): List<SolMember> {
-      return SolInternalTypeFactory.of(project).arrayType.ref
-        .functionDefinitionList
-        .map {
-          val parameters = it.parseParameters()
-            .map { pair -> pair.first to type }
-          BuiltinCallable(parameters, it.parseType(), it.name, it) }
+      return SolInternalTypeFactory.of(project).arrayType.ref.let {
+             it.functionDefinitionList
+             .map {
+               val parameters = it.parseParameters()
+                 .map { pair -> pair.first to type }
+               BuiltinCallable(parameters, it.parseType(), it.name, it)
+             } + it.stateVariableDeclarationList
+           }
     }
   }
 }
@@ -366,4 +382,8 @@ data class BuiltinCallable(
   override fun resolveElement(): SolNamedElement? = resolvedElement
   override fun getName(): String? = memberName
   override fun getPossibleUsage(contextType: ContextType) = possibleUsage
+}
+
+private fun getSdkMembers(solContract: SolContract): List<SolMember> {
+    return solContract.ref.let { it.functionDefinitionList + it.stateVariableDeclarationList }
 }

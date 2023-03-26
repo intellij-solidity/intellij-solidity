@@ -340,7 +340,9 @@ UserDefinedTypeName ::= Identifier ( '.' Identifier )* {
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
 
-MappingTypeName ::= mapping '(' (BytesArrayTypeName | ElementaryTypeName | UserDefinedTypeName ) '=>' TypeName ')' {
+private MappingKey ::= (BytesArrayTypeName | ElementaryTypeName | UserDefinedTypeName ) Identifier?
+private MappingValue ::= TypeName Identifier?
+MappingTypeName ::= mapping '(' MappingKey '=>' MappingValue ')' {
     pin = 1
     stubClass = "me.serce.solidity.lang.stubs.SolTypeRefStub"
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
@@ -480,11 +482,15 @@ FunctionCallExpression ::= Expression FunctionInvocation {
     mixin = "me.serce.solidity.lang.psi.impl.SolFunctionCallMixin"
 }
 
-private FunctionInvocation ::= MapExpression? '(' FunctionCallArguments? ')'
+FunctionInvocation ::= MapExpression? '(' FunctionCallArguments? ')'
 FunctionCallArguments ::= MapExpression | Expression? ( ',' Expression )*
-private MapExpressionClause ::= Identifier ':' Expression {pin=2}
-private MapExpression ::= '{' MapExpressionClause (',' MapExpressionClause )* '}' {pin=1}
+MapExpressionClause ::= Identifier ':' (Expression | MapExpression) {pin=2}
+private UnfinishedMapExpression ::= '{' MapExpressionClause (',' MapExpressionClause )* {
+    pin=1
+    recoverWhile = UntilBraceRecover
+}
 
+MapExpression ::= UnfinishedMapExpression '}'
 NewExpression ::= new TypeName {
     implements = "me.serce.solidity.lang.psi.SolReferenceElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolNewExpressionElement"

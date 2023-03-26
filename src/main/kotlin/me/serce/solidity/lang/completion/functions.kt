@@ -5,6 +5,8 @@ import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.project.DumbAware
+import com.intellij.patterns.StandardPatterns.and
+import com.intellij.patterns.StandardPatterns.not
 import com.intellij.psi.TokenType
 import com.intellij.psi.util.PsiTreeUtil.findElementOfClassAtOffset
 import com.intellij.psi.util.PsiTreeUtil.getParentOfType
@@ -20,7 +22,7 @@ import me.serce.solidity.lang.types.SolType
 class SolFunctionCompletionContributor : CompletionContributor(), DumbAware {
 
   init {
-    extend(CompletionType.BASIC, expression(), FunctionCompletionProvider)
+    extend(CompletionType.BASIC, and(expression(), not(mapExpression())), FunctionCompletionProvider)
   }
 
   override fun beforeCompletion(context: CompletionInitializationContext) {

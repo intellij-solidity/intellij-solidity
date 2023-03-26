@@ -18,5 +18,11 @@ contract FeedConsumer {
         } catch {
              revert("error");
         }
+
+        try runSomething(b) {
+            (c, d) = doSomething();
+        } catch(bytes memory error) {
+            (c, d) = doSomethingElse(error);
+        }
     }
 }

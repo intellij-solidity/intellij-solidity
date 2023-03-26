@@ -11,7 +11,7 @@ class SolImportFileTest : SolQuickFixTestBase() {
       name = "a.sol"
     )
 
-    testQuickFix(
+    checkQuickFix(
       "contract b is a {}",
       "\nimport \"./a.sol\";contract b is a {}"
     )

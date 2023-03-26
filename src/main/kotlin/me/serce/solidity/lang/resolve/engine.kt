@@ -8,6 +8,7 @@ import com.intellij.psi.stubs.StubIndex
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiModificationTracker
+import com.intellij.psi.util.PsiTreeUtil
 import me.serce.solidity.lang.core.SolidityFile
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.psi.impl.SolNewExpressionElement
@@ -289,6 +290,7 @@ object SolResolver {
         scope.parameterList?.parameterDefList?.asSequence() ?: emptySequence()
       }
       is SolEnumDefinition -> sequenceOf(scope)
+      is SolForStatement -> if (PsiTreeUtil.isAncestor(scope, place, false)) scope.children.firstOrNull()?.let { lexicalDeclarations(it, place) } ?: emptySequence() else emptySequence()
 
       is SolStatement -> {
         scope.children.asSequence()

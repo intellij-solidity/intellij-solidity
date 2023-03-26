@@ -16,7 +16,10 @@ import me.serce.solidity.lang.stubs.SolErrorIndex
 import me.serce.solidity.lang.stubs.SolEventIndex
 import me.serce.solidity.lang.stubs.SolGotoClassIndex
 import me.serce.solidity.lang.stubs.SolModifierIndex
-import me.serce.solidity.lang.types.*
+import me.serce.solidity.lang.types.ContextType
+import me.serce.solidity.lang.types.Usage
+import me.serce.solidity.lang.types.getMembers
+import me.serce.solidity.lang.types.type
 import javax.swing.Icon
 
 const val TYPED_COMPLETION_PRIORITY = 15.0
@@ -88,6 +91,7 @@ object SolCompleter {
     val expr = element.expression
     val contextType = when {
       expr is SolPrimaryExpression && expr.varLiteral?.name == "super" -> ContextType.SUPER
+      expr.type.isBuiltin -> ContextType.BUILTIN
       else -> ContextType.EXTERNAL
     }
     return element.expression.getMembers()
@@ -95,7 +99,7 @@ object SolCompleter {
         when (it.getPossibleUsage(contextType)) {
           Usage.CALLABLE -> {
             // could also be a builtin, me.serce.solidity.lang.types.BuiltinCallable
-            (it as? SolCallableElement)?.toFunctionLookup()
+            (it as? SolCallableElement ?: it.resolveElement() as? SolCallableElement)?.toFunctionLookup()
           }
           Usage.VARIABLE -> it.getName()?.let { name ->
             PrioritizedLookupElement.withPriority(

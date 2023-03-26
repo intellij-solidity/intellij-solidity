@@ -13,6 +13,10 @@ A a
   callFunction(
   1,
   2);
+  callFunction({
+  a: 1,
+  b: "2"
+  });
 
   if (a == 1 && b == 2)
   callMe(1,2);

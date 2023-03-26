@@ -20,7 +20,7 @@ Solidity File
   SolPrimaryExpressionImpl(PRIMARY_EXPRESSION)
     SolVarLiteralImpl(VAR_LITERAL)
       PsiElement(Identifier)('x')
-  PsiErrorElement:'(', '.', <constant variable declaration>, <contract definition>, <expression>, <function definition>, <mutation modifier>, <storage location>, enum, error, import, pragma, struct, type, using or '{' expected, got ';'
+  PsiErrorElement:'.', <constant variable declaration>, <contract definition>, <expression>, <function definition>, <function invocation>, <mutation modifier>, <storage location>, enum, error, import, pragma, struct, type or using expected, got ';'
     PsiElement(;)(';')
   PsiWhiteSpace('\n')
   PsiElement(})('}')

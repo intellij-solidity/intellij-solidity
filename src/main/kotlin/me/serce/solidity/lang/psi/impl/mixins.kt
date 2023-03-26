@@ -238,7 +238,7 @@ abstract class SolStateVarDeclMixin : SolStubbedNamedElementImpl<SolStateVarDecl
   override fun getPossibleUsage(contextType: ContextType): Usage? {
     val visibility = this.visibility
     return when {
-        contextType == ContextType.SUPER || contextType == ContextType.BUILTIN || mutability == Mutability.CONSTANT -> Usage.VARIABLE
+        contextType == ContextType.SUPER || contextType == ContextType.BUILTIN -> Usage.VARIABLE
         contextType == ContextType.EXTERNAL && visibility == Visibility.PUBLIC -> Usage.CALLABLE
         else -> null
     }
@@ -307,9 +307,6 @@ abstract class SolFunctionCallMixin(node: ASTNode) : SolNamedElementImpl(node), 
     }
   }
 
-  override val expression: SolExpression
-    get() = expressionList.first()
-
   override val referenceNameElement: PsiElement
     get() = getReferenceNameElement(expression)
 
@@ -319,6 +316,9 @@ abstract class SolFunctionCallMixin(node: ASTNode) : SolNamedElementImpl(node), 
   override fun getName(): String? = referenceName
 
   override fun getReference(): SolReference = SolFunctionCallReference(this as SolFunctionCallExpression)
+
+  override val functionCallArguments: SolFunctionCallArguments
+    get() = functionInvocation.functionCallArguments!!
 }
 
 abstract class SolModifierInvocationMixin(node: ASTNode) : SolNamedElementImpl(node), SolModifierInvocationElement {

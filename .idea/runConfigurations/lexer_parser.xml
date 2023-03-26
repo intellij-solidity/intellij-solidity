@@ -10,12 +10,15 @@
       </option>
       <option name="taskNames">
         <list>
-          <option value="lexer" />
-          <option value="parser" />
+          <option value="generateLexer" />
+          <option value="generateParser" />
         </list>
       </option>
       <option name="vmOptions" value="" />
     </ExternalSystemSettings>
-    <method />
+    <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+    <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+    <DebugAllEnabled>false</DebugAllEnabled>
+    <method v="2" />
   </configuration>
 </component>
