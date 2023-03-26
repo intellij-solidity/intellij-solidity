@@ -20,7 +20,6 @@ import me.serce.solidity.lang.types.ContextType
 import me.serce.solidity.lang.types.Usage
 import me.serce.solidity.lang.types.getMembers
 import me.serce.solidity.lang.types.type
-import javax.swing.Icon
 
 const val TYPED_COMPLETION_PRIORITY = 15.0
 
@@ -83,8 +82,13 @@ object SolCompleter {
   }
 
   fun completeLiteral(element: PsiElement): Sequence<LookupElement> {
-    return SolResolver.lexicalDeclarations(element)
-      .createVarLookups()
+    return SolResolver.lexicalDeclarations(element).mapNotNull {
+      when (it) {
+        is SolFunctionDefinition -> it.toFunctionLookup()
+        is SolStructDefinition -> it.toStructLookup()
+        else -> it.toVarLookup()
+      }
+    }
   }
 
   fun completeMemberAccess(element: SolMemberAccessExpression): Array<out LookupElement> {
@@ -114,14 +118,7 @@ object SolCompleter {
       .toTypedArray()
   }
 
-  private fun Sequence<SolNamedElement>.createVarLookups(): Sequence<LookupElement> = createVarLookups(SolidityIcons.STATE_VAR)
 
-  private fun Sequence<SolNamedElement>.createVarLookups(icon: Icon): Sequence<LookupElement> = map {
-    PrioritizedLookupElement.withPriority(
-      LookupElementBuilder.create(it.name ?: "").withIcon(icon),
-      TYPED_COMPLETION_PRIORITY
-    )
-  }
 }
 
 class ContractLookupElement(val contract: SolContractDefinition) : LookupElement() {

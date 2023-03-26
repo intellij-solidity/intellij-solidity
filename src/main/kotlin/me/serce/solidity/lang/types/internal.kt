@@ -27,10 +27,26 @@ class SolInternalTypeFactory(project: Project) {
   val msgType: SolType by lazy {
     struct("""
       struct ${internalise("Msg")} {
+      /**
+      complete calldata
+      */
           bytes data;
+      /**
+       the available gas remaining for a current transaction
+      */
           uint gas;
+      /**
+      sender of the message (current call)
+      */
           address sender;
+      /**
+      number of wei sent with the message
+      */
           uint value;
+          /**
+          first four bytes of the calldata (i.e. function identifier)
+          */
+          bytes4 sig;
       }
     """)
   }
@@ -38,7 +54,13 @@ class SolInternalTypeFactory(project: Project) {
   val txType: SolType by lazy {
     struct("""
       struct ${internalise("Tx")} {
+      /**
+      gas price of the transaction
+      */
           uint gasprice;
+      /**
+      sender of the transaction (full call chain)
+      */
           address origin;
       }
     """)
@@ -47,8 +69,13 @@ class SolInternalTypeFactory(project: Project) {
   val addressType: SolContract by lazy {
     contract("""
             contract ${internalise("Address")} {
+            /**
+            send given amount of Wei to Address, reverts on failure, forwards 2300 gas stipend, not adjustable
+            */
                 function transfer(uint value);
-                
+            /**
+                send given amount of Wei to Address, returns false on failure, forwards 2300 gas stipend, not adjustable
+                */
                 function send(uint value) returns (bool);
             }
           """)
@@ -58,10 +85,21 @@ class SolInternalTypeFactory(project: Project) {
   val arrayType: SolContract by lazy {
     contract("""
       contract ${internalise("Array")} {
+            /**
+              yields the fixed length of the byte array. The length of memory arrays is fixed (but dynamic, i.e. it can depend on runtime parameters) once they are created.
+            */
           uint256 length;
           
+            /**
+Dynamic storage arrays and <code>bytes</code> (not <code>string</code>) have a member function called <code>push()</code> that you can use to append a zero-initialised element at the end of the array. It returns a reference to the element, so that it can be used like <code>x.push().t = 2</code> or <code>x.push() = b</code>.
+            */
           function push();
+            /**
+Dynamic storage arrays and <code>bytes</code> (not <code>string</code>) have a member function called <code>push(x)</code> that you can use to append a given element at the end of the array. The function returns nothing.
+            */
           function push(uint value);
+            /**
+Dynamic storage arrays and <code>bytes</code> (not <code>string</code>) have a member function called <code>pop()</code> that you can use to remove an element from the end of the array. This also implicitly calls delete on the removed element. The function returns nothing.            */
           function pop();
       }
     """)
@@ -70,12 +108,30 @@ class SolInternalTypeFactory(project: Project) {
   val blockType: SolType by lazy {
     contract("""
         contract ${internalise("Block")}{
+            /**
+               current block miner’s address
+            */
              address coinbase;
+            /**
+               current block difficulty
+            */
              uint difficulty;
+            /**
+               current block gaslimit
+            */
              uint gasLimit;
+            /**
+              current block number
+            */
              uint number;
+            /**
+               current block timestamp as seconds since unix epoch
+            */
              uint timestamp;
              
+             /**
+                hash of the given block when blocknumber is one of the 256 most recent blocks; otherwise returns zero
+             */
              function blockhash(uint blockNumber) returns (bytes32);
 
         }      
@@ -88,21 +144,76 @@ class SolInternalTypeFactory(project: Project) {
           $blockType block;
           $msgType msg;
           $txType tx;
-          uint now;
 
-          function assert(bool condition) private {}
-          function require(bool condition) private {}
-          function require(bool condition, string message) private {}
-          function revert() private {}
-          function revert(string) {}
-          function keccak256() returns (bytes32) private {}
-          function sha3() returns (bytes32) private {}
-          function sha256() returns (bytes32) private {}
-          function ripemd160() returns (bytes20) private {}
-          function ecrecover(bytes32 hash, uint8 v, bytes32 r, bytes32 s) returns (address) private {}
-          function addmod(uint x, uint y, uint k) returns (uint) private {}
-          function mulmod(uint x, uint y, uint k) returns (uint) private returns (uint) {}
-          function selfdestruct(address recipient) private {};
+/**
+causes a Panic error and thus state change reversion if the condition is not met - to be used for internal errors.
+*/
+          function assert(bool condition);
+/**
+reverts if the condition is not met - to be used for errors in inputs or external components.
+*/
+          function require(bool condition);
+/**
+reverts if the condition is not met - to be used for errors in inputs or external components. Also provides an error message.
+*/
+          function require(bool condition, string message);
+/**
+abort execution and revert state changes
+*/
+          function revert();
+/**
+abort execution and revert state changes, providing an explanatory string
+*/
+          function revert(string memory reason);
+/**
+compute the Keccak-256 hash of the input
+*/
+          function keccak256() returns (bytes32);
+/**
+compute the SHA-256 hash of the input
+*/
+          function sha3() returns (bytes32);
+/**
+compute the SHA-256 hash of the input
+*/
+          function sha256() returns (bytes32);
+/**
+compute RIPEMD-160 hash of the input
+*/
+          function ripemd160() returns (bytes20);
+/**
+recover the address associated with the public key from elliptic curve signature or return zero on error. The function parameters correspond to ECDSA values of the signature:
+
+r = first 32 bytes of signature
+
+s = second 32 bytes of signature
+
+v = final 1 byte of signature
+
+ecrecover returns an address, and not an address payable. See address payable for conversion, in case you need to transfer funds to the recovered address.
+
+For further details, read example usage.
+*/
+          function ecrecover(bytes32 hash, uint8 v, bytes32 r, bytes32 s) returns (address);
+/**
+compute <code>(x + y) % k</code> where the addition is performed with arbitrary precision and does not wrap around at <code>2**256</code>. Assert that <code>k != 0</code> starting from version 0.5.0.
+*/
+          function addmod(uint x, uint y, uint k) returns (uint);
+/**
+compute <code>(x * y) % k</code> where the multiplication is performed with arbitrary precision and does not wrap around at <code>2**256</code>. Assert that <code>k != 0</code> starting from version 0.5.0.
+*/
+          function mulmod(uint x, uint y, uint k) returns (uint);
+/**
+Destroy the current contract, sending its funds to the given Address and end execution. Note that selfdestruct has some peculiarities inherited from the EVM:
+
+<ul>
+<li>the receiving contract’s receive function is not executed.</li>
+<li>the contract is only really destroyed at the end of the transaction and revert s might “undo” the destruction.</li>
+</ul>
+
+Furthermore, all functions of the current contract are callable directly including the current function.
+*/
+          function selfdestruct(address recipient);
       }
     """)
   }
