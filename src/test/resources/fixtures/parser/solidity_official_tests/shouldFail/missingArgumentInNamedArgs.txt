@@ -136,30 +136,35 @@ Solidity File
               SolPrimaryExpressionImpl(PRIMARY_EXPRESSION)
                 SolVarLiteralImpl(VAR_LITERAL)
                   PsiElement(Identifier)('a')
-              PsiElement(()('(')
-              SolFunctionCallArgumentsImpl(FUNCTION_CALL_ARGUMENTS)
-                PsiElement({)('{')
-                PsiElement(Identifier)('a')
-                PsiElement(:)(':')
-                PsiErrorElement:<expression> expected, got ','
-                  <empty list>
-                PsiWhiteSpace(' ')
-                PsiElement(,)(',')
-                PsiWhiteSpace(' ')
-                PsiElement(Identifier)('b')
-                PsiElement(:)(':')
-                PsiErrorElement:<expression> expected, got ','
-                  <empty list>
-                PsiWhiteSpace(' ')
-                PsiElement(,)(',')
-                PsiWhiteSpace(' ')
-                PsiElement(Identifier)('c')
-                PsiElement(:)(':')
-                PsiErrorElement:<expression> expected, got '}'
-                  <empty list>
-                PsiWhiteSpace(' ')
-                PsiElement(})('}')
-              PsiElement())(')')
+              SolFunctionInvocationImpl(FUNCTION_INVOCATION)
+                PsiElement(()('(')
+                SolFunctionCallArgumentsImpl(FUNCTION_CALL_ARGUMENTS)
+                  SolMapExpressionImpl(MAP_EXPRESSION)
+                    PsiElement({)('{')
+                    SolMapExpressionClauseImpl(MAP_EXPRESSION_CLAUSE)
+                      PsiElement(Identifier)('a')
+                      PsiElement(:)(':')
+                      PsiErrorElement:<expression> or '{' expected, got ','
+                        <empty list>
+                    PsiWhiteSpace(' ')
+                    PsiElement(,)(',')
+                    PsiWhiteSpace(' ')
+                    SolMapExpressionClauseImpl(MAP_EXPRESSION_CLAUSE)
+                      PsiElement(Identifier)('b')
+                      PsiElement(:)(':')
+                      PsiErrorElement:<expression> or '{' expected, got ','
+                        <empty list>
+                    PsiWhiteSpace(' ')
+                    PsiElement(,)(',')
+                    PsiWhiteSpace(' ')
+                    SolMapExpressionClauseImpl(MAP_EXPRESSION_CLAUSE)
+                      PsiElement(Identifier)('c')
+                      PsiElement(:)(':')
+                      PsiErrorElement:<expression> or '{' expected, got '}'
+                        <empty list>
+                    PsiWhiteSpace(' ')
+                    PsiElement(})('}')
+                PsiElement())(')')
           PsiElement(;)(';')
         PsiWhiteSpace(' ')
         PsiElement(})('}')
