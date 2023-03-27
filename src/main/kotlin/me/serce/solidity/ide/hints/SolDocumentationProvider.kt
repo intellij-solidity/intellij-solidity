@@ -2,6 +2,7 @@ package me.serce.solidity.ide.hints
 
 import com.intellij.lang.documentation.AbstractDocumentationProvider
 import com.intellij.lang.documentation.DocumentationMarkup.*
+import com.intellij.openapi.util.ModificationTracker
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.impl.source.tree.LeafPsiElement
@@ -23,17 +24,26 @@ fun PsiElement.comments(): List<PsiElement> {
   return CachedValuesManager.getCachedValue(this) {
     val nonSolElements = siblings(false, false)
       .takeWhile { it !is SolElement }.toList()
-    val res = PsiDocumentManager.getInstance(project).getDocument(this.containingFile)?.let { document ->
+    val isBuiltin = this.containingFile.virtualFile == null
+    val res = if (!isBuiltin) PsiDocumentManager.getInstance(project).getDocument(this.containingFile)?.let { document ->
       val tripleLines = nonSolElements.filter { it.text.startsWith("///") }.map { document.getLineNumber(it.textOffset) }.toSet()
       val tripleLineComments = nonSolElements.filter { tripleLines.contains(document.getLineNumber(it.startOffset)) }
-      val blockComments = nonSolElements.dropWhile { it.elementType != SolidityTokenTypes.COMMENT || !it.text.contains("*/") }.toList().let { l ->
-        (l.indexOfFirst { it.elementType == SolidityTokenTypes.COMMENT && it.text.startsWith("/**") }.takeIf { it >= 0 }?.let { l.subList(0, it + 1) }
-          ?: emptyList())
-      }
+      val blockComments = collectBlockComments(nonSolElements)
       tripleLineComments + blockComments
     } ?: emptyList()
-    CachedValueProvider.Result.create(res, this.parent)
+    else {
+      collectBlockComments(nonSolElements)
+    }
+    CachedValueProvider.Result.create(res, if (isBuiltin) ModificationTracker.NEVER_CHANGED else this.parent)
   }
+}
+
+private fun collectBlockComments(nonSolElements: List<PsiElement>): List<PsiElement> {
+  val blockComments = nonSolElements.dropWhile { it.elementType != SolidityTokenTypes.COMMENT || !it.text.contains("*/") }.toList().let { l ->
+    (l.indexOfFirst { it.elementType == SolidityTokenTypes.COMMENT && it.text.startsWith("/**") }.takeIf { it >= 0 }?.let { l.subList(0, it + 1) }
+      ?: emptyList())
+  }
+  return blockComments
 }
 
 class SolDocumentationProvider : AbstractDocumentationProvider() {
