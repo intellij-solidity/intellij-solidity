@@ -48,7 +48,7 @@ object SolHighlighter : SyntaxHighlighterBase() {
     types().map { it to SolColor.TYPE }
   ).mapValues { it.value.textAttributesKey }
 
-  private fun keywords() = setOf<IElementType>(
+  fun keywords() = setOf<IElementType>(
     // Note, the ERROR/REVERT are not keywords and are excluded
     IMPORT, AS, PRAGMA, NEW, DELETE, EMIT, /*REVERT,*/ CONSTRUCTOR,
     CONTRACT, LIBRARY, INTERFACE, IS, STRUCT, FUNCTION, ENUM,
@@ -59,7 +59,7 @@ object SolHighlighter : SyntaxHighlighterBase() {
     DAYS, WEEKS, YEARS, TYPE, VIRTUAL, OVERRIDE, IMMUTABLE, INDEXED
   )
 
-  private fun types() = setOf<IElementType>(
+  fun types() = setOf<IElementType>(
     BYTENUMTYPE, BYTESNUMTYPE, FIXEDNUMTYPE, INTNUMTYPE, UFIXEDNUMTYPE, UINTNUMTYPE,
     STRING, BOOL, ADDRESS,
   )

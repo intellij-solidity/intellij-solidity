@@ -23,7 +23,7 @@ class SolVarCompletionTest : SolCompletionTestBase() {
         }
   """)
 
-  fun testGlobalVarCompletionTest() = checkCompletion(hashSetOf("msg", "now", "tx", "block"), """
+  fun testGlobalVarCompletionTest() = checkCompletion(hashSetOf("msg", "tx", "block"), """
         contract B {
 
             function doit() {

@@ -21,6 +21,14 @@ enum class Visibility {
   EXTERNAL
 }
 
+enum class Mutability {
+  PURE, CONSTANT, VIEW, PAYABLE;
+}
+
+enum class ContractType(val docName: String) {
+  COMMON("contract"), LIBRARY("library"), INTERFACE("interface")
+}
+
 interface SolCallable {
   val callablePriority: Int
   fun getName(): String?
@@ -34,6 +42,9 @@ interface SolCallableElement : SolCallable, SolNamedElement
 interface SolStateVarElement : SolMember, SolCallableElement {
   val visibilityModifier: SolVisibilityModifier?
   val visibility: Visibility
+
+  val mutationModifier: SolMutationModifier?
+  val mutability: Mutability?
 }
 
 interface SolConstantVariable : SolNamedElement {}
@@ -76,6 +87,8 @@ interface SolModifierElement : SolNamedElement {
 interface SolContractOrLibElement : SolCallableElement {
   val supers: List<SolUserDefinedTypeName>
   val collectSupers: Collection<SolUserDefinedTypeName>
+  val isAbstract: Boolean
+  val contractType: ContractType
 }
 
 interface SolReferenceElement : SolNamedElement {

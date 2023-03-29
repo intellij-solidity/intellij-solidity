@@ -81,6 +81,8 @@
         <!-- Quote Handlers -->
         <lang.quoteHandler language="Solidity" implementationClass="me.serce.solidity.ide.SolQuoteTokenHandler"/>
 
+        <lang.documentationProvider language="Solidity" implementationClass="me.serce.solidity.ide.hints.SolDocumentationProvider"/>
+
         <!-- Hints -->
         <codeInsight.typeInfo language="Solidity"
                               implementationClass="me.serce.solidity.ide.hints.SolExpressionTypeProvider"/>

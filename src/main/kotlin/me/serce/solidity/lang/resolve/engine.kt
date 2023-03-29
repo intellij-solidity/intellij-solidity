@@ -168,7 +168,7 @@ object SolResolver {
 
   fun resolveModifier(modifier: SolModifierInvocationElement): List<SolModifierDefinition> = StubIndex.getElements(
     SolModifierIndex.KEY,
-    modifier.text,
+    modifier.firstChild.text,
     modifier.project,
     null,
     SolNamedElement::class.java

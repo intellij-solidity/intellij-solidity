@@ -15,8 +15,6 @@ import me.serce.solidity.ide.SolidityIcons
 import me.serce.solidity.lang.core.SolidityFile
 import me.serce.solidity.lang.core.SolidityTokenTypes
 import me.serce.solidity.lang.psi.*
-import me.serce.solidity.lang.resolve.SolResolver
-import me.serce.solidity.lang.types.SolInternalTypeFactory
 import me.serce.solidity.lang.types.SolType
 
 class SolFunctionCompletionContributor : CompletionContributor(), DumbAware {
@@ -89,32 +87,7 @@ object FunctionCompletionProvider : CompletionProvider<CompletionParameters>() {
     context: ProcessingContext,
     result: CompletionResultSet
   ) {
-    val position = parameters.originalPosition
-
-    val availableRefs = getParentOfType(position, SolFunctionDefinition::class.java)?.contract?.let { contract ->
-      val globalRef = SolInternalTypeFactory.of(contract.project).globalType.ref
-      contract.collectSupers.flatMap { SolResolver.resolveTypeName(it) } + globalRef + contract
-    }?.filterIsInstance<SolContractDefinition>() ?: emptyList()
-
-    val functions = availableRefs
-      .flatMap { it.functionDefinitionList }
-      .toFunctionLookups()
-
-    val structs = availableRefs
-      .flatMap { it.structDefinitionList }
-      .filterNot { it.name == null }
-      .map {
-        LookupElementBuilder
-          .create(it)
-          .withBoldness(true)
-          .withIcon(SolidityIcons.FUNCTION)
-          .withTypeText(funcOutType(it))
-          .withTailText(funcInType(it))
-          .insertParenthesis(false)
-      }
-
-    (functions + structs)
-      .forEach(result::addElement)
+    // actual completion is performed via com.intellij.psi.PsiReference#getVariants
   }
 }
 
@@ -122,9 +95,7 @@ fun List<SolFunctionDefinition>.toFunctionLookups() =
   this.mapNotNull { it.toFunctionLookup() }
 
 fun SolCallableElement.toFunctionLookup(): LookupElementBuilder? {
-  return if (name == null) {
-    null
-  } else {
+  return name?.let {
     LookupElementBuilder
       .create(this)
       .withBoldness(true)
@@ -132,6 +103,23 @@ fun SolCallableElement.toFunctionLookup(): LookupElementBuilder? {
       .withTypeText(funcOutType(this))
       .withTailText(funcInType(this))
       .insertParenthesis(false)
+  }
+}
+
+fun SolStructDefinition.toStructLookup(): LookupElementBuilder? {
+  return name?.let {  LookupElementBuilder
+      .create(this)
+      .withBoldness(true)
+      .withIcon(SolidityIcons.FUNCTION)
+      .withTypeText(funcOutType(this))
+      .withTailText(funcInType(this))
+      .insertParenthesis(false)
+  }
+}
+
+fun SolNamedElement.toVarLookup(): LookupElementBuilder? {
+  return name?.let {
+    LookupElementBuilder.create(this).withIcon(SolidityIcons.STATE_VAR)
   }
 }
 
