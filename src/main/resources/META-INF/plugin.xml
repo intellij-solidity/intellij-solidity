@@ -51,7 +51,16 @@
     -->
     <idea-version since-build="222.4554.10"/>
 
+    <!-- See https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html for the full list of modules -->
     <depends>com.intellij.modules.lang</depends>
+    <!--
+        The below might not be strictly necessary, however, it's required as per
+        https://plugins.jetbrains.com/docs/intellij/webstorm.html#configuring-plugin-projects-targeting-webstorm
+        in order to include JavaScript.
+    -->
+    <depends>com.intellij.modules.platform</depends>
+    <!-- The dependency is necessary because JavaScript-aware IDEs exclude node_modules by default. -->
+    <depends optional="true" config-file="javascriptPlugin.xml">JavaScript</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <fileType name="Solidity file"

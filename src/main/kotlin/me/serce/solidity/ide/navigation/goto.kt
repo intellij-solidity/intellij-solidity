@@ -39,7 +39,7 @@ abstract class SolNavigationContributorBase<T>(
     return StubIndex.getElements(indexKey, name, project, scope, clazz).toTypedArray<NavigationItem>()
   }
 
-  override fun getQualifiedName(item: NavigationItem?): String? = item?.name
+  override fun getQualifiedName(item: NavigationItem): String? = item.name
 
   override fun getQualifiedNameSeparator(): String = "."
 }

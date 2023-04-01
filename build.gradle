@@ -1,7 +1,7 @@
 buildscript {
     repositories {
         mavenCentral()
-        maven { url 'https://jitpack.io'}
+        maven { url 'https://jitpack.io' }
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
@@ -53,12 +53,10 @@ intellij {
     pluginName = 'Intellij-Solidity'
 
     version = '2022.2.5'
+    type = 'IU'
     downloadSources = true
     updateSinceUntilBuild = false
-    // TODO(sergey): remove
-    plugins = [
-        'java',
-    ]
+    plugins = ['JavaScript']
 
     sandboxDir = project.rootDir.canonicalPath + "/.sandbox"
 }
