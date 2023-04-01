@@ -52,6 +52,10 @@
     <idea-version since-build="222.4554.10"/>
 
     <depends>com.intellij.modules.lang</depends>
+    <!-- TODO -->
+    <depends>com.intellij.modules.platform</depends>
+    <!-- TODO -->
+    <depends optional="true" config-file="javascriptPlugin.xml">JavaScript</depends>=
 
     <extensions defaultExtensionNs="com.intellij">
         <fileType name="Solidity file"
