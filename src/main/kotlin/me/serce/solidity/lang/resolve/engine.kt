@@ -364,16 +364,17 @@ object SolResolver {
 
       is SolidityFile -> {
         RecursionManager.doPreventingRecursion(scope.name, true) {
-          val contracts = scope.children.asSequence()
+          val scopeChildren = scope.children
+          val contracts = scopeChildren.asSequence()
             .filterIsInstance<SolContractDefinition>()
 
-          val constantVariables = scope.children.asSequence()
+          val constantVariables = scopeChildren.asSequence()
             .filterIsInstance<SolConstantVariable>()
 
-          val freeFunctions = scope.children.asSequence()
+          val freeFunctions = scopeChildren.asSequence()
             .filterIsInstance<SolFunctionDefinition>()
 
-          val imports = scope.children.asSequence().filterIsInstance<SolImportDirective>()
+          val imports = scopeChildren.asSequence().filterIsInstance<SolImportDirective>()
             .mapNotNull {  it.importPath?.reference?.resolve()?.containingFile }
             .map { lexicalDeclarations(visitedScopes, it, place) }
             .flatten()
