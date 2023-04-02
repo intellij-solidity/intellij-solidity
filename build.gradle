@@ -71,8 +71,6 @@ runIde {
 
 repositories {
     mavenCentral()
-    // ethereumj isn't available on maven central
-    jcenter()
     maven { url "https://www.jetbrains.com/intellij-repository/releases" }
     maven { url "https://cache-redirector.jetbrains.com/intellij-dependencies" }
 }
