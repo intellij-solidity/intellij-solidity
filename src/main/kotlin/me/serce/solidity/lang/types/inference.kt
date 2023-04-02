@@ -88,8 +88,8 @@ fun inferDeclType(decl: SolNamedElement): SolType {
       val def = list.findParent<SolVariableDefinition>()
       val inferred = inferExprType(def.expression)
       val index = list.declarationItemList.indexOf(decl)
-      when (inferred) {
-        is SolTuple -> inferred.types[index]
+      when (inferred is SolTuple && index < inferred.types.size) {
+        true -> inferred.types[index]
         else -> SolUnknown
       }
     }
