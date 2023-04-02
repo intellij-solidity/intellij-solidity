@@ -1,6 +1,5 @@
 package me.serce.solidity.lang.types
 
-import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.project.Project
 import me.serce.solidity.lang.psi.SolPsiFactory
 import org.intellij.lang.annotations.Language
@@ -10,7 +9,7 @@ class SolInternalTypeFactory(project: Project) {
 
   companion object {
     fun of(project: Project): SolInternalTypeFactory {
-      return ServiceManager.getService(project, SolInternalTypeFactory::class.java)
+      return project.getService(SolInternalTypeFactory::class.java)
     }
   }
 
