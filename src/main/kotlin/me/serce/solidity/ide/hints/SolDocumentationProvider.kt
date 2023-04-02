@@ -55,7 +55,7 @@ class SolDocumentationProvider : AbstractDocumentationProvider() {
     return builder.toString()
   }
 
-  private val keywordColors = SolHighlighter.keywords().plus(SolHighlighter.types()).filterNot { it == SolidityTokenTypes.RETURN }.map { it.debugName }
+  private val keywordColors = SolHighlighter.keywords().plus(SolHighlighter.types()).filterNot { it == SolidityTokenTypes.RETURN }.map { it.toString()   }
     .plus(setOf("u?int(\\d+)", "u?fixed(\\d+)", "bytes?(\\d+)"))
     .joinToString("|", "\\b(", ")\\b").toRegex()
   private val col = SolColor.TYPE.textAttributesKey.defaultAttributes.foregroundColor

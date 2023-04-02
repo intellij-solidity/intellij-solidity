@@ -14,7 +14,7 @@ class SolCodeStyleSettingsProvider : CodeStyleSettingsProvider() {
 
   override fun getConfigurableDisplayName() = SolidityLanguage.displayName
 
-  override fun createSettingsPage(settings: CodeStyleSettings, originalSettings: CodeStyleSettings) =
+  override fun createConfigurable(settings: CodeStyleSettings, originalSettings: CodeStyleSettings) =
     object : CodeStyleAbstractConfigurable(settings, originalSettings, configurableDisplayName) {
       override fun createPanel(settings: CodeStyleSettings) = SolCodeStyleMainPanel(currentSettings, settings)
       override fun getHelpTopic() = null
@@ -40,10 +40,10 @@ class SolLanguageCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider()
       else -> ""
     }
 
-  override fun getDefaultCommonSettings(): CommonCodeStyleSettings {
-    val settings = CommonCodeStyleSettings(SolidityLanguage)
-    settings.initIndentOptions()
-    return settings
+  override fun customizeDefaults(
+    commonSettings: CommonCodeStyleSettings,
+    indentOptions: CommonCodeStyleSettings.IndentOptions
+  ) {
   }
 
   override fun getIndentOptionsEditor(): IndentOptionsEditor? = SmartIndentOptionsEditor()

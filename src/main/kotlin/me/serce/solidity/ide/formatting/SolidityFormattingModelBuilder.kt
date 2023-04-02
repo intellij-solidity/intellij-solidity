@@ -3,7 +3,6 @@ package me.serce.solidity.ide.formatting
 import com.intellij.formatting.*
 import com.intellij.lang.ASTNode
 import com.intellij.openapi.util.TextRange
-import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.codeStyle.CodeStyleSettings
 import com.intellij.psi.tree.TokenSet
@@ -17,7 +16,9 @@ import me.serce.solidity.lang.core.SolidityTokenTypes.*
  * https://github.com/ethereum/solidity/blob/develop/docs/style-guide.rst
  */
 class SolidityFormattingModelBuilder : FormattingModelBuilder {
-  override fun createModel(element: PsiElement, settings: CodeStyleSettings): FormattingModel {
+  override fun createModel(context: FormattingContext): FormattingModel {
+    val element = context.psiElement
+    val settings = context.codeStyleSettings
     val spacingBuilder = createSpacingBuilder(settings)
 
     val containingFile = element.containingFile

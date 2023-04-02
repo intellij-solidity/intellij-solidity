@@ -31,7 +31,7 @@ class SolidityLineMarkerProvider : LineMarkerProvider {
               val info = NavigationGutterIconBuilder
                 .create(AllIcons.Gutter.OverridenMethod)
                 .setTargets(el.findAllImplementations())
-                .setPopupTitle("Go to implementation")
+                .setPopupTitle("Go To Implementation")
                 .setTooltipText("Has implementations")
                 .createLineMarkerInfo(identifier)
               result.add(info)
@@ -46,9 +46,9 @@ class SolidityLineMarkerProvider : LineMarkerProvider {
               val info = NavigationGutterIconBuilder
                 .create(AllIcons.Gutter.OverridingMethod)
                 .setTargets(overriden)
-                .setPopupTitle("Go to overriden functions")
+                .setPopupTitle("Go To Overridden Functions")
                 .setTooltipText("Overrides function")
-                .setCellRenderer(FunctionCellRenderer(el.containingFile))
+                .setCellRenderer { FunctionCellRenderer(el.containingFile) }
                 .createLineMarkerInfo(identifier)
               result.add(info)
             }
@@ -57,9 +57,9 @@ class SolidityLineMarkerProvider : LineMarkerProvider {
               val info = NavigationGutterIconBuilder
                 .create(AllIcons.Gutter.OverridenMethod)
                 .setTargets(overrides)
-                .setPopupTitle("Is overriden")
-                .setTooltipText("Is overriden in subcontracts")
-                .setCellRenderer(FunctionCellRenderer(el.containingFile))
+                .setPopupTitle("Is Overridden")
+                .setTooltipText("Is overridden in subcontracts")
+                .setCellRenderer { FunctionCellRenderer(el.containingFile) }
                 .createLineMarkerInfo(identifier)
               result.add(info)
             }

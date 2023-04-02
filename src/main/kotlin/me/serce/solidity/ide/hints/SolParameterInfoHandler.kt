@@ -1,7 +1,5 @@
 package me.serce.solidity.ide.hints
 
-import com.intellij.codeInsight.lookup.LookupElement
-import com.intellij.lang.parameterInfo.ParameterInfoContext
 import com.intellij.lang.parameterInfo.ParameterInfoUIContext
 import com.intellij.lang.parameterInfo.ParameterInfoUtils
 import com.intellij.lang.parameterInfo.UpdateParameterInfoContext
@@ -16,10 +14,6 @@ import me.serce.solidity.lang.resolve.ref.SolFunctionCallReference
 import me.serce.solidity.lang.types.findParentOrNull
 
 class SolParameterInfoHandler : AbstractParameterInfoHandler<SolFunctionCallExpression, SolArgumentsDescription>() {
-  override fun couldShowInLookup() = true
-
-  override fun getParametersForLookup(item: LookupElement, context: ParameterInfoContext?): Array<out Any>? = null
-
   override fun findTargetElement(file: PsiFile, offset: Int): SolFunctionCallExpression? {
     return file.findElementAt(offset)?.findParentOrNull()
   }
@@ -54,13 +48,6 @@ class SolParameterInfoHandler : AbstractParameterInfoHandler<SolFunctionCallExpr
       false,
       if (p.valid) context.defaultParameterColor.brighter() else context.defaultParameterColor)
   }
-
-  override fun getParameterCloseChars() = ",)"
-
-  override fun tracksParameterIndex() = true
-
-  override fun getParametersForDocumentation(p: SolArgumentsDescription, context: ParameterInfoContext?) =
-    p.arguments
 }
 
 class SolArgumentsDescription(
