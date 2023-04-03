@@ -145,6 +145,10 @@ private val SolStatement.returns: Boolean
       return it.returns
     }
 
+    this.tryStatement?.let {
+      return it.returns
+    }
+
     if (this.returnSt != null) {
       return true
     }
@@ -230,6 +234,9 @@ private fun SolExpression.hasAssignment(el: SolNamedElement): Boolean {
 
 private fun SolTryStatement.hasAssignment(el: SolNamedElement): Boolean =
   block?.hasAssignment(el) == true && catchClauseList.all { it.block?.hasAssignment(el) == true }
+
+private val SolTryStatement.returns: Boolean
+  get() = block?.returns == true && catchClauseList.all { it.block?.returns == true }
 
 private fun SolElement.isGlobal(): Boolean {
   val contract = this.findContract()
