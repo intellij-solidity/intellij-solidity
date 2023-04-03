@@ -2,7 +2,9 @@ package me.serce.solidity.ide.inspections
 
 import com.intellij.codeInspection.LocalInspectionTool
 import com.intellij.codeInspection.ProblemsHolder
+import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiElementVisitor
+import com.intellij.psi.PsiRecursiveElementWalkingVisitor
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.types.SolInternalTypeFactory
 import me.serce.solidity.lang.types.findContract
@@ -62,11 +64,7 @@ private fun SolStatement.hasAssignment(el: SolNamedElement): Boolean {
   }
 
   this.expression?.let {
-    if (it is SolAssignmentExpression) {
-      return it.expressionList[0].isReferenceTo(el)
-    } else if (it is SolFunctionCallExpression && it.revert) {
-      return true
-    }
+    return it.hasAssignment(el)
   }
 
   this.inlineAssemblyStatement.let { st ->
@@ -80,6 +78,10 @@ private fun SolStatement.hasAssignment(el: SolNamedElement): Boolean {
   }
 
   this.ifStatement?.let {
+    return it.hasAssignment(el)
+  }
+
+  this.tryStatement?.let {
     return it.hasAssignment(el)
   }
 
@@ -209,6 +211,25 @@ private fun SolDeclarationItem.hasAssignment(el: SolNamedElement): Boolean {
 private fun SolTypedDeclarationItem.hasAssignment(el: SolNamedElement): Boolean {
   return this.identifier?.text == el.name
 }
+
+private fun SolExpression.hasAssignment(el: SolNamedElement): Boolean {
+  var hasAssignment = false
+  this.accept(object : PsiRecursiveElementWalkingVisitor() {
+    override fun visitElement(element: PsiElement) {
+      hasAssignment = element is SolAssignmentExpression && element.expressionList.any { it.isReferenceTo(el) } ||
+        element is SolFunctionCallExpression && element.revert
+      if (hasAssignment) {
+        stopWalking()
+        return
+      }
+      super.visitElement(element)
+    }
+  })
+  return hasAssignment
+}
+
+private fun SolTryStatement.hasAssignment(el: SolNamedElement): Boolean =
+  block?.hasAssignment(el) == true && catchClauseList.all { it.block?.hasAssignment(el) == true }
 
 private fun SolElement.isGlobal(): Boolean {
   val contract = this.findContract()
