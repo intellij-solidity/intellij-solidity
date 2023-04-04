@@ -155,4 +155,20 @@ class NoReturnInspectionTest : SolInspectionsTestBase(NoReturnInspection()) {
           }
       }
     """)
+
+  fun testReturnWithTryCatch() = checkByText("""
+      interface ITest {
+          function test() external;
+      }
+
+      contract Test {
+          function testTryCatch() external returns (bool) {
+              try ITest(0x0000000000000000000000000000000000000000).test() {
+                  return true;
+              } catch {
+                  return false;
+              }
+          }
+      }
+    """)
 }
