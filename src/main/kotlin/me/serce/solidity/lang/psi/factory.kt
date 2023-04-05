@@ -28,7 +28,7 @@ class SolPsiFactory(val project: Project) {
   }
 
   fun createNewLine(project: Project): PsiElement {
-    return PsiParserFacade.SERVICE.getInstance(project).createWhiteSpaceFromText("\n")
+    return PsiParserFacade.getInstance(project).createWhiteSpaceFromText("\n")
   }
 
   fun createContract(@Language("Solidity") contractBody: String): SolContractDefinition {

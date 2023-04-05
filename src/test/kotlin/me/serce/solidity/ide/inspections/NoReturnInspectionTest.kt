@@ -131,4 +131,44 @@ class NoReturnInspectionTest : SolInspectionsTestBase(NoReturnInspection()) {
             }
         }
     """)
+
+  fun testAssignmentWithRequire() = checkByText("""
+        contract Test {
+            function testRequire(uint input) external returns (bool result) {
+                require((result = input > 0), "input must be greater than 0");
+            }
+        }
+    """)
+
+  fun testAssignmentWithTryCatch() = checkByText("""
+      interface ITest {
+          function test() external;
+      }
+
+      contract Test {
+          function testTryCatch() external returns (bool result) {
+              try ITest(0x0000000000000000000000000000000000000000).test() {
+                  result = true;
+              } catch {
+                  result = false;
+              }
+          }
+      }
+    """)
+
+  fun testReturnWithTryCatch() = checkByText("""
+      interface ITest {
+          function test() external;
+      }
+
+      contract Test {
+          function testTryCatch() external returns (bool) {
+              try ITest(0x0000000000000000000000000000000000000000).test() {
+                  return true;
+              } catch {
+                  return false;
+              }
+          }
+      }
+    """)
 }

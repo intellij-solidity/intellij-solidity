@@ -1,0 +1,6 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="JavaScript">
+        <nodeModulesIndexableFileNamesProvider
+                implementation="me.serce.solidity.lang.stubs.jsindexing.SolNodeModulesIndexableFileNamesProvider"/>
+    </extensions>
+</idea-plugin>

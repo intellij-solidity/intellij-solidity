@@ -18,10 +18,23 @@
 
     <change-notes><![CDATA[
       <p>
-        Thank you for your support!
-        <p>Huge thank you to all participants of the last GitCoin round, Yenwen Feng (@tempofeng), and LevX (@LevxApp) in particular! https://gitcoin.co/grants/1047/intellij-solidity!❤️</p>
-        <p>Huge thank you to all of you who sponsor the plugin development on GitHub, and Tyler Smith (@tyler-smith) and Kevin Upton (@kevupton) in particular!❤️</p>
+        Thank you for your support! Huge thank you to
+        <p>all participants of the last GitCoin round, Yenwen Feng (@tempofeng), and LevX (@LevxApp) in particular! https://gitcoin.co/grants/1047/intellij-solidity!❤️</p>
+        <p>all of you who sponsor the plugin development, @Lumyo and Tyler Smith (@tyler-smith) in particular!❤️</p>
 
+        <b>v2.4.0</b>
+        Note that the minimum supported IntelliJ version of this release is 2022.2.5.
+        <br/>
+        In this release:
+        <ul>
+          <li>Improve performance of resolving, yours @SerCeMan</li>
+          <li>Support user-defined operators, yours @SerCeMan</li>
+          <li>Code docs generation, thanks @mbolotov!</li>
+          <li>Fix built-in member access, thanks @mbolotov!</li>
+          <li>Resolve a for loop variable, thanks @mbolotov!</li>
+          <li>Fix function modifier rename refactoring, thanks @mbolotov!</li>
+          <li>Allow named parameters in mapping types, yours @SerCeMan</li>
+        </ul>
         <b>v2.3.11</b>
         In this release:
         <ul>
@@ -32,13 +45,6 @@
           <li>Add remappings.txt support for foundry, thanks @dyzz!</li>
           <li>Fix highlighting for payable, immutable, receive, fallback, and enum values, thanks @apottere!</li>
           <li>Resolve top-level Enums, Structs, Errors, and user-defined types, thanks @apottere!</li>
-        </ul>
-        <b>v2.3.10</b>
-        In this release:
-        <ul>
-          <li>Support returns in fallback functions, yours @SerCeMan</li>
-          <li>Support single-quoted unicode strings, yours @SerCeMan</li>
-          <li>Resolve the infinite recursion issue on resolve. The fix also provides performance improvements, yours @SerCeMan</li>
         </ul>
       </p>
     ]]>
@@ -51,7 +57,16 @@
     -->
     <idea-version since-build="222.4554.10"/>
 
+    <!-- See https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html for the full list of modules -->
     <depends>com.intellij.modules.lang</depends>
+    <!--
+        The below might not be strictly necessary, however, it's required as per
+        https://plugins.jetbrains.com/docs/intellij/webstorm.html#configuring-plugin-projects-targeting-webstorm
+        in order to include JavaScript.
+    -->
+    <depends>com.intellij.modules.platform</depends>
+    <!-- The dependency is necessary because JavaScript-aware IDEs exclude node_modules by default. -->
+    <depends optional="true" config-file="javascriptPlugin.xml">JavaScript</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <fileType name="Solidity file"

@@ -187,7 +187,29 @@ ConstantVariableDeclaration ::= TypeName MutationModifier Identifier ('=' Expres
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
 
-UsingForDeclaration ::= using ( UserDefinedTypeName | '{' UserDefinedTypeName (',' UserDefinedTypeName)* '}' ) for ('*' | TypeName) 'global'? ';' {
+
+/**
+ * Operators that users are allowed to implement for some types with `using for`.
+ */
+private UserDefinableOperator ::=
+	'&'
+	| '~'
+	| '|'
+	| '^'
+	| '+'
+	| '/'
+	| '%'
+	| '*'
+	| '-'
+	| '=='
+	| '>'
+	| '>='
+	| '<'
+	| '<='
+	| '!=';
+
+UsingForDeclaration ::= using ( UserDefinedTypeName |
+                               '{' UserDefinedTypeName (as UserDefinableOperator)? (',' UserDefinedTypeName (as UserDefinableOperator)? )* '}' ) for ('*' | TypeName) 'global'? ';' {
     pin=1
     implements = "me.serce.solidity.lang.psi.SolUsingForElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolUsingForMixin"
