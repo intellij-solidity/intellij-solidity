@@ -135,7 +135,7 @@ class ImportFileAction(
             }
             it.contains("lib$separator") -> {
               val idx = it.indexOf("lib$separator")
-              it.substring(idx + "lib$separator".length)
+              it.substring(idx + "lib$separator".length).replaceFirst("/src","")
             }
             it.contains("installed_contracts$separator") -> {
               val idx = it.indexOf("installed_contracts$separator")
