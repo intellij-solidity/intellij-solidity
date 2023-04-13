@@ -17,6 +17,7 @@ class SolInternalTypeFactory(project: Project) {
     listOf(
       msgType,
       txType,
+      abiType,
       blockType
     ).associateBy { it.toString() }
   }
@@ -80,6 +81,37 @@ class SolInternalTypeFactory(project: Project) {
     """)
   }
 
+  val abiType: SolContract by lazy {
+      contract("""
+        contract ${internalise("Abi")} {
+            /**
+            * ABI-decodes the given data, while the types are given in parentheses as second argument. Example: (uint a, uint[2] memory b, bytes memory c) = abi.decode(data, (uint, uint[2], bytes))
+            */
+            function decode(bytes memory encodedData) returns (data); 
+            /**
+            * ABI-encodes the given arguments
+            */        
+            function encode(data) returns (bytes memory);
+            /**
+            * Performs packed encoding of the given arguments. Note that packed encoding can be ambiguous! 
+            */        
+            function encodePacked(data) returns (bytes memory); 
+            /**
+            * ABI-encodes the given arguments starting from the second and prepends the given four-byte selector
+            */        
+            function encodeWithSelector(bytes4 selector) returns (bytes memory);
+            /**
+            * Equivalent to abi.encodeWithSelector(bytes4(keccak256(bytes(signature))), ...)
+            */        
+            function encodeWithSignature(string memory signature) returns (bytes memory);
+            /**
+            * ABI-encodes a call to functionPointer with the arguments found in the tuple. Performs a full type-check, ensuring the types match the function signature. Result equals abi.encodeWithSelector(functionPointer.selector, (...))                   @custom:no_validation
+            */        
+            function encodeCall(functionPointer) returns (bytes memory);
+            }
+      """)
+    }
+
 
   val arrayType: SolContract by lazy {
     contract("""
@@ -92,11 +124,11 @@ class SolInternalTypeFactory(project: Project) {
             /**
             * Dynamic storage arrays and <code>bytes</code> (not <code>string</code>) have a member function called <code>push()</code> that you can use to append a zero-initialised element at the end of the array. It returns a reference to the element, so that it can be used like <code>x.push().t = 2</code> or <code>x.push() = b</code>.
             */
-          function push();
+          function push() returns (Type);
             /**
             * Dynamic storage arrays and <code>bytes</code> (not <code>string</code>) have a member function called <code>push(x)</code> that you can use to append a given element at the end of the array. The function returns nothing.
             */
-          function push(uint value);
+          function push(Type value);
             /**
             * Dynamic storage arrays and <code>bytes</code> (not <code>string</code>) have a member function called <code>pop()</code> that you can use to remove an element from the end of the array. This also implicitly calls delete on the removed element. The function returns nothing.            
             */
@@ -143,6 +175,7 @@ class SolInternalTypeFactory(project: Project) {
       contract Global {
           $blockType block;
           $msgType msg;
+          $abiType abi;
           $txType tx;
 
           /**
