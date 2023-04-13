@@ -28,7 +28,7 @@ class SolDocumentationProviderTest : SolTestBase() {
                     abi.encode/*caret*/();
                 }
             }
-        """, """<div class='definition'><pre><b style='color:rgb(0,0,128)'>function</b> encode(<b style='color:rgb(0,0,128)'>data</b>)  <b style='color:rgb(0,0,128)'>returns</b> (<b style='color:rgb(0,0,128)'>bytes</b> <b style='color:rgb(0,0,128)'>memory</b>)</pre></div><div class='content'>ABI-encodes&nbsp;the&nbsp;given&nbsp;arguments</div>""")
+        """, """<div class='definition'><pre><b style='color:rgb(0,0,128)'>function</b> encode(<b style='color:rgb(0,0,128)'>data</b>)  <b style='color:rgb(0,0,128)'>returns</b> (<b style='color:rgb(0,0,128)'>bytes</b> <b style='color:rgb(0,0,128)'>memory</b>)</pre></div><div class='content'>&nbsp;ABI-encodes&nbsp;the&nbsp;given&nbsp;arguments</div>""")
 
   fun testTripleSlashDocs() = checkByText("""
           contract A {

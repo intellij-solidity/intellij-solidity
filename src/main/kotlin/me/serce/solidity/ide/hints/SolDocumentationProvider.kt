@@ -60,7 +60,7 @@ class SolDocumentationProvider : AbstractDocumentationProvider() {
     return builder.toString()
   }
 
-  private val keywordColors = SolHighlighter.keywords().plus(SolHighlighter.types()).filterNot { it == SolidityTokenTypes.RETURN }.map { it.debugName }
+  private val keywordColors = SolHighlighter.keywords().plus(SolHighlighter.types()).minus(SolidityTokenTypes.RETURN).map { it.toString() }
     .plus(setOf("u?int(\\d+)", "u?fixed(\\d+)", "bytes?(\\d+)", "error"))
     .joinToString("|", "\\b(", ")\\b").toRegex()
   private val col = SolColor.TYPE.textAttributesKey.defaultAttributes.foregroundColor
@@ -109,7 +109,7 @@ class SolDocumentationProvider : AbstractDocumentationProvider() {
               // replacing internal '*' characters which start a line
               val split = text.split("*").filter { it.isNotEmpty() }
               split.foldIndexed("") {i, a, t -> if (i == 0) a + t else {
-                  a + (if (split[i - 1].lastOrNull { it == '\n' || !it.isWhitespace() } == '\n') "" else "*") + t
+                  a.trimEnd(' ') + (if (split[i - 1].lastOrNull { it == '\n' || !it.isWhitespace() } == '\n') "" else "*") + t
                 } }
             }
             else -> text
