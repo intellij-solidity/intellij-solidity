@@ -2,6 +2,7 @@ package me.serce.solidity.ide.formatting
 
 import com.intellij.formatting.*
 import com.intellij.lang.ASTNode
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiComment
 import com.intellij.psi.TokenType
@@ -41,7 +42,14 @@ class SolFormattingBlock(
       blocks.add(e)
       child = child.treeNext
     }
+    if (astNode.treeParent == null) {
+      logger<SolFormattingBlock>().warn("blocks: ${blocks.print(0)}")
+    }
     return Collections.unmodifiableList(blocks)
+  }
+
+  fun List<Block>.print(ind: Int): String {
+    return joinToString("") {"\t".repeat(ind) + "${(it as? SolFormattingBlock)?.astNode?.let { if (it.textLength < 10) it.text else it.elementType  }} ${it.indent} \n${it.subBlocks.print(ind + 1) }"}
   }
 
   private fun buildSubBlock(child: ASTNode): Block {
@@ -69,7 +77,8 @@ class SolFormattingBlock(
       type == STRUCT_DEFINITION && childType == VARIABLE_DECLARATION -> Indent.getNormalIndent()
 
     // inside a block, list of parameters, etc..
-      parentType in listOf(BLOCK, ENUM_DEFINITION, YUL_BLOCK, PARAMETER_LIST, INDEXED_PARAMETER_LIST, MAP_EXPRESSION) -> Indent.getNormalIndent()
+      parentType in listOf(BLOCK, UNCHECKED_BLOCK, ENUM_DEFINITION, YUL_BLOCK, PARAMETER_LIST, INDEXED_PARAMETER_LIST,
+        MAP_EXPRESSION, SEQ_EXPRESSION) -> Indent.getNormalIndent(true)
 
     // all expressions inside parens should have indentation when lines are split
       parentType in listOf(IF_STATEMENT, WHILE_STATEMENT, DO_WHILE_STATEMENT, FOR_STATEMENT) && childType != BLOCK -> {
@@ -94,6 +103,7 @@ class SolFormattingBlock(
         Indent.getNoneIndent()
       }
     }
+    node.elementType == UNCHECKED_BLOCK -> Indent.getNormalIndent()
     else -> Indent.getNoneIndent()
   }
 
