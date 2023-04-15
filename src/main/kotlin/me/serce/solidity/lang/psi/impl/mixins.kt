@@ -171,7 +171,6 @@ abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefSt
       .map { it.text.uppercase() }
       .mapNotNull { safeValueOf<Visibility>(it) }
       .firstOrNull()
-      ?: Visibility.PUBLIC
 
   override fun getPossibleUsage(contextType: ContextType) =
     if (isPossibleToUse(contextType))
@@ -180,7 +179,7 @@ abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefSt
       null
 
   private fun isPossibleToUse(contextType: ContextType): Boolean {
-    val visibility = this.visibility
+    val visibility = this.visibility ?: Visibility.PUBLIC
     return visibility != Visibility.PRIVATE
       && !(visibility == Visibility.EXTERNAL && contextType == ContextType.SUPER)
       && !(visibility == Visibility.INTERNAL && contextType == ContextType.EXTERNAL)
@@ -236,7 +235,7 @@ abstract class SolStateVarDeclMixin : SolStubbedNamedElementImpl<SolStateVarDecl
   override fun parseType(): SolType = getSolType(typeName)
 
   override fun getPossibleUsage(contextType: ContextType): Usage? {
-    val visibility = this.visibility
+    val visibility = this.visibility ?: Visibility.INTERNAL
     return when {
         contextType == ContextType.SUPER || contextType == ContextType.BUILTIN -> Usage.VARIABLE
         contextType == ContextType.EXTERNAL && visibility == Visibility.PUBLIC -> Usage.CALLABLE
@@ -248,8 +247,8 @@ abstract class SolStateVarDeclMixin : SolStubbedNamedElementImpl<SolStateVarDecl
 
   override fun resolveElement() = this
 
-  override val visibility
-    get() = visibilityModifier?.text?.let { safeValueOf(it.uppercase()) } ?: Visibility.INTERNAL
+  override val visibility: Visibility?
+    get() = visibilityModifier?.text?.let { safeValueOf(it.uppercase()) }
 
   override val mutability: Mutability?
     get() = mutationModifier?.text?.let { safeValueOf(it.uppercase()) }

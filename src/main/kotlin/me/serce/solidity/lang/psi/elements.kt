@@ -41,7 +41,7 @@ interface SolCallableElement : SolCallable, SolNamedElement
 
 interface SolStateVarElement : SolMember, SolCallableElement {
   val visibilityModifier: SolVisibilityModifier?
-  val visibility: Visibility
+  val visibility: Visibility?
 
   val mutationModifier: SolMutationModifier?
   val mutability: Mutability?
@@ -56,7 +56,7 @@ interface SolFunctionDefElement : SolHasModifiersElement, SolMember, SolCallable
   val parameters: List<SolParameterDef>
   val returns: SolParameterList?
   val isConstructor: Boolean
-  val visibility: Visibility
+  val visibility: Visibility?
 }
 
 inline fun <reified T : Enum<*>> safeValueOf(name: String): T? =
