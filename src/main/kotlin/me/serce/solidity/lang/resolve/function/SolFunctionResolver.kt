@@ -9,8 +9,8 @@ import me.serce.solidity.lang.types.SolContract
 import me.serce.solidity.lang.types.getSolType
 
 object SolFunctionResolver {
-  fun collectOverriden(func: SolFunctionDefinition): Collection<SolFunctionDefinition> {
-    val contract = func.parentOfType<SolContractDefinition>() ?: return emptyList()
+  fun collectOverriden(func: SolFunctionDefinition, contract: SolContractDefinition? = func.parentOfType()): Collection<SolFunctionDefinition> {
+    contract ?: return emptyList()
     val parents = try {
       SolContract(contract).linearizeParents().map { it.ref }
     } catch (e: LinearizationImpossibleException) {

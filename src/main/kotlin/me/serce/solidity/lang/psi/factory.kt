@@ -17,6 +17,9 @@ class SolPsiFactory(val project: Project) {
 
   fun createStringLiteral(text: String) = LeafPsiElement(SolidityTokenTypes.STRINGLITERAL, text)
 
+  fun createFunction(@Language("Solidity") text: String) = createFromText<SolFunctionDefinition>(text)
+    ?: error("Failed to create function: `$text`")
+
   fun createStruct(structBody: String): SolStructDefinition {
     return createFromText("contract dummystruct$1 { $structBody }")
       ?: error("Failed to create struct: `$structBody`")
