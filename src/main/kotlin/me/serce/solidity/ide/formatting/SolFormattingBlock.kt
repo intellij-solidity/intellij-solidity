@@ -2,7 +2,6 @@ package me.serce.solidity.ide.formatting
 
 import com.intellij.formatting.*
 import com.intellij.lang.ASTNode
-import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiComment
 import com.intellij.psi.TokenType
@@ -42,14 +41,7 @@ class SolFormattingBlock(
       blocks.add(e)
       child = child.treeNext
     }
-    if (astNode.treeParent == null) {
-      logger<SolFormattingBlock>().warn("blocks: ${blocks.print(0)}")
-    }
     return Collections.unmodifiableList(blocks)
-  }
-
-  fun List<Block>.print(ind: Int): String {
-    return joinToString("") {"\t".repeat(ind) + "${(it as? SolFormattingBlock)?.astNode?.let { if (it.textLength < 10) it.text else it.elementType  }} ${it.indent} \n${it.subBlocks.print(ind + 1) }"}
   }
 
   private fun buildSubBlock(child: ASTNode): Block {
