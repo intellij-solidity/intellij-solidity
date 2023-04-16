@@ -73,6 +73,7 @@ class SolidityFormattingModelBuilder : FormattingModelBuilder {
         .beforeInside(IDENTIFIER, TokenSet.create(VARIABLE_DECLARATION, PARAMETER_LIST, INDEXED_PARAMETER_LIST)).spaces(1)
         .after(COMMA).spaces(1)
         .beforeInside(BLOCK, STATEMENT).spaces(1)
+        .beforeInside(UNCHECKED_BLOCK, STATEMENT).spaces(1)
         .beforeInside(LBRACE, CONTRACT_DEFINITION).spaces(1)
         // else on the same line as }
         .betweenInside(STATEMENT, ELSE, IF_STATEMENT).spaces(1)

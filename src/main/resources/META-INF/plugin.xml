@@ -195,6 +195,13 @@
                          level="ERROR"
                          implementationClass="me.serce.solidity.ide.inspections.ValidateFunctionArgumentsInspection"/>
 
+        <localInspection language="Solidity" groupName="Solidity"
+                         displayName="Visibility modifier not specified for a function or state variable"
+                         enabledByDefault="true"
+                         level="WEAK WARNING"
+                         implementationClass="me.serce.solidity.ide.inspections.VisibilityModifierInspection"/>
+
+
         <errorHandler implementation="me.serce.solidity.ide.SentryReportSubmitter"/>
 
         <defaultLiveTemplates file="/liveTemplates/Solidity.xml"/>
