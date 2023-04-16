@@ -190,6 +190,12 @@
                          implementationClass="me.serce.solidity.ide.inspections.LinearizationImpossibleInspection"/>
 
         <localInspection language="Solidity" groupName="Solidity"
+                         displayName="Function call arguments are not matched with the parameters of function definition"
+                         enabledByDefault="true"
+                         level="ERROR"
+                         implementationClass="me.serce.solidity.ide.inspections.ValidateFunctionArgumentsInspection"/>
+
+        <localInspection language="Solidity" groupName="Solidity"
                          displayName="Visibility modifier not specified for a function or state variable"
                          enabledByDefault="true"
                          level="WEAK WARNING"
