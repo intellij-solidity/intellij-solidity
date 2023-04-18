@@ -84,14 +84,13 @@ private fun getSolTypeFromUserDefinedTypeName(type: SolUserDefinedTypeName): Sol
 fun inferDeclType(decl: SolNamedElement): SolType {
   return when (decl) {
     is SolDeclarationItem -> {
-      val list = decl.findParent<SolDeclarationList>()
-      val def = list.findParent<SolVariableDefinition>()
+      val list = decl.findParent<SolDeclarationList>() ?: decl.findParent<SolTypedDeclarationList>() ?: return SolUnknown
+      val def = list.findParent<SolVariableDefinition>() ?: return SolUnknown
       val inferred = inferExprType(def.expression)
-      val index = list.declarationItemList.indexOf(decl)
-      when (inferred is SolTuple && index < inferred.types.size) {
-        true -> inferred.types[index]
-        else -> SolUnknown
-      }
+      val declarationItemList = (list as? SolDeclarationList)?.declarationItemList
+        ?: (list as? SolTypedDeclarationList)?.typedDeclarationItemList ?: return SolUnknown
+      val declIndex = declarationItemList.indexOf(decl)
+      (inferred as? SolTuple)?.types?.getOrNull(declIndex) ?: SolUnknown
     }
     is SolTypedDeclarationItem -> getSolType(decl.typeName)
     is SolVariableDeclaration -> {
@@ -129,10 +128,10 @@ fun inferRefType(ref: SolVarLiteral): SolType {
   }
 }
 
-inline fun <reified T : PsiElement> PsiElement.findParent(): T {
+inline fun <reified T : PsiElement> PsiElement.findParent(): T? {
   return this.ancestors
     .filterIsInstance<T>()
-    .first()
+    .firstOrNull()
 }
 
 inline fun <reified T : PsiElement> PsiElement.findParentOrNull(): T? {

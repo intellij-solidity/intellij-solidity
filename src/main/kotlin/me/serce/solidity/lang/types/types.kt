@@ -313,12 +313,7 @@ sealed class SolArray(val type: SolType) : SolType {
 
     override fun getMembers(project: Project): List<SolMember> {
       return SolInternalTypeFactory.of(project).arrayType.ref.let {
-             it.functionDefinitionList
-             .map {
-               val parameters = it.parseParameters()
-                 .map { pair -> pair.first to type }
-               BuiltinCallable(parameters, it.parseType(), it.name, it)
-             } + it.stateVariableDeclarationList
+             it.functionDefinitionList + it.stateVariableDeclarationList
            }
     }
   }
@@ -326,7 +321,7 @@ sealed class SolArray(val type: SolType) : SolType {
 
 object SolBytes : SolPrimitiveType {
   override fun isAssignableFrom(other: SolType): Boolean =
-    other == SolBytes
+    other == SolBytes || other == SolString
 
   override fun toString() = "bytes"
 }

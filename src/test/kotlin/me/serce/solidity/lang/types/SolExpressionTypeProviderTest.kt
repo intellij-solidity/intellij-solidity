@@ -74,17 +74,47 @@ class SolExpressionTypeProviderTest : SolTestBase() {
             function someFunction() returns (uint128, bool) {
                 return (1, true);
             }
-
+          
             function f() {
-                var (x, y) = someFunction();
-                y;
-              //^
+              var (x, y) = someFunction();
+              y;
+            //^
             }
         }
     """)
     val (expr, _) = findElementAndDataInEditor<SolExpression>()
     assertEquals("bool", expr.type.toString())
   }
+
+  fun testTupleFunctionResult2() {
+    InlineFile("""
+        contract A {
+            enum AA {}
+            enum BB {}
+            enum CC {}
+            function someFunction() returns (AA, BB, CC) {
+              return 0;
+            }
+          
+            function f() {
+              (AA x, BB y, CC z) = someFunction();
+              x;
+            //^
+              y;
+            //%
+              z;
+            //$
+            }
+        }
+    """)
+    val (exprX, _) = findElementAndDataInEditor<SolExpression>("^")
+    assertEquals("AA", exprX.type.toString())
+    val (exprY, _) = findElementAndDataInEditor<SolExpression>("%")
+    assertEquals("BB", exprY.type.toString())
+    val (exprZ, _) = findElementAndDataInEditor<SolExpression>("$")
+    assertEquals("CC", exprZ.type.toString())
+  }
+
 
   fun testFunctionParameter() = checkPrimitiveTypes { _, type ->
     """
