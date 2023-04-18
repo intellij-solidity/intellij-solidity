@@ -84,20 +84,13 @@ private fun getSolTypeFromUserDefinedTypeName(type: SolUserDefinedTypeName): Sol
 fun inferDeclType(decl: SolNamedElement): SolType {
   return when (decl) {
     is SolDeclarationItem -> {
-      val list = decl.findParent<SolDeclarationList>() ?: return SolUnknown
+      val list = decl.findParent<SolDeclarationList>() ?: decl.findParent<SolTypedDeclarationList>() ?: return SolUnknown
       val def = list.findParent<SolVariableDefinition>() ?: return SolUnknown
       val inferred = inferExprType(def.expression)
-      val declarationItemList = list.declarationItemList
+      val declarationItemList = (list as? SolDeclarationList)?.declarationItemList
+        ?: (list as? SolTypedDeclarationList)?.typedDeclarationItemList ?: return SolUnknown
       val declIndex = declarationItemList.indexOf(decl)
-      when (inferred is SolTuple && declIndex < inferred.types.size) {
-        true -> {
-          // a workaround when declarations are not correctly resolved
-          val hasTypeDeclarations = inferred.types.size * 2 == declarationItemList.size
-          val index = if (hasTypeDeclarations) (declIndex - 1) / 2 else declIndex
-          inferred.types.getOrNull(index) ?: SolUnknown
-        }
-        else -> SolUnknown
-      }
+      (inferred as? SolTuple)?.types?.getOrNull(declIndex) ?: SolUnknown
     }
     is SolTypedDeclarationItem -> getSolType(decl.typeName)
     is SolVariableDeclaration -> {
