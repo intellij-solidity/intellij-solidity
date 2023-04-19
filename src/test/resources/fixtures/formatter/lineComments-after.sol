@@ -5,6 +5,7 @@ contract comments {
     // I'm a function level line comment
     function comments(){
         // I'm a block level line comment
+        int i = 1; // I'm comment on the same line with a statement
     }
 
     function comments1(){}
