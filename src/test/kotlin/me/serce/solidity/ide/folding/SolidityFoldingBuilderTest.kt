@@ -7,7 +7,8 @@ class SolidityFoldingBuilderTest  : SolTestBase() {
 
   fun testComments() = doTest()
   // TODO: fix natspec folding
-  // fun testNatSpec() = doTest()
+// fun testNatSpec() = doTest()
+  fun testElements() = doTest()
 
   private fun doTest() {
     myFixture.testFolding("${testDataPath}/$fileName")
