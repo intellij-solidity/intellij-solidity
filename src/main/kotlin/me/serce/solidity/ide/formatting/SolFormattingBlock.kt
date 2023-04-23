@@ -68,6 +68,8 @@ class SolFormattingBlock(
     // fields inside structs
       type == STRUCT_DEFINITION && childType == VARIABLE_DECLARATION -> Indent.getNormalIndent()
 
+      type == TERNARY_EXPRESSION -> Indent.getNormalIndent()
+
     // inside a block, list of parameters, etc..
       parentType in listOf(BLOCK, UNCHECKED_BLOCK, ENUM_DEFINITION, YUL_BLOCK, PARAMETER_LIST, INDEXED_PARAMETER_LIST,
         MAP_EXPRESSION, SEQ_EXPRESSION) -> Indent.getNormalIndent()
@@ -76,7 +78,6 @@ class SolFormattingBlock(
       parentType in listOf(IF_STATEMENT, WHILE_STATEMENT, DO_WHILE_STATEMENT, FOR_STATEMENT) && childType != BLOCK -> {
         Indent.getNormalIndent()
       }
-
 
       // all function calls
       parentType in listOf(FUNCTION_INVOCATION) -> Indent.getNormalIndent()
@@ -96,6 +97,7 @@ class SolFormattingBlock(
       }
     }
     node.elementType == UNCHECKED_BLOCK -> Indent.getNormalIndent()
+    node.elementType == TERNARY_EXPRESSION -> Indent.getNormalIndent()
     else -> Indent.getNoneIndent()
   }
 

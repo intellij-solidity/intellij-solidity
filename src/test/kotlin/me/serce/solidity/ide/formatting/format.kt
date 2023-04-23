@@ -4,10 +4,8 @@ import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.psi.PsiElement
 import com.intellij.psi.codeStyle.CodeStyleManager
-
-import java.io.File
-
 import me.serce.solidity.utils.SolLightPlatformCodeInsightFixtureTestCase
+import java.io.File
 
 class SolidityFormattingTest : SolLightPlatformCodeInsightFixtureTestCase() {
   private fun doTest() {
@@ -29,6 +27,7 @@ class SolidityFormattingTest : SolLightPlatformCodeInsightFixtureTestCase() {
   fun testAssembly() = this.doTest()
   fun testInsideParens() = this.doTest()
   fun testIf() = this.doTest()
+  fun testTernary() = this.doTest()
   fun testLineComments() = this.doTest()
   fun testContract() = this.doTest()
   fun testVoting() = this.doTest()
