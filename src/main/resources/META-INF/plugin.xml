@@ -138,6 +138,7 @@
         <definitionsScopedSearch implementation="me.serce.solidity.ide.navigation.SolContractImplementationSearcher"/>
 
         <lang.foldingBuilder language="Solidity" implementationClass="me.serce.solidity.ide.SolidityFoldingBuilder"/>
+        <customFoldingProvider implementation="me.serce.solidity.ide.VisualStudioCustomFoldingProvider"/>
 
         <lang.findUsagesProvider language="Solidity" implementationClass="me.serce.solidity.ide.SolFindUsagesProvider"/>
 
@@ -200,7 +201,6 @@
                          enabledByDefault="true"
                          level="WEAK WARNING"
                          implementationClass="me.serce.solidity.ide.inspections.VisibilityModifierInspection"/>
-
 
         <errorHandler implementation="me.serce.solidity.ide.SentryReportSubmitter"/>
 
