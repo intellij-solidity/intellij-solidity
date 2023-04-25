@@ -68,8 +68,6 @@ class SolFormattingBlock(
     // fields inside structs
       type == STRUCT_DEFINITION && childType == VARIABLE_DECLARATION -> Indent.getNormalIndent()
 
-      type == TERNARY_EXPRESSION -> Indent.getNormalIndent()
-
     // ternary expression
       childType == TERNARY_EXPRESSION -> Indent.getNormalIndent()
       type == TERNARY_EXPRESSION -> if (astNode.firstChildNode == child) Indent.getNoneIndent() else Indent.getNormalIndent()
