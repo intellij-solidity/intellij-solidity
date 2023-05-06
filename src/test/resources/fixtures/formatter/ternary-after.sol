@@ -5,5 +5,13 @@ contract A {
             : d
                 ? e
                 : f;
+
+        return (
+            a,
+            b == c
+                ? d
+                : e,
+            f
+        );
     }
 }

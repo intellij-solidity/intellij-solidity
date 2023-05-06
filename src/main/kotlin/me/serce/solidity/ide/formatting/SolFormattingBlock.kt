@@ -68,7 +68,9 @@ class SolFormattingBlock(
     // fields inside structs
       type == STRUCT_DEFINITION && childType == VARIABLE_DECLARATION -> Indent.getNormalIndent()
 
-      type == TERNARY_EXPRESSION -> Indent.getNormalIndent()
+    // ternary expression
+      childType == TERNARY_EXPRESSION -> Indent.getNormalIndent()
+      type == TERNARY_EXPRESSION -> if (astNode.firstChildNode == child) Indent.getNoneIndent() else Indent.getNormalIndent()
 
     // inside a block, list of parameters, etc..
       parentType in listOf(BLOCK, UNCHECKED_BLOCK, ENUM_DEFINITION, YUL_BLOCK, PARAMETER_LIST, INDEXED_PARAMETER_LIST,
