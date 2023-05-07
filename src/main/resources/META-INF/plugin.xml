@@ -22,6 +22,18 @@
         <p>all participants of the last GitCoin round, Yenwen Feng (@tempofeng), and LevX (@LevxApp) in particular! https://gitcoin.co/grants/1047/intellij-solidity!❤️</p>
         <p>all of you who sponsor the plugin development, @Lumyo and Tyler Smith (@tyler-smith) in particular!❤️</p>
 
+        <b>v2.4.1</b>
+        In this release:
+        <ul>
+          <li>Custom folding regions, thanks @mbolotov!</li>
+          <li>New function call argument validation inspection, thanks @mbolotov!</li>
+          <li>New visibility modifier inspection, thanks @mbolotov!</li>
+          <li>Multiple formatting improvements, thanks @mbolotov!</li>
+          <li>Type inference improvements, thanks @mbolotov!</li>
+          <li>Grammar fixes, thanks @mbolotov!</li>
+          <li>Code docs generator, thanks @mbolotov!</li>
+          <li>No-return inspection fixes, thanks @t-kameyama!</li>
+        </ul>
         <b>v2.4.0</b>
         Note that the minimum supported IntelliJ version of this release is 2022.2.5.
         <br/>
@@ -34,17 +46,6 @@
           <li>Resolve a for loop variable, thanks @mbolotov!</li>
           <li>Fix function modifier rename refactoring, thanks @mbolotov!</li>
           <li>Allow named parameters in mapping types, yours @SerCeMan</li>
-        </ul>
-        <b>v2.3.11</b>
-        In this release:
-        <ul>
-          <li>Allow destructuring inside try-catch block, yours @SerCeMan</li>
-          <li>Fix block comment parsing when it includes /*/, yours @SerCeMan</li>
-          <li>Support adding "Live Templates", thanks @carter-ya!</li>
-          <li>Support create smart contract interface, thanks @carter-ya!</li>
-          <li>Add remappings.txt support for foundry, thanks @dyzz!</li>
-          <li>Fix highlighting for payable, immutable, receive, fallback, and enum values, thanks @apottere!</li>
-          <li>Resolve top-level Enums, Structs, Errors, and user-defined types, thanks @apottere!</li>
         </ul>
       </p>
     ]]>
