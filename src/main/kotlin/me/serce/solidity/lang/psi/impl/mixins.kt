@@ -111,9 +111,49 @@ abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrL
     }
 }
 
-abstract class SolConstructorDefMixin(node: ASTNode) : SolElementImpl(node), SolConstructorDefinition {
+abstract class SolConstructorDefMixin(node: ASTNode) : SolElementImpl(node), SolConstructorDefinition, SolFunctionDefElement {
   override val referenceNameElement: PsiElement
     get() = this
+
+  override val modifiers: List<SolModifierInvocation>
+    get() = findChildrenByType(MODIFIER_INVOCATION)
+
+  override val parameters: List<SolParameterDef>
+    get() = findChildByType<SolParameterList>(PARAMETER_LIST)
+      ?.children
+      ?.filterIsInstance(SolParameterDef::class.java)
+      ?: emptyList()
+
+  override fun parseParameters(): List<Pair<String?, SolType>> {
+    return parameters.map { it.identifier?.text to getSolType(it.typeName) }
+  }
+
+  override val callablePriority = 100
+
+  override fun parseType(): SolType {
+    return contract?.let { SolContract( it ) } ?: SolUnknown
+  }
+
+  override val visibility
+    get() = functionVisibilitySpecifierList
+      .map { it.text.uppercase() }
+      .mapNotNull { safeValueOf<Visibility>(it) }
+      .firstOrNull()
+
+  override fun getPossibleUsage(contextType: ContextType) = Usage.CALLABLE
+
+  override fun resolveElement() = this
+
+  override val returns: SolParameterList?
+    get() = null
+
+  override val contract: SolContractDefinition?
+    get() = this.ancestors.asSequence()
+      .filterIsInstance<SolContractDefinition>()
+      .firstOrNull()
+
+  override val isConstructor: Boolean
+    get() = true
 
   override val referenceName: String
     get() = "constructor"
@@ -213,7 +253,6 @@ abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefSt
 
   override fun getIcon(flags: Int) = SolidityIcons.FUNCTION
 }
-
 abstract class SolModifierDefMixin : SolStubbedNamedElementImpl<SolModifierDefStub>, SolModifierDefinition {
   override val contract: SolContractDefinition
     get() = ancestors.firstInstance()
