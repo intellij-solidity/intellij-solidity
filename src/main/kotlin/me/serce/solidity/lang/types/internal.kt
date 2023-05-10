@@ -86,26 +86,32 @@ class SolInternalTypeFactory(project: Project) {
         contract ${internalise("Abi")} {
             /**
             * ABI-decodes the given data, while the types are given in parentheses as second argument. Example: (uint a, uint[2] memory b, bytes memory c) = abi.decode(data, (uint, uint[2], bytes))
+            * @custom:no_validation
             */
             function decode(bytes memory encodedData) returns (data); 
             /**
             * ABI-encodes the given arguments
+            * @custom:no_validation
             */        
             function encode(data) returns (bytes memory);
             /**
             * Performs packed encoding of the given arguments. Note that packed encoding can be ambiguous! 
+            * @custom:no_validation
             */        
             function encodePacked(data) returns (bytes memory); 
             /**
             * ABI-encodes the given arguments starting from the second and prepends the given four-byte selector
+            * @custom:no_validation
             */        
             function encodeWithSelector(bytes4 selector) returns (bytes memory);
             /**
             * Equivalent to abi.encodeWithSelector(bytes4(keccak256(bytes(signature))), ...)
+            * @custom:no_validation
             */        
             function encodeWithSignature(string memory signature) returns (bytes memory);
             /**
-            * ABI-encodes a call to functionPointer with the arguments found in the tuple. Performs a full type-check, ensuring the types match the function signature. Result equals abi.encodeWithSelector(functionPointer.selector, (...))                   @custom:no_validation
+            * ABI-encodes a call to functionPointer with the arguments found in the tuple. Performs a full type-check, ensuring the types match the function signature. Result equals abi.encodeWithSelector(functionPointer.selector, (...))                   
+            * @custom:no_validation
             */        
             function encodeCall(functionPointer) returns (bytes memory);
             }
