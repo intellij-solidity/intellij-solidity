@@ -4,6 +4,7 @@ struct A {
 int b;
 }
 function ident(){
+var y;
 _;
 {{}}
 }
