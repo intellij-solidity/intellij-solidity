@@ -6,6 +6,13 @@ contract A {
             * d
             / (d + c);
 
+        uint e2 =
+            a
+            * 10 ** b
+            * c
+            * d
+            / (d + c);
+
         f = a
             * 10 ** b
             * c

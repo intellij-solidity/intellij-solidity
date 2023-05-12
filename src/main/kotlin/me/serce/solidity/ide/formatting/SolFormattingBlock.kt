@@ -2,8 +2,10 @@ package me.serce.solidity.ide.formatting
 
 import com.intellij.formatting.*
 import com.intellij.lang.ASTNode
+import com.intellij.openapi.editor.Document
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiComment
+import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.TokenType
 import com.intellij.psi.codeStyle.CodeStyleSettings
 import com.intellij.psi.formatter.FormatterUtil
@@ -24,6 +26,7 @@ open class SolFormattingBlock(
 ) : ASTBlock {
   private val nodeSubBlocks: List<Block> by lazy { buildSubBlocks().let { if (extra) it + SyntheticSolFormattingBlock(this) else it } }
   private val isNodeIncomplete: Boolean by lazy { FormatterUtil.isIncomplete(node) }
+  private val doc: Document? by lazy { (astNode.psi)?.let { PsiDocumentManager.getInstance(it.project).getDocument(it.containingFile) } }
 
   override fun getSubBlocks(): List<Block> = nodeSubBlocks
 
@@ -47,13 +50,20 @@ open class SolFormattingBlock(
     return Collections.unmodifiableList(blocks)
   }
 
+  private val binaryExpressionTypes = setOf(OR_EXPRESSION, AND_EXPRESSION, EQ_EXPRESSION, COMP_EXPRESSION, OR_OP_EXPRESSION,
+    XOR_OP_EXPRESSION, AND_OP_EXPRESSION, SHIFT_EXPRESSION, PLUS_MIN_EXPRESSION, MULT_DIV_EXPRESSION, EXPONENT_EXPRESSION)
+
   private fun buildSubBlock(child: ASTNode): Block {
     var enforceChildIndent = isEnforceChildIndent
     val childType = child.elementType
     val type = astNode.elementType
     val parent = astNode.treeParent
     val parentType = parent?.elementType
-    if (type == FUNCTION_INVOCATION || type == SEQ_EXPRESSION) enforceChildIndent = false
+    if (type == FUNCTION_INVOCATION || type == SEQ_EXPRESSION ||
+      parent != null && type in binaryExpressionTypes &&
+      doc?.let { it.getLineNumber(parent.startOffset) != it.getLineNumber(astNode.startOffset) } == true) {
+      enforceChildIndent = false
+    }
     val result = when {
       child is PsiComment && type in setOf(
         CONTRACT_DEFINITION,
@@ -77,7 +87,7 @@ open class SolFormattingBlock(
 
       // inside a block, list of parameters, etc..
       parentType in setOf(BLOCK, UNCHECKED_BLOCK, ENUM_DEFINITION, YUL_BLOCK, PARAMETER_LIST, INDEXED_PARAMETER_LIST,
-        MAP_EXPRESSION, SEQ_EXPRESSION, TYPED_DECLARATION_LIST) -> Indent.getNormalIndent()
+        MAP_EXPRESSION, SEQ_EXPRESSION, TYPED_DECLARATION_LIST, RETURN_ST) -> Indent.getNormalIndent()
 
       // all expressions inside parens should have indentation when lines are split
       parentType in setOf(IF_STATEMENT, WHILE_STATEMENT, DO_WHILE_STATEMENT, FOR_STATEMENT) && childType != BLOCK -> {
@@ -92,6 +102,8 @@ open class SolFormattingBlock(
         enforceChildIndent = true
         Indent.getNormalIndent()
       }
+
+      type == FUNCTION_INVOCATION && parent?.treeParent?.elementType == MAP_EXPRESSION_CLAUSE && childType in setOf(FUNCTION_CALL_ARGUMENTS, LPAREN, RPAREN) -> Indent.getNormalIndent()
 
       else -> if (enforceChildIndent) Indent.getNormalIndent() else Indent.getNoneIndent()
     }
@@ -121,7 +133,7 @@ open class SolFormattingBlock(
   override fun getAlignment(): Alignment? = alignment
 
   override fun getSpacing(child1: Block?, child2: Block): Spacing? {
-    if ( (child2 as? SolFormattingBlock)?.astNode?.elementType == COMMENT ) {
+    if ((child2 as? SolFormattingBlock)?.astNode?.elementType == COMMENT) {
       // SpacingBuilder does not allow to use the KeepingFirstColumnSpacing option, so calling it directly
       return Spacing.createKeepingFirstColumnSpacing(0, Int.MAX_VALUE, true, 1)
     }

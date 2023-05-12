@@ -18,6 +18,14 @@ A a
   b: "2"
   });
 
+  callFunction({
+  a: 1,
+  b: callMe(
+  1,
+  2
+  )
+  });
+
   if (a == 1 && b == 2)
   callMe(1,2);
   if (
