@@ -47,13 +47,16 @@ open class SolFormattingBlock(
     return Collections.unmodifiableList(blocks)
   }
 
+  private val binaryExpressionTypes = setOf(OR_EXPRESSION, AND_EXPRESSION, EQ_EXPRESSION, COMP_EXPRESSION, OR_OP_EXPRESSION,
+    XOR_OP_EXPRESSION, AND_OP_EXPRESSION, SHIFT_EXPRESSION, PLUS_MIN_EXPRESSION, MULT_DIV_EXPRESSION, EXPONENT_EXPRESSION)
+
   private fun buildSubBlock(child: ASTNode): Block {
     var enforceChildIndent = isEnforceChildIndent
     val childType = child.elementType
     val type = astNode.elementType
     val parent = astNode.treeParent
     val parentType = parent?.elementType
-    if (type == FUNCTION_INVOCATION || type == SEQ_EXPRESSION) enforceChildIndent = false
+    if (type == FUNCTION_INVOCATION || type == SEQ_EXPRESSION || type in binaryExpressionTypes) enforceChildIndent = false
     val result = when {
       child is PsiComment && type in setOf(
         CONTRACT_DEFINITION,
@@ -77,7 +80,7 @@ open class SolFormattingBlock(
 
       // inside a block, list of parameters, etc..
       parentType in setOf(BLOCK, UNCHECKED_BLOCK, ENUM_DEFINITION, YUL_BLOCK, PARAMETER_LIST, INDEXED_PARAMETER_LIST,
-        MAP_EXPRESSION, SEQ_EXPRESSION, TYPED_DECLARATION_LIST) -> Indent.getNormalIndent()
+        MAP_EXPRESSION, SEQ_EXPRESSION, TYPED_DECLARATION_LIST, RETURN_ST) -> Indent.getNormalIndent()
 
       // all expressions inside parens should have indentation when lines are split
       parentType in setOf(IF_STATEMENT, WHILE_STATEMENT, DO_WHILE_STATEMENT, FOR_STATEMENT) && childType != BLOCK -> {
