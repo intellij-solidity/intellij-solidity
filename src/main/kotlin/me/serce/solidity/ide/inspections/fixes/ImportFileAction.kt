@@ -19,6 +19,7 @@ import me.serce.solidity.lang.psi.SolPragmaDirective
 import me.serce.solidity.lang.psi.SolPsiFactory
 import me.serce.solidity.nullIfError
 import java.awt.BorderLayout
+import java.io.File
 import java.nio.file.Paths
 import javax.swing.Icon
 import javax.swing.JPanel
@@ -126,7 +127,7 @@ class ImportFileAction(
 
     fun buildImportPath(source: VirtualFile, destination: VirtualFile): String {
       return Paths.get(source.path).parent.relativize(Paths.get(destination.path)).toString().let {
-        val separator = "/"
+        val separator = File.separator
         when {
             it.contains("node_modules$separator") -> {
               val idx = it.indexOf("node_modules$separator")
