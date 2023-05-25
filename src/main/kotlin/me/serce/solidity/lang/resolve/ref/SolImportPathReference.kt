@@ -4,6 +4,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiManager
 import com.intellij.psi.impl.source.tree.LeafElement
+import me.serce.solidity.ide.inspections.fixes.ImportFileAction
 import me.serce.solidity.lang.core.SolidityFile
 import me.serce.solidity.lang.psi.impl.SolImportPathElement
 import java.nio.file.Paths;
@@ -120,5 +121,12 @@ class SolImportPathReference(element: SolImportPathElement) : SolReferenceBase<S
     }
     val newImportPath = currentPath.replace(name, newName)
     identifier.replaceWithText(newImportPath)
+  }
+
+  override fun bindToElement(element: PsiElement): PsiElement {
+    val file = element as? SolidityFile ?: return element
+    val newPath = ImportFileAction.buildImportPath(this.element.containingFile.virtualFile, file.virtualFile)
+    val identifier = this.element.referenceNameElement as? LeafElement ?: return element
+    return identifier.replaceWithText("\"$newPath\"").psi ?: element
   }
 }
