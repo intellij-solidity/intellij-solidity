@@ -7,10 +7,12 @@ import com.intellij.openapi.progress.EmptyProgressIndicator
 import com.intellij.openapi.progress.util.ProgressIndicatorUtils
 import com.intellij.openapi.util.Condition
 import com.intellij.psi.PsiElement
+import com.intellij.psi.search.GlobalSearchScope.FilesScope
 import com.intellij.psi.search.searches.DefinitionsScopedSearch.SearchParameters
 import com.intellij.psi.search.searches.ReferencesSearch
 import com.intellij.util.Processor
 import com.intellij.util.Query
+import me.serce.solidity.lang.SolidityFileType
 import me.serce.solidity.lang.psi.SolContractDefinition
 import me.serce.solidity.lang.psi.SolInheritanceSpecifier
 import java.util.*
@@ -66,7 +68,8 @@ private fun findAllImplementationsInAction(
 }
 
 fun SolContractDefinition.findImplementations(): Query<SolContractDefinition> {
-  return ReferencesSearch.search(this, this.useScope)
+  val solOnlyScope = this.useScope.intersectWith(FilesScope.getScopeRestrictedByFileTypes(this.resolveScope, SolidityFileType))
+  return ReferencesSearch.search(this, solOnlyScope)
     .mapQuery { it.element.parent }
     .filterIsInstanceQuery<SolInheritanceSpecifier>()
     .mapQuery { it.parent }
