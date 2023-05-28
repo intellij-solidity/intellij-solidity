@@ -145,7 +145,7 @@ class ImportFileAction(
             !it.startsWith(".") -> ".$separator$it"
             else -> it
         }
-      }
+      }.replace("\\", "/")
     }
   }
 }
