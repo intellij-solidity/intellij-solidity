@@ -6,6 +6,7 @@ contract ident {
     }
 
     function ident(){
+        var y;
         _;
         {{}}
     }
