@@ -149,6 +149,7 @@ fun inferExprType(expr: SolExpression?): SolType {
         ?: expr.booleanLiteral?.let { SolBoolean }
         ?: expr.stringLiteral?.let { SolString }
         ?: expr.numberLiteral?.let { SolInteger.inferType(it) }
+        ?: expr.hexLiteral?.let { SolInteger.inferType(it) }
         ?: expr.elementaryTypeName?.let { getSolType(it) }
         ?: SolUnknown
     }

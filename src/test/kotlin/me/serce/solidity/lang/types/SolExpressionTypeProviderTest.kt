@@ -3,6 +3,7 @@ package me.serce.solidity.lang.types
 import me.serce.solidity.lang.psi.SolExpression
 import me.serce.solidity.utils.SolTestBase
 import org.intellij.lang.annotations.Language
+import org.junit.Assert
 
 class SolExpressionTypeProviderTest : SolTestBase() {
   private fun checkPrimitiveTypes(inference: Boolean = false, @Language("Solidity") codeProvider: (String, String) -> String) {
@@ -346,5 +347,52 @@ class SolExpressionTypeProviderTest : SolTestBase() {
     InlineFile(code)
     val (expr, expectedType) = findElementAndDataInEditor<SolExpression>()
     assertEquals(msg, expectedType, deInternalise(expr.type.toString()))
+  }
+
+  fun testHexLiteralCast() {
+    val bytes2 = SolFixedBytes(2)
+    val bytes4 = SolFixedBytes(4)
+
+    Assert.assertTrue(SolFixedBytes(32).isAssignableFrom("0x0011110213213234234234232443534234234345345345213423442354242342".inferType()))
+
+    // the following is the cases form the official documentation
+    // bytes2 = 54321 // not allowed
+    Assert.assertFalse(bytes2.isAssignableFrom("54321".inferType()))
+    // bytes2 = 0x12 // not allowed
+    Assert.assertFalse(bytes2.isAssignableFrom("0x12".inferType()))
+    // bytes2 = 0x123 // not allowed
+    Assert.assertFalse(bytes2.isAssignableFrom("0x123".inferType()))
+    // bytes2 = 0x1234 // fine
+    Assert.assertTrue(bytes2.isAssignableFrom("0x1234".inferType()))
+    // bytes2 = 0x0012 // fine
+    Assert.assertTrue(bytes2.isAssignableFrom("0x0012".inferType()))
+    // bytes4 = 0 // fine
+    Assert.assertTrue(bytes4.isAssignableFrom("0".inferType()))
+    // bytes4 = 0x0 // fine
+    Assert.assertTrue(bytes4.isAssignableFrom("0x0".inferType()))
+    // bytes2 a = hex"1234"; // fine
+    Assert.assertTrue(bytes2.isAssignableFrom("hex\"1234\"".inferType()))
+    // bytes2 b = "xy"; // fine
+    // todo enable string to fixed bytes cast
+    // Assert.assertTrue(bytes2.isAssignableFrom("\"xy\"".inferType()))
+    // bytes2 c = hex"12"; // not allowed
+    Assert.assertFalse(bytes2.isAssignableFrom("hex\"12\"".inferType()))
+    // bytes2 d = hex"123"; // not allowed
+    Assert.assertFalse(bytes2.isAssignableFrom("hex\"123\"".inferType()))
+    // bytes2 e = "x"; // not allowed
+    Assert.assertFalse(bytes2.isAssignableFrom("\"x\"".inferType()))
+    // bytes2 f = "xyz"; // not allowed
+    Assert.assertFalse(bytes2.isAssignableFrom("\"xyz\"".inferType()))
+  }
+
+  private fun String.inferType(): SolType {
+    InlineFile("""
+                function f() {
+                    ${this};
+                  //^
+                }
+        """)
+    val (expr, _) = findElementAndDataInEditor<SolExpression>()
+    return expr.type
   }
 }

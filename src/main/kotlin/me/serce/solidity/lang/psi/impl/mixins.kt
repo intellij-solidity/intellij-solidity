@@ -329,7 +329,7 @@ abstract class SolFunctionCallMixin(node: ASTNode) : SolNamedElementImpl(node), 
   private fun getReferenceNameElement(expr: SolExpression): PsiElement {
     return when (expr) {
       is SolPrimaryExpression ->
-        expr.varLiteral ?: expr.elementaryTypeName!!
+        expr.varLiteral ?: expr.stringLiteral ?: expr.numberLiteral ?: expr.hexLiteral ?: expr.booleanLiteral ?: expr.elementaryTypeName ?: expr.firstChild
       is SolMemberAccessExpression ->
         expr.identifier!!
       is SolFunctionCallExpression ->
