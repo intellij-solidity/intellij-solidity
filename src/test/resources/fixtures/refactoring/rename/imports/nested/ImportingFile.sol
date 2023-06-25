@@ -1,5 +1,5 @@
 import "../Lab.sol";
 
 contract IUseLab {
-  Lab lab;
+  Lab1 lab;
 }

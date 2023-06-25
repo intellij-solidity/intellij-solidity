@@ -87,6 +87,9 @@
 
         <renamePsiElementProcessor implementation="me.serce.solidity.ide.refactoring.RenameContractProcessor"/>
         <renamePsiElementProcessor implementation="me.serce.solidity.ide.refactoring.RenameConstructorProcessor"/>
+        <renamePsiElementProcessor implementation="me.serce.solidity.ide.refactoring.SolRenameFileProcessor"/>
+        <refactoring.moveHandler implementation="me.serce.solidity.ide.refactoring.SolMoveHandler" order="first"/>
+
 
         <!-- Commenter -->
         <lang.commenter language="Solidity" implementationClass="me.serce.solidity.ide.SolCommenter"/>
