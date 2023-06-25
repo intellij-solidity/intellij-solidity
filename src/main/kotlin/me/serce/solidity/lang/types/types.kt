@@ -83,7 +83,11 @@ object SolAddress : SolPrimitiveType {
 
 }
 
-data class SolInteger(val unsigned: Boolean, val size: Int) : SolNumeric {
+enum class NumericLiteralType {
+  HEX, DECIMAL, SCIENTIFIC, ZERO
+}
+
+data class SolInteger(val unsigned: Boolean, val size: Int, val digitCount: Int? = null, val literalType: NumericLiteralType? = null) : SolNumeric {
   companion object {
     val UINT_160 = SolInteger(true, 160)
     val UINT_256 = SolInteger(true, 256)
@@ -111,11 +115,18 @@ data class SolInteger(val unsigned: Boolean, val size: Int) : SolNumeric {
     }
 
     fun inferType(numberLiteral: SolNumberLiteral): SolInteger {
-      return inferIntegerType(numberLiteral.toBigInteger())
+      return inferIntegerType(numberLiteral.parseLiteral())
     }
 
-    private fun inferIntegerType(value: BigInteger): SolInteger {
-      if (value == BigInteger.ZERO) return SolInteger(true, 8)
+    fun inferType(numberLiteral: SolHexLiteral): SolInteger {
+      val withoutPrefix = numberLiteral.text.substring(3).removeSurrounding("\"").removeSurrounding("'")
+      val parse = LiteralParseResult(withoutPrefix.toBigInteger(16), NumericLiteralType.HEX, withoutPrefix.length)
+      return inferIntegerType(parse)
+    }
+
+    private fun inferIntegerType(parseResult: LiteralParseResult): SolInteger {
+      val value = parseResult.value
+      if (value == BigInteger.ZERO) return SolInteger(true, 8, 1, NumericLiteralType.ZERO)
       val positive = value >= BigInteger.ZERO
       if (positive) {
         var shifts = 0
@@ -124,7 +135,7 @@ data class SolInteger(val unsigned: Boolean, val size: Int) : SolNumeric {
           shifts++
           current = current.shiftRight(8)
         }
-        return SolInteger(positive, shifts * 8)
+        return SolInteger(positive, shifts * 8, parseResult.digitCount, parseResult.type)
       } else {
         var shifts = 1
         var current = value.abs().minus(BigInteger.ONE).shiftRight(7)
@@ -132,22 +143,25 @@ data class SolInteger(val unsigned: Boolean, val size: Int) : SolNumeric {
           shifts++
           current = current.shiftRight(8)
         }
-        return SolInteger(positive, shifts * 8)
+        return SolInteger(positive, shifts * 8, parseResult.digitCount, parseResult.type)
       }
     }
 
-    private fun SolNumberLiteral.toBigInteger(): BigInteger {
+    private class LiteralParseResult(val value: BigInteger, val type: NumericLiteralType, val digitCount: Int? = null)
+
+    private fun SolNumberLiteral.parseLiteral(): LiteralParseResult  {
       this.decimalNumber?.let {
-        return it.text.replace("_", "").toBigInteger()
+        return LiteralParseResult(it.text.replace("_", "").toBigInteger(), NumericLiteralType.DECIMAL)
       }
       this.hexNumber?.let {
-        return it.text.removePrefix("0x").toBigInteger(16)
+        val withoutPrefix = it.text.removePrefix("0x")
+        return LiteralParseResult(withoutPrefix.toBigInteger(16), NumericLiteralType.HEX, withoutPrefix.length)
       }
       this.scientificNumber?.let {
-        return it.text.replace("_", "").lowercase().toBigDecimal().toBigInteger()
+        return LiteralParseResult(it.text.replace("_", "").lowercase().toBigDecimal().toBigInteger(), NumericLiteralType.SCIENTIFIC)
       }
       //todo
-      return BigInteger.ZERO
+      return LiteralParseResult(BigInteger.ZERO, NumericLiteralType.ZERO)
     }
   }
 
@@ -329,8 +343,11 @@ object SolBytes : SolPrimitiveType {
 data class SolFixedBytes(val size: Int): SolPrimitiveType {
   override fun toString() = "bytes$size"
 
-  override fun isAssignableFrom(other: SolType): Boolean =
-    other is SolFixedBytes && other.size <= size
+  override fun isAssignableFrom(other: SolType): Boolean {
+    return other is SolFixedBytes && other.size <= size ||
+      other is SolInteger &&
+      (other.literalType == NumericLiteralType.HEX && other.digitCount == size * 2 || other.literalType == NumericLiteralType.ZERO)
+  }
 
   companion object {
     fun parse(name: String): SolFixedBytes {
