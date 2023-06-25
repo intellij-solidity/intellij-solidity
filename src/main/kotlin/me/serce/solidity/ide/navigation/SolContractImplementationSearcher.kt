@@ -69,9 +69,10 @@ private fun findAllImplementationsInAction(
 }
 
 fun SolContractDefinition.findImplementations(): Query<SolContractDefinition> {
+  val virtualFile = containingFile.virtualFile
   val resolveScope = when {
     // When the file for which we're performing search for usages is a part of the sources/libs in the current project
-    resolveScope.contains(containingFile.virtualFile) -> resolveScope
+    virtualFile != null && resolveScope.contains(virtualFile) -> resolveScope
     // However, if the project doesn't store solidity files in its source folder, we perform a global search.
     else -> allScope(project)
   }
