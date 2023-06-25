@@ -8,6 +8,7 @@ import com.intellij.openapi.progress.util.ProgressIndicatorUtils
 import com.intellij.openapi.util.Condition
 import com.intellij.psi.PsiElement
 import com.intellij.psi.search.GlobalSearchScope.FilesScope
+import com.intellij.psi.search.GlobalSearchScope.allScope
 import com.intellij.psi.search.searches.DefinitionsScopedSearch.SearchParameters
 import com.intellij.psi.search.searches.ReferencesSearch
 import com.intellij.util.Processor
@@ -68,7 +69,13 @@ private fun findAllImplementationsInAction(
 }
 
 fun SolContractDefinition.findImplementations(): Query<SolContractDefinition> {
-  val solOnlyScope = this.useScope.intersectWith(FilesScope.getScopeRestrictedByFileTypes(this.resolveScope, SolidityFileType))
+  val resolveScope = when {
+    // When the file for which we're performing search for usages is a part of the sources/libs in the current project
+    resolveScope.contains(containingFile.virtualFile) -> resolveScope
+    // However, if the project doesn't store solidity files in its source folder, we perform a global search.
+    else -> allScope(project)
+  }
+  val solOnlyScope = useScope.intersectWith(FilesScope.getScopeRestrictedByFileTypes(resolveScope, SolidityFileType))
   return ReferencesSearch.search(this, solOnlyScope)
     .mapQuery { it.element.parent }
     .filterIsInstanceQuery<SolInheritanceSpecifier>()
