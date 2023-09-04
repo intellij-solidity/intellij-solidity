@@ -36,7 +36,6 @@ EOL=\R
 
 WHITE_SPACE=\s+
 
-EOL_COMMENT="/""/"[^\n]*
 // see https://docs.soliditylang.org/en/v0.8.7/natspec-format.html for NatSpec tags support
 NAT_SPEC_TAG=@[a-zA-Z_0-9:]*
 HEXLITERAL=(hex\"([_0-9a-fA-F]+)\"|hex\'([_0-9a-fA-F]+)\')
@@ -232,7 +231,10 @@ PRAGMAALL=[^ ][^;]*
                             return COMMENT;
                           }
 
-  <<EOF>>                 { yybegin(YYINITIAL); }
+  <<EOF>>                 {
+                            yybegin(YYINITIAL);
+                            return COMMENT;
+                          }
 
   [^]                     { }
 }
@@ -257,6 +259,11 @@ PRAGMAALL=[^ ][^;]*
                             yybegin(YYINITIAL);
                             // do not include '\n' in the comment
                             yypushback(1);
+                            return COMMENT;
+                          }
+
+  <<EOF>>                 {
+                            yybegin(YYINITIAL);
                             return COMMENT;
                           }
 
