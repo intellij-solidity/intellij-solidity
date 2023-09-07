@@ -29,6 +29,7 @@ class SolidityCompleteCustomParsingTest : SolidityParsingTestBase("fixtures/pars
   fun testCallChain() = doTest(true)
   fun testCallOptions() = doTest(true)
   fun testComments() = doTest(true)
+  fun testCommentsEOL() = doTest(true)
   fun testConstructor() = doTest(true)
   fun testContractWithDifferentFields() = doTest(true)
   fun testContractWithLiterals() = doTest(true)
