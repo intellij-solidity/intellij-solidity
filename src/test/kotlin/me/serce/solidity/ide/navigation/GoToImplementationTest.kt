@@ -5,6 +5,8 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.progress.util.ProgressIndicatorUtils
 import com.intellij.testFramework.fixtures.CodeInsightTestUtil
+import me.serce.solidity.lang.psi.SolContractDefinition
+import me.serce.solidity.lang.types.SolContract
 import me.serce.solidity.utils.SolTestBase
 import org.intellij.lang.annotations.Language
 import org.junit.Assert
@@ -15,16 +17,52 @@ class GoToImplementationTest : SolTestBase() {
   fun testFindImplementations() = testImplementations("""
       contract A/*caret*/ { }
       contract B is A { }
-  """, setOf("B"))
+  """, setOf("B"), "ctr.sol")
 
   fun testFindMultipleImplementations() = testImplementations("""
       contract A/*caret*/ { }
       contract B is A { }
       contract C is B { }
-  """, setOf("B", "C"))
+  """, setOf("B", "C"), "ctr.sol")
 
-  private fun testImplementations(@Language("Solidity") code: String, options: Set<String>) {
-    InlineFile(code).withCaret()
+  fun testImportContract() {
+    InlineFile(
+      code = """
+          import {Ctr} from './ctr.sol';
+          contract Ctr1 is Ctr {
+          }
+      """,
+      name = "base1.sol"
+    )
+
+    testImplementations(
+      """
+        contract Ctr/*caret*/ {
+        }
+      """.trimIndent(), setOf("Ctr1"), "ctr.sol")
+  }
+
+  fun testImportContractAs() {
+    InlineFile(
+      code = """
+          import {Ctr as MyCtr} from './ctr2.sol';
+          contract Ctr1 is MyCtr {
+          }
+      """,
+      name = "base1.sol"
+    )
+
+    testImplementations(
+      """
+        contract Ctr/*caret*/ {
+        }
+      """.trimIndent(), setOf("Ctr1"), "ctr2.sol")
+  }
+
+
+
+  private fun testImplementations(@Language("Solidity") code: String, options: Set<String>, filename: String) {
+    InlineFile(code, name=filename).withCaret()
     val actual = doGoToImplementation()
     Assert.assertEquals(options, actual)
   }
