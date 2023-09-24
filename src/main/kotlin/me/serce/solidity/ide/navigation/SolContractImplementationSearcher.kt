@@ -11,10 +11,15 @@ import com.intellij.psi.search.GlobalSearchScope.FilesScope
 import com.intellij.psi.search.GlobalSearchScope.allScope
 import com.intellij.psi.search.searches.DefinitionsScopedSearch.SearchParameters
 import com.intellij.psi.search.searches.ReferencesSearch
+import com.intellij.psi.util.childrenOfType
+import com.intellij.util.ArrayQuery
+import com.intellij.util.CollectionQuery
+import com.intellij.util.EmptyQuery
 import com.intellij.util.Processor
 import com.intellij.util.Query
 import me.serce.solidity.lang.SolidityFileType
 import me.serce.solidity.lang.psi.SolContractDefinition
+import me.serce.solidity.lang.psi.SolImportAliasedPair
 import me.serce.solidity.lang.psi.SolInheritanceSpecifier
 import java.util.*
 
@@ -77,9 +82,36 @@ fun SolContractDefinition.findImplementations(): Query<SolContractDefinition> {
     else -> allScope(project)
   }
   val solOnlyScope = useScope.intersectWith(FilesScope.getScopeRestrictedByFileTypes(resolveScope, SolidityFileType))
+  // Reference search can find two types of references:
   return ReferencesSearch.search(this, solOnlyScope)
-    .mapQuery { it.element.parent }
-    .filterIsInstanceQuery<SolInheritanceSpecifier>()
-    .mapQuery { it.parent }
-    .filterIsInstanceQuery()
+    .flatMapping {
+      when (val element = it.element.parent) {
+        // 1. A contract is directly referenced in the inheritance specifier.
+        //    In this case, we simply include the contract definition in the list of results.
+        is SolInheritanceSpecifier -> {
+          when (val parent = element.parent) {
+            is SolContractDefinition -> ArrayQuery(parent)
+            else -> EmptyQuery()
+          }
+        }
+        // 2. A contract is referenced in the import alias.
+        //    Because we want all referenced through aliases to be resolvable directly, we can't
+        //    rely on the reference search to find the references to a particular alias. So, instead
+        //    we search through all contract definition in the file containing the alias.
+        // TODO: consider whether we could to either allow resolving references to aliases which
+        //   should also allow renaming. Or, alternatively, add a separate index for faster search.
+        is SolImportAliasedPair -> {
+          val containingFile = element.containingFile
+          val alias = element.importAlias
+          // TODO: get inheritanceSpecifierList in order to consider constructor calls as well.
+          val results = containingFile
+            .childrenOfType<SolContractDefinition>()
+            .filter {
+              it.inheritanceSpecifierList.map { it.userDefinedTypeName.name }.contains(alias?.name)
+            }
+          CollectionQuery(results)
+        }
+        else -> EmptyQuery()
+      }
+    }
 }
