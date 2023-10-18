@@ -69,7 +69,7 @@ abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrL
    * @return list of super contracts in reversed order
    */
   override val supers: List<SolUserDefinedTypeName>
-    get() = inheritanceSpecifierList.reversed()
+    get() = inheritanceSpecifierList
       .mapNotNull { it.userDefinedTypeName }
 
   override val collectSupers: Collection<SolUserDefinedTypeName>
