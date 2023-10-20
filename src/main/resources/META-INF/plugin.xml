@@ -198,6 +198,12 @@
                          implementationClass="me.serce.solidity.ide.inspections.ValidateFunctionArgumentsInspection"/>
 
         <localInspection language="Solidity" groupName="Solidity"
+                         displayName="Event emit arguments are not matched with the parameters of event definition"
+                         enabledByDefault="false"
+                         level="ERROR"
+                         implementationClass="me.serce.solidity.ide.inspections.ValidateEmitEventArgumentsInspection"/>
+
+        <localInspection language="Solidity" groupName="Solidity"
                          displayName="Visibility modifier not specified for a function or state variable"
                          enabledByDefault="true"
                          level="WEAK WARNING"

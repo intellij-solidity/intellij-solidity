@@ -64,6 +64,10 @@ abstract class SolEnumValueMixin(node: ASTNode) : SolNamedElementImpl(node), Sol
 }
 
 abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrLibDefStub>, SolContractDefinition {
+  /**
+   * In solidity, the given bases are searched from right to left (left to right in Python) in a depth-first manner, so we need reversed order
+   * @return list of super contracts in reversed order
+   */
   override val supers: List<SolUserDefinedTypeName>
     get() = inheritanceSpecifierList
       .mapNotNull { it.userDefinedTypeName }
