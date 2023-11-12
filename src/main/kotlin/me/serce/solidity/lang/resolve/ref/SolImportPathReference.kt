@@ -125,7 +125,7 @@ class SolImportPathReference(element: SolImportPathElement) : SolReferenceBase<S
 
   override fun bindToElement(element: PsiElement): PsiElement {
     val file = element as? SolidityFile ?: return element
-    val newPath = ImportFileAction.buildImportPath(this.element.containingFile.virtualFile, file.virtualFile)
+    val newPath = ImportFileAction.buildImportPath(element.project, this.element.containingFile.virtualFile, file.virtualFile)
     val identifier = this.element.referenceNameElement as? LeafElement ?: return element
     return identifier.replaceWithText("\"$newPath\"").psi ?: element
   }

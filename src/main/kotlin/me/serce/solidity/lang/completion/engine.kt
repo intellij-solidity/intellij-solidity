@@ -132,7 +132,7 @@ class ContractLookupElement(val contract: SolContractDefinition) : LookupElement
 
   override fun handleInsert(context: InsertionContext) {
     if (!ImportFileAction.isImportedAlready(context.file, contract.containingFile)) {
-      ImportFileAction.addImport(contract.project, context.file, contract.containingFile)
+      ImportFileAction.addContractImport(contract, context.file)
     }
   }
 }
