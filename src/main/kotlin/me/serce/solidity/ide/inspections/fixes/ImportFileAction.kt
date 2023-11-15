@@ -9,11 +9,14 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.PopupStep
 import com.intellij.openapi.ui.popup.util.BaseListPopupStep
 import com.intellij.openapi.util.RecursionManager
+import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
+import com.intellij.psi.PsiManager
 import com.intellij.ui.popup.list.ListPopupImpl
 import com.intellij.ui.popup.list.PopupListElementRenderer
+import me.serce.solidity.lang.psi.SolContractDefinition
 import me.serce.solidity.lang.psi.SolImportDirective
 import me.serce.solidity.lang.psi.SolPragmaDirective
 import me.serce.solidity.lang.psi.SolPsiFactory
@@ -25,6 +28,7 @@ import javax.swing.Icon
 import javax.swing.JPanel
 import javax.swing.ListCellRenderer
 
+
 class ImportFileAction(
   val editor: Editor,
   private val file: PsiFile,
@@ -33,6 +37,7 @@ class ImportFileAction(
 
   val project: Project
     get() = file.project
+
 
   override fun execute(): Boolean {
     PsiDocumentManager.getInstance(project).commitAllDocuments()
@@ -113,37 +118,78 @@ class ImportFileAction(
       }
     }
 
+    fun addContractImport(contract: SolContractDefinition, file: PsiFile) {
+      CommandProcessor.getInstance().runUndoTransparentAction {
+        ApplicationManager.getApplication().runWriteAction {
+          val after = file.children.filterIsInstance<SolImportDirective>().lastOrNull()
+            ?: file.children.filterIsInstance<SolPragmaDirective>().firstOrNull()
+          val factory = SolPsiFactory(contract.project)
+          val contractName = contract.name;
+          val path = buildImportPath(contract.project, file.virtualFile, contract.containingFile.virtualFile);
+          if (contractName.isNullOrBlank()) {
+            file.addAfter(factory.createImportDirective(path), after);
+          } else {
+            file.addAfter(factory.createContractImportFromDirective(path, contractName), after);
+          }
+
+          file.addAfter(factory.createNewLine(contract.project), after)
+        }
+      }
+    }
+
     fun addImport(project: Project, file: PsiFile, to: PsiFile) {
       CommandProcessor.getInstance().runUndoTransparentAction {
         ApplicationManager.getApplication().runWriteAction {
           val after = file.children.filterIsInstance<SolImportDirective>().lastOrNull()
             ?: file.children.filterIsInstance<SolPragmaDirective>().firstOrNull()
           val factory = SolPsiFactory(project)
-          file.addAfter(factory.createImportDirective(buildImportPath(file.virtualFile, to.virtualFile)), after)
+          file.addAfter(factory.createImportDirective(buildImportPath(project, file.virtualFile, to.virtualFile)), after)
           file.addAfter(factory.createNewLine(project), after)
         }
       }
     }
 
-    fun buildImportPath(source: VirtualFile, destination: VirtualFile): String {
-      return Paths.get(source.path).parent.relativize(Paths.get(destination.path)).toString().let {
+    fun readRemappingsFile(project: Project): Map<String, String> {
+      val psiManager = PsiManager.getInstance(project)
+      val file = LocalFileSystem.getInstance().findFileByIoFile(File(project.basePath + "/remappings.txt"))
+      val psiFile: PsiFile? = file?.let { psiManager.findFile(it) }
+      val content = psiFile?.text ?: ""
+      val remappingsMap = content.lines()
+        .filter { it.isNotBlank() }
+        .associate {
+          val (a, b) = it.split("=")
+          b.trim() to a.trim()
+        }
+      return remappingsMap
+    }
+
+    fun buildImportPath(project: Project, source: VirtualFile, destination: VirtualFile): String {
+      return Paths.get(source.path).parent.relativize(Paths.get(destination.path)).toString().let { importPath ->
         val separator = File.separator
+
         when {
-            it.contains("node_modules$separator") -> {
-              val idx = it.indexOf("node_modules$separator")
-              it.substring(idx + "node_modules$separator".length)
+            importPath.contains("node_modules$separator") -> {
+              val idx = importPath.indexOf("node_modules$separator")
+              importPath.substring(idx + "node_modules$separator".length)
             }
-            it.contains("lib$separator") -> {
-              val idx = it.indexOf("lib$separator")
-              it.substring(idx + "lib$separator".length)
+
+            importPath.contains("lib$separator") -> {
+              val idx = importPath.indexOf("lib$separator")
+              val mapping = readRemappingsFile(project);
+              val fallback = importPath.substring(idx + "lib$separator".length)
+              return mapping.keys.firstOrNull { importPath.contains(it) }
+                ?.let { importPath.substring(importPath.indexOf(it)).replaceFirst(it, mapping[it]!!) }
+                ?: fallback
             }
-            it.contains("installed_contracts$separator") -> {
-              val idx = it.indexOf("installed_contracts$separator")
-              it.substring(idx + "installed_contracts$separator".length)
+
+            importPath.contains("installed_contracts$separator") -> {
+              val idx = importPath.indexOf("installed_contracts$separator")
+              importPath.substring(idx + "installed_contracts$separator".length)
                 .replaceFirst("${separator}contracts${separator}", separator)
             }
-            !it.startsWith(".") -> ".$separator$it"
-            else -> it
+
+            !importPath.startsWith(".") -> ".$separator$importPath"
+            else -> importPath
         }
       }.replace("\\", "/")
     }

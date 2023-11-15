@@ -24,9 +24,10 @@ class ImportFileFix(element: SolUserDefinedTypeName) : LocalQuickFixOnPsiElement
       val suggestions = SolResolver.resolveTypeName(element).map { it.containingFile }.toSet()
       val fixText: String? = when {
           suggestions.size == 1 -> {
-            val importPath = buildImportPath(element.containingFile.virtualFile, suggestions.first().virtualFile)
+            val importPath = buildImportPath(element.project, element.containingFile.virtualFile, suggestions.first().virtualFile)
             "$familyName $importPath"
           }
+
           suggestions.isNotEmpty() -> familyName
           else -> null
       }
@@ -37,6 +38,7 @@ class ImportFileFix(element: SolUserDefinedTypeName) : LocalQuickFixOnPsiElement
           )
           true
         }
+
         else -> false
       }
     } else {
@@ -47,11 +49,12 @@ class ImportFileFix(element: SolUserDefinedTypeName) : LocalQuickFixOnPsiElement
   override fun isAvailable(project: Project, editor: Editor?, file: PsiFile?): Boolean {
     val element = startElement as SolUserDefinedTypeName?
     return when {
-        element != null -> when {
-            !element.isValid || element.reference?.resolve() != null -> false
-            else -> SolResolver.resolveTypeName(element).isNotEmpty()
-        }
-        else -> false
+      element != null -> when {
+        !element.isValid || element.reference?.resolve() != null -> false
+        else -> SolResolver.resolveTypeName(element).isNotEmpty()
+      }
+
+      else -> false
     }
   }
 
