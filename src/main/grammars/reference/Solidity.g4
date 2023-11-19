@@ -16,12 +16,13 @@ sourceUnit: (
 	| contractDefinition
 	| interfaceDefinition
 	| libraryDefinition
-	| freeFunctionDefinition
+	| functionDefinition
 	| constantVariableDeclaration
 	| structDefinition
 	| enumDefinition
 	| userDefinedValueTypeDefinition
 	| errorDefinition
+	| eventDefinition
 )* EOF;
 
 //@doc: inline
@@ -85,7 +86,7 @@ inheritanceSpecifier: name=identifierPath arguments=callArgumentList?;
  */
 contractBodyElement:
 	constructorDefinition
-	| contractFunctionDefinition
+	| functionDefinition
 	| modifierDefinition
 	| fallbackFunctionDefinition
 	| receiveFunctionDefinition
@@ -152,11 +153,11 @@ stateMutability: Pure | View | Payable;
  */
 overrideSpecifier: Override (LParen overrides+=identifierPath (Comma overrides+=identifierPath)* RParen)?;
 /**
- * The definition of contract, library and interface functions.
+ * The definition of contract, library, interface or free functions.
  * Depending on the context in which the function is defined, further restrictions may apply,
  * e.g. functions in interfaces have to be unimplemented, i.e. may not contain a body block.
  */
-contractFunctionDefinition
+functionDefinition
 locals[
 	boolean visibilitySet = false,
 	boolean mutabilitySet = false,
@@ -175,16 +176,6 @@ locals[
 	 )*
 	(Returns LParen returnParameters=parameterList RParen)?
 	(Semicolon | body=block);
-
-/**
- * The definition of a free function.
- */
- freeFunctionDefinition:
- 	Function (identifier | Fallback | Receive)
- 	LParen (arguments=parameterList)? RParen
- 	stateMutability?
- 	(Returns LParen returnParameters=parameterList RParen)?
- 	(Semicolon | body=block);
 
 /**
  * The definition of a modifier.
@@ -378,7 +369,7 @@ dataLocation: Memory | Storage | Calldata;
  */
 expression:
 	expression LBrack index=expression? RBrack # IndexAccess
-	| expression LBrack start=expression? Colon end=expression? RBrack # IndexRangeAccess
+	| expression LBrack startIndex=expression? Colon endIndex=expression? RBrack # IndexRangeAccess
 	| expression Period (identifier | Address) # MemberAccess
 	| expression LBrace (namedArgument (Comma namedArgument)*)? RBrace # FunctionCallOptions
 	| expression callArgumentList # FunctionCall
@@ -399,7 +390,7 @@ expression:
 	| expression Or expression # OrOperation
 	|<assoc=right> expression Conditional expression Colon expression # Conditional
 	|<assoc=right> expression assignOp expression # Assignment
-	| New typeName # NewExpression
+	| New typeName # NewExpr
 	| tupleExpression # Tuple
 	| inlineArrayExpression # InlineArray
  	| (
