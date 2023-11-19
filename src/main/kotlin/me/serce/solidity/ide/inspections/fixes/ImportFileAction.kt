@@ -14,6 +14,9 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
+import com.intellij.psi.util.CachedValueProvider
+import com.intellij.psi.util.CachedValuesManager
+import com.intellij.psi.util.PsiModificationTracker
 import com.intellij.ui.popup.list.ListPopupImpl
 import com.intellij.ui.popup.list.PopupListElementRenderer
 import me.serce.solidity.lang.psi.SolContractDefinition
@@ -153,14 +156,19 @@ class ImportFileAction(
       val psiManager = PsiManager.getInstance(project)
       val file = LocalFileSystem.getInstance().findFileByIoFile(File(project.basePath + "/remappings.txt"))
       val psiFile: PsiFile? = file?.let { psiManager.findFile(it) }
-      val content = psiFile?.text ?: ""
-      val remappingsMap = content.lines()
-        .filter { it.isNotBlank() }
-        .associate {
-          val (a, b) = it.split("=")
-          b.trim() to a.trim()
-        }
-      return remappingsMap
+      if (psiFile == null) {
+        return emptyMap()
+      }
+      return CachedValuesManager.getCachedValue(psiFile) {
+        val content = psiFile.text
+        val remappingsMap = content.lines()
+          .filter { it.isNotBlank() }
+          .associate {
+            val (a, b) = it.split("=")
+            b.trim() to a.trim()
+          }
+        CachedValueProvider.Result.create(remappingsMap, PsiModificationTracker.MODIFICATION_COUNT)
+      }
     }
 
     fun buildImportPath(project: Project, source: VirtualFile, destination: VirtualFile): String {
