@@ -2,6 +2,7 @@ package me.serce.solidity.ide.refactoring
 
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiReference
 import com.intellij.psi.search.searches.ReferencesSearch
 import com.intellij.refactoring.move.MoveCallback
@@ -17,7 +18,10 @@ class SolMoveHandler : MoveFilesOrDirectoriesHandler() {
     super.doMove(project, elements, targetContainer) {
       callback?.refactoringCompleted()
       elements.forEach {newFile ->
-        oldRefs[newFile.containingFile.name]?.forEach { it.bindToElement(newFile) }
+        val containingFile: PsiFile? = newFile.containingFile
+        if (containingFile != null) {
+          oldRefs[containingFile.name]?.forEach { it.bindToElement(newFile) }
+        }
       }
     }
   }
