@@ -27,7 +27,7 @@ fun getSolType(type: SolTypeName?): SolType {
       when (val text = type.firstChild.text) {
         "bool" -> SolBoolean
         "string" -> SolString
-        "address" -> SolAddress
+        "address" -> if (type.lastChild.text == "payable") SolAddress.PAYABLE else SolAddress.NON_PAYABLE
         else -> {
           try {
             SolInteger.parse(text)

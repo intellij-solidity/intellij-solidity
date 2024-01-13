@@ -101,6 +101,7 @@
                               implementationClass="me.serce.solidity.ide.hints.SolExpressionTypeProvider"/>
         <codeInsight.parameterInfo language="Solidity"
                                    implementationClass="me.serce.solidity.ide.hints.SolParameterInfoHandler"/>
+        <codeInsight.daemonBoundCodeVisionProvider implementation="me.serce.solidity.ide.hints.SolGasEstimationInlayProvider"/>
 
         <completion.contributor language="Solidity"
                                 implementationClass="me.serce.solidity.lang.completion.SolBaseTypesCompletionContributor"/>
@@ -219,6 +220,12 @@
                 text="Smart Contract" description="Create new solidity contract">
             <add-to-group group-id="NewGroup" anchor="after" relative-to-action="NewDir"/>
         </action>
+        <action id="solidity.show.gas.estimation"
+                class="me.serce.solidity.ide.hints.ShowGasEstimationAction"
+                text="Show Gas Estimation" description="Show gas estimation for functions as calculated by solc compiler">
+            <add-to-group group-id="AnalyzeActions" anchor="last"/>
+        </action>
+
     </actions>
 
 </idea-plugin>
