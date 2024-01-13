@@ -101,7 +101,7 @@ class SolGasEstimationService(project: Project) {
     val funNameWParen by lazy { "$funName(" }
 
     return estimates.get(if (isInternal) "internal" else "external")?.let {
-      (if (s.contains(".*")) it.fields().asSequence().find { it.key.matches(s.replace("(", "\\(").replace(")", "\\)").toRegex()) }?.value else it.get(s))
+      (if (s.contains(".*")) it.fields().asSequence().find { it.key.matches(s.replace("(", "\\(").replace(")", "\\)").replace("[", "\\[").toRegex()) }?.value else it.get(s))
         ?: tryCollapseNodes(it, funNameWParen)
     }?.asText() ?: return "N/A";
   }
