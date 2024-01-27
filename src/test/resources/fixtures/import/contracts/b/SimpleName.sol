@@ -1,0 +1,5 @@
+contract Outer {
+    struct SimpleName {
+
+    }
+}

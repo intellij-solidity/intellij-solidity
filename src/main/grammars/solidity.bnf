@@ -244,7 +244,7 @@ ModifierInvocation ::= VarLiteral ('(' ModifierInvocationCallArguments ')')? {
 private ModifierInvocationCallArguments ::= FunctionCallArguments
 
 ConstructorDefinition ::= constructor ParameterList
-                         ( ModifierInvocation | FunctionVisibilitySpecifier | StateMutability)*
+                         ( FunctionVisibilitySpecifier | StateMutability | ModifierInvocation)*
                          Block {
     pin = 1
     implements = "me.serce.solidity.lang.psi.SolHasModifiersElement"

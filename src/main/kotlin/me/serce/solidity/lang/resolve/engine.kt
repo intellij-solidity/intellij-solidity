@@ -195,6 +195,11 @@ object SolResolver {
     SolNamedElement::class.java
   )
 
+  private fun resolveTypeNameStrict(element: SolReferenceElement) : Collection<SolNamedElement> {
+    val names = resolveTypeName(element)
+    return names.takeIf { it.size <= 1 } ?: resolveTypeNameUsingImports(element)
+  }
+
   fun resolveModifier(modifier: SolModifierInvocationElement): List<SolModifierDefinition> = StubIndex.getElements(
     SolModifierIndex.KEY,
     modifier.firstChild.text,
@@ -205,21 +210,32 @@ object SolResolver {
     .toList()
 
   fun resolveVarLiteralReference(element: SolNamedElement): List<SolNamedElement> {
-    return if (element.parent?.parent is SolFunctionCallExpression) {
-      val functionCall = element.findParentOrNull<SolFunctionCallElement>()!!
-      val resolved = functionCall.reference?.multiResolve() ?: emptyList()
-      if (resolved.isNotEmpty()) {
-        resolved.filterIsInstance<SolNamedElement>()
-      } else {
-        resolveVarLiteral(element)
-      }
-    } else {
-      resolveVarLiteral(element)
-        .findBest {
-          when (it) {
-            is SolStateVariableDeclaration -> 0
-            else -> Int.MAX_VALUE
+    return when {
+        element.parent?.parent is SolFunctionCallExpression -> {
+          val functionCall = element.findParentOrNull<SolFunctionCallElement>()!!
+          val resolved = functionCall.reference?.multiResolve() ?: emptyList()
+          if (resolved.isNotEmpty()) {
+            resolved.filterIsInstance<SolNamedElement>()
+          } else {
+            resolveVarLiteral(element)
           }
+        }
+        element.parent is SolModifierInvocation -> {
+          when {
+            element.parent.parent is SolConstructorDefinition -> element.findContract()?.collectSupers?.filter { resolveTypeNameStrict(it).filterIsInstance<SolContractDefinition>().any { it.name == element.name } }
+            else -> (element.parent as SolModifierInvocation).reference?.multiResolve()?.filterIsInstance<SolNamedElement>()?.takeIf { it.isNotEmpty() }
+          } ?: emptyList()
+        }
+        else -> {
+          resolveVarLiteral(element)
+            .findBest {
+              when (it) {
+                is SolVariableDeclaration -> 1
+                is SolParameterDef -> 10
+                is SolStateVariableDeclaration -> 100
+                else -> Int.MAX_VALUE
+              }
+            }
         }
     }
   }
@@ -269,7 +285,7 @@ object SolResolver {
     else
       emptyList()
     return members + contract.supers
-      .map { resolveTypeName(it).firstOrNull() }
+      .map { resolveTypeNameStrict(it).firstOrNull() }
       .filterIsInstance<SolContractDefinition>()
       .flatMap { resolveContractMembers(it) }
   }
@@ -328,7 +344,7 @@ object SolResolver {
           .map { lexicalDeclarations(visitedScopes, it, place) }
           .flatten() + scope.structDefinitionList + scope.eventDefinitionList + scope.errorDefinitionList
         val extendsScope = scope.supers.asSequence()
-          .map { resolveTypeName(it).firstOrNull() }
+          .map { resolveTypeNameStrict(it).firstOrNull() }
           .filterNotNull()
           .map { lexicalDeclarations(visitedScopes, it, place) }
           .flatten()
@@ -339,6 +355,9 @@ object SolResolver {
           (scope.returns?.parameterDefList?.asSequence() ?: emptySequence())
       }
       is SolConstructorDefinition -> {
+        scope.parameterList?.parameterDefList?.asSequence() ?: emptySequence()
+      }
+      is SolModifierDefinition -> {
         scope.parameterList?.parameterDefList?.asSequence() ?: emptySequence()
       }
       is SolEnumDefinition -> sequenceOf(scope)
@@ -357,6 +376,11 @@ object SolResolver {
       }
 
       is SolBlock -> {
+        scope.statementList.asSequence()
+          .map { lexicalDeclarations(visitedScopes, it, place) }
+          .flatten()
+      }
+      is SolUncheckedBlock -> {
         scope.statementList.asSequence()
           .map { lexicalDeclarations(visitedScopes, it, place) }
           .flatten()
@@ -386,12 +410,20 @@ object SolResolver {
         scope.variableDeclaration?.let {
           val declarationList = it.declarationList
           val typedDeclarationList = it.typedDeclarationList
+          val identifier = it.identifier
           when {
             declarationList != null -> declarationList.declarationItemList.asSequence()
             typedDeclarationList != null -> typedDeclarationList.typedDeclarationItemList.asSequence()
+            identifier != null -> listOf(it).asSequence()
             else -> emptySequence()
           }
         } ?: emptySequence()
+      }
+      is SolTryStatement -> {
+        scope.parameterList?.parameterDefList?.asSequence() ?: emptySequence()
+      }
+      is SolCatchClause -> {
+        scope.parameterList?.parameterDefList?.asSequence() ?: emptySequence()
       }
 
       else -> emptySequence()

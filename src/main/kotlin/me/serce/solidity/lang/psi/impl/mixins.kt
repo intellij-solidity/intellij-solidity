@@ -249,12 +249,6 @@ abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefSt
   constructor(node: ASTNode) : super(node)
   constructor(stub: SolFunctionDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
 
-  override fun getReference() = references.firstOrNull()
-
-  override fun getReferences(): Array<SolReference> {
-    return modifiers.map { SolModifierReference(this, it) }.toTypedArray()
-  }
-
   override fun getIcon(flags: Int) = SolidityIcons.FUNCTION
 }
 abstract class SolModifierDefMixin : SolStubbedNamedElementImpl<SolModifierDefStub>, SolModifierDefinition {

@@ -253,6 +253,19 @@ class SolInternalTypeFactory(project: Project) {
           * Furthermore, all functions of the current contract are callable directly including the current function.
           */
           function selfdestruct(address recipient);
+          
+          
+          /**
+          * Returns the amount of gas remaining the current transaction.
+          */
+          function gasleft() returns (uint64);
+          
+          /**
+          * Returns hash of the given block when blocknumber is one of the 256 most recent blocks; otherwise returns zero
+          */
+          function blockhash(uint blockNumber) returns (bytes32);
+          
+          function payable(address addr);
       }
     """)
   }
