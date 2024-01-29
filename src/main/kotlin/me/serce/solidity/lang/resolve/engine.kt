@@ -272,16 +272,19 @@ object SolResolver {
         return resolved
       }
     }
+    val isFunctionCall = element.nextSibling is SolFunctionInvocation
+
     return when (val memberName = element.identifier?.text) {
       null -> emptyList()
-      else -> element.expression.getMembers()
-        .filter { it.getName() == memberName }
+      else -> element.getMembers()
+        .filter { it.getName() == memberName && if (isFunctionCall) it !is SolFunctionReference else it !is SolFunctionDefinition}
     }
   }
 
   fun resolveContractMembers(contract: SolContractDefinition, skipThis: Boolean = false): List<SolMember> {
     val members = if (!skipThis)
-      contract.stateVariableDeclarationList as List<SolMember> + contract.functionDefinitionList
+      contract.stateVariableDeclarationList as List<SolMember> + contract.functionDefinitionList + contract.functionDefinitionList.filter { it.visibility?.let { it == Visibility.PUBLIC || it == Visibility.EXTERNAL } ?: false }.map { SolFunctionReference(it) }  +
+        contract.structDefinitionList.map { SolStructConstructor(it) } + contract.enumDefinitionList.map { SolEnum(it) }
     else
       emptyList()
     return members + contract.supers

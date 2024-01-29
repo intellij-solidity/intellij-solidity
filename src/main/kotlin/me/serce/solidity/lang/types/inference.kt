@@ -7,9 +7,11 @@ import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiModificationTracker
 import me.serce.solidity.firstOrElse
 import me.serce.solidity.lang.psi.*
+import me.serce.solidity.lang.psi.impl.SolMemberAccessElement
 import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.resolve.canBeApplied
 import me.serce.solidity.lang.resolve.ref.SolFunctionCallReference
+import me.serce.solidity.lang.resolve.ref.toLibraryFunDefinition
 import me.serce.solidity.lang.types.SolArray.SolDynamicArray
 import me.serce.solidity.lang.types.SolArray.SolStaticArray
 import kotlin.math.max
@@ -27,14 +29,16 @@ fun getSolType(type: SolTypeName?): SolType {
       when (val text = type.firstChild.text) {
         "bool" -> SolBoolean
         "string" -> SolString
-        "address" -> SolAddress
-        else -> {
-          try {
-            SolInteger.parse(text)
+        "address" -> SolAddress.NON_PAYABLE
+        else -> try {
+            when {
+              text.matches(SolFixedByte.regex) -> SolFixedByte.parse(text)
+              text.matches(SolFixedBytes.regex) -> SolFixedBytes.parse(text)
+              else -> SolInteger.parse(text)
+            }
           } catch (e: IllegalArgumentException) {
             SolUnknown
           }
-        }
       }
     }
     is SolUserDefinedLocationTypeName ->
@@ -186,7 +190,7 @@ fun inferExprType(expr: SolExpression?): SolType {
     }
     is SolMemberAccessExpression -> {
       return SolResolver.resolveMemberAccess(expr)
-        .firstOrNull()
+        .firstOrNull { true }
         ?.parseType()
         ?: SolUnknown
     }
@@ -196,6 +200,7 @@ fun inferExprType(expr: SolExpression?): SolType {
     }
     is SolUnaryExpression ->
       inferExprType(expr.expression)
+    is SolMetaTypeExpression -> SolMetaType(getSolType(expr.typeName))
     else -> SolUnknown
   }
 }
@@ -212,15 +217,17 @@ private fun getNumericExpressionType(firstType: SolType, secondType: SolType): S
   }
 }
 
-fun SolExpression.getMembers(): List<SolMember> {
+fun SolMemberAccessExpression.getMembers(): List<SolMember> {
+  val expr = expression
   return when {
-    this is SolPrimaryExpression && varLiteral?.name == "super" -> {
-      val contract = this.findContract()
+    expr is SolPrimaryExpression && expr.varLiteral?.name == "super" -> {
+      val contract = expr.findContract()
       contract?.let { SolResolver.resolveContractMembers(it, true) }
         ?: emptyList()
     }
     else -> {
-      this.type.getMembers(this.project)
+      val fromLibraries = (this as? SolMemberAccessElement)?.collectUsingForLibraryFunctions() ?: emptyList()
+      expr.type.getMembers(this.project) + fromLibraries.map { it.toLibraryFunDefinition() }
     }
   }
 }

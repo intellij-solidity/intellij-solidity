@@ -36,7 +36,7 @@ class SolKeywordCompletion : SolCompletionTestBase() {
   """)
 
   fun testThisKeywordNotInMemberAccess() = checkCompletion(
-    hashSetOf("send", "transfer"), """
+    hashSetOf("call", "code", "delegatecall", "transfer", "balance", "codehash", "send", "staticcall"), """
         contract A {
             address a;
         

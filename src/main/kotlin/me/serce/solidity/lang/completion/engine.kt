@@ -98,7 +98,8 @@ object SolCompleter {
       expr.type.isBuiltin -> ContextType.BUILTIN
       else -> ContextType.EXTERNAL
     }
-    return element.expression.getMembers()
+
+    return element.getMembers()
       .mapNotNull {
         when (it.getPossibleUsage(contextType)) {
           Usage.CALLABLE -> {

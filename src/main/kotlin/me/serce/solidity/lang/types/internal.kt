@@ -77,6 +77,37 @@ class SolInternalTypeFactory(project: Project) {
             * send given amount of Wei to Address, returns false on failure, forwards 2300 gas stipend, not adjustable
             */
             function send(uint value) returns (bool);
+            
+            /**
+            * balance of the Address in Wei
+            */
+            uint256 balance;
+            
+            /**
+            * code at the Address (can be empty)
+            */
+            bytes memory code;
+            
+            /**
+            * the codehash of the Address
+            */
+            bytes32 codehash;
+            
+            /**
+            * issue low-level CALL with the given payload, returns success condition and return data, forwards all available gas, adjustable
+            */
+            function call(bytes memory) returns (bool, bytes memory)
+            
+            /**
+            * issue low-level DELEGATECALL with the given payload, returns success condition and return data, forwards all available gas, adjustable
+            */
+            
+            function delegatecall(bytes memory) returns (bool, bytes memory)
+            /**
+            * issue low-level STATICCALL with the given payload, returns success condition and return data, forwards all available gas, adjustable
+            */
+            function staticcall(bytes memory) returns (bool, bytes memory)
+            
             }
     """)
   }
@@ -147,6 +178,18 @@ class SolInternalTypeFactory(project: Project) {
     contract("""
         contract ${internalise("Block")}{
             /**
+            * current block’s base fee (EIP-3198 and EIP-1559)
+            */
+             uint basefee;       
+            /**
+            * current block’s blob base fee (EIP-7516 and EIP-4844)
+            */
+             uint blobbasefee;        
+            /**
+            * current chain id
+            */
+             uint chainid;
+            /**
             * current block miner’s address
             */
              address coinbase;
@@ -157,7 +200,11 @@ class SolInternalTypeFactory(project: Project) {
             /**
             * current block gaslimit
             */
-             uint gasLimit;
+             uint gaslimit;
+            /**
+            * random number provided by the beacon chain (EVM >= Paris) (see EIP-4399 )
+            */
+             uint prevrandao;
             /**
             * current block number
             */
@@ -171,10 +218,50 @@ class SolInternalTypeFactory(project: Project) {
              * hash of the given block when blocknumber is one of the 256 most recent blocks; otherwise returns zero
              */
              function blockhash(uint blockNumber) returns (bytes32);
+             
+             /**
+             * versioned hash of the index-th blob associated with the current transaction. A versioned hash consists of a single byte representing the version (currently 0x01), followed by the last 31 bytes of the SHA256 hash of the KZG commitment (EIP-4844).
+             */
+             function blobhash(uint blockNumber) returns (bytes32);
 
         }      
     """)
   }
+
+  val metaType: SolContract by lazy {
+    contract("""
+      /**
+      */
+      contract ${internalise("MetaType")} {
+							/**
+                the smallest value representable by type <code>T</code>.
+							*/
+							T min;
+							/**
+                the largest value representable by type <code>T</code>.
+							*/
+							T max;
+      }
+    """)
+  }
+
+  val functionType: SolContract by lazy {
+    contract("""
+      /**
+      */
+      contract ${internalise("FunctionType")} {
+							/**
+                 the address of the contract of the function.
+							*/
+//							address address;
+							/**
+                the ABI function selector
+							*/
+							bytes4 selector;
+      }
+    """)
+  }
+
 
   val globalType: SolContract by lazy {
     contract("""
@@ -265,7 +352,7 @@ class SolInternalTypeFactory(project: Project) {
           */
           function blockhash(uint blockNumber) returns (bytes32);
           
-          function payable(address addr);
+          function payable(address addr) returns (address);
       }
     """)
   }

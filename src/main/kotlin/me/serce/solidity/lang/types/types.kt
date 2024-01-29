@@ -69,17 +69,23 @@ object SolString : SolPrimitiveType {
   override fun toString() = "string"
 }
 
-object SolAddress : SolPrimitiveType {
+class SolAddress(val isPayable : Boolean) : SolPrimitiveType {
+  private val toString = "address${if (isPayable) " payable" else ""}"
   override fun isAssignableFrom(other: SolType): Boolean =
     when (other) {
-      is SolAddress -> true
-      is SolContract -> true
+      is SolAddress -> !this.isPayable || other.isPayable
+      is SolContract -> other.ref.isPayable.let { !this.isPayable || it }
       else -> UINT_160.isAssignableFrom(other)
     }
 
   override fun getMembers(project: Project) = getSdkMembers(SolInternalTypeFactory.of(project).addressType)
 
-  override fun toString() = "address"
+  override fun toString() = toString
+
+  companion object {
+    val PAYABLE = SolAddress(true)
+    val NON_PAYABLE = SolAddress(false)
+  }
 
 }
 
@@ -225,7 +231,7 @@ data class SolContract(val ref: SolContractDefinition, val builtin: Boolean = fa
   override fun toString() = ref.name ?: ref.text ?: "$ref"
 }
 
-data class SolStruct(val ref: SolStructDefinition, val builtin : Boolean = false) : SolUserType {
+data class SolStruct(val ref: SolStructDefinition, val builtin : Boolean = false) : SolUserType, SolMember {
   override fun isAssignableFrom(other: SolType): Boolean =
     other is SolStruct && ref == other.ref
 
@@ -238,6 +244,14 @@ data class SolStruct(val ref: SolStructDefinition, val builtin : Boolean = false
 
   override val isBuiltin: Boolean
     get() = builtin
+
+  override fun getName(): String? = ref.name
+
+  override fun parseType(): SolType = this
+
+  override fun resolveElement(): SolNamedElement? = ref
+
+  override fun getPossibleUsage(contextType: ContextType): Usage? = null
 }
 
 data class SolStructVariableDeclaration(
@@ -252,9 +266,32 @@ data class SolStructVariableDeclaration(
   override fun getPossibleUsage(contextType: ContextType) = Usage.VARIABLE
 }
 
-data class SolEnum(val ref: SolEnumDefinition) : SolUserType {
+data class SolStructConstructor(val ref: SolStructDefinition) : SolMember, SolCallable {
+  override val callablePriority: Int = 0
+
+  override fun getName(): String? = ref.name
+
+  override fun parseType(): SolType = ref.parseType()
+  override fun parseParameters(): List<Pair<String?, SolType>> = ref.parseParameters()
+
+  override fun resolveElement(): SolNamedElement? = ref
+
+  override fun getPossibleUsage(contextType: ContextType): Usage? = Usage.CALLABLE
+
+}
+
+data class SolEnum(val ref: SolEnumDefinition) : SolUserType, SolMember {
   override fun isAssignableFrom(other: SolType): Boolean =
     other is SolEnum && ref == other.ref
+
+  override fun getName(): String? = ref.name
+
+  override fun parseType(): SolType = this
+
+  override fun resolveElement(): SolNamedElement? = ref
+
+  override fun getPossibleUsage(contextType: ContextType): Usage? = null
+
 
   override fun toString() = ref.name ?: ref.text ?: "$ref"
 
@@ -305,7 +342,7 @@ sealed class SolArray(val type: SolType) : SolType {
     override fun getMembers(project: Project) = SolInternalTypeFactory.of(project).arrayType.ref.stateVariableDeclarationList;
   }
 
-  class SolDynamicArray(type: SolType) : SolArray(type) {
+  open class SolDynamicArray(type: SolType) : SolArray(type) {
     override fun isAssignableFrom(other: SolType): Boolean =
       other is SolDynamicArray && type == other.type
 
@@ -333,14 +370,41 @@ sealed class SolArray(val type: SolType) : SolType {
   }
 }
 
-object SolBytes : SolPrimitiveType {
+object SolBytes : SolArray.SolDynamicArray(SolFixedByte(1)) {
+  private val concatFunction = BuiltinCallable(emptyList(), SolBytes, "concat", null)
+
   override fun isAssignableFrom(other: SolType): Boolean =
     other == SolBytes || other == SolString
+
+  override fun getMembers(project: Project): List<SolMember> {
+    return super.getMembers(project).toMutableList() + concatFunction
+  }
 
   override fun toString() = "bytes"
 }
 
+data class SolFixedByte(val size: Int): SolPrimitiveType {
+  override fun toString() = "byte$size"
+
+  override fun isAssignableFrom(other: SolType): Boolean =
+    other is SolFixedByte && other.size <= size
+
+  companion object {
+
+    val regex = "byte\\d*$".toRegex()
+    fun parse(name: String): SolFixedByte {
+      return if (name.startsWith("byte")) {
+        SolFixedByte(name.substring(4).toInt())
+      } else {
+        throw java.lang.IllegalArgumentException("should start with 'byte'")
+      }
+    }
+  }
+}
+
+
 data class SolFixedBytes(val size: Int): SolPrimitiveType {
+
   override fun toString() = "bytes$size"
 
   override fun isAssignableFrom(other: SolType): Boolean {
@@ -350,6 +414,7 @@ data class SolFixedBytes(val size: Int): SolPrimitiveType {
   }
 
   companion object {
+    val regex = "bytes\\d*$".toRegex()
     fun parse(name: String): SolFixedBytes {
       return if (name.startsWith("bytes")) {
         SolFixedBytes(name.substring(5).toInt())
@@ -359,6 +424,44 @@ data class SolFixedBytes(val size: Int): SolPrimitiveType {
     }
   }
 }
+
+data class SolMetaType(val type: SolType): SolType {
+  override fun isAssignableFrom(other: SolType): Boolean {
+    return other is SolMetaType && this.type == other.type
+  }
+
+  override fun getMembers(project: Project): List<SolMember> {
+    return getSdkMembers(SolInternalTypeFactory.of(project).metaType)
+  }
+
+  override fun toString(): String = "type($type)"
+}
+
+data class SolFunctionType(val ref: SolFunctionDefinition): SolType {
+  override fun isAssignableFrom(other: SolType): Boolean {
+    return other is SolFunctionType && this.ref.parseParameters() == other.ref.parseParameters() && this.ref.parseType() == other.ref.parseType() // todo state mutability of 'this' is more restrictive than the state mutability of 'other'
+  }
+
+  override fun getMembers(project: Project): List<SolMember> {
+    return getSdkMembers(SolInternalTypeFactory.of(project).functionType)
+  }
+
+  override fun toString(): String = "function(${ref.name})"
+}
+
+data class SolFunctionReference(val ref: SolFunctionDefinition): SolMember {
+  override fun getName(): String? = ref.name
+
+  override fun parseType(): SolType {
+    return SolFunctionType(ref)
+  }
+
+  override fun resolveElement(): SolNamedElement? = ref
+
+  override fun getPossibleUsage(contextType: ContextType): Usage? = Usage.VARIABLE
+
+}
+
 
 private const val INTERNAL_INDICATOR = "_sol1_s"
 
@@ -384,7 +487,7 @@ data class BuiltinCallable(
   private val parameters: List<Pair<String?, SolType>>,
   private val returnType: SolType,
   private val memberName: String?,
-  private val resolvedElement: SolNamedElement?,
+  private val resolvedElement: SolNamedElement? = null,
   private val possibleUsage: Usage = Usage.CALLABLE
 ) : SolCallable, SolMember {
   override val callablePriority: Int
@@ -395,6 +498,10 @@ data class BuiltinCallable(
   override fun getName(): String? = memberName
   override fun getPossibleUsage(contextType: ContextType) = possibleUsage
 }
+
+val addressMember = BuiltinCallable(emptyList(), SolAddress.NON_PAYABLE, "address")
+val selectorMember = BuiltinCallable(emptyList(), SolFixedBytes(4), "selector")
+
 
 private fun getSdkMembers(solContract: SolContract): List<SolMember> {
     return solContract.ref.let { it.functionDefinitionList + it.stateVariableDeclarationList }
