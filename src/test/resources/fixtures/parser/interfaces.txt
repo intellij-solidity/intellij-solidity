@@ -41,7 +41,7 @@ Solidity File
         PsiElement(external)('external')
       PsiWhiteSpace(' ')
       SolStateMutabilityImpl(STATE_MUTABILITY)
-        PsiElement(Identifier)('payable')
+        PsiElement(payable)('payable')
       PsiElement(;)(';')
     PsiWhiteSpace('\n')
     PsiElement(})('}')

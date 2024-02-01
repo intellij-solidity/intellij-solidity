@@ -258,7 +258,11 @@ object SolResolver {
         ?: emptyList()
       else -> lexicalDeclarations(element)
         .filter { it.name == element.name }
-        .toList()
+        .toList().let {
+          if (it.size <= 1 || it.any { it !is SolContractDefinition }) it
+          // resolve by imports to distinguish elements with the same name
+          else resolveTypeNameUsingImports(element).toList()
+        }
     }
   }
 
@@ -284,7 +288,7 @@ object SolResolver {
   fun resolveContractMembers(contract: SolContractDefinition, skipThis: Boolean = false): List<SolMember> {
     val members = if (!skipThis)
       contract.stateVariableDeclarationList as List<SolMember> + contract.functionDefinitionList + contract.functionDefinitionList.filter { it.visibility?.let { it == Visibility.PUBLIC || it == Visibility.EXTERNAL } ?: false }.map { SolFunctionReference(it) }  +
-        contract.structDefinitionList.map { SolStructConstructor(it) } + contract.enumDefinitionList.map { SolEnum(it) }
+        contract.structDefinitionList.map { SolMemberConstructor(it) } + contract.enumDefinitionList.map { SolEnum(it) } + contract.eventDefinitionList.map { SolMemberConstructor(it) }
     else
       emptyList()
     return members + contract.supers
@@ -448,13 +452,26 @@ private fun <T> Sequence<T>.takeWhileInclusive(pred: (T) -> Boolean): Sequence<T
 }
 
 fun SolCallable.canBeApplied(arguments: SolFunctionCallArguments): Boolean {
-  val callArgumentTypes = arguments.expressionList.map { it.type }
-  val parameters = parseParameters()
-    .map { it.second }
-  if (parameters.size != callArgumentTypes.size)
-    return false
-  return !parameters.zip(callArgumentTypes)
-    .any { (paramType, argumentType) ->
-      paramType != SolUnknown && !paramType.isAssignableFrom(argumentType)
+  val parameterPairs = parseParameters()
+  val paramMap = arguments.expressionList.firstOrNull()
+  if (paramMap is SolMapExpression) {
+    val callArguments = paramMap.mapExpressionClauseList.mapNotNull { Pair(it.identifier.text, it.expression?.type ?: return@mapNotNull null) }
+    if (callArguments.size != parameterPairs.size) {
+      return false
     }
+    return !parameterPairs.sortedBy { it.first }.zip(callArguments.sortedBy { it.first })
+          .any { (param, argument) ->
+            param.first != argument.first || param.second != SolUnknown && !param.second.isAssignableFrom(argument.second)
+          }
+  } else {
+    val callArgumentTypes = arguments.expressionList.map { it.type }
+    val parameters = parameterPairs
+      .map { it.second }
+    if (parameters.size != callArgumentTypes.size)
+      return false
+    return !parameters.zip(callArgumentTypes)
+      .any { (paramType, argumentType) ->
+        paramType != SolUnknown && !paramType.isAssignableFrom(argumentType)
+      }
+  }
 }

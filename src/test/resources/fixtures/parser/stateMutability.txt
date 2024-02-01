@@ -227,7 +227,7 @@ Solidity File
         PsiElement())(')')
       PsiWhiteSpace(' ')
       SolStateMutabilityImpl(STATE_MUTABILITY)
-        PsiElement(Identifier)('payable')
+        PsiElement(payable)('payable')
       PsiWhiteSpace(' ')
       PsiElement(returns)('returns')
       PsiWhiteSpace(' ')

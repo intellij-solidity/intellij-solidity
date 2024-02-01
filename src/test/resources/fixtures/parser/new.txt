@@ -139,7 +139,7 @@ Solidity File
         PsiElement(public)('public')
       PsiWhiteSpace(' ')
       SolStateMutabilityImpl(STATE_MUTABILITY)
-        PsiElement(Identifier)('payable')
+        PsiElement(payable)('payable')
       PsiWhiteSpace(' ')
       SolBlockImpl(BLOCK)
         PsiElement({)('{')

@@ -185,6 +185,7 @@ PRAGMAALL=[^ ][^;]*
   "weeks"                 { return WEEKS; }
   "years"                 { return YEARS; }
   "address"               { return ADDRESS; }
+  "payable"               { return PAYABLE; }
   "string"                { return STRING; }
   "bool"                  { return BOOL; }
 

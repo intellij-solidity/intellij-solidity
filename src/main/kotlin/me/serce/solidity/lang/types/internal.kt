@@ -178,11 +178,11 @@ class SolInternalTypeFactory(project: Project) {
     contract("""
         contract ${internalise("Block")}{
             /**
-            * current block’s base fee (EIP-3198 and EIP-1559)
+            * current block’s base fee (<a href="https://eips.ethereum.org/EIPS/EIP-3198">EIP-3198</a> and <a href="https://eips.ethereum.org/EIPS/EIP-1559">EIP-1559</a>)
             */
              uint basefee;       
             /**
-            * current block’s blob base fee (EIP-7516 and EIP-4844)
+            * current block’s blob base fee (<a href="https://eips.ethereum.org/EIPS/EIP-7516">EIP-7516</a> and <a href="https://eips.ethereum.org/EIPS/EIP-4844">EIP-4844</a>)
             */
              uint blobbasefee;        
             /**
@@ -202,7 +202,7 @@ class SolInternalTypeFactory(project: Project) {
             */
              uint gaslimit;
             /**
-            * random number provided by the beacon chain (EVM >= Paris) (see EIP-4399 )
+            * random number provided by the beacon chain (EVM >= Paris) (see <a href="https://eips.ethereum.org/EIPS/EIP-4399">EIP-4399</a> )
             */
              uint prevrandao;
             /**
@@ -220,7 +220,7 @@ class SolInternalTypeFactory(project: Project) {
              function blockhash(uint blockNumber) returns (bytes32);
              
              /**
-             * versioned hash of the index-th blob associated with the current transaction. A versioned hash consists of a single byte representing the version (currently 0x01), followed by the last 31 bytes of the SHA256 hash of the KZG commitment (EIP-4844).
+             * versioned hash of the index-th blob associated with the current transaction. A versioned hash consists of a single byte representing the version (currently 0x01), followed by the last 31 bytes of the SHA256 hash of the KZG commitment (<a href="https://eips.ethereum.org/EIPS/EIP-4844">EIP-4844</a>).
              */
              function blobhash(uint blockNumber) returns (bytes32);
 
@@ -233,6 +233,24 @@ class SolInternalTypeFactory(project: Project) {
       /**
       */
       contract ${internalise("MetaType")} {
+							/**
+                The name of the contract
+							*/
+							string name;
+							/**
+                the creation bytecode of the contract. This can be used in inline assembly to build custom creation routines, especially by using the <code>create2</code> opcode. This property can not be accessed in the contract itself or any derived contract. It causes the bytecode to be included in the bytecode of the call site and thus circular references like that are not possible.
+							*/
+							bytes memory creationCode;
+							/**
+                the runtime bytecode of the contract. This is the code that is usually deployed by the constructor of <code>C</code>. If <code>C</code> has a constructor that uses inline assembly, this might be different from the actually deployed bytecode. Also note that libraries modify their runtime bytecode at time of deployment to guard against regular calls. The same restrictions as with <code>.creationCode</code> also apply for this property.
+							*/
+							bytes memory runtimeCode;
+
+							/**
+                 the <a href="https://eips.ethereum.org/EIPS/eip-165">EIP-165</a> interface identifier of the given interface <code>I</code>. This identifier is defined as the <code>XOR</code> of all function selectors defined within the interface itself - excluding all inherited functions.
+							*/
+							bytes4 interfaceId;
+
 							/**
                 the smallest value representable by type <code>T</code>.
 							*/
@@ -351,8 +369,6 @@ class SolInternalTypeFactory(project: Project) {
           * Returns hash of the given block when blocknumber is one of the 256 most recent blocks; otherwise returns zero
           */
           function blockhash(uint blockNumber) returns (bytes32);
-          
-          function payable(address addr) returns (address);
       }
     """)
   }
