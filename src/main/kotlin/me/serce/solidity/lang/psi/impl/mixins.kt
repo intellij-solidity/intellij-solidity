@@ -18,6 +18,7 @@ import me.serce.solidity.lang.resolve.ref.*
 import me.serce.solidity.lang.stubs.*
 import me.serce.solidity.lang.types.*
 import javax.naming.OperationNotSupportedException
+import javax.swing.Icon
 
 open class SolImportPathElement : SolStubbedNamedElementImpl<SolImportPathDefStub>, SolReferenceElement {
   constructor(node: ASTNode) : super(node)
@@ -446,6 +447,10 @@ abstract class SolEventDefMixin : SolStubbedNamedElementImpl<SolEventDefStub>, S
     return indexedParameterList?.typeNameList
       ?.map { null to getSolType(it) }
       ?: emptyList()
+  }
+
+  override fun getIcon(flags: Int): Icon? {
+    return SolidityIcons.EVENT
   }
 
   override fun parseType(): SolType {
