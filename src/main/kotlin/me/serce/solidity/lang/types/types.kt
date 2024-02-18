@@ -66,6 +66,8 @@ object SolString : SolPrimitiveType {
   override fun isAssignableFrom(other: SolType): Boolean =
     other == SolString
 
+  override fun getMembers(project: Project) = getSdkMembers(SolInternalTypeFactory.of(project).stringType)
+
   override fun toString() = "string"
 }
 

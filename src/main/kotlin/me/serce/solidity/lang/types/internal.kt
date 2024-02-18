@@ -11,6 +11,7 @@ class SolInternalTypeFactory(project: Project) {
     fun of(project: Project): SolInternalTypeFactory {
       return project.getService(SolInternalTypeFactory::class.java)
     }
+    const val varargsId = "varargs"
   }
 
   private val registry: Map<String, SolType> by lazy {
@@ -23,6 +24,17 @@ class SolInternalTypeFactory(project: Project) {
   }
 
   fun byName(name: String): SolType? = registry[name]
+
+  val stringType: SolContract by lazy {
+     contract("""
+       contract ${internalise("String")} {
+ 							/**
+                @return contents of the arguments without padding. 
+ 							*/
+ 							function concat(string $varargsId) returns (string memory);
+         }
+     """)
+   }
 
   val msgType: SolType by lazy {
     contract("""

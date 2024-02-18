@@ -467,11 +467,12 @@ fun SolCallable.canBeApplied(arguments: SolFunctionCallArguments): Boolean {
     val callArgumentTypes = arguments.expressionList.map { it.type }
     val parameters = parameterPairs
       .map { it.second }
-    if (parameters.size != callArgumentTypes.size)
+    val varargs = parameterPairs.find { it.first == SolInternalTypeFactory.varargsId }
+    if (parameters.size != callArgumentTypes.size && varargs == null)
       return false
-    return !parameters.zip(callArgumentTypes)
+    return !((parameters.takeIf { varargs == null || callArgumentTypes.size <= parameters.size } ?: (parameters.toMutableList() + List(callArgumentTypes.size - parameters.size) { varargs!!.second })).zip(callArgumentTypes)
       .any { (paramType, argumentType) ->
         paramType != SolUnknown && !paramType.isAssignableFrom(argumentType)
-      }
+      })
   }
 }

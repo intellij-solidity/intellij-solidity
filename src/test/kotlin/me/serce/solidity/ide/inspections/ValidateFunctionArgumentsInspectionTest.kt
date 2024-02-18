@@ -44,4 +44,17 @@ class ValidateFunctionArgumentsInspectionTest : SolInspectionsTestBase(ValidateF
         }
     """)
 
+  fun testVarargs() = checkByText("""
+        contract a {
+            function a() {
+                string r = string.concat('a', 'b', 'c');
+                string r2 = string.concat(/*@error descr="Argument of type 'uint8' is not assignable to parameter of type 'string'"@*/'a', 2, 'c'/*@/error@*/); 
+            }
+            
+            function b(int a) {
+            
+            }
+        }
+    """)
+
 }
