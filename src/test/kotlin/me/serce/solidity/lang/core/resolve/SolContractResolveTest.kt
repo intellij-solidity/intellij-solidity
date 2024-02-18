@@ -91,10 +91,19 @@ class SolContractResolveTest : SolResolveTestBase() {
     ),
     InlineFile("""
           import {a as A} from "./a.sol";
+                //^
+          contract b is A {}
+                      
+    """)
+  )
 
+  fun testResolveSymbolAliases2() = checkByCode(
+    """
+          import {a as A} from "./a.sol";
+                     //x
           contract b is A {}
                       //^
-    """)
+    """
   )
 
   fun testResolveSymbolAliasesChain() {

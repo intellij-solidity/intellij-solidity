@@ -81,6 +81,7 @@ private fun getSolTypeFromUserDefinedTypeName(type: SolUserDefinedTypeName): Sol
         is SolStructDefinition -> SolStruct(it)
         is SolEnumDefinition -> SolEnum(it)
         is SolUserDefinedValueTypeDefinition -> getSolType(it.elementaryTypeName)
+        is SolImportAlias -> (it.parent as? SolImportAliasedPair)?.let { getSolTypeFromUserDefinedTypeName(it.userDefinedTypeName) }
         else -> null
       }
     }
@@ -172,6 +173,7 @@ fun inferExprType(expr: SolExpression?): SolType {
       inferExprType(expr.expressionList.firstOrNull()),
       inferExprType(expr.expressionList.secondOrNull())
     )
+    is SolShiftExpression -> inferExprType(expr.expressionList.firstOrNull())
     is SolFunctionCallExpression -> {
       (expr.reference as SolFunctionCallReference)
         .resolveFunctionCall()
