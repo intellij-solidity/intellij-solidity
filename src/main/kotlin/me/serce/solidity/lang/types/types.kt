@@ -75,7 +75,7 @@ class SolAddress(val isPayable : Boolean) : SolPrimitiveType {
   private val toString = "address${if (isPayable) " payable" else ""}"
   override fun isAssignableFrom(other: SolType): Boolean =
     when (other) {
-      is SolAddress -> true //!this.isPayable || other.isPayable
+      is SolAddress -> true
       is SolContract -> true
       else -> UINT_160.isAssignableFrom(other)
     }
