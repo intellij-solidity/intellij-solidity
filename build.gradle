@@ -120,7 +120,7 @@ generateParser {
     pathToPsiRoot = "$pkg/psi"
     purgeOldFiles = true
 
-    outputs.dir(new File("$targetRoot/$pkg"))
+    outputs.dir(new File("gen/$pkg"))
 }
 
 
@@ -134,3 +134,5 @@ jacocoTestReport {
 }
 
 check.dependsOn jacocoTestReport
+
+buildSearchableOptions.enabled = false
