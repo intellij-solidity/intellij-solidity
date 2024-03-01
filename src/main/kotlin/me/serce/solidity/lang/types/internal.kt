@@ -283,7 +283,7 @@ class SolInternalTypeFactory(project: Project) {
 							/**
                  the address of the contract of the function.
 							*/
-//							address address;
+							address __address;
 							/**
                 the ABI function selector
 							*/

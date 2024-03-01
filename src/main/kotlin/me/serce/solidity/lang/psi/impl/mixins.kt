@@ -97,7 +97,15 @@ abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrL
   override fun getIcon(flags: Int) = SolidityIcons.CONTRACT
 
   override fun parseParameters(): List<Pair<String?, SolType>> {
-    return listOf(Pair(null, if (isPayable) SolAddress.PAYABLE else SolAddress.NON_PAYABLE))
+    return listOf(Pair(null, object : SolType {
+      override fun isAssignableFrom(other: SolType): Boolean {
+        return when (other) {
+          is SolAddress -> true
+          is SolContract -> SolContract(this@SolContractOrLibMixin).isAssignableFrom(other)
+          else -> false
+        }
+      }
+    }))
   }
 
   override fun parseType(): SolType {
@@ -309,6 +317,12 @@ abstract class SolStateVarDeclMixin : SolStubbedNamedElementImpl<SolStateVarDecl
 
   override val mutability: Mutability?
     get() = mutationModifier?.text?.let { safeValueOf(it.uppercase()) }
+
+  override val mutationModifier: SolMutationModifier?
+    get() = mutationModifierList.firstOrNull()
+
+  override val visibilityModifier: SolVisibilityModifier?
+    get() = visibilityModifierList.firstOrNull()
 
 }
 

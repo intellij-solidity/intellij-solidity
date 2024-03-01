@@ -101,7 +101,7 @@ object SolResolver {
           val aliases = it.importAliasedPairList
           val names = if (aliases.isNotEmpty()) {
             aliases.mapNotNull { it.importAlias } + aliases.mapNotNull { it.userDefinedTypeName.name?.let { tn -> containingFile.childrenOfType<SolContractDefinition>().find { it.name == tn } } }
-          } else containingFile.childrenOfType<SolContractDefinition>().toList().flatMap { resolveContractMembers(it) + it }
+          } else containingFile.childrenOfType<SolCallableElement>().toList().flatMap { (if (it is SolContractDefinition) resolveContractMembers(it) else emptyList()) + it }
           ImportRecord(containingFile, names.filterIsInstance<SolNamedElement>())
         }
       }
@@ -290,7 +290,8 @@ object SolResolver {
 
   fun resolveContractMembers(contract: SolContractDefinition, skipThis: Boolean = false): List<SolMember> {
     val members = if (!skipThis)
-      contract.stateVariableDeclarationList as List<SolMember> + contract.functionDefinitionList + contract.functionDefinitionList.filter { it.visibility?.let { it == Visibility.PUBLIC || it == Visibility.EXTERNAL } ?: false }.map { SolFunctionReference(it) }  +
+      contract.stateVariableDeclarationList as List<SolMember> + contract.functionDefinitionList +
+        contract.functionDefinitionList.filter { it.visibility?.let { it == Visibility.PUBLIC || it == Visibility.EXTERNAL } ?: false }.map { SolFunctionReference(it) }  +
         contract.enumDefinitionList.map { SolEnum(it) } +
         contract.structDefinitionList.map { SolMemberConstructor(it) } + contract.eventDefinitionList.map { SolMemberConstructor(it) } + contract.errorDefinitionList.map { SolMemberConstructor(it) }
     else

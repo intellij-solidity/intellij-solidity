@@ -88,7 +88,6 @@ class SolAddress(val isPayable : Boolean) : SolPrimitiveType {
     val PAYABLE = SolAddress(true)
     val NON_PAYABLE = SolAddress(false)
   }
-
 }
 
 enum class NumericLiteralType {
@@ -446,11 +445,46 @@ data class SolFunctionType(val ref: SolFunctionDefinition): SolType {
   }
 
   override fun getMembers(project: Project): List<SolMember> {
-    return getSdkMembers(SolInternalTypeFactory.of(project).functionType)
+    return getReferenceTypeMembers(project, Usage.CALLABLE)
   }
+
+
 
   override fun toString(): String = "function(${ref.name})"
 }
+
+data class SolVariableType(val ref: SolStateVariableDeclaration): SolType {
+  override fun isAssignableFrom(other: SolType): Boolean {
+    return other is SolVariableType && this.ref.parseParameters() == other.ref.parseParameters() && this.ref.parseType() == other.ref.parseType()
+  }
+
+  override fun getMembers(project: Project): List<SolMember> {
+    return getReferenceTypeMembers(project, Usage.VARIABLE)
+  }
+
+  override fun toString(): String = "variable(${ref.name})"
+}
+
+private fun getReferenceTypeMembers(project: Project, usage: Usage) =
+    getSdkMembers(SolInternalTypeFactory.of(project).functionType).map {
+      it.getName()?.let { name -> if (it is SolCallable && name.startsWith("__")) changeName(it, name.substring(2), usage) else it }
+        ?: it
+    }
+
+data class SolUserDefinedValueTypeType(val ref: SolUserDefinedValueTypeDefinition): SolType {
+  var elementaryType: SolType = getSolType(ref.elementaryTypeName)
+  override fun isAssignableFrom(other: SolType): Boolean {
+    return other is SolUserDefinedValueTypeType && this.elementaryType == other.elementaryType
+  }
+
+  override fun getMembers(project: Project): List<SolMember> {
+    return elementaryType.getMembers(project) + BuiltinCallable(listOf("value" to this), elementaryType, "unwrap") + BuiltinCallable(listOf("value" to elementaryType), this, "wrap")
+  }
+
+  override fun toString(): String = "ValueType(${ref.name})"
+}
+
+
 
 data class SolFunctionReference(val ref: SolFunctionDefinition): SolMember {
   override fun getName(): String? = ref.name
@@ -502,10 +536,13 @@ data class BuiltinCallable(
   override fun getPossibleUsage(contextType: ContextType) = possibleUsage
 }
 
-val addressMember = BuiltinCallable(emptyList(), SolAddress.NON_PAYABLE, "address")
-val selectorMember = BuiltinCallable(emptyList(), SolFixedBytes(4), "selector")
+
 
 
 private fun getSdkMembers(solContract: SolContract): List<SolMember> {
     return solContract.ref.let { it.functionDefinitionList + it.stateVariableDeclarationList }
+}
+
+private fun changeName(it: SolCallable, newName: String, callable: Usage): SolMember {
+  return BuiltinCallable(it.parseParameters(), it.parseType(), newName)
 }

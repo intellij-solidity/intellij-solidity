@@ -173,7 +173,7 @@ InheritanceSpecifier ::= UserDefinedTypeName ( '(' Expression ( ',' Expression )
 VisibilityModifier ::= ( public | internal | private )
 MutationModifier ::= (constant | immutable)
 
-StateVariableDeclaration ::= TypeName (VisibilityModifier MutationModifier OverrideSpecifier? | MutationModifier? VisibilityModifier? OverrideSpecifier? ) Identifier ('=' Expression)? ';'  {
+StateVariableDeclaration ::= TypeName (MutationModifier | VisibilityModifier | OverrideSpecifier)* Identifier ('=' Expression)? ';'  {
     implements = "me.serce.solidity.lang.psi.SolStateVarElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolStateVarDeclMixin"
     stubClass = "me.serce.solidity.lang.stubs.SolStateVarDeclStub"

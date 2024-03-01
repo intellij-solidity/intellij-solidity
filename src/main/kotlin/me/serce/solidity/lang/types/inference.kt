@@ -2,10 +2,13 @@ package me.serce.solidity.lang.types
 
 import com.intellij.openapi.util.RecursionManager
 import com.intellij.psi.PsiElement
+import com.intellij.psi.impl.source.tree.LeafPsiElement
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiModificationTracker
+import com.intellij.psi.util.childrenOfType
 import me.serce.solidity.firstOrElse
+import me.serce.solidity.lang.core.SolidityTokenTypes
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.psi.impl.SolMemberAccessElement
 import me.serce.solidity.lang.resolve.SolResolver
@@ -29,7 +32,7 @@ fun getSolType(type: SolTypeName?): SolType {
       when (val text = type.firstChild.text) {
         "bool" -> SolBoolean
         "string" -> SolString
-        "address" -> SolAddress.NON_PAYABLE
+        "address" -> if (type.childrenOfType<LeafPsiElement>().drop(1).any { it.elementType == SolidityTokenTypes.PAYABLE }) SolAddress.PAYABLE else SolAddress.NON_PAYABLE
         "payable" -> SolAddress.PAYABLE
         "bytes" -> SolBytes
         "byte" -> SolFixedBytes(1)
@@ -80,7 +83,7 @@ private fun getSolTypeFromUserDefinedTypeName(type: SolUserDefinedTypeName): Sol
         is SolContractDefinition -> SolContract(it)
         is SolStructDefinition -> SolStruct(it)
         is SolEnumDefinition -> SolEnum(it)
-        is SolUserDefinedValueTypeDefinition -> getSolType(it.elementaryTypeName)
+        is SolUserDefinedValueTypeDefinition -> SolUserDefinedValueTypeType(it)
         is SolImportAlias -> (it.parent as? SolImportAliasedPair)?.let { getSolTypeFromUserDefinedTypeName(it.userDefinedTypeName) }
         else -> null
       }
@@ -115,6 +118,7 @@ fun inferDeclType(decl: SolNamedElement): SolType {
     is SolEnumValue -> inferDeclType(decl.parent as SolNamedElement)
     is SolParameterDef -> getSolType(decl.typeName)
     is SolStateVariableDeclaration -> getSolType(decl.typeName)
+    is SolFunctionDefinition -> SolFunctionType(decl)
     else -> SolUnknown
   }
 }
@@ -231,8 +235,10 @@ fun SolMemberAccessExpression.getMembers(): List<SolMember> {
         ?: emptyList()
     }
     else -> {
-      val fromLibraries = (this as? SolMemberAccessElement)?.collectUsingForLibraryFunctions() ?: emptyList()
-      expr.type.getMembers(this.project) + fromLibraries.map { it.toLibraryFunDefinition() }
+      val fromLibraries = (this as? SolMemberAccessElement)?.collectUsingForLibraryFunctions()?.let { it.map { it.toLibraryFunDefinition() } } ?: emptyList()
+      val stateVarRefs = (expr.reference?.resolve()?.let { it as? SolStateVariableDeclaration }?.takeIf { it.visibility?.let { it == Visibility.PUBLIC || it == Visibility.EXTERNAL } ?: false}?.let { SolVariableType(it).getMembers(it.project) } ?: emptyList())
+      val typeMembers = expr.type.getMembers(this.project)
+      if (fromLibraries.isEmpty() && stateVarRefs.isEmpty()) typeMembers else typeMembers + fromLibraries + stateVarRefs
     }
   }
 }
