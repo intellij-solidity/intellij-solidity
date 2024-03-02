@@ -92,7 +92,7 @@ abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrL
   override fun getIcon(flags: Int) = SolidityIcons.CONTRACT
 
   override fun parseParameters(): List<Pair<String?, SolType>> {
-    return listOf(Pair(null, SolAddress))
+    return listOf(Pair(null, SolAddress.PAYABLE))
   }
 
   override fun parseType(): SolType {

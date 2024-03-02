@@ -30,7 +30,7 @@ abstract class SolReferenceBase<T : SolReferenceElement>(element: T) : PsiPolyVa
     return element
   }
 
-  override fun resolve(): SolElement? = super.resolve() as SolElement?
+  override fun resolve(): SolElement? = super.resolve() as? SolElement?
 
   protected open fun doRename(identifier: PsiElement, newName: String) {
     check(identifier.elementType == IDENTIFIER)

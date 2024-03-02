@@ -44,6 +44,8 @@ interface SolType {
 interface SolUserType : SolType {
   override val isBuiltin: Boolean
     get() = false
+
+  val abiName: String
 }
 
 interface SolPrimitiveType : SolType
@@ -69,7 +71,8 @@ object SolString : SolPrimitiveType {
   override fun toString() = "string"
 }
 
-object SolAddress : SolPrimitiveType {
+class SolAddress(val isPayable : Boolean) : SolPrimitiveType {
+  private val toString = "address${if (isPayable) " payable" else ""}"
   override fun isAssignableFrom(other: SolType): Boolean =
     when (other) {
       is SolAddress -> true
@@ -79,7 +82,12 @@ object SolAddress : SolPrimitiveType {
 
   override fun getMembers(project: Project) = getSdkMembers(SolInternalTypeFactory.of(project).addressType)
 
-  override fun toString() = "address"
+  override fun toString() = toString
+
+  companion object {
+    val PAYABLE = SolAddress(true)
+    val NON_PAYABLE = SolAddress(false)
+  }
 
 }
 
@@ -221,6 +229,8 @@ data class SolContract(val ref: SolContractDefinition, val builtin: Boolean = fa
   }
 
   override val isBuiltin get() = builtin
+  override val abiName: String
+    get() = "contract"
 
   override fun toString() = ref.name ?: ref.text ?: "$ref"
 }
@@ -238,6 +248,8 @@ data class SolStruct(val ref: SolStructDefinition, val builtin : Boolean = false
 
   override val isBuiltin: Boolean
     get() = builtin
+  override val abiName: String
+    get() = "struct"
 }
 
 data class SolStructVariableDeclaration(
@@ -253,6 +265,9 @@ data class SolStructVariableDeclaration(
 }
 
 data class SolEnum(val ref: SolEnumDefinition) : SolUserType {
+  override val abiName: String
+    get() = "enum"
+
   override fun isAssignableFrom(other: SolType): Boolean =
     other is SolEnum && ref == other.ref
 
