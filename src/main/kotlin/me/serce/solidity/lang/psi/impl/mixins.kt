@@ -19,6 +19,7 @@ import me.serce.solidity.lang.stubs.*
 import me.serce.solidity.lang.types.*
 import me.serce.solidity.wrap
 import javax.naming.OperationNotSupportedException
+import javax.swing.Icon
 
 open class SolImportPathElement : SolStubbedNamedElementImpl<SolImportPathDefStub>, SolReferenceElement {
   constructor(node: ASTNode) : super(node)
@@ -152,14 +153,14 @@ abstract class SolConstructorDefMixin(node: ASTNode) : SolElementImpl(node), Sol
   override val callablePriority = 100
 
   override fun parseType(): SolType {
-    return contract?.let { SolContract( it ) } ?: SolUnknown
+    return contract?.let { SolContract(it) } ?: SolUnknown
   }
 
   override val visibility
-    get() = functionVisibilitySpecifierList
-      .map { it.text.uppercase() }
-      .mapNotNull { safeValueOf<Visibility>(it) }
-      .firstOrNull()
+    get() = functionVisibilitySpecifierList.mapNotNull { it.visibilitySpecifier }.parseVisibility()
+
+  override val mutability
+    get() = stateMutabilitySpecifierList.parseMutability()
 
   override fun getPossibleUsage(contextType: ContextType) = Usage.CALLABLE
 
@@ -217,22 +218,14 @@ abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefSt
   override val callablePriority = 0
 
   override fun parseType(): SolType {
-    return this.returns.let { list ->
-      when (list) {
-        null -> SolUnknown
-        else -> list.parameterDefList.let {
-          when (it.size) {
-            1 -> getSolType(it[0].typeName)
-            else -> SolTuple(it.map { def -> getSolType(def.typeName) })
-          }
-        }
-      }
-    }
+    return this.returns.parseType()
   }
 
   override val visibility
-    get() = functionVisibilitySpecifierList
-      .map { it.text.uppercase() }.firstNotNullOfOrNull { safeValueOf<Visibility>(it) }
+    get() = functionVisibilitySpecifierList.mapNotNull { it.visibilitySpecifier }.parseVisibility()
+
+  override val mutability
+    get() = stateMutabilitySpecifierList.parseMutability()
 
   override val specialFunction: SpecialFunctionType?
     get() = firstChild?.text?.uppercase().let { t -> SpecialFunctionType.values().find { it.name == t } }
@@ -332,8 +325,6 @@ abstract class SolConstantVariableDeclMixin : SolStubbedNamedElementImpl<SolCons
 
   // TODO: does it need a separate icon?
   override fun getIcon(flags: Int) = SolidityIcons.STATE_VAR
-
-
 }
 
 abstract class SolStructDefMixin : SolStubbedNamedElementImpl<SolStructDefStub>, SolStructDefinition, SolCallableElement {
@@ -417,7 +408,9 @@ open class SolDeclarationItemMixin(node: ASTNode) : SolNamedElementImpl(node)
 
 open class SolTypedDeclarationItemMixin(node: ASTNode) : SolNamedElementImpl(node)
 
-abstract class SolVariableDeclarationMixin(node: ASTNode) : SolVariableDeclaration, SolNamedElementImpl(node)
+abstract class SolVariableDeclarationMixin(node: ASTNode) : SolVariableDeclaration, SolNamedElementImpl(node) {
+  override fun getIcon(flags: Int): Icon = SolidityIcons.STATE_VAR
+}
 
 open class SolParameterDefMixin(node: ASTNode) : SolNamedElementImpl(node)
 
@@ -506,6 +499,10 @@ abstract class SolEventDefMixin : SolStubbedNamedElementImpl<SolEventDefStub>, S
       ?: emptyList()
   }
 
+  override fun getIcon(flags: Int): Icon? {
+    return SolidityIcons.EVENT
+  }
+
   override fun parseType(): SolType {
     return SolUnknown
   }
@@ -556,3 +553,30 @@ abstract class SolUsingForMixin(node: ASTNode) : SolElementImpl(node), SolUsingF
       .filterIsInstance<SolContractDefinition>()
       .firstOrNull()
 }
+
+
+abstract class SolFunctionTypeMixin : SolStubbedElementImpl<SolTypeRefStub>, SolFunctionTypeName, SolFunctionTypeElement {
+
+  constructor(node: ASTNode) : super(node)
+  constructor(stub: SolTypeRefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
+
+
+  override val params: List<SolParameterDef>
+    get() = parameterListList.first().parameterDefList
+  override val returns: SolType
+    get() = parameterListList.getOrNull(1).parseType()
+  override val mutability: Mutability?
+    get() = stateMutabilitySpecifierList.parseMutability()
+  override val visibility: Visibility?
+    get() = visibilitySpecifierList.parseVisibility()
+}
+
+fun List<SolVisibilitySpecifier>.parseVisibility() =
+     map { it.text.uppercase() }
+    .mapNotNull { safeValueOf<Visibility>(it) }
+    .firstOrNull()
+
+
+fun List<SolStateMutabilitySpecifier>.parseMutability() =
+       map { it.text.uppercase() }
+         .firstNotNullOfOrNull { safeValueOf<Mutability>(it) }

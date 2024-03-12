@@ -211,7 +211,6 @@
                                  displayName="Member is not defined"
                                  enabledByDefault="true"
                                  level="ERROR"
-                                 shortName="SolidityMemberAccessInspection"
                                  implementationClass="me.serce.solidity.ide.inspections.ValidateMemberAccessInspection"/>
 
 

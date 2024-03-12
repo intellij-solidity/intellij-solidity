@@ -222,13 +222,13 @@ class SolDocumentationProvider : AbstractDocumentationProvider() {
 
   private fun SolFunctionDefinition.doc() : String {
     return ("${if (isConstructor) "constructor" else "function"} ${identifier.idName()}(${parameters.doc()}) ${functionVisibilitySpecifierList.doc(" ")} " +
-      "${stateMutabilityList.doc(" ")} ${modifierInvocationList.doc(" ")} " +
+      "${stateMutabilitySpecifierList.doc(" ")} ${modifierInvocationList.doc(" ")} " +
       (returns?.parameterDefList?.doc(", ", "returns (", ")") ?: "")).replace("  ", " ")
   }
 
   private fun SolConstructorDefinition.doc() : String {
     return ("constructor ${findContract()?.identifier.idName()}(${parameterList?.parameterDefList.doc()}) ${functionVisibilitySpecifierList.doc(" ")} " +
-      "${stateMutabilityList.doc(" ")} ${modifierInvocationList.doc(" ")} "
+      "${stateMutabilitySpecifierList.doc(" ")} ${modifierInvocationList.doc(" ")} "
       ).replace("  ", " ")
   }
 

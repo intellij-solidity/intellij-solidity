@@ -10,6 +10,7 @@ import me.serce.solidity.lang.psi.impl.SolFunctionDefMixin
 import me.serce.solidity.lang.psi.impl.SolNewExpressionElement
 import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.resolve.canBeApplied
+import me.serce.solidity.lang.resolve.function.SolFunctionResolver
 import me.serce.solidity.lang.types.*
 import me.serce.solidity.wrap
 
@@ -128,11 +129,11 @@ class SolFunctionCallReference(element: SolFunctionCallExpression) : SolReferenc
   }
 
   private fun removeOverrides(callables: Collection<SolCallable>): Collection<SolCallable> {
-    val test = callables.filterIsInstance<SolFunctionDefinition>()
+    val test = callables.filterIsInstance<SolFunctionDefinition>().flatMap { SolFunctionResolver.collectOverriden(it) }.toSet()
     return callables
       .filter {
         when (it) {
-//          is SolFunctionDefinition -> SolFunctionResolver.collectOverrides(it).intersect(test).isEmpty()
+          is SolFunctionDefinition -> !test.contains(it)
           else -> true
         }
       }

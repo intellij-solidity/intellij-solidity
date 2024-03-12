@@ -37,17 +37,13 @@ object SolResolver {
     }
 
   private fun resolveAliases(element: PsiElement): Set<SolNamedElement> {
-    return resolveUsingImports(SolImportAlias::class.java, element, element.containingFile, true)
+    return resolveUsingImports(SolImportAlias::class.java, element, element.containingFile)
   }
 
-  /**
-   * @param withAliases aliases are not recursive, so count them only at the first level of recursion
-   */
   private fun <T : SolNamedElement> resolveUsingImports(
     target: Class<T>,
     element: PsiElement,
     file: PsiFile,
-    withAliases: Boolean,
   ): Set<T> {
     // If the elements has no name or text, we can't resolve it.
     val elementName = element.nameOrText
@@ -66,14 +62,13 @@ object SolResolver {
     )
 
     val resolvedImportedFiles = collectImports(file)
-    val insideImport = element.parentOfType<SolImportDirective>() != null
     val sameNameReferences = elements.filterIsInstance(target).filter {
       val containingFile = it.containingFile
       // During completion, IntelliJ copies PSI files, and therefore we need to ensure that we compare
       // files against its original file.
       val originalFile = file.originalFile
       // Below, either include
-      containingFile == originalFile || resolvedImportedFiles.any { (insideImport || containingFile == it.file) && it.names.let {it.isEmpty() || it.any { it.name == elementName }}}
+      containingFile == originalFile || resolvedImportedFiles.any { (containingFile == it.file) && it.names.let {it.isEmpty() || it.any { it.name == elementName }}}
 
 
     }
@@ -111,23 +106,23 @@ object SolResolver {
   }
 
   private fun resolveContract(element: PsiElement): Set<SolContractDefinition> =
-    resolveUsingImports(SolContractDefinition::class.java, element, element.containingFile, true)
+    resolveUsingImports(SolContractDefinition::class.java, element, element.containingFile)
   private fun resolveEnum(element: PsiElement): Set<SolNamedElement> =
-    resolveInnerType<SolEnumDefinition>(element) { it.enumDefinitionList } + resolveUsingImports(SolEnumDefinition::class.java, element, element.containingFile, true)
+    resolveInnerType<SolEnumDefinition>(element) { it.enumDefinitionList } + resolveUsingImports(SolEnumDefinition::class.java, element, element.containingFile)
 
   private fun resolveStruct(element: PsiElement): Set<SolNamedElement> =
-    resolveInnerType<SolStructDefinition>(element) { it.structDefinitionList } + resolveUsingImports(SolStructDefinition::class.java, element, element.containingFile, true)
+    resolveInnerType<SolStructDefinition>(element) { it.structDefinitionList } + resolveUsingImports(SolStructDefinition::class.java, element, element.containingFile)
 
   private fun resolveUserDefinedValueType(element: PsiElement): Set<SolNamedElement> =
     resolveInnerType<SolUserDefinedValueTypeDefinition>(
       element,
-      { it.userDefinedValueTypeDefinitionList }) + resolveUsingImports(SolUserDefinedValueTypeDefinition::class.java, element, element.containingFile, true)
+      { it.userDefinedValueTypeDefinitionList }) + resolveUsingImports(SolUserDefinedValueTypeDefinition::class.java, element, element.containingFile)
 
   private fun resolveEvent(element: PsiElement): Set<SolNamedElement> =
     resolveInnerType<SolEventDefinition>(element) { it.eventDefinitionList }
 
   private fun resolveError(element: PsiElement): Set<SolNamedElement> =
-    resolveInnerType<SolErrorDefinition>(element) { it.errorDefinitionList } + resolveUsingImports(SolErrorDefinition::class.java, element, element.containingFile, true)
+    resolveInnerType<SolErrorDefinition>(element) { it.errorDefinitionList } + resolveUsingImports(SolErrorDefinition::class.java, element, element.containingFile)
 
   private inline fun <reified T : SolNamedElement> resolveInFile(element: PsiElement) : Set<T> {
     return element.parentOfType<SolidityFile>()
@@ -291,7 +286,7 @@ object SolResolver {
   fun resolveContractMembers(contract: SolContractDefinition, skipThis: Boolean = false): List<SolMember> {
     val members = if (!skipThis)
       contract.stateVariableDeclarationList as List<SolMember> + contract.functionDefinitionList +
-        contract.functionDefinitionList.filter { it.visibility?.let { it == Visibility.PUBLIC || it == Visibility.EXTERNAL } ?: false }.map { SolFunctionReference(it) }  +
+        contract.functionDefinitionList.filter { it.visibility?.let { it == Visibility.PUBLIC || it == Visibility.EXTERNAL || it == Visibility.INTERNAL && contract.contractType == ContractType.LIBRARY } ?: false }.map { SolFunctionReference(it) }  +
         contract.enumDefinitionList.map { SolEnum(it) } +
         contract.structDefinitionList.map { SolMemberConstructor(it) } + contract.eventDefinitionList.map { SolMemberConstructor(it) } + contract.errorDefinitionList.map { SolMemberConstructor(it) }
     else

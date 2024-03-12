@@ -182,12 +182,10 @@ class ImportFileAction(
             }
 
             importPath.contains("lib$separator") -> {
-              val idx = importPath.indexOf("lib$separator")
               val mapping = readRemappingsFile(project);
-              val fallback = importPath.substring(idx + "lib$separator".length)
-              return mapping.keys.firstOrNull { importPath.contains(it) }
+              mapping.keys.firstOrNull { importPath.contains(it) }
                 ?.let { importPath.substring(importPath.indexOf(it)).replaceFirst(it, mapping[it]!!) }
-                ?: fallback
+                ?: importPath
             }
 
             importPath.contains("installed_contracts$separator") -> {
@@ -195,7 +193,6 @@ class ImportFileAction(
               importPath.substring(idx + "installed_contracts$separator".length)
                 .replaceFirst("${separator}contracts${separator}", separator)
             }
-
             !importPath.startsWith(".") -> ".$separator$importPath"
             else -> importPath
         }

@@ -238,7 +238,7 @@ ModifierDefinition ::= modifier Identifier ParameterList? ( VirtualSpecifier | O
 VirtualSpecifier ::= virtual {pin=1}
 OverrideSpecifier ::= override ( '(' UserDefinedTypeName (',' UserDefinedTypeName)* ')' )? {pin=1}
 
-FunctionVisibilitySpecifier ::= external | public | internal | 'private' | VirtualSpecifier | OverrideSpecifier
+FunctionVisibilitySpecifier ::= VisibilitySpecifier | VirtualSpecifier | OverrideSpecifier
 ModifierInvocation ::= VarLiteral ('(' ModifierInvocationCallArguments ')')? {
     implements = "me.serce.solidity.lang.psi.SolModifierInvocationElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolModifierInvocationMixin"
@@ -246,7 +246,7 @@ ModifierInvocation ::= VarLiteral ('(' ModifierInvocationCallArguments ')')? {
 private ModifierInvocationCallArguments ::= FunctionCallArguments
 
 ConstructorDefinition ::= constructor ParameterList
-                         ( FunctionVisibilitySpecifier | StateMutability | ModifierInvocation)*
+                         ( FunctionVisibilitySpecifier | StateMutabilitySpecifier | ModifierInvocation)*
                          Block {
     pin = 1
     implements = "me.serce.solidity.lang.psi.SolHasModifiersElement"
@@ -255,7 +255,7 @@ ConstructorDefinition ::= constructor ParameterList
 
 FunctionDefinition ::= (function Identifier? | fallback | receive )
                         ParameterList
-                        ( FunctionVisibilitySpecifier | StateMutability | ModifierInvocation)*
+                        ( FunctionVisibilitySpecifier | StateMutabilitySpecifier | ModifierInvocation)*
                         ( returns ParameterList )? ( ';' | Block ) {
     pin = 1
     implements = "me.serce.solidity.lang.psi.SolFunctionDefElement"
@@ -303,7 +303,7 @@ UserDefinedValueTypeDefinition ::= type Identifier is ElementaryTypeName ';' {
 }
 
 IndexedParameterList ::= '(' ( TypeName indexed?  Identifier? (',' TypeName indexed?  Identifier?)* )? ')'
-ParameterDef ::= TypeName (constant StorageLocation? | StorageLocation constant?)? Identifier? {
+ParameterDef ::= TypeName (constant StorageLocationSpecifier? | StorageLocationSpecifier constant?)? Identifier? {
     implements = "me.serce.solidity.lang.psi.SolNamedElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolParameterDefMixin"
 }
@@ -317,7 +317,7 @@ DeclarationItem ::= Identifier ','? | ',' {
     mixin = "me.serce.solidity.lang.psi.impl.SolDeclarationItemMixin"
 }
 DeclarationList ::= '(' DeclarationItem*  ')'
-TypedDeclarationItem ::= (TypeName StorageLocation?)? Identifier ','? | ',' {
+TypedDeclarationItem ::= (TypeName StorageLocationSpecifier?)? Identifier ','? | ',' {
     implements = "me.serce.solidity.lang.psi.SolNamedElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolTypedDeclarationItemMixin"
 }
@@ -327,7 +327,7 @@ VariableDeclaration ::=
     TypedDeclarationList |
     var DeclarationList |
     DeclarationList |
-    TypeName StorageLocation? Identifier {
+    TypeName StorageLocationSpecifier? Identifier {
     implements = "me.serce.solidity.lang.psi.SolNamedElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolVariableDeclarationMixin"
 }
@@ -342,12 +342,12 @@ TypeName ::= MappingTypeName
     extends = "me.serce.solidity.lang.psi.impl.SolStubbedElementImpl<?>"
 }
 
-BytesArrayTypeName ::= bytesNumType StorageLocation? {
+BytesArrayTypeName ::= bytesNumType StorageLocationSpecifier? {
      stubClass = "me.serce.solidity.lang.stubs.SolTypeRefStub"
      elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
 
-ArrayTypeName ::= TypeName '[' Expression? ']' StorageLocation? {
+ArrayTypeName ::= TypeName '[' Expression? ']' StorageLocationSpecifier? {
     stubClass = "me.serce.solidity.lang.stubs.SolTypeRefStub"
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
@@ -356,7 +356,7 @@ UserDefinedLocationTypeName ::= UserDefinedWithLocationTypeName | UserDefinedWit
     stubClass = "me.serce.solidity.lang.stubs.SolTypeRefStub"
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
-private UserDefinedWithLocationTypeName ::= UserDefinedTypeName StorageLocation
+private UserDefinedWithLocationTypeName ::= UserDefinedTypeName StorageLocationSpecifier
 private UserDefinedWithoutLocationTypeName ::= UserDefinedTypeName
 
 UserDefinedTypeName ::= Identifier ( '.' Identifier )* {
@@ -374,15 +374,19 @@ MappingTypeName ::= mapping '(' MappingKey '=>' MappingValue ')' {
 }
 
 // According to grammar.txt, it should be only TypeNameList after function, but according to reality ...
-FunctionTypeName ::= function ParameterList ( internal | external | StateMutability )*
+FunctionTypeName ::= function ParameterList ( VisibilitySpecifier | StateMutabilitySpecifier )*
                    ( returns ParameterList )? {
     pin = 1
     stubClass = "me.serce.solidity.lang.stubs.SolTypeRefStub"
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
+    mixin = "me.serce.solidity.lang.psi.impl.SolFunctionTypeMixin"
+    implements = "me.serce.solidity.lang.psi.SolFunctionTypeElement"
+
 }
 
-StorageLocation ::= memory | storage | calldata
-StateMutability ::= pure | constant | view | 'payable'
+StorageLocationSpecifier ::= memory | storage | calldata
+StateMutabilitySpecifier ::= pure | constant | view | 'payable'
+VisibilitySpecifier ::= private | internal | external | public
 
 private UnfinishedUncheckedBlock ::= unchecked '{' Statement* {
     pin = 1

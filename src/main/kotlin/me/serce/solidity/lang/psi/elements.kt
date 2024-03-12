@@ -62,6 +62,7 @@ interface SolFunctionDefElement : SolHasModifiersElement, SolMember, SolCallable
   val returns: SolParameterList?
   val isConstructor: Boolean
   val visibility: Visibility?
+  val mutability: Mutability?
   val specialFunction: SpecialFunctionType?
 }
 
@@ -115,4 +116,11 @@ interface SolUsingForElement : PsiElement {
   val type: SolType?
   val library: SolContractDefinition?
   fun getTypeNameList(): List<SolTypeName>
+}
+
+interface SolFunctionTypeElement : PsiElement {
+  val params: List<SolParameterDef>
+  val returns: SolType
+  val mutability: Mutability?
+  val visibility: Visibility?
 }

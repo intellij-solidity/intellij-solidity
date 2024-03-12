@@ -93,7 +93,7 @@ class SolGasEstimationService(project: Project) {
         getSolType(it.typeName)
           .let { type ->
             if (type is SolUserType) "${type.abiName} .*${type}.*" else (type.toString() + (it.takeIf { isInternal }
-              ?.let { PsiTreeUtil.findChildOfType(it, SolStorageLocation::class.java)?.text?.let { " $it" } } ?: ""))
+              ?.let { PsiTreeUtil.findChildOfType(it, SolStorageLocationSpecifier::class.java)?.text?.let { " $it" } } ?: ""))
           }
       }
     }"

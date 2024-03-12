@@ -66,6 +66,7 @@ fun getSolType(type: SolTypeName?): SolType {
         else -> SolUnknown
       }
     }
+    is SolFunctionTypeName -> SolFunctionTypeType(type)
     else -> SolUnknown
   }
 }
@@ -236,7 +237,7 @@ fun SolMemberAccessExpression.getMembers(): List<SolMember> {
     }
     else -> {
       val fromLibraries = (this as? SolMemberAccessElement)?.collectUsingForLibraryFunctions()?.let { it.map { it.toLibraryFunDefinition() } } ?: emptyList()
-      val stateVarRefs = (expr.reference?.resolve()?.let { it as? SolStateVariableDeclaration }?.takeIf { it.visibility?.let { it == Visibility.PUBLIC || it == Visibility.EXTERNAL } ?: false}?.let { SolVariableType(it).getMembers(it.project) } ?: emptyList())
+      val stateVarRefs = (expr.reference?.resolve()?.let { it as? SolStateVariableDeclaration }?.takeIf { v -> v.visibility?.let { it == Visibility.PUBLIC || it == Visibility.EXTERNAL || it == Visibility.INTERNAL && v.findContract()?.contractType == ContractType.LIBRARY } ?: false}?.let { SolVariableType(it).getMembers(it.project) } ?: emptyList())
       val typeMembers = expr.type.getMembers(this.project)
       if (fromLibraries.isEmpty() && stateVarRefs.isEmpty()) typeMembers else typeMembers + fromLibraries + stateVarRefs
     }

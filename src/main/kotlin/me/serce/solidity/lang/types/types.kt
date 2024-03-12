@@ -507,6 +507,34 @@ data class SolFunctionReference(val ref: SolFunctionDefinition): SolMember {
 
 }
 
+data class SolFunctionTypeType(val ref: SolFunctionTypeName): SolType {
+  override fun isAssignableFrom(other: SolType): Boolean = when (other) {
+    is SolFunctionTypeType -> this.ref == other.ref
+    is SolFunctionType -> {
+      val func = other.ref
+      this.ref.params.zip(func.parameters).all { getSolType(it.first.typeName).isAssignableFrom(getSolType(it.second.typeName)) } &&
+        this.ref.returns.isAssignableFrom(func.parseType()) &&
+        this.ref.mutability == other.ref.mutability && this.ref.visibility == other.ref.visibility
+    }
+    else -> false
+  }
+
+  override fun toString(): String {
+    return "functionType(${ref.params.joinToString {it.text}}) ${ref.returns.takeIf { it != SolUnknown }?.let { " returns ($it)" } ?: ""}"
+  }
+}
+
+fun SolParameterList?.parseType(): SolType = when (this) {
+  null -> SolUnknown
+  else -> parameterDefList.let {
+    when (it.size) {
+      1 -> getSolType(it[0].typeName)
+      else -> SolTuple(it.map { def -> getSolType(def.typeName) })
+    }
+  }
+}
+
+
 
 private const val INTERNAL_INDICATOR = "_sol1_s"
 
