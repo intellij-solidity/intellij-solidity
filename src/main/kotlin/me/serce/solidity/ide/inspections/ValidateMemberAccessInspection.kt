@@ -6,6 +6,8 @@ import com.intellij.psi.PsiElementVisitor
 import me.serce.solidity.lang.psi.SolMemberAccessExpression
 import me.serce.solidity.lang.psi.SolVisitor
 import me.serce.solidity.lang.resolve.SolResolver
+import me.serce.solidity.lang.types.SolUnknown
+import me.serce.solidity.lang.types.type
 
 class ValidateMemberAccessInspection : LocalInspectionTool() {
   override fun getDisplayName(): String = ""
@@ -15,9 +17,8 @@ class ValidateMemberAccessInspection : LocalInspectionTool() {
       override fun visitMemberAccessExpression(element: SolMemberAccessExpression) {
         val id = element.identifier ?: return
         val refs = SolResolver.resolveMemberAccess(element)
-        when {
-          refs.isEmpty() -> holder.registerProblem(id, "Member cannot be resolved")
-//            refs.size > 1 -> holder.registerProblem(element.parents(true).first { it.textLength > 0 }, "Multiple members resolved")
+        if (refs.isEmpty() && element.expression.type != SolUnknown) {
+          holder.registerProblem(id, "Member cannot be resolved")
         }
       }
     }
