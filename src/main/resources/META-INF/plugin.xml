@@ -213,8 +213,6 @@
                                  level="ERROR"
                                  implementationClass="me.serce.solidity.ide.inspections.ValidateMemberAccessInspection"/>
 
-
-
         <errorHandler implementation="me.serce.solidity.ide.SentryReportSubmitter"/>
 
         <defaultLiveTemplates file="/liveTemplates/Solidity.xml"/>
