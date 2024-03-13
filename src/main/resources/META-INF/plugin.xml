@@ -210,7 +210,7 @@
         <localInspection language="Solidity" groupName="Solidity"
                                  displayName="Member is not defined"
                                  enabledByDefault="true"
-                                 level="ERROR"
+                                 level="WEAK WARNING"
                                  implementationClass="me.serce.solidity.ide.inspections.ValidateMemberAccessInspection"/>
 
         <errorHandler implementation="me.serce.solidity.ide.SentryReportSubmitter"/>
