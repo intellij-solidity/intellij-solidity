@@ -301,7 +301,6 @@ data class SolEnum(val ref: SolEnumDefinition) : SolUserType, SolMember {
 
   override fun getPossibleUsage(contextType: ContextType): Usage? = null
 
-
   override fun toString() = ref.name ?: ref.text ?: "$ref"
 
   override fun getMembers(project: Project): List<SolMember> {
