@@ -479,18 +479,28 @@ private fun getReferenceTypeMembers(project: Project, usage: Usage) =
         ?: it
     }
 
+data class SolUserDefinedValueTypeReferenceType(val ref: SolUserDefinedValueTypeDefinition): SolType {
+  var elementaryType: SolType = getSolType(ref.elementaryTypeName)
+  override fun isAssignableFrom(other: SolType): Boolean {
+    return other is SolUserDefinedValueTypeReferenceType && this.elementaryType == other.elementaryType
+  }
+
+  override fun getMembers(project: Project): List<SolMember> {
+    return listOf(BuiltinCallable(listOf("value" to this), elementaryType, "unwrap"), BuiltinCallable(listOf("value" to elementaryType), this, "wrap"))
+  }
+
+  override fun toString(): String = "ValueTypeReference(${ref.name})"
+}
+
 data class SolUserDefinedValueTypeType(val ref: SolUserDefinedValueTypeDefinition): SolType {
   var elementaryType: SolType = getSolType(ref.elementaryTypeName)
   override fun isAssignableFrom(other: SolType): Boolean {
     return other is SolUserDefinedValueTypeType && this.elementaryType == other.elementaryType
   }
 
-  override fun getMembers(project: Project): List<SolMember> {
-    return elementaryType.getMembers(project) + BuiltinCallable(listOf("value" to this), elementaryType, "unwrap") + BuiltinCallable(listOf("value" to elementaryType), this, "wrap")
-  }
-
   override fun toString(): String = "ValueType(${ref.name})"
 }
+
 
 
 

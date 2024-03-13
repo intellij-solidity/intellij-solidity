@@ -120,6 +120,7 @@ fun inferDeclType(decl: SolNamedElement): SolType {
     is SolParameterDef -> getSolType(decl.typeName)
     is SolStateVariableDeclaration -> getSolType(decl.typeName)
     is SolFunctionDefinition -> SolFunctionType(decl)
+    is SolUserDefinedValueTypeDefinition -> SolUserDefinedValueTypeReferenceType(decl)
     else -> SolUnknown
   }
 }

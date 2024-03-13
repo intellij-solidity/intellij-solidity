@@ -117,4 +117,15 @@ class SolMemberAccessCompletionTest : SolCompletionTestBase() {
     assertEquals(variants["doSmth1"], 1)
   }
 
+  fun testWrapUserDefinedType() = checkCompletion(hashSetOf("wrap", "unwrap"), """
+        contract B {
+          type ShortString is bytes32;
+        
+          function a()  {
+            ShortString./*caret*/;
+          }
+        }
+        
+  """, strict = true)
+
 }

@@ -349,7 +349,7 @@ object SolResolver {
           scope.structDefinitionList
         ).flatten()
           .map { lexicalDeclarations(visitedScopes, it, place) }
-          .flatten() + scope.structDefinitionList + scope.eventDefinitionList + scope.errorDefinitionList
+          .flatten() + scope.structDefinitionList + scope.eventDefinitionList + scope.errorDefinitionList + scope.userDefinedValueTypeDefinitionList
         val extendsScope = scope.supers.asSequence()
           .map { resolveTypeNameStrict(it).firstOrNull() }
           .filterNotNull()
@@ -405,11 +405,14 @@ object SolResolver {
           val freeFunctions = scopeChildren.asSequence()
             .filterIsInstance<SolFunctionDefinition>()
 
+          val userDefinedTypes = scopeChildren.asSequence()
+            .filterIsInstance<SolUserDefinedValueTypeDefinition>()
+
           val imports = scopeChildren.asSequence().filterIsInstance<SolImportDirective>()
             .mapNotNull {  it.importPath?.reference?.resolve()?.containingFile }
             .map { lexicalDeclarations(visitedScopes, it, place) }
             .flatten()
-          imports + contracts + constantVariables + freeFunctions
+          imports + contracts + constantVariables + freeFunctions + userDefinedTypes
         } ?: emptySequence()
       }
 
