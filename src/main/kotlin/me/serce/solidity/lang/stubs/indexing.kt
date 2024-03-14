@@ -57,6 +57,10 @@ fun IndexSink.indexImportPathDef(stub: SolImportPathDefStub) {
   indexImportPath(stub)
 }
 
+fun IndexSink.indexImportPathDef(stub: SolImportAliasDefStub) {
+  indexNamedStub(stub)
+}
+
 private fun IndexSink.indexModifier(stub: SolModifierDefStub) {
   stub.name?.let {
     occurrence(SolModifierIndex.KEY, it)

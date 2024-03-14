@@ -98,12 +98,13 @@ object SolCompleter {
       expr.type.isBuiltin -> ContextType.BUILTIN
       else -> ContextType.EXTERNAL
     }
-    return element.expression.getMembers()
+
+    return element.getMembers()
       .mapNotNull {
         when (it.getPossibleUsage(contextType)) {
           Usage.CALLABLE -> {
             // could also be a builtin, me.serce.solidity.lang.types.BuiltinCallable
-            (it as? SolCallableElement ?: it.resolveElement() as? SolCallableElement)?.toFunctionLookup()
+            (it as? SolCallable ?: it.resolveElement() as? SolCallableElement)?.toFunctionLookup()
           }
           Usage.VARIABLE -> it.getName()?.let { name ->
             PrioritizedLookupElement.withPriority(

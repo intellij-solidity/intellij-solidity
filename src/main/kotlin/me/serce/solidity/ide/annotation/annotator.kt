@@ -23,7 +23,7 @@ class SolidityAnnotator : Annotator {
     when (element) {
       is SolNumberType -> applyColor(holder, element, SolColor.TYPE)
       is SolElementaryTypeName -> applyColor(holder, element, SolColor.TYPE)
-      is SolStateMutability -> if (element.text == "payable") {
+      is SolStateMutabilitySpecifier -> if (element.text == "payable") {
         applyColor(holder, element, SolColor.KEYWORD)
       }
       is SolEnumValue -> applyColor(holder, element, SolColor.ENUM_VALUE)

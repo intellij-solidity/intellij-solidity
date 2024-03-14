@@ -14,7 +14,7 @@ Solidity File
         PsiElement([)('[')
         PsiElement(])(']')
         PsiWhiteSpace(' ')
-        SolStorageLocationImpl(STORAGE_LOCATION)
+        SolStorageLocationSpecifierImpl(STORAGE_LOCATION_SPECIFIER)
           PsiElement(memory)('memory')
       PsiWhiteSpace(' ')
       PsiElement(Identifier)('x')

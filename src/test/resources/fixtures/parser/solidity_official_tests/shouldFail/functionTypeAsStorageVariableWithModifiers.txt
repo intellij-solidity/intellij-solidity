@@ -46,7 +46,7 @@ Solidity File
   SolPrimaryExpressionImpl(PRIMARY_EXPRESSION)
     SolVarLiteralImpl(VAR_LITERAL)
       PsiElement(Identifier)('f1')
-  PsiErrorElement:'.', <constant variable declaration>, <contract definition>, <expression>, <function definition>, <function invocation>, <mutation modifier>, <storage location>, <visibility modifier>, Identifier, enum, error, event, import, override, pragma, struct, type or using expected, got ';'
+  PsiErrorElement:'.', <constant variable declaration>, <contract definition>, <expression>, <function definition>, <function invocation>, <mutation modifier>, <storage location specifier>, <visibility modifier>, Identifier, enum, error, event, import, override, pragma, struct, type or using expected, got ';'
     PsiElement(;)(';')
   PsiWhiteSpace('\n')
   PsiElement(})('}')

@@ -34,7 +34,7 @@ Solidity File
           PsiElement(Identifier)('addr')
         PsiElement())(')')
       PsiWhiteSpace(' ')
-      SolStateMutabilityImpl(STATE_MUTABILITY)
+      SolStateMutabilitySpecifierImpl(STATE_MUTABILITY_SPECIFIER)
         PsiElement(constant)('constant')
       PsiWhiteSpace('\n    ')
       PsiElement(returns)('returns')

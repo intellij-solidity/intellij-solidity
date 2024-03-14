@@ -17,7 +17,9 @@ import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.resolve.ref.*
 import me.serce.solidity.lang.stubs.*
 import me.serce.solidity.lang.types.*
+import me.serce.solidity.wrap
 import javax.naming.OperationNotSupportedException
+import javax.swing.Icon
 
 open class SolImportPathElement : SolStubbedNamedElementImpl<SolImportPathDefStub>, SolReferenceElement {
   constructor(node: ASTNode) : super(node)
@@ -31,7 +33,11 @@ open class SolImportPathElement : SolStubbedNamedElementImpl<SolImportPathDefStu
   override fun getReference() = SolImportPathReference(this)
 }
 
-open class SolImportAliasMixin(node: ASTNode) : SolNamedElementImpl(node)
+open class SolImportAliasMixin : SolStubbedNamedElementImpl<SolImportAliasDefStub>, SolNamedElement {
+  constructor(node: ASTNode) : super(node)
+  constructor(stub: SolImportAliasDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
+
+}
 
 abstract class SolEnumItemImplMixin : SolStubbedNamedElementImpl<SolEnumDefStub>, SolEnumDefinition {
   constructor(node: ASTNode) : super(node)
@@ -92,7 +98,15 @@ abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrL
   override fun getIcon(flags: Int) = SolidityIcons.CONTRACT
 
   override fun parseParameters(): List<Pair<String?, SolType>> {
-    return listOf(Pair(null, SolAddress.PAYABLE))
+    return listOf(Pair(null, object : SolType {
+      override fun isAssignableFrom(other: SolType): Boolean {
+        return when (other) {
+          is SolAddress -> true
+          is SolContract -> SolContract(this@SolContractOrLibMixin).isAssignableFrom(other)
+          else -> false
+        }
+      }
+    }))
   }
 
   override fun parseType(): SolType {
@@ -113,6 +127,10 @@ abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrL
         else -> ContractType.COMMON
       }
     }
+
+  override val isPayable: Boolean
+    get() = this.functionDefinitionList.any { it.specialFunction?.let { it == SpecialFunctionType.RECEIVE || it == SpecialFunctionType.FALLBACK } ?: false }
+
 }
 
 abstract class SolConstructorDefMixin(node: ASTNode) : SolElementImpl(node), SolConstructorDefinition, SolFunctionDefElement {
@@ -135,14 +153,14 @@ abstract class SolConstructorDefMixin(node: ASTNode) : SolElementImpl(node), Sol
   override val callablePriority = 100
 
   override fun parseType(): SolType {
-    return contract?.let { SolContract( it ) } ?: SolUnknown
+    return contract?.let { SolContract(it) } ?: SolUnknown
   }
 
   override val visibility
-    get() = functionVisibilitySpecifierList
-      .map { it.text.uppercase() }
-      .mapNotNull { safeValueOf<Visibility>(it) }
-      .firstOrNull()
+    get() = functionVisibilitySpecifierList.mapNotNull { it.visibilitySpecifier }.parseVisibility()
+
+  override val mutability
+    get() = stateMutabilitySpecifierList.parseMutability()
 
   override fun getPossibleUsage(contextType: ContextType) = Usage.CALLABLE
 
@@ -172,6 +190,9 @@ abstract class SolConstructorDefMixin(node: ASTNode) : SolElementImpl(node), Sol
     return findChildrenByType<SolModifierInvocation>(MODIFIER_INVOCATION)
       .map { SolModifierReference(this, it) }.toTypedArray()
   }
+
+  override val specialFunction: SpecialFunctionType?
+    get() = null
 }
 
 abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefStub>, SolFunctionDefinition {
@@ -191,30 +212,24 @@ abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefSt
       ?: emptyList()
 
   override fun parseParameters(): List<Pair<String?, SolType>> {
-    return parameters.map { it.identifier?.text to getSolType(it.typeName) }
+    return Companion.parseParameters(parameters)
   }
 
   override val callablePriority = 0
 
   override fun parseType(): SolType {
-    return this.returns.let { list ->
-      when (list) {
-        null -> SolUnknown
-        else -> list.parameterDefList.let {
-          when (it.size) {
-            1 -> getSolType(it[0].typeName)
-            else -> SolTuple(it.map { def -> getSolType(def.typeName) })
-          }
-        }
-      }
-    }
+    return this.returns.parseType()
   }
 
   override val visibility
-    get() = functionVisibilitySpecifierList
-      .map { it.text.uppercase() }
-      .mapNotNull { safeValueOf<Visibility>(it) }
-      .firstOrNull()
+    get() = functionVisibilitySpecifierList.mapNotNull { it.visibilitySpecifier }.parseVisibility()
+
+  override val mutability
+    get() = stateMutabilitySpecifierList.parseMutability()
+
+  override val specialFunction: SpecialFunctionType?
+    get() = firstChild?.text?.uppercase().let { t -> SpecialFunctionType.values().find { it.name == t } }
+
 
   override fun getPossibleUsage(contextType: ContextType) =
     if (isPossibleToUse(contextType))
@@ -249,13 +264,13 @@ abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefSt
   constructor(node: ASTNode) : super(node)
   constructor(stub: SolFunctionDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
 
-  override fun getReference() = references.firstOrNull()
-
-  override fun getReferences(): Array<SolReference> {
-    return modifiers.map { SolModifierReference(this, it) }.toTypedArray()
-  }
-
   override fun getIcon(flags: Int) = SolidityIcons.FUNCTION
+
+  companion object {
+    fun parseParameters(parameters: List<SolParameterDef>): List<Pair<String?, SolType>> {
+      return parameters.map { it.identifier?.text to getSolType(it.typeName) }
+    }
+  }
 }
 abstract class SolModifierDefMixin : SolStubbedNamedElementImpl<SolModifierDefStub>, SolModifierDefinition {
   override val contract: SolContractDefinition
@@ -295,6 +310,12 @@ abstract class SolStateVarDeclMixin : SolStubbedNamedElementImpl<SolStateVarDecl
 
   override val mutability: Mutability?
     get() = mutationModifier?.text?.let { safeValueOf(it.uppercase()) }
+
+  override val mutationModifier: SolMutationModifier?
+    get() = mutationModifierList.firstOrNull()
+
+  override val visibilityModifier: SolVisibilityModifier?
+    get() = visibilityModifierList.firstOrNull()
 
 }
 
@@ -343,7 +364,7 @@ abstract class SolFunctionCallMixin(node: ASTNode) : SolNamedElementImpl(node), 
       is SolNewExpression ->
         expr.typeName as PsiElement
       is SolSeqExpression ->
-        getReferenceNameElement(expr.expressionList.first())
+        expr.expressionList.firstOrNull()?.let { getReferenceNameElement(it) } ?: expr
       // unable to extract reference name element
       else -> expr
     }
@@ -387,7 +408,9 @@ open class SolDeclarationItemMixin(node: ASTNode) : SolNamedElementImpl(node)
 
 open class SolTypedDeclarationItemMixin(node: ASTNode) : SolNamedElementImpl(node)
 
-abstract class SolVariableDeclarationMixin(node: ASTNode) : SolVariableDeclaration, SolNamedElementImpl(node)
+abstract class SolVariableDeclarationMixin(node: ASTNode) : SolVariableDeclaration, SolNamedElementImpl(node) {
+  override fun getIcon(flags: Int): Icon = SolidityIcons.STATE_VAR
+}
 
 open class SolParameterDefMixin(node: ASTNode) : SolNamedElementImpl(node)
 
@@ -417,6 +440,12 @@ abstract class SolUserDefinedTypeNameImplMixin : SolStubbedElementImpl<SolTypeRe
     referenceNameElement.replace(SolPsiFactory(project).createIdentifier(name))
     return this
   }
+
+  companion object {
+    fun parseParameters(parameters: List<SolParameterDef>): List<Pair<String?, SolType>> {
+      return parameters.map { it.identifier?.text to getSolType(it.typeName) }
+    }
+  }
 }
 
 abstract class SolMemberAccessElement(node: ASTNode) : SolNamedElementImpl(node), SolMemberAccessExpression {
@@ -426,6 +455,28 @@ abstract class SolMemberAccessElement(node: ASTNode) : SolNamedElementImpl(node)
     get() = referenceNameElement.text
 
   override fun getReference() = SolMemberAccessReference(this)
+
+  fun collectUsingForLibraryFunctions(): List<SolFunctionDefinition> {
+    val type = expression.type.takeIf { it != SolUnknown } ?: return emptyList()
+    val contract = findContract()
+    val superContracts = contract
+      ?.collectSupers
+      ?.flatMap { SolResolver.resolveTypeNameUsingImports(it) }
+      ?.filterIsInstance<SolContractDefinition>()
+      ?: emptyList()
+    val libraries = (superContracts + contract.wrap())
+            .asSequence()
+            .flatMap { it.usingForDeclarationList }
+      .filter {
+        val usingType = it.type
+        usingType == null || usingType == type
+      }
+      .mapNotNull { it.library }
+      .distinct()
+      .flatMap { it.functionDefinitionList }
+            .toList()
+    return libraries
+  }
 }
 
 abstract class SolNewExpressionElement(node: ASTNode) : SolNamedElementImpl(node), SolNewExpression {
@@ -446,6 +497,10 @@ abstract class SolEventDefMixin : SolStubbedNamedElementImpl<SolEventDefStub>, S
     return indexedParameterList?.typeNameList
       ?.map { null to getSolType(it) }
       ?: emptyList()
+  }
+
+  override fun getIcon(flags: Int): Icon? {
+    return SolidityIcons.EVENT
   }
 
   override fun parseType(): SolType {
@@ -498,3 +553,30 @@ abstract class SolUsingForMixin(node: ASTNode) : SolElementImpl(node), SolUsingF
       .filterIsInstance<SolContractDefinition>()
       .firstOrNull()
 }
+
+
+abstract class SolFunctionTypeMixin : SolStubbedElementImpl<SolTypeRefStub>, SolFunctionTypeName, SolFunctionTypeElement {
+
+  constructor(node: ASTNode) : super(node)
+  constructor(stub: SolTypeRefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
+
+
+  override val params: List<SolParameterDef>
+    get() = parameterListList.first().parameterDefList
+  override val returns: SolType
+    get() = parameterListList.getOrNull(1).parseType()
+  override val mutability: Mutability?
+    get() = stateMutabilitySpecifierList.parseMutability()
+  override val visibility: Visibility?
+    get() = visibilitySpecifierList.parseVisibility()
+}
+
+fun List<SolVisibilitySpecifier>.parseVisibility() =
+     map { it.text.uppercase() }
+    .mapNotNull { safeValueOf<Visibility>(it) }
+    .firstOrNull()
+
+
+fun List<SolStateMutabilitySpecifier>.parseMutability() =
+       map { it.text.uppercase() }
+         .firstNotNullOfOrNull { safeValueOf<Mutability>(it) }

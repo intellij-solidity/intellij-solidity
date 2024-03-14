@@ -207,6 +207,12 @@
                          level="WEAK WARNING"
                          implementationClass="me.serce.solidity.ide.inspections.VisibilityModifierInspection"/>
 
+        <localInspection language="Solidity" groupName="Solidity"
+                                 displayName="Member is not defined"
+                                 enabledByDefault="true"
+                                 level="WEAK WARNING"
+                                 implementationClass="me.serce.solidity.ide.inspections.ValidateMemberAccessInspection"/>
+
         <errorHandler implementation="me.serce.solidity.ide.SentryReportSubmitter"/>
 
         <defaultLiveTemplates file="/liveTemplates/Solidity.xml"/>
