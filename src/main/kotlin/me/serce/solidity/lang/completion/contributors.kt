@@ -8,10 +8,13 @@ import com.intellij.openapi.project.DumbAware
 import com.intellij.patterns.*
 import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.psi.PsiElement
+import com.intellij.psi.codeStyle.CodeStyleManager
 import com.intellij.psi.impl.source.tree.LeafPsiElement
+import com.intellij.refactoring.suggested.endOffset
 import com.intellij.util.ProcessingContext
 import me.serce.solidity.ide.SolidityIcons
 import me.serce.solidity.ide.hints.SolArgumentsDescription
+import me.serce.solidity.ide.hints.startOffset
 import me.serce.solidity.lang.core.SolidityTokenTypes
 import me.serce.solidity.lang.psi.*
 
@@ -75,20 +78,20 @@ class SolContextCompletionContributor : CompletionContributor(), DumbAware {
         override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext, result: CompletionResultSet) {
           val descriptions = SolArgumentsDescription.findDescriptions(parameters.originalPosition?.parentOfType() ?: return)
           val defined = (parameters.originalPosition?.parentOfType<SolMapExpression>())?.mapExpressionClauseList?.map { it.identifier.text }?.toSet() ?: emptySet()
-          val needComma = parameters.originalPosition?.elementType != SolidityTokenTypes.RBRACE
-          val elements = (descriptions.flatMap { it.arguments.map { it.split(" ").last() }.toList() }.toSet() - defined)
-            .map {
+          val elements = descriptions.flatMap { it.arguments.map { it.split(" ").last() }.toList() }.toSet() - defined
+          val needComma = parameters.originalPosition?.elementType != SolidityTokenTypes.RBRACE && elements.size > 1
+          val results = elements.map {
               LookupElementBuilder.create(it).withIcon(SolidityIcons.STATE_VAR).withInsertHandler { context, item ->
-                val originalPosition = parameters.originalPosition
-                val parent = originalPosition?.parent
-                if (parent !is SolMapExpressionClause) {
-                  val insert = " : ${if (needComma) "," else ""}"
+                val parent = parameters.originalPosition?.parent
+                if (parent != null && parent !is SolMapExpressionClause) {
+                  val insert = ": ${if (needComma) "," else ""}"
                   context.document.insertString(context.selectionEndOffset, insert)
                   context.editor.caretModel.currentCaret.moveToOffset(context.selectionEndOffset - 1)
+                  CodeStyleManager.getInstance(context.project).reformatText(parent.containingFile, parent.startOffset, parent.endOffset)
                 }
               }
             }
-          result.addAllElements(elements)
+          result.addAllElements(results)
         }
       }
     )

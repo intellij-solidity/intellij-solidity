@@ -213,6 +213,12 @@
                                  level="WEAK WARNING"
                                  implementationClass="me.serce.solidity.ide.inspections.ValidateMemberAccessInspection"/>
 
+        <localInspection language="Solidity" groupName="Solidity"
+                                 displayName="Element is never used"
+                                 enabledByDefault="false"
+                                 level="WEAK WARNING"
+                                 implementationClass="me.serce.solidity.ide.inspections.UnusedElementInspection"/>
+
         <errorHandler implementation="me.serce.solidity.ide.SentryReportSubmitter"/>
 
         <defaultLiveTemplates file="/liveTemplates/Solidity.xml"/>

@@ -23,6 +23,7 @@ import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.resolve.function.SolFunctionResolver
 import me.serce.solidity.lang.types.findContract
 import me.serce.solidity.lang.types.getSolType
+import me.serce.solidity.lang.types.isBuiltin
 
 const val NO_VALIDATION_TAG = "@custom:no_validation"
 
@@ -30,8 +31,7 @@ fun PsiElement.comments(): List<PsiElement> {
   return CachedValuesManager.getCachedValue(this) {
     val nonSolElements = siblings(false, false)
       .takeWhile { it !is SolElement }.toList()
-    val isBuiltin = this.containingFile.virtualFile == null
-    val res = (if (!isBuiltin) PsiDocumentManager.getInstance(project).getDocument(this.containingFile)?.let { document ->
+    val res = (if (!isBuiltin()) PsiDocumentManager.getInstance(project).getDocument(this.containingFile)?.let { document ->
       val tripleLines = nonSolElements.filter { it.text.startsWith("///") }.map { document.getLineNumber(it.textOffset) }.toSet()
       val tripleLineComments = nonSolElements.filter { tripleLines.contains(document.getLineNumber(it.startOffset)) }
       val blockComments = collectBlockComments(nonSolElements)
@@ -40,7 +40,7 @@ fun PsiElement.comments(): List<PsiElement> {
     else {
       collectBlockComments(nonSolElements)
     }).filterIsInstance<PsiComment>()
-    CachedValueProvider.Result.create(res, if (isBuiltin) ModificationTracker.NEVER_CHANGED else this.parent)
+    CachedValueProvider.Result.create(res, if (isBuiltin()) ModificationTracker.NEVER_CHANGED else this.parent)
   }
 }
 
