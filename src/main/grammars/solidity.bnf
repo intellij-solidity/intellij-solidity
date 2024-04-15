@@ -562,9 +562,9 @@ NumberType ::= intNumType | uIntNumType | byteNumType | bytesNumType | fixedNumT
 
 // Yul Assembly
 //
-private YulLeave ::= 'leave'
-private YulBreak ::= 'break'
-private YulContinue ::= 'continue'
+YulLeave ::= 'leave'
+YulBreak ::= 'break'
+YulContinue ::= 'continue'
 private YulLBrace ::= '{'
 private YulRBrace ::= '}'
 private YulLet ::= 'let'
@@ -574,7 +574,7 @@ private YulIf ::= 'if'
 private YulFor ::= 'for'
 private YulCase ::= 'case'
 private YulSwitch ::= 'switch'
-private YulDefault ::= 'default'
+YulDefault ::= 'default'
 private YulLParen ::= '('
 private YulRParen ::= ')'
 private YulArrow ::= '->'
@@ -595,8 +595,8 @@ private YulEVMBuiltin ::=
         	| 'basefee';
 private YulFunction ::= 'function'
 private YulPeriod ::= '.'
-private YulTrue ::= 'true'
-private YulFalse ::= 'false'
+YulTrue ::= 'true'
+YulFalse ::= 'false'
 private YulDecimalNumber ::= DecimalNumber
 private YulStringLiteral ::= StringLiteral
 private YulHexNumber ::= HexNumber
@@ -683,7 +683,10 @@ YulLabel ::= Identifier ':'
  * While only identifiers without dots can be declared within inline assembly,
  * paths containing dots can refer to declarations outside the inline assembly block.
  */
-YulPath ::= YulIdentifier (YulPeriod (YulIdentifier | YulEVMBuiltin))*
+YulPath ::= YulIdentifier (YulPeriod (YulIdentifier | YulEVMBuiltin))* {
+   implements = "me.serce.solidity.lang.psi.SolReferenceElement"
+   mixin = "me.serce.solidity.lang.psi.impl.SolYulPathElement"
+}
 /**
  * A call to a function with return values can only occur as right-hand side of an assignment or
  * a variable declaration.
