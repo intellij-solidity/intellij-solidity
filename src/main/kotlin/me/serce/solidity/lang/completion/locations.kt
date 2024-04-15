@@ -44,4 +44,6 @@ fun functionCallArguments(): ElementPattern<PsiElement> =
 fun mapExpression(): ElementPattern<PsiElement> =
   psiElement(SolidityTokenTypes.IDENTIFIER).inside(SolMapExpression::class.java)
 
+fun pathImportExpression(): ElementPattern<PsiElement> =
+  psiElement(SolidityTokenTypes.STRINGLITERAL).inside(SolImportPath::class.java)
 

@@ -1,19 +1,28 @@
 package me.serce.solidity.lang.completion
 
 import com.intellij.codeInsight.completion.*
+import com.intellij.codeInsight.completion.impl.CamelHumpMatcher
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.editor.EditorModificationUtil
 import com.intellij.openapi.project.DumbAware
+import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.patterns.*
 import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.psi.PsiElement
 import com.intellij.psi.impl.source.tree.LeafPsiElement
+import com.intellij.psi.search.GlobalSearchScope
+import com.intellij.psi.stubs.StubIndex
 import com.intellij.util.ProcessingContext
 import me.serce.solidity.ide.SolidityIcons
 import me.serce.solidity.ide.hints.SolArgumentsDescription
+import me.serce.solidity.lang.SolidityFileType
 import me.serce.solidity.lang.core.SolidityTokenTypes
 import me.serce.solidity.lang.psi.*
+import me.serce.solidity.lang.resolve.ref.SolImportPathReference
+import me.serce.solidity.lang.stubs.SolGotoClassIndex
+import me.serce.solidity.removeQuotes
+import java.io.File
 
 /**
  * Special Variables and Functions
@@ -92,6 +101,36 @@ class SolContextCompletionContributor : CompletionContributor(), DumbAware {
         }
       }
     )
+    extend(CompletionType.BASIC, pathImportExpression(),
+          object : CompletionProvider<CompletionParameters>() {
+            override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext, result: CompletionResultSet) {
+              val text = parameters.originalPosition?.text?.removeQuotes() ?: return
+              val matcher = CamelHumpMatcher(text)
+              val project = parameters.position.project
+              val humpFiles = StubIndex.getInstance().getAllKeys(SolGotoClassIndex.KEY, project)
+              .filter { matcher.prefixMatches(it) }
+              .flatMap { StubIndex.getInstance().getContainingFilesIterator(SolGotoClassIndex.KEY, it, project, GlobalSearchScope.projectScope(project)).asSequence() }
+
+
+              val isDir = File(text).isDirectory || text.endsWith("/")
+              var dirText = if (isDir) text
+              else text.lastIndexOf("/").takeIf { it >= 0 }?.let { text.substring(0, it) } ?: text
+              if (!dirText.endsWith("/")) dirText += "/"
+              val curFile = parameters.originalFile.virtualFile
+              val vPath = SolImportPathReference.findImportFile(curFile, dirText)
+              val elements = (vPath?.children ?: emptyArray())
+                .filter { it.isDirectory || it.extension == SolidityFileType.defaultExtension }
+                .map { LookupElementBuilder.create("\"$dirText${it.name}").withIcon(SolidityIcons.FILE_ICON) } +
+               humpFiles
+                 .map {
+                   val rel = if (it.path.contains("node_modules/")) it.path.substringAfter("node_modules/")
+                   else (VfsUtil.findRelativePath(curFile.parent, it, '/')?.let { if (!it.startsWith(".")) "./$it" else it } ?: it.path)
+                   LookupElementBuilder.create("\"$rel").withLookupString("\"${it.name}").withIcon(SolidityIcons.FILE_ICON)
+                 }
+              result.addAllElements(elements)
+            }
+          }
+        )
   }
 
   private fun mappingExpression() = ObjectPattern.Capture(object : InitialPatternCondition<SolMapExpression>(SolMapExpression::class.java) {
