@@ -110,7 +110,7 @@ fun SolStructDefinition.toStructLookup(): LookupElementBuilder? {
   return name?.let {  LookupElementBuilder
       .create(this)
       .withBoldness(true)
-      .withIcon(SolidityIcons.FUNCTION)
+      .withIcon(SolidityIcons.STRUCT)
       .withTypeText(funcOutType(this))
       .withTailText(funcInType(this))
       .insertParenthesis(false)

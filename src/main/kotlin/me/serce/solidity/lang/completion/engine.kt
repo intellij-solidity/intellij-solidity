@@ -77,7 +77,7 @@ object SolCompleter {
       project
     )
     return allModifiers
-      .map { LookupElementBuilder.create(it, it).withIcon(SolidityIcons.FUNCTION) }
+      .map { LookupElementBuilder.create(it, it).withIcon(SolidityIcons.MODIFIER) }
       .toTypedArray()
   }
 
@@ -125,7 +125,7 @@ class ContractLookupElement(val contract: SolContractDefinition) : LookupElement
   override fun getLookupString(): String = contract.name!!
 
   override fun renderElement(presentation: LookupElementPresentation) {
-    presentation.icon = SolidityIcons.CONTRACT
+    presentation.icon = contract.icon
     presentation.itemText = contract.name
     presentation.typeText = "from ${contract.containingFile.name}"
   }

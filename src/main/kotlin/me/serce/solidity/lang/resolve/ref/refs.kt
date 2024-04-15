@@ -39,7 +39,7 @@ class SolModifierReference(
   override fun calculateDefaultRangeInElement() = modifierElement.parentRelativeRange
 
   override fun multiResolve(): List<SolNamedElement> {
-    val contract = modifierElement.findContract()!!
+    val contract = modifierElement.findContract() ?: return emptyList()
     val superNames: List<String> = (contract.collectSupers.map { it.name } + contract.name).filterNotNull()
     return SolResolver.resolveModifier(modifierElement)
       .filter { it.contract.name in superNames }

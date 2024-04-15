@@ -47,6 +47,7 @@ class SolidityFormattingModelBuilder : FormattingModelBuilder {
         .before(SEMICOLON).none()
         .around(BINARY_OPERATORS).spaces(1)
         .beforeInside(COLON, MAP_EXPRESSION_CLAUSE).spaces(0)
+        .afterInside(COLON, MAP_EXPRESSION_CLAUSE).spaces(1)
         .around(TokenSet.create(QUESTION, COLON, IS)).spaces(1)
         .after(TokenSet.create(RETURNS, RETURN, IMPORT)).spaces(1)
         .after(MAPPING).spaces(0)

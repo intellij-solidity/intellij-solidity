@@ -7,6 +7,7 @@ import com.intellij.psi.PsiReference
 import me.serce.solidity.lang.resolve.ref.SolReference
 import me.serce.solidity.lang.types.SolMember
 import me.serce.solidity.lang.types.SolType
+import javax.swing.Icon
 
 interface SolElement : PsiElement {
   override fun getReference(): PsiReference?
@@ -22,8 +23,13 @@ enum class Visibility {
 }
 
 enum class Mutability {
-  PURE, CONSTANT, VIEW, PAYABLE;
+  PURE, VIEW, PAYABLE;
 }
+
+enum class VariableMutability {
+  CONSTANT, IMMUTABLE;
+}
+
 
 enum class ContractType(val docName: String) {
   COMMON("contract"), LIBRARY("library"), INTERFACE("interface")
@@ -44,7 +50,7 @@ interface SolStateVarElement : SolMember, SolCallableElement {
   val visibility: Visibility?
 
   val mutationModifier: SolMutationModifier?
-  val mutability: Mutability?
+  val mutability: VariableMutability?
 }
 
 interface SolConstantVariable : SolNamedElement {}
@@ -97,6 +103,8 @@ interface SolContractOrLibElement : SolCallableElement {
   val isAbstract: Boolean
   val contractType: ContractType
   val isPayable: Boolean
+
+  val icon : Icon
 }
 
 interface SolReferenceElement : SolNamedElement {

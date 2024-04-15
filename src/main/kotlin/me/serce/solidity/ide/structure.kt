@@ -84,7 +84,7 @@ private const val CUSTOM_REGION_NAME = "SHOW_CUSTOM_REGIONS"
 
 class RegionFilter : Filter {
   override fun getPresentation(): ActionPresentation {
-    return ActionPresentationData("Show Custom Regions", null as String?, AllIcons.ObjectBrowser.VisibilitySort);
+    return ActionPresentationData("Show Custom Regions", null as String?, SolidityIcons.SHOW_REGION_TOGGLE);
   }
 
   override fun getName(): String {
