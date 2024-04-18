@@ -300,8 +300,6 @@ abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefSt
     return modifiers.map { SolModifierReference(this, it) }.toTypedArray()
   }
 
-  override fun getIcon(flags: Int) = SolidityIcons.FUNCTION
-
   companion object {
     fun parseParameters(parameters: List<SolParameterDef>): List<Pair<String?, SolType>> {
       return parameters.map { it.identifier?.text to getSolType(it.typeName) }
@@ -615,15 +613,6 @@ abstract class SolFunctionTypeMixin : SolStubbedElementImpl<SolTypeRefStub>, Sol
     get() = visibilitySpecifierList.parseVisibility()
 }
 
-abstract class SolYulPathElement(node: ASTNode) : SolNamedElementImpl(node), SolReferenceElement {
-  override val referenceNameElement: PsiElement
-    get() = firstChild
-  override val referenceName: String
-    get() = referenceNameElement.text
-
-  override fun getReference() = SolYulLiteralReference(this)
-}
-
 fun List<SolVisibilitySpecifier>.parseVisibility() =
      map { it.text.uppercase() }
     .mapNotNull { safeValueOf<Visibility>(it) }
@@ -633,3 +622,5 @@ fun List<SolVisibilitySpecifier>.parseVisibility() =
 fun List<SolStateMutabilitySpecifier>.parseMutability() =
        map { it.text.uppercase() }
          .firstNotNullOfOrNull { safeValueOf<Mutability>(it) }
+
+

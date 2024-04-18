@@ -110,7 +110,7 @@ class NoReturnInspectionTest : SolInspectionsTestBase(NoReturnInspection()) {
 
   fun testAssignmentInAssembly() = checkByText("""
         contract a {
-            function lowLevel(string memory source) constant returns (bytes32 result) {
+            function lowLevel(string memory source) pure returns (bytes32 result) {
                 assembly {
                     result := mload(add(source, 32))
                 }
@@ -126,7 +126,7 @@ class NoReturnInspectionTest : SolInspectionsTestBase(NoReturnInspection()) {
         contract a {
             address someAddress;
 
-            function lookupService(bytes32 identifier) constant returns (address manager) {
+            function lookupService(bytes32 identifier) pure returns (address manager) {
                 manager = SomeInterface(someAddress).getContractAddress(identifier);
             }
         }

@@ -125,3 +125,10 @@ interface SolUsingForElement : PsiElement {
   val library: SolContractDefinition?
   fun getTypeNameList(): List<SolTypeName>
 }
+
+interface SolFunctionTypeElement : PsiElement {
+  val params: List<SolParameterDef>
+  val returns: SolType
+  val mutability: Mutability?
+  val visibility: Visibility?
+}

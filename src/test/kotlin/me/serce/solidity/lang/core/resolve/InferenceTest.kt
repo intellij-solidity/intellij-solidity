@@ -31,7 +31,7 @@ class InferenceTest : SolResolveTestBase() {
       name = "base2.sol"
     )
 
-    checkType(SolAddress, """
+    checkType(SolAddress.NON_PAYABLE, """
         import './base1.sol';
         contract Test  {
             function test() {
@@ -77,7 +77,7 @@ class InferenceTest : SolResolveTestBase() {
   }
 
   fun testCastAddress() {
-    checkType(SolAddress, """
+    checkType(SolAddress.NON_PAYABLE, """
         contract Contract {
             function test() {
                 var test = address(this);

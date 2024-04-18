@@ -52,7 +52,7 @@ clean.doFirst {
 intellij {
     pluginName = 'Intellij-Solidity'
 
-    version = '2022.2.5'
+    version = '2023.1'
     type = 'IU'
     downloadSources = true
     updateSinceUntilBuild = false
@@ -120,7 +120,7 @@ generateParser {
     pathToPsiRoot = "$pkg/psi"
     purgeOldFiles = true
 
-    outputs.dir(new File("gen/$pkg"))
+    outputs.dir(new File("$targetRoot/$pkg"))
 }
 
 
@@ -134,5 +134,3 @@ jacocoTestReport {
 }
 
 check.dependsOn jacocoTestReport
-
-buildSearchableOptions.enabled = false

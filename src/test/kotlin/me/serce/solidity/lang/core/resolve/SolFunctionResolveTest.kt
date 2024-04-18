@@ -129,8 +129,8 @@ class SolFunctionResolveTest : SolResolveTestBase() {
         }
 
         contract B {
-            function doit() {
-                A a = A(1);
+            function doit(address adr) {
+                A a = A(adr);
                     //^
             }
         }

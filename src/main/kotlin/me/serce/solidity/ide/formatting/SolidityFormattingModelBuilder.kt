@@ -60,7 +60,7 @@ class SolidityFormattingModelBuilder : FormattingModelBuilder {
         .around(FUNCTION_INVOCATION).spaces(0)
         .aroundInside(MODIFIER_INVOCATION, FUNCTION_DEFINITION).spaces(1)
         .around(FUNCTION_VISIBILITY_SPECIFIER).spaces(1)
-        .around(STATE_MUTABILITY).spaces(1)
+        .around(STATE_MUTABILITY_SPECIFIER).spaces(1)
         .betweenInside(MODIFIER_INVOCATION, MODIFIER_INVOCATION, FUNCTION_DEFINITION).spaces(1)
         .aroundInside(TO, MAPPING_TYPE_NAME).spaces(1)
         .aroundInside(TokenSet.create(

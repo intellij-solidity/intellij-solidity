@@ -1,0 +1,5 @@
+contract SimpleName {
+    function abc() {
+
+    }
+}

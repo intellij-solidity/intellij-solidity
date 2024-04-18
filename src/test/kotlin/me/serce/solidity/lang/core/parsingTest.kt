@@ -168,7 +168,6 @@ class SolidityCompleteOfficialFailingParsingTest :
   fun testMissingParameterNameInNamedArgs() = doTest(true)
   fun testMissingVariableNameInDeclaration() = doTest(true)
   fun testModifierWithoutSemicolon() = doTest(true)
-  fun testMultipleVisibilitySpecifiers() = doTest(true)
   fun testNoDoubleRadixInFixedLiteral() = doTest(true)
   fun testPayableAccessor() = doTest(true)
   fun testVarArray() = doTest(true)
