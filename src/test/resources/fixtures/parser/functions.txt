@@ -320,7 +320,7 @@ Solidity File
           PsiElement(internal)('internal')
       PsiWhiteSpace(' ')
       SolStateMutabilitySpecifierImpl(STATE_MUTABILITY_SPECIFIER)
-        PsiElement(constant)('constant')
+        PsiElement(pure)('pure')
       PsiWhiteSpace(' ')
       PsiElement(returns)('returns')
       PsiWhiteSpace(' ')

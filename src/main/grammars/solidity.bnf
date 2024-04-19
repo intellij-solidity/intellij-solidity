@@ -385,7 +385,7 @@ FunctionTypeName ::= function ParameterList ( VisibilitySpecifier | StateMutabil
 }
 
 StorageLocationSpecifier ::= memory | storage | calldata
-StateMutabilitySpecifier ::= pure | constant | view | 'payable'
+StateMutabilitySpecifier ::= pure | view | 'payable'
 VisibilitySpecifier ::= private | internal | external | public
 
 private UnfinishedUncheckedBlock ::= unchecked '{' Statement* {

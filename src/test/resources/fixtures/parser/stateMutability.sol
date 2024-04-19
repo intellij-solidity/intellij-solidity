@@ -3,10 +3,6 @@ contract A {
         return a * (b + 42);
     }
 
-    function f2(uint a, uint b) constant returns (uint) {
-        return a * (b + 42);
-    }
-
     function f3(uint a, uint b) view returns (uint) {
         return a * (b + 42);
     }

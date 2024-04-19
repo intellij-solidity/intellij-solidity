@@ -7,7 +7,7 @@ contract Foo {
         assembly {=: b}
     }
 
-    function get() constant returns (uint) {
+    function get() pure returns (uint) {
         assembly {
             mstore(0x40, sload(0))
             byte(0)
