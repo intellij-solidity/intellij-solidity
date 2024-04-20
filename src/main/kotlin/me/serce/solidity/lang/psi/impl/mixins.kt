@@ -9,6 +9,7 @@ import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiModificationTracker
 import com.intellij.psi.util.nextLeaf
+import com.intellij.ui.IconManager
 import me.serce.solidity.firstInstance
 import me.serce.solidity.ide.SolidityIcons
 import me.serce.solidity.lang.core.SolidityTokenTypes.*
@@ -95,7 +96,7 @@ abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrL
   constructor(node: ASTNode) : super(node)
   constructor(stub: SolContractOrLibDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
 
-  override fun getIcon(flags: Int) = SolidityIcons.CONTRACT
+  override fun getIcon(flags: Int) = icon
 
   override fun parseParameters(): List<Pair<String?, SolType>> {
     return listOf(Pair(null, object : SolType {
@@ -131,9 +132,19 @@ abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrL
   override val isPayable: Boolean
     get() = this.functionDefinitionList.any { it.specialFunction?.let { it == SpecialFunctionType.RECEIVE || it == SpecialFunctionType.FALLBACK } ?: false }
 
+  override val icon: Icon
+    get() = when (contractType) {
+      ContractType.LIBRARY -> SolidityIcons.LIBRARY
+      ContractType.INTERFACE -> SolidityIcons.INTERFACE
+      ContractType.COMMON -> SolidityIcons.CONTRACT
+    }
 }
 
-abstract class SolConstructorDefMixin(node: ASTNode) : SolElementImpl(node), SolConstructorDefinition, SolFunctionDefElement {
+interface SolConstructorOrFunctionDef {
+  fun getBlock(): SolBlock?
+}
+
+abstract class SolConstructorDefMixin(node: ASTNode) : SolElementImpl(node), SolConstructorDefinition, SolFunctionDefElement, SolConstructorOrFunctionDef {
   override val referenceNameElement: PsiElement
     get() = this
 
@@ -193,9 +204,11 @@ abstract class SolConstructorDefMixin(node: ASTNode) : SolElementImpl(node), Sol
 
   override val specialFunction: SpecialFunctionType?
     get() = null
+
+  override fun getIcon(flags: Int): Icon? = SolidityIcons.CONSTRUCTOR
 }
 
-abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefStub>, SolFunctionDefinition {
+abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefStub>, SolFunctionDefinition, SolConstructorOrFunctionDef {
   override val referenceNameElement: PsiElement
     get() = findChildByType(IDENTIFIER)!!
 
@@ -208,7 +221,7 @@ abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefSt
   override val parameters: List<SolParameterDef>
     get() = findChildByType<SolParameterList>(PARAMETER_LIST)
       ?.children
-      ?.filterIsInstance(SolParameterDef::class.java)
+      ?.filterIsInstance<SolParameterDef>()
       ?: emptyList()
 
   override fun parseParameters(): List<Pair<String?, SolType>> {
@@ -264,7 +277,28 @@ abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefSt
   constructor(node: ASTNode) : super(node)
   constructor(stub: SolFunctionDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
 
-  override fun getIcon(flags: Int) = SolidityIcons.FUNCTION
+  override fun getIcon(flags: Int): Icon {
+    specialFunction?.let { if (it == SpecialFunctionType.RECEIVE) return SolidityIcons.RECEIVE }
+    val main = when (visibility) {
+      Visibility.PRIVATE -> SolidityIcons.FUNCTION_PRV
+      Visibility.INTERNAL -> SolidityIcons.FUNCTION_INT
+      Visibility.PUBLIC -> SolidityIcons.FUNCTION_PUB
+      Visibility.EXTERNAL -> SolidityIcons.FUNCTION_EXT
+      null -> SolidityIcons.FUNCTION
+    }
+    val ext = when (mutability) {
+        Mutability.PURE -> SolidityIcons.PURE
+        Mutability.VIEW -> SolidityIcons.VIEW
+      Mutability.PAYABLE -> SolidityIcons.PAYABLE
+        null -> SolidityIcons.WRITE
+      }
+    return IconManager.getInstance().createRowIcon(main, ext)
+  }
+  override fun getReference() = references.firstOrNull()
+
+  override fun getReferences(): Array<SolReference> {
+    return modifiers.map { SolModifierReference(this, it) }.toTypedArray()
+  }
 
   companion object {
     fun parseParameters(parameters: List<SolParameterDef>): List<Pair<String?, SolType>> {
@@ -279,14 +313,20 @@ abstract class SolModifierDefMixin : SolStubbedNamedElementImpl<SolModifierDefSt
   constructor(node: ASTNode) : super(node)
   constructor(stub: SolModifierDefStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
 
-  override fun getIcon(flags: Int) = SolidityIcons.FUNCTION
+  override fun getIcon(flags: Int) = SolidityIcons.MODIFIER
 }
 
 abstract class SolStateVarDeclMixin : SolStubbedNamedElementImpl<SolStateVarDeclStub>, SolStateVariableDeclaration {
   constructor(node: ASTNode) : super(node)
   constructor(stub: SolStateVarDeclStub, nodeType: IStubElementType<*, *>) : super(stub, nodeType)
 
-  override fun getIcon(flags: Int) = SolidityIcons.STATE_VAR
+  override fun getIcon(flags: Int): Icon {
+    return when (mutability) {
+      VariableMutability.CONSTANT -> SolidityIcons.CONSTANT_VARIABLE
+      VariableMutability.IMMUTABLE -> SolidityIcons.IMMUTABLE_VARIABLE
+      null -> if (firstChild.text == "address payable") IconManager.getInstance().createRowIcon(SolidityIcons.STATE_VAR, SolidityIcons.PAYABLE) else SolidityIcons.STATE_VAR
+    }
+  }
 
   override fun parseParameters(): List<Pair<String?, SolType>> = emptyList()
 
@@ -308,7 +348,7 @@ abstract class SolStateVarDeclMixin : SolStubbedNamedElementImpl<SolStateVarDecl
   override val visibility: Visibility?
     get() = visibilityModifier?.text?.let { safeValueOf(it.uppercase()) }
 
-  override val mutability: Mutability?
+  override val mutability: VariableMutability?
     get() = mutationModifier?.text?.let { safeValueOf(it.uppercase()) }
 
   override val mutationModifier: SolMutationModifier?
@@ -535,6 +575,8 @@ abstract class SolErrorDefMixin : SolStubbedNamedElementImpl<SolErrorDefStub>, S
   override fun resolveElement() = this
 
   override val callablePriority = 1000
+
+  override fun getIcon(flags: Int): Icon = SolidityIcons.ERROR
 }
 
 
@@ -580,3 +622,4 @@ fun List<SolVisibilitySpecifier>.parseVisibility() =
 fun List<SolStateMutabilitySpecifier>.parseMutability() =
        map { it.text.uppercase() }
          .firstNotNullOfOrNull { safeValueOf<Mutability>(it) }
+

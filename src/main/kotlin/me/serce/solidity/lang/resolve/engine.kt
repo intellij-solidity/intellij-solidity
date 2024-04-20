@@ -78,6 +78,12 @@ object SolResolver {
     return sameNameReferences.toSet()
   }
 
+  data class ImportRecord(val file: PsiFile, val names: List<SolNamedElement>)
+
+  fun collectImports(file: PsiFile): Collection<ImportRecord> {
+    return collectImports(file.childrenOfType<SolImportDirective>()).filter { it.file !== file }
+  }
+
   private val exportElements = setOf(
     SolContractDefinition::class.java,
     SolConstantVariableDeclaration::class.java,
@@ -135,18 +141,12 @@ object SolResolver {
 
   data class ImportedName(val ref: SolNamedElement, val target: SolNamedElement)
 
-  data class ImportRecord(val file: PsiFile, val names: List<SolNamedElement>)
-
 
   fun collectImports(import: SolImportDirective): Collection<ImportRecord> {
     return CachedValuesManager.getCachedValue(import) {
       val result = collectImports(listOf(import))
       CachedValueProvider.Result.create(result, result.map { it.file } + import)
     }
-  }
-
-  fun collectImports(file: PsiFile): Collection<ImportRecord> {
-    return collectImports(file.childrenOfType<SolImportDirective>()).filter { it.file !== file }
   }
 
   /**

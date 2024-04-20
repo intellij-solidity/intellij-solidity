@@ -41,11 +41,11 @@ class SolidityLineMarkerProvider : LineMarkerProvider {
         is SolFunctionDefinition -> {
           val identifier = el.identifier
           if (identifier != null) {
-            val overriden = SolFunctionResolver.collectOverriden(el)
-            if (!overriden.isEmpty()) {
+            val overridden = SolFunctionResolver.collectOverriden(el)
+            if (!overridden.isEmpty()) {
               val info = NavigationGutterIconBuilder
                 .create(AllIcons.Gutter.OverridingMethod)
-                .setTargets(overriden)
+                .setTargets(overridden)
                 .setPopupTitle("Go To Overridden Functions")
                 .setTooltipText("Overrides function")
                 .setCellRenderer { FunctionCellRenderer(el.containingFile) }
