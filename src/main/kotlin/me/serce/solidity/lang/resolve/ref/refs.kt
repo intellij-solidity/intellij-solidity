@@ -8,6 +8,7 @@ import me.serce.solidity.lang.core.SolidityTokenTypes
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.psi.impl.SolFunctionDefMixin
 import me.serce.solidity.lang.psi.impl.SolNewExpressionElement
+import me.serce.solidity.lang.psi.impl.SolYulPathElement
 import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.resolve.canBeApplied
 import me.serce.solidity.lang.resolve.function.SolFunctionResolver
@@ -31,6 +32,13 @@ class SolVarLiteralReference(element: SolVarLiteral) : SolReferenceBase<SolVarLi
 
   override fun getVariants() = SolCompleter.completeLiteral(element).toList().toTypedArray()
 }
+
+class SolYulLiteralReference(element: SolYulPathElement) : SolReferenceBase<SolYulPathElement>(element), SolReference {
+  override fun multiResolve() = SolResolver.resolveVarLiteralReference(element)
+
+  override fun getVariants() = SolCompleter.completeLiteral(element).toList().toTypedArray()
+}
+
 
 class SolModifierReference(
   element: SolReferenceElement,

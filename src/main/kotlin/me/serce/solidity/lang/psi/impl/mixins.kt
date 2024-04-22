@@ -613,6 +613,15 @@ abstract class SolFunctionTypeMixin : SolStubbedElementImpl<SolTypeRefStub>, Sol
     get() = visibilitySpecifierList.parseVisibility()
 }
 
+abstract class SolYulPathElement(node: ASTNode) : SolNamedElementImpl(node), SolReferenceElement {
+  override val referenceNameElement: PsiElement
+    get() = firstChild
+  override val referenceName: String
+    get() = referenceNameElement.text
+
+  override fun getReference() = SolYulLiteralReference(this)
+}
+
 fun List<SolVisibilitySpecifier>.parseVisibility() =
      map { it.text.uppercase() }
     .mapNotNull { safeValueOf<Visibility>(it) }
@@ -622,5 +631,4 @@ fun List<SolVisibilitySpecifier>.parseVisibility() =
 fun List<SolStateMutabilitySpecifier>.parseMutability() =
        map { it.text.uppercase() }
          .firstNotNullOfOrNull { safeValueOf<Mutability>(it) }
-
 

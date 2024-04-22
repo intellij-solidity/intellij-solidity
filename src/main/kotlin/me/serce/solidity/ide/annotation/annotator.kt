@@ -99,6 +99,9 @@ class SolidityAnnotator : Annotator {
           }
         }
       }
+      is SolYulVariableDeclaration, is SolYulSwitchStatement, is SolYulSwitchCase ->
+        applyColor(holder, element.firstChild, SolColor.KEYWORD)
+      is SolYulLeave, is SolYulBreak, is SolYulContinue, is SolYulDefault -> applyColor(holder, element, SolColor.KEYWORD)
     }
   }
 
