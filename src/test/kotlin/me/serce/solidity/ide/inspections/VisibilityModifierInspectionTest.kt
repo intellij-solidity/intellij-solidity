@@ -8,7 +8,7 @@ class VisibilityModifierInspectionTest : SolInspectionsTestBase(VisibilityModifi
                 int i = 1;
             }
         }
-    """)
+    """, checkWeakWarn = true)
 
   fun testTypeAssertSuccess() = checkByText("""
         contract a {

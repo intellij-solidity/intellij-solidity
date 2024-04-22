@@ -156,6 +156,10 @@ inline fun <reified T : PsiElement> PsiElement.findParentOrNull(): T? {
 
 fun PsiElement.findContract(): SolContractDefinition? = this.findParentOrNull()
 
+fun SolNamedElement.outerContract() = parent?.takeIf { it is SolContractDefinition || it is SolEnumDefinition || it is SolStructDefinition }?.findContract()
+
+fun PsiElement.isBuiltin() = this.containingFile.virtualFile == null
+
 fun inferExprType(expr: SolExpression?): SolType {
   return when (expr) {
     is SolPrimaryExpression -> {

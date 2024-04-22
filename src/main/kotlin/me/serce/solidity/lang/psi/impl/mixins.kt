@@ -623,4 +623,3 @@ fun List<SolStateMutabilitySpecifier>.parseMutability() =
        map { it.text.uppercase() }
          .firstNotNullOfOrNull { safeValueOf<Mutability>(it) }
 
-
