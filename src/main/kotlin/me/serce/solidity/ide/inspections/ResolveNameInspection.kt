@@ -5,38 +5,40 @@ import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.psi.PsiElementVisitor
 import me.serce.solidity.ide.inspections.fixes.ImportFileFix
-import me.serce.solidity.lang.psi.SolReferenceElement
-import me.serce.solidity.lang.psi.SolUserDefinedTypeName
-import me.serce.solidity.lang.psi.SolVarLiteral
-import me.serce.solidity.lang.psi.SolVisitor
+import me.serce.solidity.lang.psi.*
 
 class ResolveNameInspection : LocalInspectionTool() {
   override fun getDisplayName(): String = ""
 
   override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
     return object : SolVisitor() {
+      override fun visitImportDirective(o: SolImportDirective) {
+        o.importPath?.let { path ->
+          if (path.reference?.resolve() == null) {
+            holder.registerProblem(path, "'${path.text}' cannot be resolved", ProblemHighlightType.WARNING)
+          } else {
+            o.importAliasedPairList.filter { it.userDefinedTypeName.reference?.resolve() == null }.forEach {
+              holder.registerProblem(it.userDefinedTypeName, "'${it.userDefinedTypeName}' cannot be resolved", ProblemHighlightType.WARNING)
+            }
+          }
+        }
+      }
+
       override fun visitVarLiteral(element: SolVarLiteral) {
-        inspectVarLiteralRef(element, holder)
+        checkReference(element) {
+          holder.registerProblem(element, "'${element.identifier.text}' is undefined", ProblemHighlightType.WARNING, ImportFileFix(element))
+        }
       }
 
       override fun visitUserDefinedTypeName(element: SolUserDefinedTypeName) {
-        inspectUserDefinedTypeName(element, holder)
+        checkReference(element) {
+          holder.registerProblem(element, "Import file", ProblemHighlightType.WARNING, ImportFileFix(element))
+        }
       }
     }
   }
 }
 
-fun inspectVarLiteralRef(element: SolVarLiteral, holder: ProblemsHolder) {
-  checkReference(element) {
-    holder.registerProblem(element, "'${element.identifier.text}' is undefined", ProblemHighlightType.WARNING)
-  }
-}
-
-fun inspectUserDefinedTypeName(element: SolUserDefinedTypeName, holder: ProblemsHolder) {
-  checkReference(element) {
-    holder.registerProblem(element, "Import file", ProblemHighlightType.WARNING, ImportFileFix(element))
-  }
-}
 private fun checkReference(element: SolReferenceElement, report: () -> Unit) {
   if (element.reference != null) {
     // resolve return either 1 reference or null, and because our resolve is not perfect we can return a number

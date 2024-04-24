@@ -41,3 +41,6 @@ fun <T> nullIfError(action: () -> T): T? {
     null
   }
 }
+fun String.removeQuotes(): String {
+  return removeSurrounding("\"").removeSurrounding("'")
+}
