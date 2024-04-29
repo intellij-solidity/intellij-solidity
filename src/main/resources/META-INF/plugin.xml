@@ -19,8 +19,21 @@
     <change-notes><![CDATA[
       <p>
         Thank you for your support! Huge thank you to
-        <p>all participants of the last GitCoin round, Yenwen Feng (@tempofeng), and LevX (@LevxApp) in particular! https://gitcoin.co/grants/1047/intellij-solidity!❤️</p>
-        <p>all of you who sponsor the plugin development, @Lumyo and Tyler Smith (@tyler-smith) in particular!❤️</p>
+        all of you who sponsor the plugin development, @punk3155 in particular!❤️
+
+        <b>v2.4.4</b>
+        In this release:
+        <ul>
+          <li>Import fixes and improvements, thank you @mbolotov!</li>
+          <li>Fix Yul references and highlight keywords, thank you @mbolotov!</li>
+          <li>Unused elements inspection, thank you @mbolotov!</li>
+          <li>Solidity elements structure in the structure view & a new icon set, thank you @mbolotov!</li>
+          <li>Fix function and variable name spelling issues, thank you @standstaff!</li>
+          <li>Member access inspection and resolve fixes, thank you @mbolotov!</li>
+          <li>Gas estimation display hints, thank you @mbolotov!</li>
+          <li>Exception fixes, yours @SerCeMan!</li>
+        </ul>
+        A special thank you to tetu.io who made the @mboloov's contributions possible! 🎉
 
         <b>v2.4.3</b>
         In this release:
@@ -30,16 +43,6 @@
           <li>Add emit event parameter inspection, thanks @jonahcui!</li>
           <li>Follow aliases when going to implementation, yours @SerCeMan!</li>
           <li>Fix lexer errors when analysing comments, thanks @spacelord47!</li>
-        </ul>
-        <b>v2.4.2</b>
-        In this release:
-        <ul>
-          <li>Support move refactoring, thanks @mbolotov!</li>
-          <li>Support a hex literal type implicit cast to a fixed size byte array, thanks @mbolotov!</li>
-          <li>Fix ternary and assign formatting, thanks @mbolotov!</li>
-          <li>Optimise searching for implementations, thanks @mbolotov & yours @SerCeMan!</li>
-          <li>Fix import paths on Windows, thanks @mbolotov!</li>
-          <li>Show hovering doc for parameters of a constructor, thanks @mbolotov!</li>
         </ul>
       </p>
     ]]>
