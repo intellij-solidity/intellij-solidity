@@ -207,6 +207,9 @@
         <defaultLiveTemplates file="/liveTemplates/Solidity.xml"/>
         <liveTemplateContext
                 implementation="me.serce.solidity.ide.liveTemplates.SolTemplateContextType"/>
+
+        <lang.structureViewExtension implementation="me.serce.solidity.ide.SolStructureViewExtension"/>
+        <typeHierarchyProvider language="Solidity" implementationClass="me.serce.solidity.ide.SolHierarchyTypeProvider"/>
     </extensions>
 
     <actions>
