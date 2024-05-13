@@ -19,7 +19,7 @@ class SolParameterInfoHandlerTest : SolTestBase() {
                 emit SomeEvent(/*caret*/);
             }
         }
-    """, "uint256, string", 0)
+    """, "uint256 value, string s", 0)
 
   fun testError() = checkByText("""
         contract A {
@@ -29,7 +29,7 @@ class SolParameterInfoHandlerTest : SolTestBase() {
                 revert AnError(/*caret*/);
             }
         }
-    """, "uint256, string", 0)
+    """, "uint256 value, string s", 0)
 
   fun testStruct() = checkByText("""
       contract B {

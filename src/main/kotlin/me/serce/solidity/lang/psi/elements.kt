@@ -78,6 +78,8 @@ inline fun <reified T : Enum<*>> safeValueOf(name: String): T? =
 interface SolFunctionCallElement : SolReferenceElement {
   val expression: SolExpression?
   val functionCallArguments: SolFunctionCallArguments
+
+  fun resolveDefinitions() : List<SolCallable>?
 }
 
 interface SolModifierInvocationElement : SolReferenceElement {
