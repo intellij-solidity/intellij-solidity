@@ -30,9 +30,10 @@ class SolPsiFactory(val project: Project) {
       ?: error("Failed to create struct: `$importPath`")
   }
 
-  fun createImportDirective(importPath: String): SolImportDirective {
-    return createFromText("import \"$importPath\";")
-      ?: error("Failed to create struct: `$importPath`")
+  fun createImportDirective(content: String, addQuotes: Boolean = true): SolImportDirective {
+    val text = if (addQuotes) "\"$content\"" else content
+    return createFromText("import $text;")
+      ?: error("Failed to create import: `$text`")
   }
 
   fun createNewLine(project: Project): PsiElement {

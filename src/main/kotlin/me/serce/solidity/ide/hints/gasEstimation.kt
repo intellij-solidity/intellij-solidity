@@ -75,7 +75,8 @@ class SolGasEstimationService(project: Project) {
 
   fun findEstimation(element: SolFunctionDefElement): String? {
     if (jsonNode == null) return null
-    val file = hardHatRoot?.toNioPath()?.relativize(element.containingFile.virtualFile.toNioPath())?.toString()?.replace("\\", "/")
+    val elementPath = kotlin.runCatching { element.containingFile.virtualFile.toNioPath() }.getOrNull() ?: return null
+    val file = hardHatRoot?.toNioPath()?.relativize(elementPath)?.toString()?.replace("\\", "/")
       ?: return null
     val contract = element.findContract()?.name ?: ""
 
