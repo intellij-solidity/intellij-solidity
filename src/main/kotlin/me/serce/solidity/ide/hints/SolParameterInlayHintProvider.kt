@@ -3,7 +3,6 @@ package me.serce.solidity.ide.hints
 
 import com.intellij.codeInsight.hints.InlayInfo
 import com.intellij.codeInsight.hints.InlayParameterHintsProvider
-import com.intellij.codeInsight.hints.Option
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.parentOfType
 import me.serce.solidity.lang.psi.SolDeclarationItem
@@ -21,7 +20,6 @@ class SolParameterInlayHintProvider : InlayParameterHintsProvider {
     return emptySet()
   }
 }
-
 
 enum class HintType(
      private val description: String,
@@ -52,40 +50,16 @@ enum class HintType(
         override fun isApplicable(e: PsiElement): Boolean = e is SolFunctionCallArguments
     };
 
-
     companion object {
         private val values = values()
 
         fun resolve(e: PsiElement): List<HintType> =
             values.filter { it.isApplicable(e) }
-
     }
 
     abstract fun isApplicable(e: PsiElement): Boolean
     open fun provideHints(e: PsiElement): List<InlayInfo> = emptyList()
-    open fun provideHintDetails(e: PsiElement): List<InlayInfoDetails> =
-        provideHints(e).map { InlayInfoDetails(it, listOf(TextInlayInfoDetail(it.text))) }
-
-    val option = Option("SHOW_${this.name}", { this.description }, defaultEnabled)
-    val enabled
-        get() = option.get()
 }
-
-data class InlayInfoDetails(val inlayInfo: InlayInfo, val details: List<InlayInfoDetail>)
-
-sealed class InlayInfoDetail(val text: String)
-
-class TextInlayInfoDetail(text: String, val smallText: Boolean = true): InlayInfoDetail(text) {
-    override fun toString(): String = "[$text]"
-}
-class TypeInlayInfoDetail(text: String, val fqName: String?): InlayInfoDetail(text) {
-    override fun toString(): String = "[$text :$fqName]"
-}
-class PsiInlayInfoDetail(text: String, val element: PsiElement): InlayInfoDetail(text) {
-    override fun toString(): String = "[$text @ $element]"
-}
-
-
 
 fun provideArgumentNameHints(element: SolFunctionCallElement): List<InlayInfo> {
   val params = element.resolveDefinitions().takeIf { it?.size == 1 }?.get(0)?.parseParameters() ?: return emptyList()

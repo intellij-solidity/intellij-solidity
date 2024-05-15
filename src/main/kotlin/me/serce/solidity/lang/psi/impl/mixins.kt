@@ -107,6 +107,8 @@ abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrL
           else -> false
         }
       }
+
+      override fun toString(): String = this@SolContractOrLibMixin.name ?: ""
     }))
   }
 
@@ -424,9 +426,12 @@ abstract class SolFunctionCallMixin(node: ASTNode) : SolNamedElementImpl(node), 
     get() = functionInvocation.functionCallArguments!!
 
   override fun resolveDefinitions(): List<SolCallable>? {
-    return ((children.firstOrNull() as? SolMemberAccessExpression)?.let {
-      SolResolver.resolveMemberAccess(it)
-    } ?: SolResolver.resolveVarLiteralReference(this)).filterIsInstance<SolCallable>()
+
+    return when (val it = children.firstOrNull()) {
+      is SolMemberAccessExpression -> SolResolver.resolveMemberAccess(it)
+      is SolNewExpression -> it.reference?.multiResolve() ?: emptyList()
+      else -> SolResolver.resolveVarLiteralReference(this)
+    }.filterIsInstance<SolCallable>()
   }
 }
 
