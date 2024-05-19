@@ -82,13 +82,15 @@ object SolCompleter {
   }
 
   fun completeLiteral(element: PsiElement): Sequence<LookupElement> {
-    return SolResolver.lexicalDeclarations(element).mapNotNull {
+    val lexicalDeclarations = SolResolver.lexicalDeclarations(element).mapNotNull {
       when (it) {
         is SolFunctionDefinition -> it.toFunctionLookup()
         is SolStructDefinition -> it.toStructLookup()
         else -> it.toVarLookup()
       }
-    }
+    }.associateBy { it.lookupString }
+    val keys = lexicalDeclarations.keys
+    return lexicalDeclarations.values.asSequence() + completeTypeName(element).filterNot { keys.contains(it.lookupString) }
   }
 
   fun completeMemberAccess(element: SolMemberAccessExpression): Array<out LookupElement> {
