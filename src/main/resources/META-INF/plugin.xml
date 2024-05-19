@@ -117,6 +117,10 @@
         <completion.contributor language="Solidity"
                                 implementationClass="me.serce.solidity.lang.completion.SolNatSpecCompletionContributor"/>
 
+        <psi.referenceContributor language="Solidity"
+                                  implementation="me.serce.solidity.lang.completion.SolDocReferenceContributor"/>
+
+
         <lang.formatter language="Solidity"
                         implementationClass="me.serce.solidity.ide.formatting.SolidityFormattingModelBuilder"/>
 

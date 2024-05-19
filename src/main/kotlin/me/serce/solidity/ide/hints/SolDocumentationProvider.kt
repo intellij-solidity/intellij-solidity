@@ -85,7 +85,7 @@ class SolDocumentationProvider : AbstractDocumentationProvider() {
 
     fun getDoc(file: PsiFile) = doc.getOrCreate(file) { DocWrapper(PsiDocumentManager.getInstance(element.project).getDocument(file)) }.document
     val comments = element.comments().let {
-      it + if (it.isEmpty() || it.any { it.elementType == SolidityTokenTypes.NAT_SPEC_TAG && it.text == "@inheritdoc" }) {
+      it + if (it.isEmpty() || it.any { it.isInheritDoc() }) {
         when (element) {
           is SolParameterDef -> collectParameterComments(element) + collectInheritanceComments(element)
           is SolFunctionDefinition -> collectInheritanceComments(element)
@@ -256,3 +256,4 @@ class SolDocumentationProvider : AbstractDocumentationProvider() {
 }
 
 
+fun PsiElement.isInheritDoc() = elementType == SolidityTokenTypes.NAT_SPEC_TAG && text == "@inheritdoc"
