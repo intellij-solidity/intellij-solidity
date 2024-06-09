@@ -14,7 +14,7 @@ class SolidityFileStub(file: SolidityFile?) : PsiFileStubImpl<SolidityFile>(file
 
   object Type : IStubFileElementType<SolidityFileStub>(SolidityLanguage) {
     // bump version every time stub tree changes
-    override fun getStubVersion() = 15
+    override fun getStubVersion() = 19
 
     override fun getBuilder(): StubBuilder = object : DefaultStubBuilder() {
       override fun createStubForFile(file: PsiFile) = SolidityFileStub(file as SolidityFile)
@@ -40,6 +40,7 @@ fun factory(name: String): SolStubElementType<*, *> = when (name) {
   "STATE_VARIABLE_DECLARATION" -> SolStateVarDeclStub.Type
   "CONSTANT_VARIABLE_DECLARATION" -> SolConstantVariableDeclStub.Type
   "IMPORT_PATH" -> SolImportPathDefStub.Type
+  "IMPORT_ALIAS" -> SolImportAliasDefStub.Type
 
   "ELEMENTARY_TYPE_NAME" -> SolTypeRefStub.Type("ELEMENTARY_TYPE_NAME", ::SolElementaryTypeNameImpl)
   "MAPPING_TYPE_NAME" -> SolTypeRefStub.Type("MAPPING_TYPE_NAME", ::SolMappingTypeNameImpl)
@@ -331,5 +332,28 @@ class SolImportPathDefStub(
     override fun indexStub(stub: SolImportPathDefStub, sink: IndexSink) = sink.indexImportPathDef(stub)
   }
 }
+
+class SolImportAliasDefStub(
+  parent: StubElement<*>?,
+  elementType: IStubElementType<*, *>,
+  override val name: String?,
+) : StubBase<SolImportAliasImpl>(parent, elementType), SolNamedStub {
+
+  object Type : SolStubElementType<SolImportAliasDefStub, SolImportAliasImpl>("IMPORT_ALIAS") {
+    override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?) =
+      SolImportAliasDefStub(parentStub, this, dataStream.readNameAsString())
+
+    override fun serialize(stub: SolImportAliasDefStub, dataStream: StubOutputStream) = with(dataStream) {
+      writeName(stub.name)
+    }
+
+    override fun createPsi(stub: SolImportAliasDefStub) = SolImportAliasImpl(stub, this)
+
+    override fun createStub(psi: SolImportAliasImpl, parentStub: StubElement<*>?) = SolImportAliasDefStub(parentStub, this, psi.name)
+
+    override fun indexStub(stub: SolImportAliasDefStub, sink: IndexSink) = sink.indexImportPathDef(stub)
+  }
+}
+
 
 private fun StubInputStream.readNameAsString(): String? = readName()?.string

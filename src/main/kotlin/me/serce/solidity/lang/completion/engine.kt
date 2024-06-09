@@ -77,7 +77,7 @@ object SolCompleter {
       project
     )
     return allModifiers
-      .map { LookupElementBuilder.create(it, it).withIcon(SolidityIcons.FUNCTION) }
+      .map { LookupElementBuilder.create(it, it).withIcon(SolidityIcons.MODIFIER) }
       .toTypedArray()
   }
 
@@ -98,12 +98,13 @@ object SolCompleter {
       expr.type.isBuiltin -> ContextType.BUILTIN
       else -> ContextType.EXTERNAL
     }
-    return element.expression.getMembers()
+
+    return element.getMembers()
       .mapNotNull {
         when (it.getPossibleUsage(contextType)) {
           Usage.CALLABLE -> {
             // could also be a builtin, me.serce.solidity.lang.types.BuiltinCallable
-            (it as? SolCallableElement ?: it.resolveElement() as? SolCallableElement)?.toFunctionLookup()
+            (it as? SolCallable ?: it.resolveElement() as? SolCallableElement)?.toFunctionLookup()
           }
           Usage.VARIABLE -> it.getName()?.let { name ->
             PrioritizedLookupElement.withPriority(
@@ -125,14 +126,14 @@ class ContractLookupElement(val contract: SolContractDefinition) : LookupElement
   override fun getLookupString(): String = contract.name!!
 
   override fun renderElement(presentation: LookupElementPresentation) {
-    presentation.icon = SolidityIcons.CONTRACT
+    presentation.icon = contract.icon
     presentation.itemText = contract.name
     presentation.typeText = "from ${contract.containingFile.name}"
   }
 
   override fun handleInsert(context: InsertionContext) {
     if (!ImportFileAction.isImportedAlready(context.file, contract.containingFile)) {
-      ImportFileAction.addImport(contract.project, context.file, contract.containingFile)
+      ImportFileAction.addContractImport(contract, context.file)
     }
   }
 }

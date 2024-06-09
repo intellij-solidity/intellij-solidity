@@ -2,6 +2,7 @@ package me.serce.solidity.lang.resolve.function
 
 import me.serce.solidity.ide.navigation.findAllImplementations
 import me.serce.solidity.lang.psi.SolContractDefinition
+import me.serce.solidity.lang.psi.SolFunctionDefElement
 import me.serce.solidity.lang.psi.SolFunctionDefinition
 import me.serce.solidity.lang.psi.impl.LinearizationImpossibleException
 import me.serce.solidity.lang.psi.parentOfType
@@ -9,7 +10,7 @@ import me.serce.solidity.lang.types.SolContract
 import me.serce.solidity.lang.types.getSolType
 
 object SolFunctionResolver {
-  fun collectOverriden(func: SolFunctionDefinition, contract: SolContractDefinition? = func.parentOfType()): Collection<SolFunctionDefinition> {
+  fun collectOverriden(func: SolFunctionDefElement, contract: SolContractDefinition? = func.parentOfType()): Collection<SolFunctionDefinition> {
     contract ?: return emptyList()
     val parents = try {
       SolContract(contract).linearizeParents().map { it.ref }
@@ -28,7 +29,7 @@ object SolFunctionResolver {
       .filter { signatureEquals(func, it) }
   }
 
-  private fun signatureEquals(f1: SolFunctionDefinition, f2: SolFunctionDefinition): Boolean {
+  private fun signatureEquals(f1: SolFunctionDefElement, f2: SolFunctionDefElement): Boolean {
     if (f1.name != f2.name) {
       return false
     }

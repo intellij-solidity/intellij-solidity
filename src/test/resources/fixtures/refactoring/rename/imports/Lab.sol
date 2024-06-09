@@ -1,1 +1,1 @@
-contract Lab {}
+contract Lab1 {}

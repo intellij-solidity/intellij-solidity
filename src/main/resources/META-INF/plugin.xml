@@ -19,32 +19,30 @@
     <change-notes><![CDATA[
       <p>
         Thank you for your support! Huge thank you to
-        <p>all participants of the last GitCoin round, Yenwen Feng (@tempofeng), and LevX (@LevxApp) in particular! https://gitcoin.co/grants/1047/intellij-solidity!❤️</p>
-        <p>all of you who sponsor the plugin development, @Lumyo and Tyler Smith (@tyler-smith) in particular!❤️</p>
+        all of you who sponsor the plugin development, @punk3155 in particular!❤️
 
-        <b>v2.4.0</b>
-        Note that the minimum supported IntelliJ version of this release is 2022.2.5.
-        <br/>
+        <b>v2.4.4</b>
         In this release:
         <ul>
-          <li>Improve performance of resolving, yours @SerCeMan</li>
-          <li>Support user-defined operators, yours @SerCeMan</li>
-          <li>Code docs generation, thanks @mbolotov!</li>
-          <li>Fix built-in member access, thanks @mbolotov!</li>
-          <li>Resolve a for loop variable, thanks @mbolotov!</li>
-          <li>Fix function modifier rename refactoring, thanks @mbolotov!</li>
-          <li>Allow named parameters in mapping types, yours @SerCeMan</li>
+          <li>Import fixes and improvements, thank you @mbolotov!</li>
+          <li>Fix Yul references and highlight keywords, thank you @mbolotov!</li>
+          <li>Unused elements inspection, thank you @mbolotov!</li>
+          <li>Solidity elements structure in the structure view & a new icon set, thank you @mbolotov!</li>
+          <li>Fix function and variable name spelling issues, thank you @standstaff!</li>
+          <li>Member access inspection and resolve fixes, thank you @mbolotov!</li>
+          <li>Gas estimation display hints, thank you @mbolotov!</li>
+          <li>Exception fixes, yours @SerCeMan!</li>
         </ul>
-        <b>v2.3.11</b>
+        A special thank you to tetu.io who made the @mboloov's contributions possible! 🎉
+
+        <b>v2.4.3</b>
         In this release:
         <ul>
-          <li>Allow destructuring inside try-catch block, yours @SerCeMan</li>
-          <li>Fix block comment parsing when it includes /*/, yours @SerCeMan</li>
-          <li>Support adding "Live Templates", thanks @carter-ya!</li>
-          <li>Support create smart contract interface, thanks @carter-ya!</li>
-          <li>Add remappings.txt support for foundry, thanks @dyzz!</li>
-          <li>Fix highlighting for payable, immutable, receive, fallback, and enum values, thanks @apottere!</li>
-          <li>Resolve top-level Enums, Structs, Errors, and user-defined types, thanks @apottere!</li>
+          <li>Support event definitions at file level, yours @SerCeMan!</li>
+          <li>Support named imports and forge remappings, thanks @ArshanKhanifar!</li>
+          <li>Add emit event parameter inspection, thanks @jonahcui!</li>
+          <li>Follow aliases when going to implementation, yours @SerCeMan!</li>
+          <li>Fix lexer errors when analysing comments, thanks @spacelord47!</li>
         </ul>
       </p>
     ]]>
@@ -52,10 +50,10 @@
 
     <!--
         See https://plugins.jetbrains.com/docs/intellij/build-number-ranges.html
-        See https://youtrack.jetbrains.com/articles/IDEA-A-2100661473/IntelliJ-IDEA-2022.2.5-222.4554.10-build-Release-Notes
-        222.4554.10 is IntelliJ IDEA 2022.2.5
+        See https://youtrack.jetbrains.com/articles/IDEA-A-2100661478/IntelliJ-IDEA-2023.1-231.8109.175-build-Release-Notes
+        231.8109.175 is IntelliJ IDEA 2023.1
     -->
-    <idea-version since-build="222.4554.10"/>
+    <idea-version since-build="231.8109.175"/>
 
     <!-- See https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html for the full list of modules -->
     <depends>com.intellij.modules.lang</depends>
@@ -86,6 +84,9 @@
 
         <renamePsiElementProcessor implementation="me.serce.solidity.ide.refactoring.RenameContractProcessor"/>
         <renamePsiElementProcessor implementation="me.serce.solidity.ide.refactoring.RenameConstructorProcessor"/>
+        <renamePsiElementProcessor implementation="me.serce.solidity.ide.refactoring.SolRenameFileProcessor"/>
+        <refactoring.moveHandler implementation="me.serce.solidity.ide.refactoring.SolMoveHandler" order="first"/>
+
 
         <!-- Commenter -->
         <lang.commenter language="Solidity" implementationClass="me.serce.solidity.ide.SolCommenter"/>
@@ -103,6 +104,7 @@
                               implementationClass="me.serce.solidity.ide.hints.SolExpressionTypeProvider"/>
         <codeInsight.parameterInfo language="Solidity"
                                    implementationClass="me.serce.solidity.ide.hints.SolParameterInfoHandler"/>
+        <codeInsight.daemonBoundCodeVisionProvider implementation="me.serce.solidity.ide.hints.SolGasEstimationInlayProvider"/>
 
         <completion.contributor language="Solidity"
                                 implementationClass="me.serce.solidity.lang.completion.SolBaseTypesCompletionContributor"/>
@@ -192,15 +194,33 @@
 
         <localInspection language="Solidity" groupName="Solidity"
                          displayName="Function call arguments are not matched with the parameters of function definition"
-                         enabledByDefault="true"
+                         enabledByDefault="false"
                          level="ERROR"
                          implementationClass="me.serce.solidity.ide.inspections.ValidateFunctionArgumentsInspection"/>
+
+        <localInspection language="Solidity" groupName="Solidity"
+                         displayName="Event emit arguments are not matched with the parameters of event definition"
+                         enabledByDefault="false"
+                         level="ERROR"
+                         implementationClass="me.serce.solidity.ide.inspections.ValidateEmitEventArgumentsInspection"/>
 
         <localInspection language="Solidity" groupName="Solidity"
                          displayName="Visibility modifier not specified for a function or state variable"
                          enabledByDefault="true"
                          level="WEAK WARNING"
                          implementationClass="me.serce.solidity.ide.inspections.VisibilityModifierInspection"/>
+
+        <localInspection language="Solidity" groupName="Solidity"
+                                 displayName="Member is not defined"
+                                 enabledByDefault="true"
+                                 level="WEAK WARNING"
+                                 implementationClass="me.serce.solidity.ide.inspections.ValidateMemberAccessInspection"/>
+
+        <localInspection language="Solidity" groupName="Solidity"
+                                 displayName="Element is never used"
+                                 enabledByDefault="false"
+                                 level="WEAK WARNING"
+                                 implementationClass="me.serce.solidity.ide.inspections.UnusedElementInspection"/>
 
         <errorHandler implementation="me.serce.solidity.ide.SentryReportSubmitter"/>
 
@@ -209,6 +229,7 @@
                 implementation="me.serce.solidity.ide.liveTemplates.SolTemplateContextType"/>
 
         <lang.structureViewExtension implementation="me.serce.solidity.ide.SolStructureViewExtension"/>
+
         <typeHierarchyProvider language="Solidity" implementationClass="me.serce.solidity.ide.SolHierarchyTypeProvider"/>
     </extensions>
 
@@ -218,6 +239,12 @@
                 text="Smart Contract" description="Create new solidity contract">
             <add-to-group group-id="NewGroup" anchor="after" relative-to-action="NewDir"/>
         </action>
+        <action id="solidity.show.gas.estimation"
+                class="me.serce.solidity.ide.hints.ShowGasEstimationAction"
+                text="Show Gas Estimation" description="Show gas estimation for functions as calculated by solc compiler">
+            <add-to-group group-id="AnalyzeActions" anchor="last"/>
+        </action>
+
     </actions>
 
 </idea-plugin>

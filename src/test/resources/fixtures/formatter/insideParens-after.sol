@@ -18,6 +18,14 @@ contract A {
             b: "2"
         });
 
+        callFunction({
+            a: 1,
+            b: callMe(
+                1,
+                2
+            )
+        });
+
         if (a == 1 && b == 2)
             callMe(1, 2);
         if (
@@ -34,5 +42,15 @@ contract A {
             || 2 == 3) {
             doSomething(1, 2);
         }
+
+        (v1,
+            v2,
+            v3) = f3(a_, b_);
+
+        (
+            v1,
+        ,
+            v3
+        ) = f3(a_, b_);
     }
 }

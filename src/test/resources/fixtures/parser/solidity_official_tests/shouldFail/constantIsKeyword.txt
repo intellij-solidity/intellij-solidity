@@ -15,7 +15,7 @@ Solidity File
   PsiWhiteSpace(' ')
   PsiElement(constant)('constant')
   PsiWhiteSpace(' ')
-  PsiErrorElement:<visibility modifier>, Identifier or override expected, got '='
+  PsiErrorElement:<mutation modifier>, <visibility modifier>, Identifier or override expected, got '='
     PsiElement(=)('=')
   PsiWhiteSpace(' ')
   PsiElement(decimalNumber)('4')

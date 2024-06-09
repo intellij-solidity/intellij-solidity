@@ -1,5 +1,6 @@
 package me.serce.solidity.lang.core.resolve
 
+import com.intellij.psi.PsiNamedElement
 import me.serce.solidity.lang.psi.SolNamedElement
 
 class SolImportResolveTest : SolResolveTestBase() {
@@ -62,6 +63,21 @@ class SolImportResolveTest : SolResolveTestBase() {
     }
 
     assertEquals(file1.name, resolved.containingFile.name)
+  }
+
+  fun testResolveNameClash() {
+
+    myFixture.configureByFile("contracts/a/SimpleName.sol")
+    myFixture.configureByFile("contracts/b/SimpleName.sol")
+
+    myFixture.configureByFile("contracts/ImportNameClash.sol")
+    val (refElement) = findElementAndDataInEditor<SolNamedElement>("^")
+
+    val resolved = checkNotNull(refElement.reference?.resolve() as? PsiNamedElement) {
+      "Failed to resolve ${refElement.text}"
+    }
+
+    assertEquals("abc", resolved.name)
   }
 
   fun testResolveFrom() {

@@ -220,4 +220,68 @@ class SolVarResolveTest : SolResolveTestBase() {
             }
         }          
     """)
+
+  fun testResolveTryStatementVariable() = checkByCode("""
+        contract B {
+            function getData(address token) external returns (uint value);
+            function test() {
+                try feed.getData(token) returns (uint v) {
+                                                    //x
+                    return (v, true);
+                          //^
+                } catch Error(string memory reason) {
+                }
+            }
+        }          
+    """)
+
+  fun testResolveCatchClauseVariable() = checkByCode("""
+        contract B {
+            function getData(address token) external returns (uint value);
+            function test() {
+                try feed.getData(token) returns (uint v) {
+                    return (v, true);
+                } catch Error(string memory reason) {
+                                             //x
+                    var r2 = reason;
+                              //^
+                }
+            }
+        }          
+    """)
+
+  fun testResolveUncheckBlockVariable() = checkByCode("""
+        contract B {
+            function test() {
+                unchecked {
+                    uint256 length = 1;
+                              //x
+                    string memory buffer = new string(length);
+                                                        //^ 
+                }
+            }
+        }      
+    """)
+
+  fun testResolveModifierParameter() = checkByCode("""
+        contract B {
+          modifier reinitializer(uint8 version) {
+                                         //x
+              var v = version;
+                       //^ 
+          }
+        }          
+    """)
+
+  fun testResolveParameterDefInTuple() = checkByCode("""
+        contract B {
+          function test() {
+              uint reserves = (tokenIn == token0 ? reserves0 : reserves1);
+                      //x
+              var v = reserves;
+                       //^ 
+          }
+        }          
+    """)
+
 }

@@ -29,7 +29,7 @@ contract MyToken {
         throw;
     }
 
-    function hello() internal constant returns (string memory str) {
+    function hello() internal pure returns (string memory str) {
         return "hel";
     }
 

@@ -298,7 +298,7 @@ Solidity File
         PsiElement(Identifier)('x')
       PsiElement())(')')
     PsiWhiteSpace(' ')
-    SolStateMutabilityImpl(STATE_MUTABILITY)
+    SolStateMutabilitySpecifierImpl(STATE_MUTABILITY_SPECIFIER)
       PsiElement(pure)('pure')
     PsiWhiteSpace(' ')
     PsiElement(returns)('returns')

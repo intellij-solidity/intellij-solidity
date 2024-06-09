@@ -22,7 +22,7 @@ class SolidityFormattingModelBuilder : FormattingModelBuilder {
     val spacingBuilder = createSpacingBuilder(settings)
 
     val containingFile = element.containingFile
-    val solidityBlock = SolFormattingBlock(element.node, null, Indent.getNoneIndent(), null, settings, spacingBuilder)
+    val solidityBlock = SolFormattingBlock(element.node, null, Indent.getNoneIndent(), null, settings, spacingBuilder, false, false)
 
     return FormattingModelProvider.createFormattingModelForPsiFile(containingFile, solidityBlock, settings)
   }
@@ -34,6 +34,7 @@ class SolidityFormattingModelBuilder : FormattingModelBuilder {
   companion object {
     fun createSpacingBuilder(settings: CodeStyleSettings): SpacingBuilder {
       return SpacingBuilder(settings, SolidityLanguage)
+        .between(TokenSet.create(LPAREN, LBRACE, LBRACKET), COMMENT).spaces(1)
         .after(TokenSet.create(LPAREN, LBRACE, LBRACKET)).none()
         // Some old versions do not support .before(TokenSet), so we use more verbose form
         // https://github.com/JetBrains/intellij-community/commit/fd4c8224c17d041bf53d556f5c74ffaf20acffe3
@@ -46,6 +47,7 @@ class SolidityFormattingModelBuilder : FormattingModelBuilder {
         .before(SEMICOLON).none()
         .around(BINARY_OPERATORS).spaces(1)
         .beforeInside(COLON, MAP_EXPRESSION_CLAUSE).spaces(0)
+        .afterInside(COLON, MAP_EXPRESSION_CLAUSE).spaces(1)
         .around(TokenSet.create(QUESTION, COLON, IS)).spaces(1)
         .after(TokenSet.create(RETURNS, RETURN, IMPORT)).spaces(1)
         .after(MAPPING).spaces(0)
@@ -58,7 +60,7 @@ class SolidityFormattingModelBuilder : FormattingModelBuilder {
         .around(FUNCTION_INVOCATION).spaces(0)
         .aroundInside(MODIFIER_INVOCATION, FUNCTION_DEFINITION).spaces(1)
         .around(FUNCTION_VISIBILITY_SPECIFIER).spaces(1)
-        .around(STATE_MUTABILITY).spaces(1)
+        .around(STATE_MUTABILITY_SPECIFIER).spaces(1)
         .betweenInside(MODIFIER_INVOCATION, MODIFIER_INVOCATION, FUNCTION_DEFINITION).spaces(1)
         .aroundInside(TO, MAPPING_TYPE_NAME).spaces(1)
         .aroundInside(TokenSet.create(
@@ -77,7 +79,7 @@ class SolidityFormattingModelBuilder : FormattingModelBuilder {
         .beforeInside(LBRACE, CONTRACT_DEFINITION).spaces(1)
         // else on the same line as }
         .betweenInside(STATEMENT, ELSE, IF_STATEMENT).spaces(1)
-        .between(STATEMENT, COMMENT).spaces(1)
+        .between(STATEMENT, COMMENT).spacing(0, Int.MAX_VALUE, 0, true, 1)
         .after(STATEMENT).lineBreakInCode()
         .between(LBRACE, RBRACE).none()
         .afterInside(EXPRESSION, MEMBER_ACCESS_EXPRESSION).none()

@@ -52,7 +52,7 @@ clean.doFirst {
 intellij {
     pluginName = 'Intellij-Solidity'
 
-    version = '2022.2.5'
+    version = '2023.1'
     type = 'IU'
     downloadSources = true
     updateSinceUntilBuild = false

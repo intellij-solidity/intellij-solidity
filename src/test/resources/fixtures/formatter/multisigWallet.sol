@@ -34,7 +34,9 @@ address randomVariable2;
 }
 
                     function  execute(address  _to, uint  _value, bytes  _data)   external  onlyOwner  returns (bytes32  _r) {
-                if (underLimit(_value)) {
+                                (a, b) = getAB();
+                                       (int c, int d) = getCD();
+                    if (underLimit(_value)) {
             SingleTransact(msg.sender, _value, _to, _data);
                         if (!_to.call.value(_value)(_data)) {
                 throw;

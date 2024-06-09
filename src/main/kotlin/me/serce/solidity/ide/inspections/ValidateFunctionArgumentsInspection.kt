@@ -9,6 +9,7 @@ import me.serce.solidity.ide.hints.comments
 import me.serce.solidity.lang.core.SolidityTokenTypes
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.resolve.SolResolver
+import me.serce.solidity.lang.types.SolInternalTypeFactory
 import me.serce.solidity.lang.types.SolUnknown
 import me.serce.solidity.lang.types.getSolType
 import me.serce.solidity.lang.types.type
@@ -35,14 +36,19 @@ class ValidateFunctionArgumentsInspection : LocalInspectionTool() {
               var wrongTypes = ""
               var wrongElement = element as SolElement
               if (funDefs.none { ref ->
-                  val expArgs = ref.parameters.size
+                  var parameters = ref.parameters
+                  val expArgs = parameters.size
                   val actArgs = args.size
-                  if (actArgs != expArgs) {
+                  val vararg = parameters.find { it.name == SolInternalTypeFactory.varargsId }
+                  if (actArgs != expArgs && vararg == null) {
                     wrongNumberOfArgs = "Expected $expArgs argument${if (expArgs > 1) "s" else ""}, but got $actArgs"
                     false
                   } else {
+                    if (vararg != null && actArgs > expArgs) {
+                      parameters = parameters.toMutableList() + List(actArgs - expArgs) {vararg}
+                    }
                     args.withIndex().all { argtype ->
-                      ref.parameters.getOrNull(argtype.index)?.let {
+                      parameters.getOrNull(argtype.index)?.let {
                         val expType = getSolType(it.typeName)
                         val actType = argtype.value.type
                         expType == SolUnknown || actType == SolUnknown || expType.isAssignableFrom(actType).also {

@@ -36,11 +36,10 @@ EOL=\R
 
 WHITE_SPACE=\s+
 
-EOL_COMMENT="/""/"[^\n]*
 // see https://docs.soliditylang.org/en/v0.8.7/natspec-format.html for NatSpec tags support
 NAT_SPEC_TAG=@[a-zA-Z_0-9:]*
 HEXLITERAL=(hex\"([_0-9a-fA-F]+)\"|hex\'([_0-9a-fA-F]+)\')
-STRINGLITERAL=(\"([^\"\r\n\\]|\\.)*\")|(\'([^\'\r\n\\]|\\.)*\')|unicode(\"([^\"])*\")|unicode(\'([^\"])*\')
+STRINGLITERAL=(\"([^\"\r\n\\]|\\.)*\")|(\'([^\'\r\n\\]|\\.)*\')|unicode(\"([^\"])*\")|unicode(\'([^\'])*\')
 DECIMALNUMBER=[0-9][_0-9]*
 FIXEDNUMBER=(([0-9][_0-9]*)+\.[_0-9]*|([0-9][_0-9]*)*\.([0-9][_0-9]*))
 SCIENTIFICNUMBER=((([0-9][_0-9]*)+|([0-9][_0-9]*)+\.[_0-9]*|([0-9][_0-9]*|[0-9])*\.([0-9][_0-9]*))[Ee][+-]?[_0-9]+)
@@ -186,6 +185,7 @@ PRAGMAALL=[^ ][^;]*
   "weeks"                 { return WEEKS; }
   "years"                 { return YEARS; }
   "address"               { return ADDRESS; }
+  "payable"               { return PAYABLE; }
   "string"                { return STRING; }
   "bool"                  { return BOOL; }
 
@@ -232,7 +232,10 @@ PRAGMAALL=[^ ][^;]*
                             return COMMENT;
                           }
 
-  <<EOF>>                 { yybegin(YYINITIAL); }
+  <<EOF>>                 {
+                            yybegin(YYINITIAL);
+                            return COMMENT;
+                          }
 
   [^]                     { }
 }
@@ -257,6 +260,11 @@ PRAGMAALL=[^ ][^;]*
                             yybegin(YYINITIAL);
                             // do not include '\n' in the comment
                             yypushback(1);
+                            return COMMENT;
+                          }
+
+  <<EOF>>                 {
+                            yybegin(YYINITIAL);
                             return COMMENT;
                           }
 

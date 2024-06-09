@@ -21,7 +21,9 @@ import me.serce.solidity.lang.psi.impl.SolErrorDefMixin
 import me.serce.solidity.lang.psi.parentOfType
 import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.resolve.function.SolFunctionResolver
+import me.serce.solidity.lang.types.findContract
 import me.serce.solidity.lang.types.getSolType
+import me.serce.solidity.lang.types.isBuiltin
 
 const val NO_VALIDATION_TAG = "@custom:no_validation"
 
@@ -29,8 +31,7 @@ fun PsiElement.comments(): List<PsiElement> {
   return CachedValuesManager.getCachedValue(this) {
     val nonSolElements = siblings(false, false)
       .takeWhile { it !is SolElement }.toList()
-    val isBuiltin = this.containingFile.virtualFile == null
-    val res = (if (!isBuiltin) PsiDocumentManager.getInstance(project).getDocument(this.containingFile)?.let { document ->
+    val res = (if (!isBuiltin()) PsiDocumentManager.getInstance(project).getDocument(this.containingFile)?.let { document ->
       val tripleLines = nonSolElements.filter { it.text.startsWith("///") }.map { document.getLineNumber(it.textOffset) }.toSet()
       val tripleLineComments = nonSolElements.filter { tripleLines.contains(document.getLineNumber(it.startOffset)) }
       val blockComments = collectBlockComments(nonSolElements)
@@ -39,7 +40,7 @@ fun PsiElement.comments(): List<PsiElement> {
     else {
       collectBlockComments(nonSolElements)
     }).filterIsInstance<PsiComment>()
-    CachedValueProvider.Result.create(res, if (isBuiltin) ModificationTracker.NEVER_CHANGED else this.parent)
+    CachedValueProvider.Result.create(res, if (isBuiltin()) ModificationTracker.NEVER_CHANGED else this.parent)
   }
 }
 
@@ -135,7 +136,7 @@ class SolDocumentationProvider : AbstractDocumentationProvider() {
 
   private fun collectInheritanceComments(element: SolElement): List<PsiElement> {
     if (element !is SolNamedElement) return emptyList()
-    val function = element.parentOfType<SolFunctionDefinition>(false)
+    val function = element.parentOfType<SolFunctionDefElement>(false)
       ?: element.parentOfType<SolStateVariableDeclaration>(false)?.let { SolPsiFactory(element.project).createFunction("function ${element.name}() {}") }
       ?: return emptyList()
 
@@ -161,7 +162,7 @@ class SolDocumentationProvider : AbstractDocumentationProvider() {
   }
 
   private fun collectParameterComments(element: SolParameterDef): List<PsiElement> {
-    val functionDefinition = element.parentOfType<SolFunctionDefinition>() ?: return emptyList()
+    val functionDefinition = element.parentOfType<SolFunctionDefElement>() ?: return emptyList()
     val comments = functionDefinition.comments().takeIf { it.isNotEmpty() } ?: return emptyList()
     val natIndexes = comments.withIndex().filter { it.value.elementType == SolidityTokenTypes.NAT_SPEC_TAG }
 
@@ -190,6 +191,7 @@ class SolDocumentationProvider : AbstractDocumentationProvider() {
       is SolContractDefinition -> element.doc()
       is SolStructDefinition ->  "struct " + element.identifier.idName()
       is SolFunctionDefinition -> element.doc()
+      is SolConstructorDefinition -> element.doc()
       is SolParameterDef -> element.colorizedTypeText()
       is SolVariableDeclaration -> element.colorizedTypeText()
       is SolTypedDeclarationItem -> "${getSolType(element.typeName).toString().colorizeKeywords()} ${element.identifier.idName()}"
@@ -220,9 +222,16 @@ class SolDocumentationProvider : AbstractDocumentationProvider() {
 
   private fun SolFunctionDefinition.doc() : String {
     return ("${if (isConstructor) "constructor" else "function"} ${identifier.idName()}(${parameters.doc()}) ${functionVisibilitySpecifierList.doc(" ")} " +
-      "${stateMutabilityList.doc(" ")} ${modifierInvocationList.doc(" ")} " +
+      "${stateMutabilitySpecifierList.doc(" ")} ${modifierInvocationList.doc(" ")} " +
       (returns?.parameterDefList?.doc(", ", "returns (", ")") ?: "")).replace("  ", " ")
   }
+
+  private fun SolConstructorDefinition.doc() : String {
+    return ("constructor ${findContract()?.identifier.idName()}(${parameterList?.parameterDefList.doc()}) ${functionVisibilitySpecifierList.doc(" ")} " +
+      "${stateMutabilitySpecifierList.doc(" ")} ${modifierInvocationList.doc(" ")} "
+      ).replace("  ", " ")
+  }
+
 
   private fun SolUserDefinedValueTypeDefinition.doc() : String {
     return "type ${identifier.idName()} is ${elementaryTypeName?.text}"
