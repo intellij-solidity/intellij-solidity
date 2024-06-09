@@ -302,7 +302,8 @@ UserDefinedValueTypeDefinition ::= type Identifier is ElementaryTypeName ';' {
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
 
-IndexedParameterList ::= '(' ( TypeName indexed?  Identifier? (',' TypeName indexed?  Identifier?)* )? ')'
+IndexedParameterList ::= '(' (  IndexedParamDef (',' IndexedParamDef )*)? ')'
+IndexedParamDef ::= TypeName indexed?  Identifier?
 ParameterDef ::= TypeName (constant StorageLocationSpecifier? | StorageLocationSpecifier constant?)? Identifier? {
     implements = "me.serce.solidity.lang.psi.SolNamedElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolParameterDefMixin"

@@ -101,6 +101,9 @@
 
         <lang.documentationProvider language="Solidity" implementationClass="me.serce.solidity.ide.hints.SolDocumentationProvider"/>
 
+        <codeInsight.parameterNameHints implementationClass="me.serce.solidity.ide.hints.SolParameterInlayHintProvider"
+                                        language="Solidity"/>
+
         <!-- Hints -->
         <codeInsight.typeInfo language="Solidity"
                               implementationClass="me.serce.solidity.ide.hints.SolExpressionTypeProvider"/>

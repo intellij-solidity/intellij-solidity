@@ -107,6 +107,8 @@ abstract class SolContractOrLibMixin : SolStubbedNamedElementImpl<SolContractOrL
           else -> false
         }
       }
+
+      override fun toString(): String = this@SolContractOrLibMixin.name ?: ""
     }))
   }
 
@@ -422,6 +424,15 @@ abstract class SolFunctionCallMixin(node: ASTNode) : SolNamedElementImpl(node), 
 
   override val functionCallArguments: SolFunctionCallArguments
     get() = functionInvocation.functionCallArguments!!
+
+  override fun resolveDefinitions(): List<SolCallable>? {
+
+    return when (val it = children.firstOrNull()) {
+      is SolMemberAccessExpression -> SolResolver.resolveMemberAccess(it)
+      is SolNewExpression -> it.reference?.multiResolve() ?: emptyList()
+      else -> SolResolver.resolveVarLiteralReference(this)
+    }.filterIsInstance<SolCallable>()
+  }
 }
 
 abstract class SolModifierInvocationMixin(node: ASTNode) : SolNamedElementImpl(node), SolModifierInvocationElement {
@@ -534,8 +545,8 @@ abstract class SolEventDefMixin : SolStubbedNamedElementImpl<SolEventDefStub>, S
 
   //todo add event args identifiers
   override fun parseParameters(): List<Pair<String?, SolType>> {
-    return indexedParameterList?.typeNameList
-      ?.map { null to getSolType(it) }
+    return indexedParameterList?.indexedParamDefList
+      ?.map { it.identifier?.text to getSolType(it.typeName) }
       ?: emptyList()
   }
 
@@ -558,8 +569,8 @@ abstract class SolErrorDefMixin : SolStubbedNamedElementImpl<SolErrorDefStub>, S
 
   //todo add error args identifiers
   override fun parseParameters(): List<Pair<String?, SolType>> {
-    return indexedParameterList?.typeNameList
-      ?.map { null to getSolType(it) }
+    return indexedParameterList?.indexedParamDefList
+      ?.map { it.identifier?.text to getSolType(it.typeName) }
       ?: emptyList()
   }
 
