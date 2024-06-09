@@ -74,7 +74,11 @@ class SolDocumentationProvider : AbstractDocumentationProvider() {
   private val commentsRegex = "^/\\*\\*|\\*/$|^///".toRegex()
 
   override fun generateDoc(elementOrNull: PsiElement?, originalElement: PsiElement?): String? {
-    var element = elementOrNull ?: return null
+    var element = (elementOrNull ?: return null)
+      .takeIf { it.textRange.contains(originalElement?.textRange ?: return@takeIf true) }
+      ?: originalElement?.parent
+      ?: elementOrNull
+
     if (element is SolMemberAccessExpression) {
       element = SolResolver.resolveMemberAccess(element).filterIsInstance<SolFunctionDefinition>().firstOrNull() ?: return null
     }
