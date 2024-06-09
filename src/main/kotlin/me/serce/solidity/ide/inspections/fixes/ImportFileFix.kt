@@ -68,7 +68,7 @@ class ImportFileFix(element: SolReferenceElement) : LocalQuickFixOnPsiElement(el
   }
 
   override fun invoke(project: Project, editor: Editor?, file: PsiFile?) {
-    val element = startElement as SolUserDefinedTypeName?
+    val element = startElement as? SolUserDefinedTypeName
     if (element != null) {
       val suggestions = SolResolver.resolveTypeName(element as SolReferenceElement).map { it.containingFile }.toSet()
       if (suggestions.size == 1) {

@@ -19,6 +19,7 @@ import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.PsiModificationTracker
 import com.intellij.ui.popup.list.ListPopupImpl
 import com.intellij.ui.popup.list.PopupListElementRenderer
+import me.serce.solidity.ide.formatting.SolImportOptimizer
 import me.serce.solidity.lang.psi.SolContractDefinition
 import me.serce.solidity.lang.psi.SolImportDirective
 import me.serce.solidity.lang.psi.SolPragmaDirective
@@ -144,12 +145,18 @@ class ImportFileAction(
       CommandProcessor.getInstance().runUndoTransparentAction {
         ApplicationManager.getApplication().runWriteAction {
           val after = file.children.filterIsInstance<SolImportDirective>().lastOrNull()
-            ?: file.children.filterIsInstance<SolPragmaDirective>().firstOrNull()
+            ?: file.children.filterIsInstance<SolPragmaDirective>().lastOrNull()
           val factory = SolPsiFactory(project)
           file.addAfter(factory.createImportDirective(buildImportPath(project, file.virtualFile, to.virtualFile)), after)
           file.addAfter(factory.createNewLine(project), after)
+          SolImportOptimizer().processFile(file, false).run()
         }
       }
+    }
+
+    fun createImport(factory: SolPsiFactory, solUserDefinedTypeName: List<String>, file: VirtualFile, to: VirtualFile): SolImportDirective {
+      val content = "${(solUserDefinedTypeName.takeIf { it.isNotEmpty() }?.let { "{${it.joinToString(", ")}} from " } ?: "")}\"${buildImportPath(factory.project, to, file)}\""
+      return factory.createImportDirective(content, false)
     }
 
     fun readRemappingsFile(project: Project): Map<String, String> {
