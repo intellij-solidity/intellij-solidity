@@ -1,5 +1,6 @@
 package me.serce.solidity.ide.refactoring
 
+import com.intellij.lang.refactoring.RefactoringSupportProvider
 import com.intellij.openapi.ui.MessageDialogBuilder
 import com.intellij.psi.PsiElement
 import com.intellij.psi.search.SearchScope
@@ -20,5 +21,14 @@ class SolRenameFileProcessor : RenamePsiFileProcessor() {
       }
     }
     super.prepareRenaming(element, newName, allRenames, scope)
+  }
+
+  override fun isInplaceRenameSupported(): Boolean = true
+}
+
+
+class SolRenameFileRefactoringSupportProvider : RefactoringSupportProvider() {
+  override fun isMemberInplaceRenameAvailable(element: PsiElement, context: PsiElement?): Boolean {
+    return true
   }
 }
