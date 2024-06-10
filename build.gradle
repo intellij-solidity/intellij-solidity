@@ -125,11 +125,25 @@ generateParser {
 
 
 // codecov
+// The below configuration fixes the 0% coverage issue, see
+// https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin-faq.html#jacoco-reports-0-coverage
+
+test {
+    jacoco {
+        includeNoLocationClasses = true
+        excludes = ["jdk.internal.*"]
+    }
+}
+
+jacocoTestCoverageVerification {
+    classDirectories.setFrom(instrumentCode)
+}
 
 jacocoTestReport {
+    classDirectories.setFrom(instrumentCode)
     reports {
-        xml.enabled true
-        html.enabled false
+        xml.required = true
+        html.required = true
     }
 }
 
