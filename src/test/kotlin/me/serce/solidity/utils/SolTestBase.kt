@@ -4,6 +4,7 @@ import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.util.PsiTreeUtil
+import com.intellij.testFramework.PsiTestUtil
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
 import org.intellij.lang.annotations.Language
 
@@ -61,11 +62,34 @@ abstract class SolTestBase : SolLightPlatformCodeInsightFixtureTestCase() {
     return element
   }
 
+  protected open fun checkEditorAction(
+    @Language("Solidity") before: String,
+    @Language("Solidity") after: String,
+    actionId: String,
+    trimIndent: Boolean = true,
+  ) {
+    checkByText(before.trimIndent(), after.trimIndent()) {
+      myFixture.performEditorAction(actionId)
+    }
+  }
+
   protected fun checkByFile(ignoreTrailingWhitespace: Boolean = true, action: () -> Unit) {
     val (before, after) = (fileName to fileName.replace(".sol", "After.sol"))
     myFixture.configureByFile(before)
     action()
     myFixture.checkResultByFile(after, ignoreTrailingWhitespace)
+  }
+
+  protected fun checkByText(
+    @Language("Solidity") before: String,
+    @Language("Solidity") after: String,
+    fileName: String = "main.sol",
+    action: () -> Unit
+  ) {
+    InlineFile(before, fileName)
+    action()
+    PsiTestUtil.checkPsiStructureWithCommit(myFixture.file, PsiTestUtil::checkPsiMatchesTextIgnoringNonCode)
+    myFixture.checkResult(replaceCaretMarker(after))
   }
 
   protected fun checkResult(@Language("Solidity") text: String) {
