@@ -373,8 +373,15 @@ class SolExpressionTypeProviderTest : SolTestBase() {
     // bytes2 a = hex"1234"; // fine
     Assert.assertTrue(bytes2.isAssignableFrom("hex\"1234\"".inferType()))
     // bytes2 b = "xy"; // fine
-    // todo enable string to fixed bytes cast
-    // Assert.assertTrue(bytes2.isAssignableFrom("\"xy\"".inferType()))
+    Assert.assertTrue(bytes2.isAssignableFrom("\"xy\"".inferType()))
+    // bytes2 b = "$*"; // fine
+    Assert.assertTrue(bytes2.isAssignableFrom("\"$*\"".inferType()))
+    // bytes2 b = 'xy'; // fine
+    Assert.assertTrue(bytes2.isAssignableFrom("'xy'".inferType()))
+    // bytes2 b = xy; // not allowed
+    Assert.assertFalse(bytes2.isAssignableFrom("xy".inferType()))
+    // bytes2 b = ""; // fine
+    Assert.assertTrue(bytes2.isAssignableFrom("\"\"".inferType()))
     // bytes2 c = hex"12"; // not allowed
     Assert.assertFalse(bytes2.isAssignableFrom("hex\"12\"".inferType()))
     // bytes2 d = hex"123"; // not allowed

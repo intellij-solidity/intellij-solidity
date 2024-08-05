@@ -18,7 +18,7 @@ class SolTypeTest {
 
   @Test
   fun testString() {
-    assertTrue(SolBytes.isAssignableFrom(SolString))
+    assertTrue(SolBytes.isAssignableFrom(SolString(0)))
   }
 
 }
