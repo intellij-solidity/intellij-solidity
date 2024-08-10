@@ -64,13 +64,22 @@ object SolBoolean : SolPrimitiveType {
   override fun toString() = "bool"
 }
 
-object SolString : SolPrimitiveType {
+data class SolString(val length: Int) : SolPrimitiveType {
   override fun isAssignableFrom(other: SolType): Boolean =
-    other == SolString
+    other is SolString
 
   override fun getMembers(project: Project) = getSdkMembers(SolInternalTypeFactory.of(project).stringType)
 
   override fun toString() = "string"
+
+  companion object {
+    fun inferType(stringLiteral: SolStringLiteral): SolString {
+      return SolString(stringLiteral.text
+        .removeSurrounding("\"")
+        .removeSurrounding("'")
+        .length)
+    }
+  }
 }
 
 class SolAddress(val isPayable : Boolean) : SolPrimitiveType {
@@ -386,7 +395,7 @@ object SolBytes : SolArray.SolDynamicArray(SolFixedByte(1)) {
   private val concatFunction = BuiltinCallable(emptyList(), SolBytes, "concat", null)
 
   override fun isAssignableFrom(other: SolType): Boolean =
-    other == SolBytes || other == SolString
+    other == SolBytes || other is SolString
 
   override fun getMembers(project: Project): List<SolMember> {
     return super.getMembers(project).toMutableList() + concatFunction
@@ -422,7 +431,8 @@ data class SolFixedBytes(val size: Int): SolPrimitiveType {
   override fun isAssignableFrom(other: SolType): Boolean {
     return other is SolFixedBytes && other.size <= size ||
       other is SolInteger &&
-      (other.literalType == NumericLiteralType.HEX && other.digitCount == size * 2 || other.literalType == NumericLiteralType.ZERO)
+      (other.literalType == NumericLiteralType.HEX && other.digitCount == size * 2 || other.literalType == NumericLiteralType.ZERO) ||
+      other is SolString && (other.length == size || other.length == 0)
   }
 
   companion object {

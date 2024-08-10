@@ -31,7 +31,7 @@ fun getSolType(type: SolTypeName?): SolType {
     is SolElementaryTypeName -> {
       when (val text = type.firstChild.text) {
         "bool" -> SolBoolean
-        "string" -> SolString
+        "string" -> SolString(text.length)
         "address" -> if (type.childrenOfType<LeafPsiElement>().drop(1).any { it.elementType == SolidityTokenTypes.PAYABLE }) SolAddress.PAYABLE else SolAddress.NON_PAYABLE
         "payable" -> SolAddress.PAYABLE
         "bytes" -> SolBytes
@@ -165,7 +165,7 @@ fun inferExprType(expr: SolExpression?): SolType {
     is SolPrimaryExpression -> {
       expr.varLiteral?.let { inferRefType(it) }
         ?: expr.booleanLiteral?.let { SolBoolean }
-        ?: expr.stringLiteral?.let { SolString }
+        ?: expr.stringLiteral?.let { SolString.inferType(it) }
         ?: expr.numberLiteral?.let { SolInteger.inferType(it) }
         ?: expr.hexLiteral?.let { SolInteger.inferType(it) }
         ?: expr.elementaryTypeName?.let { getSolType(it) }
