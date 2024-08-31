@@ -322,13 +322,44 @@ object SolResolver {
         ?.supers
         ?.flatMap { resolveTypeNameUsingImports(it) }
         ?: emptyList()
-      else -> lexicalDeclarations(element)
-        .filter { it.name == element.name }
-        .toList().let {
-          if (it.size <= 1 || it.any { it !is SolContractDefinition }) it
-          // resolve by imports to distinguish elements with the same name
-          else resolveTypeNameUsingImports(element).toList()
+      else -> {
+        //check if the element is an alias
+        var nameToFilter = element.name
+        run {
+          element.containingFile.childrenOfType<SolImportDirective>().forEach {
+            if (it.importAlias?.name == element.name) {
+              //match import a as A from "path"
+              if (it.userDefinedTypeName != null) {
+                nameToFilter = it.userDefinedTypeName!!.name
+                return@run
+              } else {
+              //match import "path" as A
+                val contractFromPath =
+                  it.importPath?.reference?.resolve()?.childrenOfType<SolContractDefinition>()
+                if (!contractFromPath.isNullOrEmpty()) {
+                  nameToFilter = contractFromPath[0].name
+                  return@run
+                }
+              }
+            } else {
+              //match import {a as A} from "path"
+              it.importAliasedPairList.forEach { importAliasedPair ->
+                if (importAliasedPair.importAlias?.name == element.name) {
+                  nameToFilter = importAliasedPair.userDefinedTypeName.name
+                  return@run
+                }
+              }
+            }
+          }
         }
+        lexicalDeclarations(element)
+          .filter { it.name == nameToFilter }
+          .toList().let {
+            if (it.size <= 1 || it.any { it !is SolContractDefinition }) it
+            // resolve by imports to distinguish elements with the same name
+            else resolveTypeNameUsingImports(element).toList()
+          }
+      }
     }
   }
 

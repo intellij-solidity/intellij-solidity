@@ -414,6 +414,54 @@ class SolFunctionResolveTest : SolResolveTestBase() {
     testResolveBetweenFiles(file1, file2)
   }
 
+fun testResolveImportedFunction() = testResolveBetweenFiles(
+    InlineFile(
+        code = """
+      contract a {
+        function doit() {
+                 //x
+        }
+      }
+  """,
+        name = "a.sol"
+    ),
+    InlineFile("""
+      import {a} from "./a.sol";
+          
+      contract b {
+        function test() {
+            a.doit();
+            //^
+        }
+      }
+                  
+""")
+)
+
+    fun testResolveImportedContractFunction() = testResolveBetweenFiles(
+        InlineFile(
+            code = """
+      contract a {
+             //x
+        function doit() {
+        }
+      }
+  """,
+            name = "a.sol"
+        ),
+        InlineFile("""
+      import {a} from "./a.sol";
+          
+      contract b {
+        function test() {
+            a.doit();
+          //^
+        }
+      }
+                  
+""")
+    )
+
   fun checkIsResolved(@Language("Solidity") code: String) {
     val (refElement, _) = resolveInCode<SolFunctionCallExpression>(code)
     assertNotNull(refElement.reference?.resolve())
