@@ -323,37 +323,18 @@ object SolResolver {
         ?.flatMap { resolveTypeNameUsingImports(it) }
         ?: emptyList()
       else -> {
-        //check if the element is an alias
-        var nameToFilter = element.name
-        run {
-          element.containingFile.childrenOfType<SolImportDirective>().forEach {
-            if (it.importAlias?.name == element.name) {
-              //match import a as A from "path"
-              if (it.userDefinedTypeName != null) {
-                nameToFilter = it.userDefinedTypeName!!.name
-                return@run
-              } else {
-              //match import "path" as A
-                val contractFromPath =
-                  it.importPath?.reference?.resolve()?.childrenOfType<SolContractDefinition>()
-                if (!contractFromPath.isNullOrEmpty()) {
-                  nameToFilter = contractFromPath[0].name
-                  return@run
-                }
-              }
-            } else {
-              //match import {a as A} from "path"
-              it.importAliasedPairList.forEach { importAliasedPair ->
-                if (importAliasedPair.importAlias?.name == element.name) {
-                  nameToFilter = importAliasedPair.userDefinedTypeName.name
-                  return@run
-                }
-              }
-            }
+        var elementToSearch = element
+        val importAlias = resolveAlias(element)
+        if (importAlias != null) {
+          elementToSearch = getElementFromAlias(element, importAlias)
+          //if it has the same name, then we can only link to the alias of the contract
+          if (elementToSearch.name == element.name) {
+            return listOf(elementToSearch)
           }
         }
+
         lexicalDeclarations(element)
-          .filter { it.name == nameToFilter }
+          .filter { it.name == elementToSearch.name }
           .toList().let {
             if (it.size <= 1 || it.any { it !is SolContractDefinition }) it
             // resolve by imports to distinguish elements with the same name
@@ -361,6 +342,44 @@ object SolResolver {
           }
       }
     }
+  }
+
+  fun resolveAlias(element: SolNamedElement): SolImportDirective? {
+    element.containingFile.childrenOfType<SolImportDirective>().forEach {
+      if (it.importAlias?.name == element.name) {
+        return it
+      } else {
+        it.importAliasedPairList.forEach { importAliasedPair ->
+          if (importAliasedPair.importAlias?.name == element.name) {
+            return it
+          }
+        }
+      }
+    }
+    return null
+  }
+
+  //return the right element to search
+  fun getElementFromAlias(element: SolNamedElement, import: SolImportDirective): SolNamedElement {
+    if (import.importAlias?.name == element.name) {
+      if (import.userDefinedTypeName != null && import.userDefinedTypeName!!.name != "*") {
+        //match import a as A from "path"
+        return import.userDefinedTypeName!!
+      } else {
+        //match import * as A from "path"
+        //match import "path" as A
+        return import.importAlias!!
+      }
+    } else {
+      //match import {a as A} from "path"
+      import.importAliasedPairList.forEach { importAliasedPair ->
+        if (importAliasedPair.importAlias?.name == element.name) {
+          return importAliasedPair.userDefinedTypeName
+        }
+      }
+    }
+
+    return element
   }
 
   fun resolveMemberAccess(element: SolMemberAccessExpression): List<SolMember> {

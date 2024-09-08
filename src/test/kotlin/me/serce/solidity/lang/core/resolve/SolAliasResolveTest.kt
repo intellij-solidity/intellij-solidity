@@ -90,25 +90,12 @@ class SolAliasResolveTest : SolResolveTestBase() {
         )
     )
 
-    fun testResolveContractFromPathWithAlias() = testResolveBetweenFiles(
-        InlineFile(
-            code = """
-          pragma solidity ^0.8.26;
-                
-          contract a {
-                 //x
-            function doit() public {
-            }
-          }
-      """,
-            name = "a.sol"
-        ),
-        InlineFile(
-            """
+    fun testResolveContractFromPathWithAlias() = checkByCode(
+        """
           pragma solidity ^0.8.26;
                 
           import "./a.sol" as A;
-                     
+                            //x
           contract b {
             function test(address x) public {
                 A.a(x).doit();
@@ -116,7 +103,6 @@ class SolAliasResolveTest : SolResolveTestBase() {
             }
           }
     """
-        )
     )
 
     fun testResolveContractFromPathWithAlias2() = testResolveBetweenFiles(
@@ -177,25 +163,12 @@ class SolAliasResolveTest : SolResolveTestBase() {
         )
     )
 
-    fun testResolveContractFromAsteriskWithAlias() = testResolveBetweenFiles(
-        InlineFile(
-            code = """
-          pragma solidity ^0.8.26;
-                
-          library a {
-                //x
-            function doit() internal {
-            }
-          }
-      """,
-            name = "a.sol"
-        ),
-        InlineFile(
-            """
+    fun testResolveContractFromAsteriskWithAlias() = checkByCode(
+        """
           pragma solidity ^0.8.26;
                 
           import * as A from "./a.sol";
-              
+                    //x
           contract b {
             function test() public {
                 A.a.doit();
@@ -203,7 +176,6 @@ class SolAliasResolveTest : SolResolveTestBase() {
             }
           }
     """
-        )
     )
 
     fun testResolveContractFromAsteriskWithAlias2() = testResolveBetweenFiles(
