@@ -362,14 +362,9 @@ object SolResolver {
   //return the right element to search
   fun getElementFromAlias(element: SolNamedElement, import: SolImportDirective): SolNamedElement {
     if (import.importAlias?.name == element.name) {
-      if (import.userDefinedTypeName != null && import.userDefinedTypeName!!.name != "*") {
-        //match import a as A from "path"
-        return import.userDefinedTypeName!!
-      } else {
         //match import * as A from "path"
         //match import "path" as A
         return import.importAlias!!
-      }
     } else {
       //match import {a as A} from "path"
       import.importAliasedPairList.forEach { importAliasedPair ->
