@@ -414,52 +414,62 @@ class SolFunctionResolveTest : SolResolveTestBase() {
     testResolveBetweenFiles(file1, file2)
   }
 
-fun testResolveImportedFunction() = testResolveBetweenFiles(
-    InlineFile(
-        code = """
-      contract a {
-        function doit() {
-                 //x
+    fun testResolveImportedFunction() = testResolveBetweenFiles(
+        InlineFile(
+            code = """
+        pragma solidity ^0.8.26;
+
+        contract a {
+            function doit() public {
+                    //x
+            }
         }
-      }
   """,
-        name = "a.sol"
-    ),
-    InlineFile("""
-      import {a} from "./a.sol";
-          
-      contract b {
-        function test() {
-            a.doit();
-            //^
+            name = "a.sol"
+        ),
+        InlineFile(
+            """
+        pragma solidity ^0.8.26;
+
+        import {a} from "./a.sol";
+        
+        contract b {
+            function test(address x) public {
+                a(x).doit();
+                    //^
+            }
         }
-      }
-                  
-""")
-)
+"""
+        )
+    )
 
     fun testResolveImportedContractFunction() = testResolveBetweenFiles(
         InlineFile(
             code = """
-      contract a {
-             //x
-        function doit() {
+      pragma solidity ^0.8.26;
+
+        contract a {
+               //x
+            function doit() public {
+            }
         }
-      }
   """,
             name = "a.sol"
         ),
-        InlineFile("""
-      import {a} from "./a.sol";
-          
-      contract b {
-        function test() {
-            a.doit();
-          //^
+        InlineFile(
+            """
+        pragma solidity ^0.8.26;
+
+        import {a} from "./a.sol";
+        
+        contract b {
+            function test(address x) public {
+                a(x).doit();
+              //^
+            }
         }
-      }
-                  
-""")
+"""
+        )
     )
 
   fun checkIsResolved(@Language("Solidity") code: String) {
