@@ -67,8 +67,19 @@ class SolMemberAccessReference(element: SolMemberAccessExpression) : SolReferenc
     return element.identifier?.parentRelativeRange ?: super.calculateDefaultRangeInElement()
   }
 
-  override fun multiResolve() = SolResolver.resolveMemberAccess(element)
-    .mapNotNull { it.resolveElement() }
+  override fun multiResolve(): List<SolNamedElement> {
+    if (element.firstChild is SolPrimaryExpression && element.parent is SolFunctionCallExpression) {
+      val importAlias = (element.firstChild as SolPrimaryExpression).varLiteral?.let { SolResolver.resolveAlias(it) }
+      if (importAlias != null && SolResolver.isAliasOfFile(importAlias)) {
+        if (element.parent is SolFunctionCallExpression) {
+          val functionCall = element.findParentOrNull<SolFunctionCallElement>()!!
+         return (functionCall.reference as SolFunctionCallReference)
+            .resolveFunctionCallAndFilter().mapNotNull { it.resolveElement() }
+        }
+      }
+    }
+     return SolResolver.resolveMemberAccess(element).mapNotNull { it.resolveElement() }
+  }
 
   override fun getVariants() = SolCompleter.completeMemberAccess(element)
 }
@@ -164,7 +175,18 @@ class SolFunctionCallReference(element: SolFunctionCallExpression) : SolReferenc
 
   private fun resolveMemberFunctions(expression: SolMemberAccessExpression): Collection<SolCallable> {
     val name = expression.identifier?.text
-    return if (name != null) {
+    val importAlias =  when (expression.firstChild is SolPrimaryExpression ) {
+      true -> (expression.firstChild as SolPrimaryExpression).varLiteral?.let { SolResolver.resolveAlias(it) }
+      false ->  null
+    }
+
+    return if (importAlias != null && name != null) {
+      importAlias.importPath?.reference?.resolve()?.containingFile?.let {
+        SolResolver.collectContracts(it).filter { contract -> contract.name == name }
+      } ?: emptyList()
+    }
+    else
+      return if (name != null) {
       expression.getMembers()
       .filterIsInstance<SolCallable>()
       .filter { it.getName() == name }

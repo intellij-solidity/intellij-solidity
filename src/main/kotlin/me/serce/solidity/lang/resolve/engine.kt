@@ -173,6 +173,14 @@ object SolResolver {
     return result + result.map { collectImports(it.file.childrenOfType<SolImportDirective>(), visited) }.flatten()
   }
 
+  //collect all SolContractDefinition recursively from imports
+  fun collectContracts(file: PsiFile): Collection<SolContractDefinition> {
+    return file.childrenOfType<SolContractDefinition>() + file.childrenOfType<SolImportDirective>().map {
+      val containingFile = it.importPath?.reference?.resolve()?.containingFile
+      containingFile?.let { collectContracts(containingFile) } ?: emptyList()
+    }.flatten()
+  }
+
   private fun resolveContract(element: PsiElement): Set<SolContractDefinition> =
     resolveUsingImports(SolContractDefinition::class.java, element, element.containingFile)
   private fun resolveEnum(element: PsiElement): Set<SolNamedElement> =
@@ -357,6 +365,13 @@ object SolResolver {
       }
     }
     return null
+  }
+
+  fun isAliasOfFile(import: SolImportDirective ): Boolean {
+    return when (import.importAlias) {
+      null -> false
+      else -> true
+    }
   }
 
   //return the right element to search
