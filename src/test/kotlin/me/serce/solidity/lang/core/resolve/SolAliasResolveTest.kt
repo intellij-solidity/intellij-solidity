@@ -243,28 +243,29 @@ class SolAliasResolveTest : SolResolveTestBase() {
 
     fun testResolveContractFromAsteriskWithAliasMultipleContracts2() {
         InlineFile(
-            code = """
+                code = """
             pragma solidity ^0.8.26;
+            
+            import "./z.sol";
                 
-            contract z {
-                function doit2() public {
+            contract a {
+                function doit() public {
                 }
             }
-            """, name = "z.sol"
+            """, name = "a.sol"
         )
 
         testResolveBetweenFiles(
             InlineFile(
-                    code = """
+                code = """
                 pragma solidity ^0.8.26;
-                
-                import "./z.sol";
                     
-                contract a {
-                    function doit() public {
+                contract z {
+                    function doit2() public {
+                            //x
                     }
                 }
-                """, name = "a.sol"
+                """, name = "z.sol"
             ),
 
             InlineFile("""
