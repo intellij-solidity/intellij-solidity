@@ -241,6 +241,40 @@ class SolAliasResolveTest : SolResolveTestBase() {
         )
     )
 
+    fun testResolveLibraryFromAsteriskWithAliasMultipleLibrary() = testResolveBetweenFiles(
+        InlineFile(
+            code = """
+            pragma solidity ^0.8.26;
+                
+            library a {
+                function doit() internal {
+                }
+            }
+            
+            library ab {
+                function doit() internal {
+                       //x
+                }
+            }
+      """,
+            name = "a.sol"
+        ),
+        InlineFile(
+            """
+          pragma solidity ^0.8.26;
+                
+          import * as A from "./a.sol";
+              
+          contract b {
+            function test(address x) public {
+                A.ab.doit();
+                    //^
+            }
+          }
+    """
+        )
+    )
+
     fun testResolveContractFromAsteriskWithAliasMultipleContracts2() {
         InlineFile(
                 code = """
