@@ -80,6 +80,20 @@ class SolImportResolveTest : SolResolveTestBase() {
     assertEquals("abc", resolved.name)
   }
 
+  fun testRecursiveImport() {
+    myFixture.configureByFile("recursive/B.sol")
+    myFixture.configureByFile("recursive/C.sol")
+    myFixture.configureByFile("recursive/dir/C.sol")
+    myFixture.configureByFile("recursive/A.sol")
+    val (refElement) = findElementAndDataInEditor<SolNamedElement>("^")
+
+    val resolved = checkNotNull(refElement.reference?.resolve() as? PsiNamedElement) {
+      "Failed to resolve ${refElement.text}"
+    }
+
+    assertEquals("C", resolved.name)
+  }
+
   fun testResolveFrom() {
     val file1 = InlineFile(
       code = "contract A {}",
