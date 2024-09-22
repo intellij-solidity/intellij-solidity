@@ -472,6 +472,35 @@ class SolFunctionResolveTest : SolResolveTestBase() {
         )
     )
 
+    fun testResolveImportedFunctionFromLibrary() = testResolveBetweenFiles(
+        InlineFile(
+            code = """
+          pragma solidity ^0.8.26;
+                
+          library a {
+            function doit() internal {
+                     //x
+            }
+          }
+      """,
+            name = "a.sol"
+        ),
+        InlineFile(
+            """
+          pragma solidity ^0.8.26;
+                
+          import "./a.sol";
+              
+          contract b {
+            function test() public {
+                a.doit();
+                  //^
+            }
+          }
+    """
+        )
+    )
+
   fun checkIsResolved(@Language("Solidity") code: String) {
     val (refElement, _) = resolveInCode<SolFunctionCallExpression>(code)
     assertNotNull(refElement.reference?.resolve())
