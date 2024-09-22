@@ -149,10 +149,17 @@ object SolResolver {
     }
   }
 
+  fun collectImports(imports: Collection<SolImportDirective>): Collection<ImportRecord> {
+    return RecursionManager.doPreventingRecursion(imports, true) {
+      val visited: MutableSet<PsiFile> = hashSetOf()
+      collectImports(imports, visited)
+    } ?: emptySet()
+  }
+
   /**
    * Collects imports of all declarations for a given file recursively.
    */
-  private fun collectImports(imports: Collection<SolImportDirective>, visited: MutableSet<PsiFile> = hashSetOf()): Collection<ImportRecord> {
+  private fun collectImports(imports: Collection<SolImportDirective>, visited: MutableSet<PsiFile>): Collection<ImportRecord> {
     if (!visited.add((imports.firstOrNull() ?: return emptyList()).containingFile)) {
       return emptySet()
     }
