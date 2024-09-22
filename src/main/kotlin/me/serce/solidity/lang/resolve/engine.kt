@@ -353,18 +353,12 @@ object SolResolver {
   }
 
   fun resolveAlias(element: SolNamedElement): SolImportDirective? {
-    element.containingFile.childrenOfType<SolImportDirective>().forEach {
-      if (it.importAlias?.name == element.name) {
-        return it
-      } else {
-        it.importAliasedPairList.forEach { importAliasedPair ->
-          if (importAliasedPair.importAlias?.name == element.name) {
-            return it
-          }
-        }
-      }
+    return element.containingFile.childrenOfType<SolImportDirective>().find {
+      it.importAlias?.name == element.name ||
+              it.importAliasedPairList.any { importAliasedPair ->
+                importAliasedPair.importAlias?.name == element.name
+              }
     }
-    return null
   }
 
   fun isAliasOfFile(import: SolImportDirective ): Boolean {
