@@ -76,16 +76,12 @@ class SolMemberAccessReference(element: SolMemberAccessExpression) : SolReferenc
         return (functionCall.reference as SolFunctionCallReference)
           .resolveFunctionCallAndFilter().mapNotNull { it.resolveElement() }
       } else {
-        return SolResolver.lexicalDeclarations(element.lastChild)
-          .filter { it.name == element.lastChild.text }
-          .toList().let {
-            if (it.size <= 1 || it.any { it !is SolContractDefinition }) it
-            // resolve by imports to distinguish elements with the same name
-            else SolResolver.resolveTypeNameUsingImports(element.lastChild).toList()
-          }
+        return importAlias.importPath?.reference?.resolve()?.containingFile?.let { file ->
+          SolResolver.collectContracts(file).filter { contract -> contract.name == element.identifier!!.text }
+        } ?: emptyList()
       }
     }
-     return SolResolver.resolveMemberAccess(element).mapNotNull { it.resolveElement() }
+    return SolResolver.resolveMemberAccess(element).mapNotNull { it.resolveElement() }
   }
 
   override fun getVariants() = SolCompleter.completeMemberAccess(element)
