@@ -181,11 +181,8 @@ object SolResolver {
   }
 
   //collect all SolContractDefinition recursively from imports
-  fun collectContracts(file: PsiFile): Collection<SolContractDefinition> {
-    return file.childrenOfType<SolContractDefinition>() + file.childrenOfType<SolImportDirective>()
-      .map { importDirective ->
-        importDirective.importPath?.reference?.resolve()?.containingFile?.let { collectContracts(it) } ?: emptyList()
-      }.flatten()
+  fun collectContracts(import: SolImportDirective): Collection<SolContractDefinition> {
+    return collectImports(import).flatMap { it.file.childrenOfType<SolContractDefinition>() }
   }
 
   private fun resolveContract(element: PsiElement): Set<SolContractDefinition> =
