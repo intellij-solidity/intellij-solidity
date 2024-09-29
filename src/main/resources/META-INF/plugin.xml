@@ -21,6 +21,18 @@
         Thank you for your support! Huge thank you to
         all of you who sponsor the plugin development, @punk3155 in particular!❤️
 
+        <b>v2.4.5</b>
+        In this release:
+        <ul>
+          <li>Updated solidity version in the templates, thank you @ereztdev!</li>
+          <li>Resolved StackOverflowError on imports with the same name, yours @SerCeMan!</li>
+          <li>Supported string casting in fixed bytes types, thank you @Paulalex85!</li>
+          <li>Enabled hints for function call arguments, thank you @mbolotov!</li>
+          <li>Fixed documentation display for functions with modifiers, thank you @mbolotov!</li>
+          <li>Inline rename refactoring, thank you @mbolotov!</li>
+          <li>New Optimize imports action, thank you @mbolotov!</li>
+          <li>Added hierarchy view provider, thank you @mbolotov!</li>
+        </ul>
         <b>v2.4.4</b>
         In this release:
         <ul>
@@ -33,17 +45,8 @@
           <li>Gas estimation display hints, thank you @mbolotov!</li>
           <li>Exception fixes, yours @SerCeMan!</li>
         </ul>
-        A special thank you to tetu.io who made the @mboloov's contributions possible! 🎉
 
-        <b>v2.4.3</b>
-        In this release:
-        <ul>
-          <li>Support event definitions at file level, yours @SerCeMan!</li>
-          <li>Support named imports and forge remappings, thanks @ArshanKhanifar!</li>
-          <li>Add emit event parameter inspection, thanks @jonahcui!</li>
-          <li>Follow aliases when going to implementation, yours @SerCeMan!</li>
-          <li>Fix lexer errors when analysing comments, thanks @spacelord47!</li>
-        </ul>
+        A special thank you to tetu.io who made the @mboloov's contributions possible! 🎉
       </p>
     ]]>
     </change-notes>
