@@ -156,3 +156,43 @@ contract C {
         }
     }
 }
+
+contract C {
+    function f() external {
+        assembly {
+            tstore(0, 0)
+            let a := tload(0)
+            tstore(0, 1)
+            tstore(1, a)
+        }
+    }
+}
+
+contract C {
+    function f() public pure {
+        assembly {
+            mcopy(0, 0, 0)
+            mcopy(0x1000, 0x2000, 100)
+        }
+    }
+}
+
+contract C {
+    function f() public view returns (bytes32 ret) {
+        assembly {
+            ret := blobhash(1)
+        }
+    }
+
+    function g() public view returns (uint ret) {
+        assembly {
+            ret := blobbasefee()
+        }
+    }
+
+    function g() public view returns (uint256 ret) {
+        assembly {
+            ret := prevrandao()
+        }
+    }
+}
