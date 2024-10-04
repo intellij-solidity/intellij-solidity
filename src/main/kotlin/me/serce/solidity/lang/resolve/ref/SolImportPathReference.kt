@@ -60,18 +60,18 @@ class SolImportPathReference(element: SolImportPathElement) : SolReferenceBase<S
           return output
         }
       }
-      return output;
+      return output
     }
 
     private fun foundryDefaultFallback(file: VirtualFile, path: String): VirtualFile? {
       val count = Paths.get(path).nameCount
       if (count < 2) {
-        return null;
+        return null
       }
       val libName = Paths.get(path).subpath(0, 1).toString()
       val libFile = Paths.get(path).subpath(1, count).toString()
       val test = file.findFileByRelativePath("lib/$libName/src/$libFile")
-      return test;
+      return test
     }
 
     // default lib located at: forge-std/Test.sol => lib/forge-std/src/Test.sol
@@ -79,7 +79,7 @@ class SolImportPathReference(element: SolImportPathElement) : SolReferenceBase<S
       val testRemappingFile = file.findFileByRelativePath("remappings.txt")
       val remappings = arrayListOf<Pair<String, String>>()
       if (testRemappingFile != null) {
-        val mappingsContents = testRemappingFile.contentsToByteArray().toString(Charsets.UTF_8).split("[\r\n]+".toRegex());
+        val mappingsContents = testRemappingFile.contentsToByteArray().toString(Charsets.UTF_8).split("[\r\n]+".toRegex())
         mappingsContents.forEach { mapping ->
           val splitMapping = mapping.split("=")
           if (splitMapping.size == 2) {
