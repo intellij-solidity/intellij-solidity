@@ -55,7 +55,7 @@ intellij {
     type = 'IU'
     downloadSources = true
     updateSinceUntilBuild = false
-    plugins = ['JavaScript']
+    plugins = ['JavaScript','org.toml.lang:231.8109.1']
 
     sandboxDir = project.rootDir.canonicalPath + "/.sandbox"
 }
