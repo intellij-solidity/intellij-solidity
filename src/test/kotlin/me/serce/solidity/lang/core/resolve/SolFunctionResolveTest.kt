@@ -414,6 +414,93 @@ class SolFunctionResolveTest : SolResolveTestBase() {
     testResolveBetweenFiles(file1, file2)
   }
 
+    fun testResolveImportedFunction() = testResolveBetweenFiles(
+        InlineFile(
+            code = """
+        pragma solidity ^0.8.26;
+
+        contract a {
+            function doit() public {
+                    //x
+            }
+        }
+  """,
+            name = "a.sol"
+        ),
+        InlineFile(
+            """
+        pragma solidity ^0.8.26;
+
+        import {a} from "./a.sol";
+        
+        contract b {
+            function test(address x) public {
+                a(x).doit();
+                    //^
+            }
+        }
+"""
+        )
+    )
+
+    fun testResolveImportedContractFunction() = testResolveBetweenFiles(
+        InlineFile(
+            code = """
+      pragma solidity ^0.8.26;
+
+        contract a {
+               //x
+            function doit() public {
+            }
+        }
+  """,
+            name = "a.sol"
+        ),
+        InlineFile(
+            """
+        pragma solidity ^0.8.26;
+
+        import {a} from "./a.sol";
+        
+        contract b {
+            function test(address x) public {
+                a(x).doit();
+              //^
+            }
+        }
+"""
+        )
+    )
+
+    fun testResolveImportedFunctionFromLibrary() = testResolveBetweenFiles(
+        InlineFile(
+            code = """
+          pragma solidity ^0.8.26;
+                
+          library a {
+            function doit() internal {
+                     //x
+            }
+          }
+      """,
+            name = "a.sol"
+        ),
+        InlineFile(
+            """
+          pragma solidity ^0.8.26;
+                
+          import "./a.sol";
+              
+          contract b {
+            function test() public {
+                a.doit();
+                  //^
+            }
+          }
+    """
+        )
+    )
+
   fun checkIsResolved(@Language("Solidity") code: String) {
     val (refElement, _) = resolveInCode<SolFunctionCallExpression>(code)
     assertNotNull(refElement.reference?.resolve())

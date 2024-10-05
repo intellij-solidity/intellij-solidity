@@ -136,7 +136,7 @@ ImportPath ::= stringLiteral {
 }
 private ImportDirectivePart ::= import
         ( ImportPath (as ImportAlias)?
-        | ('*' | UserDefinedTypeName) (as ImportAlias)? 'from' ImportPath
+        | '*' (as ImportAlias)? 'from' ImportPath
         | '{' ImportRuleSet '}' 'from' ImportPath ) {
  pin = 1
  recoverWhile = UntilSemicolonRecover

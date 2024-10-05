@@ -180,6 +180,11 @@ object SolResolver {
     return result + result.map { collectImports(it.file.childrenOfType<SolImportDirective>(), visited) }.flatten()
   }
 
+  //collect all SolContractDefinition recursively from imports
+  fun collectContracts(import: SolImportDirective): Collection<SolContractDefinition> {
+    return collectImports(import).flatMap { it.file.childrenOfType<SolContractDefinition>() }
+  }
+
   private fun resolveContract(element: PsiElement): Set<SolContractDefinition> =
     resolveUsingImports(SolContractDefinition::class.java, element, element.containingFile)
   private fun resolveEnum(element: PsiElement): Set<SolNamedElement> =
@@ -329,14 +334,60 @@ object SolResolver {
         ?.supers
         ?.flatMap { resolveTypeNameUsingImports(it) }
         ?: emptyList()
-      else -> lexicalDeclarations(element)
-        .filter { it.name == element.name }
-        .toList().let {
-          if (it.size <= 1 || it.any { it !is SolContractDefinition }) it
-          // resolve by imports to distinguish elements with the same name
-          else resolveTypeNameUsingImports(element).toList()
+      else -> {
+        var elementToSearch = element
+        val importAlias = resolveAlias(element)
+        if (importAlias != null) {
+          elementToSearch = getElementFromAlias(element, importAlias)
+          //if it has the same name, then we can only link to the alias of the contract
+          if (elementToSearch.name == element.name) {
+            return listOf(elementToSearch)
+          }
         }
+
+        lexicalDeclarations(element)
+          .filter { it.name == elementToSearch.name }
+          .toList().let {
+            if (it.size <= 1 || it.any { it !is SolContractDefinition }) it
+            // resolve by imports to distinguish elements with the same name
+            else resolveTypeNameUsingImports(element).toList()
+          }
+      }
     }
+  }
+
+  fun resolveAlias(element: SolNamedElement): SolImportDirective? {
+    return element.containingFile.childrenOfType<SolImportDirective>().find {
+      it.importAlias?.name == element.name ||
+              it.importAliasedPairList.any { importAliasedPair ->
+                importAliasedPair.importAlias?.name == element.name
+              }
+    }
+  }
+
+  fun isAliasOfFile(import: SolImportDirective ): Boolean {
+    return when (import.importAlias) {
+      null -> false
+      else -> true
+    }
+  }
+
+  //return the right element to search
+  fun getElementFromAlias(element: SolNamedElement, import: SolImportDirective): SolNamedElement {
+    if (import.importAlias?.name == element.name) {
+        //match import * as A from "path"
+        //match import "path" as A
+        return import.importAlias!!
+    } else {
+      //match import {a as A} from "path"
+      import.importAliasedPairList.forEach { importAliasedPair ->
+        if (importAliasedPair.importAlias?.name == element.name) {
+          return importAliasedPair.userDefinedTypeName
+        }
+      }
+    }
+
+    return element
   }
 
   fun resolveMemberAccess(element: SolMemberAccessExpression): List<SolMember> {

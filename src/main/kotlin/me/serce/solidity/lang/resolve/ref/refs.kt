@@ -67,8 +67,20 @@ class SolMemberAccessReference(element: SolMemberAccessExpression) : SolReferenc
     return element.identifier?.parentRelativeRange ?: super.calculateDefaultRangeInElement()
   }
 
-  override fun multiResolve() = SolResolver.resolveMemberAccess(element)
-    .mapNotNull { it.resolveElement() }
+  override fun multiResolve(): List<SolNamedElement> {
+    val importAlias = element.childOfType<SolPrimaryExpression>()
+      .let { it?.varLiteral?.let { varLiteral -> SolResolver.resolveAlias(varLiteral) } }
+    if (importAlias != null && SolResolver.isAliasOfFile(importAlias)) {
+      return when (element.parent is SolFunctionCallExpression) {
+        true -> (element.parent.reference as SolFunctionCallReference).resolveFunctionCallAndFilter()
+          .mapNotNull { it.resolveElement() }
+
+        else -> SolResolver.collectContracts(importAlias)
+          .filter { contract -> contract.name == element.identifier!!.text }
+      }
+    }
+    return SolResolver.resolveMemberAccess(element).mapNotNull { it.resolveElement() }
+  }
 
   override fun getVariants() = SolCompleter.completeMemberAccess(element)
 }
@@ -164,10 +176,33 @@ class SolFunctionCallReference(element: SolFunctionCallExpression) : SolReferenc
 
   private fun resolveMemberFunctions(expression: SolMemberAccessExpression): Collection<SolCallable> {
     val name = expression.identifier?.text
-    return if (name != null) {
+
+    val importAlias = expression.childOfType<SolPrimaryExpression>()
+      .let { it?.varLiteral?.let { varLiteral -> SolResolver.resolveAlias(varLiteral) } }
+
+    return if (importAlias != null && name != null) {
+      //if true, then it's a contract resolution like A.a
+      if (expression.firstChild is SolPrimaryExpression) {
+        SolResolver.collectContracts(importAlias).filter { contract -> contract.name == name }
+      } else {
+        //looking to resolve member of a contract
+        //first need to find the contract name
+        val contractToLook = when (expression.firstChild) {
+          is SolMemberAccessExpression -> expression.firstChild.lastChild.text
+          is SolFunctionCallExpression -> expression.childOfType<SolMemberAccessExpression>()?.lastChild?.text
+          else -> null
+        }
+
+        //resolve member
+        SolResolver.collectContracts(importAlias).filter { contract -> contract.name == contractToLook }.map {
+          SolResolver.resolveContractMembers(it).filterIsInstance<SolCallable>()
+            .filter { member -> member.getName() == name }
+        }.flatten()
+      }
+    } else if (name != null) {
       expression.getMembers()
-      .filterIsInstance<SolCallable>()
-      .filter { it.getName() == name }
+        .filterIsInstance<SolCallable>()
+        .filter { it.getName() == name }
     } else {
       emptyList()
     }

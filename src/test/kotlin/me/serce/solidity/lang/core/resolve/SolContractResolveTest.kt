@@ -168,4 +168,27 @@ class SolContractResolveTest : SolResolveTestBase() {
     val (refElement, _) = findElementAndDataInEditor<SolNamedElement>("^")
     assertNull(refElement.reference?.resolve())
   }
+
+    fun testResolveWithCast() = testResolveBetweenFiles(
+        InlineFile(
+            code = """
+            contract A {
+                   //x
+                function doit2() {
+                }
+            }
+      """,
+            name = "a.sol"
+        ),
+        InlineFile("""
+          import "./a.sol";
+
+          contract B {
+            function doit(address some) {
+                A(some).doit2();
+              //^
+            }
+         }
+    """)
+    )
 }
