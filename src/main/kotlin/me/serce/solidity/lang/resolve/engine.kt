@@ -34,7 +34,8 @@ object SolResolver {
           resolveEnum(element) +
           resolveStruct(element) +
           resolveUserDefinedValueType(element) +
-          resolveAliases(element)
+          resolveAliases(element) +
+          resolveConstant(element)
       }
       CachedValueProvider.Result.create(result, PsiModificationTracker.MODIFICATION_COUNT)
     }
@@ -49,10 +50,7 @@ object SolResolver {
     file: PsiFile,
   ): Set<T> {
     // If the elements has no name or text, we can't resolve it.
-    val elementName = element.nameOrText
-    if (elementName == null) {
-      return emptySet()
-    }
+    val elementName = element.nameOrText ?: return emptySet()
 
 
     // Retrieve all PSI elements with the name we're trying to lookup.
@@ -198,6 +196,8 @@ object SolResolver {
       element,
       { it.userDefinedValueTypeDefinitionList }) + resolveUsingImports(SolUserDefinedValueTypeDefinition::class.java, element, element.containingFile)
 
+  private fun resolveConstant(element: PsiElement): Set<SolNamedElement> =
+    resolveUsingImports(SolConstantVariable::class.java, element, element.containingFile)
   private fun resolveEvent(element: PsiElement): Set<SolNamedElement> =
     resolveInnerType<SolEventDefinition>(element) { it.eventDefinitionList }
 
