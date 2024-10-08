@@ -28,7 +28,8 @@ object SolResolver {
           resolveEvent(element) +
           resolveContract(element) +
           resolveEnum(element) +
-          resolveUserDefinedValueType(element)
+          resolveUserDefinedValueType(element) +
+          resolveConstant(element)
       } else {
         resolveContract(element) +
           resolveEnum(element) +
