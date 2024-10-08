@@ -77,6 +77,59 @@ class SolEventResolveTest : SolResolveTestBase() {
     )
   }
 
+  fun testResolveImportedEvent() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+          pragma solidity ^0.8.26;
+          
+          event Closed();
+                  //x
+      """,
+      name = "a.sol"
+    ),
+    InlineFile(
+      """
+          pragma solidity ^0.8.26;      
+                
+          import {Closed} from "./a.sol";
+                  //^
+          contract b {
+              function emitEvent() public {
+                emit Closed();
+              }
+          }
+                      
+    """
+    )
+  )
+
+  fun testResolveImportedEvent2() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+          pragma solidity ^0.8.26;
+          
+          event Closed();
+                  //x
+      """,
+      name = "a.sol"
+    ),
+    InlineFile(
+      """
+          pragma solidity ^0.8.26;      
+                
+          import {Closed} from "./a.sol";
+                  
+          contract b {
+              function emitEvent() public {
+                emit Closed();
+                      //^
+              }
+          }
+                      
+    """
+    )
+  )
+
 
   override fun checkByCode(code: String) {
     checkByCodeInternal<SolFunctionCallExpression, SolNamedElement>(code)

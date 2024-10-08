@@ -32,6 +32,7 @@ object SolResolver {
           resolveConstant(element)
       } else {
         resolveContract(element) +
+          resolveEvent(element) +
           resolveEnum(element) +
           resolveStruct(element) +
           resolveUserDefinedValueType(element) +
@@ -200,7 +201,7 @@ object SolResolver {
   private fun resolveConstant(element: PsiElement): Set<SolNamedElement> =
     resolveUsingImports(SolConstantVariable::class.java, element, element.containingFile)
   private fun resolveEvent(element: PsiElement): Set<SolNamedElement> =
-    resolveInnerType<SolEventDefinition>(element) { it.eventDefinitionList }
+    resolveInnerType<SolEventDefinition>(element) { it.eventDefinitionList } + resolveUsingImports(SolEventDefinition::class.java, element, element.containingFile)
 
   private fun resolveError(element: PsiElement): Set<SolNamedElement> =
     resolveInnerType<SolErrorDefinition>(element) { it.errorDefinitionList } + resolveUsingImports(SolErrorDefinition::class.java, element, element.containingFile)
