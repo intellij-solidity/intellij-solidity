@@ -77,6 +77,22 @@ class SolEventResolveTest : SolResolveTestBase() {
     )
   }
 
+  fun testEventAtFileLevel() = checkByCode(
+    """
+        pragma solidity ^0.8.26;
+        
+        event Refunded(int a, uint256 b);
+                //x
+        contract B {
+
+            function close() public {
+                emit Refunded(1, 2);
+                    //^
+            }
+        }
+  """
+  )
+
   fun testResolveImportedEvent() = testResolveBetweenFiles(
     InlineFile(
       code = """
