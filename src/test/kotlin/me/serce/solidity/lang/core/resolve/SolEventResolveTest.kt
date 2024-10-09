@@ -8,12 +8,14 @@ class SolEventResolveTest : SolResolveTestBase() {
 
   fun testEventWithNoArguments() = checkByCode(
     """
+       pragma solidity ^0.8.26;
+       
         contract B {
             event Closed();
                     //x
-            function close() {
-                Closed();
-                //^
+            function close() public {
+                emit Closed();
+                    //^
             }
         }
   """
@@ -21,29 +23,33 @@ class SolEventResolveTest : SolResolveTestBase() {
 
   fun testEventParent() = checkByCode(
     """
+       pragma solidity ^0.8.26;
+       
         contract A {
             event Closed();
                     //x
         }
 
         contract B is A {
-            function close() {
-                Closed();
-                //^
+            function close() public {
+                emit Closed();
+                    //^
             }
         }
   """
   )
 
-  fun testEventWithParemeters() = checkByCode(
+  fun testEventWithParameters() = checkByCode(
     """
+       pragma solidity ^0.8.26;
+       
         contract B {
             event Refunded(int a, uint256 b);
                     //x
 
-            function close() {
-                Refunded(1, 2);
-                //^
+            function close() public {
+                emit Refunded(1, 2);
+                      //^
             }
         }
   """
@@ -61,6 +67,8 @@ class SolEventResolveTest : SolResolveTestBase() {
     RecursionManager.disableMissedCacheAssertions(testRootDisposable)
     checkByCode(
       """
+         pragma solidity ^0.8.26;
+         
         contract B {
             event B();
                    
@@ -69,7 +77,7 @@ class SolEventResolveTest : SolResolveTestBase() {
                    //^
             }
             
-            function B() {
+            function B() public {
                    //x
             }
         }
