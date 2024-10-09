@@ -71,6 +71,7 @@ class SolEventResolveTest : SolResolveTestBase() {
          
         contract B {
             event B();
+                //x  
                    
             function close() public {
                 emit B();
@@ -78,11 +79,38 @@ class SolEventResolveTest : SolResolveTestBase() {
             }
             
             function B() public {
-                   //x
             }
         }
     """
     )
+  }
+
+  fun testContractTheSameNameAsEvent2() {
+    // A recursion guard check is disabled to prevent c.i.o.u.RecursionManager.CachingPreventedException
+    // from being thrown. The case highlights another issue that's worth fixing.
+    RecursionManager.disableMissedCacheAssertions(testRootDisposable)
+    InlineFile(
+      """
+         pragma solidity ^0.8.26;
+         
+        contract B {
+            event B();
+                   
+            function close() public {
+                emit B();
+            }
+            
+            function B() public {
+                   //^
+            }
+        }
+    """
+    )
+
+    val (refElement) = findElementAndDataInEditor<SolNamedElement>("^")
+
+    val references = refElement.references.mapNotNull { it?.resolve() }
+    assertTrue("Should fail to resolve ${refElement.text}", references.isEmpty())
   }
 
   fun testEventAtFileLevel() = checkByCode(
