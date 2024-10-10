@@ -537,11 +537,14 @@ object SolResolver {
           val userDefinedTypes = scopeChildren.asSequence()
             .filterIsInstance<SolUserDefinedValueTypeDefinition>()
 
+          val enums = scopeChildren.asSequence()
+            .filterIsInstance<SolEnumDefinition>()
+
           val imports = scopeChildren.asSequence().filterIsInstance<SolImportDirective>()
             .mapNotNull {  it.importPath?.reference?.resolve()?.containingFile }
             .map { lexicalDeclarations(visitedScopes, it, place) }
             .flatten()
-          imports + contracts + constantVariables + freeFunctions + userDefinedTypes
+          imports + contracts + constantVariables + freeFunctions + userDefinedTypes + enums
         } ?: emptySequence()
       }
 
