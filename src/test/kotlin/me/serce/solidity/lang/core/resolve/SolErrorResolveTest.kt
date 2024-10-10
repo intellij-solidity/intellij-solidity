@@ -29,7 +29,7 @@ class SolErrorResolveTest : SolResolveTestBase() {
         }
   """)
 
-  fun testErrorWithParemeters() = checkByCode("""
+  fun testErrorWithParameters() = checkByCode("""
         contract B {
             error Refunded(int a, uint256 b);
                     //x
