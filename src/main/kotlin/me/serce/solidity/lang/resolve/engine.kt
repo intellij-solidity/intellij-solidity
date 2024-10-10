@@ -31,7 +31,8 @@ object SolResolver {
           resolveUserDefinedValueType(element) +
           resolveConstant(element)
       } else {
-        resolveContract(element) +
+        resolveError(element) +
+          resolveContract(element) +
           resolveEvent(element) +
           resolveEnum(element) +
           resolveStruct(element) +
