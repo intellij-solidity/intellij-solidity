@@ -64,6 +64,21 @@ class SolModifierResolveTest : SolResolveTestBase() {
         }
   """)
 
+  fun testResolveMulti2() = checkByCode("""
+        contract B {
+            modifier onlySeller1() {
+                     //x
+            }
+
+            modifier onlySeller2() {
+            }
+
+            function doit() onlySeller1 onlySeller2 {
+                               //^              
+            }
+        }
+  """)
+
   override fun checkByCode(@Language("Solidity") code: String) {
     super.checkByCodeInternal<SolModifierInvocation, SolNamedElement>(code)
   }
