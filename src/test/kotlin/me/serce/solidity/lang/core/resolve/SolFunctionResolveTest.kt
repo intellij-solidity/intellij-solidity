@@ -501,6 +501,25 @@ class SolFunctionResolveTest : SolResolveTestBase() {
         )
     )
 
+  fun testResolveFunctionWithModifier() = checkByCode("""
+        pragma solidity ^0.8.26;
+
+        contract Temp {
+            modifier onlyOwner() {
+                _;
+            }
+        
+            function foo() public onlyOwner {
+                    //x   
+            }
+        
+            function bar() external {
+                foo();
+                //^
+            }
+        }
+  """)
+
   fun checkIsResolved(@Language("Solidity") code: String) {
     val (refElement, _) = resolveInCode<SolFunctionCallExpression>(code)
     assertNotNull(refElement.reference?.resolve())
