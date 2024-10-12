@@ -1,5 +1,6 @@
 package me.serce.solidity.ide.usage
 
+import com.intellij.psi.PsiElement
 import me.serce.solidity.lang.psi.SolNamedElement
 import me.serce.solidity.utils.SolTestBase
 import org.intellij.lang.annotations.Language
@@ -16,7 +17,7 @@ abstract class SolUsageTestBase : SolTestBase() {
     InlineFile(code)
     val source = findElementInEditor<SolNamedElement>()
     val usages = myFixture.findUsages(source)
-    val elements = findMultipleElementAndDataInEditor<SolNamedElement>().map { it.first }
+    val elements = findMultipleElementAndDataInEditor<PsiElement>().map { it.first }
     assertTrue("Failed to find all usages ", usages.all { elements.contains(it.element) })
   }
 }
