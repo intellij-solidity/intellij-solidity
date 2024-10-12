@@ -10,7 +10,7 @@ class SolContractUsageTest : SolUsageTestBase() {
   """, 2
   )
 
-  fun testFields() = multipleResolveTest(
+  fun testFields() = multipleUsageTest(
     """
       contract A {}
              //^

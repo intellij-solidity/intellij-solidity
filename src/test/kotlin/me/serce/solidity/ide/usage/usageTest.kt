@@ -12,11 +12,11 @@ abstract class SolUsageTestBase : SolTestBase() {
     assertEquals(expectedUsages, usages.size)
   }
 
-  protected fun multipleResolveTest(@Language("Solidity") code: String) {
+  protected fun multipleUsageTest(@Language("Solidity") code: String) {
     InlineFile(code)
     val source = findElementInEditor<SolNamedElement>()
     val usages = myFixture.findUsages(source)
     val elements = findMultipleElementAndDataInEditor<SolNamedElement>().map { it.first }
-    assertTrue(usages.all { elements.contains(it.element) })
+    assertTrue("Failed to find all usages ", usages.all { elements.contains(it.element) })
   }
 }
