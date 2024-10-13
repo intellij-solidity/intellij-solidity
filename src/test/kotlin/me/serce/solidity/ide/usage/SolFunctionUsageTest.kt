@@ -2,7 +2,7 @@ package me.serce.solidity.ide.usage
 
 class SolFunctionUsageTest : SolUsageTestBase() {
 
-  fun testFindUsageFunctionWithModifier() = multipleUsageTest(
+  fun testFindUsageFunctionWithModifier() = doTest(
     """
         pragma solidity ^0.8.26;
 
@@ -17,9 +17,8 @@ class SolFunctionUsageTest : SolUsageTestBase() {
         
             function bar() external {
                 foo();
-              //x   
             }
         }
-  """
+  """,1
   )
 }

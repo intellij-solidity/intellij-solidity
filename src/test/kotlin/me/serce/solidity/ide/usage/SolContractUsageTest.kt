@@ -10,20 +10,17 @@ class SolContractUsageTest : SolUsageTestBase() {
   """, 2
   )
 
-  fun testFields() = multipleUsageTest(
+  fun testFields() = doTest(
     """
       contract A {}
              //^
       contract B {
           A field1;
-        //x
           A field2;
-        //x
       }
       contract C {
           A field1;
-        //x
       }
-    """
+    """, 3
   )
 }

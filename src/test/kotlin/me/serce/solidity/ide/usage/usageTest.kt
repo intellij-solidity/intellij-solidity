@@ -1,6 +1,5 @@
 package me.serce.solidity.ide.usage
 
-import com.intellij.psi.PsiElement
 import me.serce.solidity.lang.psi.SolNamedElement
 import me.serce.solidity.utils.SolTestBase
 import org.intellij.lang.annotations.Language
@@ -11,13 +10,5 @@ abstract class SolUsageTestBase : SolTestBase() {
     val source = findElementInEditor<SolNamedElement>()
     val usages = myFixture.findUsages(source)
     assertEquals(expectedUsages, usages.size)
-  }
-
-  protected fun multipleUsageTest(@Language("Solidity") code: String) {
-    InlineFile(code)
-    val source = findElementInEditor<SolNamedElement>()
-    val usages = myFixture.findUsages(source)
-    val elements = findMultipleElementAndDataInEditor<PsiElement>().map { it.first }
-    assertTrue("Failed to find all usages ", usages.all { elements.contains(it.element) })
   }
 }
