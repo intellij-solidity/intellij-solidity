@@ -36,5 +36,18 @@ class SolImportResolveFoundryTest : SolResolveTestBase() {
     }
   }
 
+  fun testImportPathResolveFoundryFoundryFileNoError() {
+    testcases.forEach { (targetFile, contractFile) ->
+      val file1 = myFixture.configureByFile(targetFile)
+      myFixture.configureByFile("foundry.toml")
+      myFixture.configureByFile(contractFile)
+      val (refElement) = findElementAndDataInEditor<SolNamedElement>("^")
+      val resolved = checkNotNull(refElement.reference?.resolve()) {
+        "Failed to resolve ${refElement.text}"
+      }
+      assertEquals(file1.name, resolved.containingFile.name)
+    }
+  }
+
   override fun getTestDataPath() = "src/test/resources/fixtures/importRemappings/"
 }
