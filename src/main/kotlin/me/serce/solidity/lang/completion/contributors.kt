@@ -120,7 +120,7 @@ class SolContextCompletionContributor : CompletionContributor(), DumbAware {
               else text.lastIndexOf("/").takeIf { it >= 0 }?.let { text.substring(0, it) } ?: text
               if (!dirText.endsWith("/")) dirText += "/"
               val curFile = parameters.originalFile.virtualFile
-              val vPath = SolImportPathReference.findImportFile(curFile, dirText, parameters.position.project)
+              val vPath = SolImportPathReference.findImportFile(curFile, dirText)
               val elements = (vPath?.children ?: emptyArray())
                 .filter { it.isDirectory || it.extension == SolidityFileType.defaultExtension }
                 .map { LookupElementBuilder.create("\"$dirText${it.name}").withIcon(SolidityIcons.FILE_ICON) } +
