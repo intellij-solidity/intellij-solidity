@@ -6,7 +6,7 @@ class SolEnumResolveTest : SolResolveTestBase() {
             enum B { A1, A2 }
                         //x
 
-            function f() {
+            function f() public {
                 B.A2;
                 //^
             }
@@ -33,7 +33,7 @@ class SolEnumResolveTest : SolResolveTestBase() {
             enum B { A1, A2 }
                //x
 
-            function f() {
+            function f() public {
                 B.A2;
               //^
             }
@@ -45,7 +45,7 @@ class SolEnumResolveTest : SolResolveTestBase() {
             enum B { A1, A2 }
                //x
 
-            function f(B test) {
+            function f(B test) public {
                      //^
             }
         }
@@ -58,7 +58,7 @@ class SolEnumResolveTest : SolResolveTestBase() {
         }
 
         contract C is A {
-            function f() {
+            function f() public {
                 B.A1;
                 //^
             }
@@ -72,7 +72,7 @@ class SolEnumResolveTest : SolResolveTestBase() {
         }
 
         contract C is A {
-            function f(B test) {
+            function f(B test) public {
                      //^
             }
         }
@@ -85,7 +85,7 @@ class SolEnumResolveTest : SolResolveTestBase() {
         }
 
         contract C {
-            function f(A.B test) {
+            function f(A.B test) public {
                        //^
             }
         }
@@ -98,7 +98,7 @@ class SolEnumResolveTest : SolResolveTestBase() {
         }
 
         contract C {
-            function f() {
+            function f() public {
                 A.B test = A.B.A1;
                               //^
             }
@@ -121,7 +121,7 @@ class SolEnumResolveTest : SolResolveTestBase() {
         import {B as enumB} from "./a.sol";
 
         contract C {
-            function f() {
+            function f() public {
                 enumB.A2;
                 //^
             }
@@ -145,7 +145,7 @@ class SolEnumResolveTest : SolResolveTestBase() {
         import {B as enumB} from "./a.sol";
 
         contract C {
-            function f() {
+            function f() public {
                 enumB.A2;
                     //^
             }
@@ -170,7 +170,7 @@ class SolEnumResolveTest : SolResolveTestBase() {
                     //^
 
         contract C {
-            function f() {
+            function f() public {
                 enumB.A2;
             }
        }
@@ -196,7 +196,7 @@ class SolEnumResolveTest : SolResolveTestBase() {
                               //^
 
         contract C {
-            function f() {
+            function f() public {
                 Types.B.A2;
             }
        }
@@ -221,7 +221,7 @@ class SolEnumResolveTest : SolResolveTestBase() {
         import {InterfaceI as Types} from "./a.sol";
 
         contract C {
-            function f() {
+            function f() public {
                 Types.B.A2;
                 //^
             }
@@ -247,7 +247,7 @@ class SolEnumResolveTest : SolResolveTestBase() {
         import {InterfaceI as Types} from "./a.sol";
 
         contract C {
-            function f() {
+            function f() public {
                 Types.B.A2;
                        //^
             }
@@ -273,7 +273,7 @@ class SolEnumResolveTest : SolResolveTestBase() {
         import {InterfaceI as Types} from "./a.sol";
 
         contract C {
-            function f() {
+            function f() public {
                 Types.B.A2;
                     //^
             }
