@@ -169,26 +169,26 @@ class SolContractResolveTest : SolResolveTestBase() {
     assertNull(refElement.reference?.resolve())
   }
 
-    fun testResolveWithCast() = testResolveBetweenFiles(
-        InlineFile(
-            code = """
-            contract A {
-                   //x
-                function doit2() {
-                }
-            }
-      """,
-            name = "a.sol"
-        ),
-        InlineFile("""
-          import "./a.sol";
+  fun testResolveWithCast() = testResolveBetweenFiles(
+      InlineFile(
+          code = """
+          contract A {
+                 //x
+              function doit2() {
+              }
+          }
+    """,
+          name = "a.sol"
+      ),
+      InlineFile("""
+        import "./a.sol";
 
-          contract B {
-            function doit(address some) {
-                A(some).doit2();
-              //^
-            }
-         }
-    """)
-    )
+        contract B {
+          function doit(address some) {
+              A(some).doit2();
+            //^
+          }
+       }
+  """)
+  )
 }

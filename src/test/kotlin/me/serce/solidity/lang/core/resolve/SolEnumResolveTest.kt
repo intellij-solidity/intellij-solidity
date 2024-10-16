@@ -104,4 +104,76 @@ class SolEnumResolveTest : SolResolveTestBase() {
             }
         }
   """)
+
+  fun testResolveEnumFromAlias() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+          enum B { A1, A2 }
+             //x
+    """,
+      name = "a.sol"
+    ),
+    InlineFile("""
+        pragma solidity ^0.8.26;
+        
+        import {B as enumB} from "./a.sol";
+
+        contract C {
+            function f() {
+                enumB.A2;
+                //^
+            }
+       }
+  """)
+  )
+
+  fun testResolveEnumFromAlias2() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+          enum B { A1, A2 }
+                      //x
+    """,
+      name = "a.sol"
+    ),
+    InlineFile("""
+        pragma solidity ^0.8.26;
+        
+        import {B as enumB} from "./a.sol";
+
+        contract C {
+            function f() {
+                enumB.A2;
+                    //^
+            }
+       }
+  """)
+  )
+
+  fun testResolveEnumFromAlias3() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+          enum B { A1, A2 }
+             //x
+    """,
+      name = "a.sol"
+    ),
+    InlineFile("""
+        pragma solidity ^0.8.26;
+        
+        import {B as enumB} from "./a.sol";
+                    //^
+
+        contract C {
+            function f() {
+                enumB.A2;
+            }
+       }
+  """)
+  )
 }
