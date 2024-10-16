@@ -41,6 +41,56 @@ class SolErrorResolveTest : SolResolveTestBase() {
         }
   """)
 
+  fun testResolveErrorFromAlias() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+          error Closed();
+                 //x
+    """,
+      name = "a.sol"
+    ),
+    InlineFile("""
+        pragma solidity ^0.8.26;
+        
+        import {Closed as ErrorClosed} from "./a.sol";
+
+        contract C {
+            function f() public {
+               revert ErrorClosed();
+                        //^
+            }
+       }
+  """)
+  )
+
+  fun testResolveErrorFromAlias2() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+         interface InterfaceI {
+            error Closed();
+                 //x
+         }
+    """,
+      name = "a.sol"
+    ),
+    InlineFile("""
+        pragma solidity ^0.8.26;
+        
+        import {InterfaceI as Types} from "./a.sol";
+
+        contract C {
+            function f() public {
+               revert Types.ErrorClosed();
+                            //^
+            }
+       }
+  """)
+  )
+
   override fun checkByCode(code: String) {
     checkByCodeInternal<SolFunctionCallExpression, SolNamedElement>(code)
   }
