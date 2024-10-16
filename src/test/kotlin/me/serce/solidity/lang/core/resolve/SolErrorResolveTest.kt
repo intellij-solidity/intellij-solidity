@@ -65,7 +65,7 @@ class SolErrorResolveTest : SolResolveTestBase() {
   """)
   )
 
-  fun testResolveErrorFromAlias2() = testResolveBetweenFiles(
+  fun testResolveErrorFromAliasInInterface() = testResolveBetweenFiles(
     InlineFile(
       code = """
          pragma solidity ^0.8.26;
