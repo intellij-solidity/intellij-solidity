@@ -37,15 +37,13 @@ class SolImportResolveFoundryTest : SolResolveTestBase() {
   }
 
   fun testImportPathResolveFoundryFoundryFileNoError() {
-    testcases.forEach { (targetFile, contractFile) ->
-      val file1 = myFixture.configureByFile(targetFile)
-      myFixture.configureByFile("foundry.toml")
+    testcases.forEach { (_, contractFile) ->
+      myFixture.configureByText("foundry.toml", "")
       myFixture.configureByFile(contractFile)
       val (refElement) = findElementAndDataInEditor<SolNamedElement>("^")
-      val resolved = checkNotNull(refElement.reference?.resolve()) {
-        "Failed to resolve ${refElement.text}"
+       check(refElement.reference?.resolve() == null) {
+        "Should failed to resolve ${refElement.text}"
       }
-      assertEquals(file1.name, resolved.containingFile.name)
     }
   }
 
