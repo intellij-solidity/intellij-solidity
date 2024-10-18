@@ -296,11 +296,6 @@ abstract class SolFunctionDefMixin : SolStubbedNamedElementImpl<SolFunctionDefSt
       }
     return IconManager.getInstance().createRowIcon(main, ext)
   }
-  override fun getReference() = references.firstOrNull()
-
-  override fun getReferences(): Array<SolReference> {
-    return modifiers.map { SolModifierReference(this, it) }.toTypedArray()
-  }
 
   companion object {
     fun parseParameters(parameters: List<SolParameterDef>): List<Pair<String?, SolType>> {
