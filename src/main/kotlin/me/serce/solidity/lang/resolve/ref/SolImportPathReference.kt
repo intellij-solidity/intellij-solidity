@@ -103,18 +103,30 @@ class SolImportPathReference(element: SolImportPathElement) : SolReferenceBase<S
 
     private fun remappingsFromFoundryConfigFile(file: VirtualFile): List<Pair<String, String>> {
       val foundryConfigFile = file.findFileByRelativePath("foundry.toml")
-      val remappings = arrayListOf<Pair<String, String>>()
+      val remappingsResult = arrayListOf<Pair<String, String>>()
       if (foundryConfigFile != null) {
         val mapper = TomlMapper()
         val data = mapper.readValue(foundryConfigFile.readText(), Map::class.java)
-        (((data["profile"] as LinkedHashMap<*, *>)["default"] as LinkedHashMap<*, *>)["remappings"] as ArrayList<*>).forEach { mapping ->
-          val splitMapping = mapping.toString().trim('"').split("=")
-          if (splitMapping.size == 2) {
-            remappings.add(Pair(splitMapping[0].trim(), splitMapping[1].trim()))
+        data["profile"].let { profile ->
+          if (profile != null) {
+            (profile as LinkedHashMap<*, *>)["default"].let { profileDefault ->
+              if (profileDefault != null) {
+                (profileDefault as LinkedHashMap<*, *>)["remappings"].let { remappings ->
+                  if (remappings != null) {
+                    (remappings as ArrayList<*>).forEach { mapping ->
+                      val splitMapping = mapping.toString().trim('"').split("=")
+                      if (splitMapping.size == 2) {
+                        remappingsResult.add(Pair(splitMapping[0].trim(), splitMapping[1].trim()))
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
-      return remappings
+      return remappingsResult
     }
 
     private fun findEthPMImportFile(file: VirtualFile, path: String): VirtualFile? {
