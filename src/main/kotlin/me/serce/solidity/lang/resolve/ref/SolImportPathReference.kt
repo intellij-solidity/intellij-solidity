@@ -103,30 +103,28 @@ class SolImportPathReference(element: SolImportPathElement) : SolReferenceBase<S
 
     private fun remappingsFromFoundryConfigFile(file: VirtualFile): List<Pair<String, String>> {
       val foundryConfigFile = file.findFileByRelativePath("foundry.toml")
-      val remappingsResult = arrayListOf<Pair<String, String>>()
-      if (foundryConfigFile != null) {
-        val mapper = TomlMapper()
-        val data = mapper.readValue(foundryConfigFile.readText(), Map::class.java)
-        data["profile"].let { profile ->
-          if (profile != null) {
-            (profile as LinkedHashMap<*, *>)["default"].let { profileDefault ->
-              if (profileDefault != null) {
-                (profileDefault as LinkedHashMap<*, *>)["remappings"].let { remappings ->
-                  if (remappings != null) {
-                    (remappings as ArrayList<*>).forEach { mapping ->
-                      val splitMapping = mapping.toString().trim('"').split("=")
-                      if (splitMapping.size == 2) {
-                        remappingsResult.add(Pair(splitMapping[0].trim(), splitMapping[1].trim()))
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
+      if (foundryConfigFile == null) {
+        return emptyList()
       }
-      return remappingsResult
+      val mapper = TomlMapper()
+      val data = try {
+        mapper.readTree(foundryConfigFile.readText())
+      } catch (e: IOException) {
+        null
+      }
+      val remappings = data?.get("profile")?.get("default")?.get("remappings")
+      if (remappings == null) {
+        return emptyList()
+      }
+      return remappings //
+        .filterIsInstance<TextNode>() //
+        .map { //
+          // each is e.g. "forge-std/=lib/forge-std/src/"
+          it.textValue().trim('"').split("=") //
+        } //
+        .filter { it.size == 2 } //
+        // "forge-std/" to "lib/forge-std/src/"
+        .map { it[0].trim() to it[1].trim() }
     }
 
     private fun findEthPMImportFile(file: VirtualFile, path: String): VirtualFile? {
