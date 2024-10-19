@@ -1,5 +1,6 @@
 package me.serce.solidity.lang.resolve.ref
 
+import com.fasterxml.jackson.databind.node.TextNode
 import com.fasterxml.jackson.dataformat.toml.TomlMapper
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.readText
@@ -9,6 +10,7 @@ import com.intellij.psi.impl.source.tree.LeafElement
 import me.serce.solidity.ide.inspections.fixes.ImportFileAction
 import me.serce.solidity.lang.core.SolidityFile
 import me.serce.solidity.lang.psi.impl.SolImportPathElement
+import java.io.IOException
 import java.nio.file.Paths
 
 class SolImportPathReference(element: SolImportPathElement) : SolReferenceBase<SolImportPathElement>(element) {
@@ -78,7 +80,8 @@ class SolImportPathReference(element: SolImportPathElement) : SolReferenceBase<S
       val testRemappingFile = file.findFileByRelativePath("remappings.txt")
       val remappings = arrayListOf<Pair<String, String>>()
       if (testRemappingFile != null) {
-        val mappingsContents = testRemappingFile.contentsToByteArray().toString(Charsets.UTF_8).split("[\r\n]+".toRegex())
+        val mappingsContents =
+          testRemappingFile.contentsToByteArray().toString(Charsets.UTF_8).split("[\r\n]+".toRegex())
         mappingsContents.forEach { mapping ->
           val splitMapping = mapping.split("=")
           if (splitMapping.size == 2) {
@@ -158,7 +161,8 @@ class SolImportPathReference(element: SolImportPathElement) : SolReferenceBase<S
 
   override fun bindToElement(element: PsiElement): PsiElement {
     val file = element as? SolidityFile ?: return element
-    val newPath = ImportFileAction.buildImportPath(element.project, this.element.containingFile.virtualFile, file.virtualFile)
+    val newPath =
+      ImportFileAction.buildImportPath(element.project, this.element.containingFile.virtualFile, file.virtualFile)
     val identifier = this.element.referenceNameElement as? LeafElement ?: return element
     return identifier.replaceWithText("\"$newPath\"").psi ?: element
   }
