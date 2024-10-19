@@ -26,6 +26,8 @@ class SolImportPathReference(element: SolImportPathElement) : SolReferenceBase<S
 
   companion object {
 
+    private val tomlMapper by lazy { TomlMapper() }
+
     fun findImportFile(file: VirtualFile, path: String): VirtualFile? {
       val directFile = file.findFileByRelativePath("../$path")
       return if (directFile != null) {
@@ -106,9 +108,8 @@ class SolImportPathReference(element: SolImportPathElement) : SolReferenceBase<S
 
     private fun remappingsFromFoundryConfigFile(file: VirtualFile): List<Pair<String, String>> {
       val foundryConfigFile = file.findFileByRelativePath("foundry.toml") ?: return emptyList()
-      val mapper = TomlMapper()
       val data = try {
-        mapper.readTree(foundryConfigFile.readText())
+        tomlMapper.readTree(foundryConfigFile.readText())
       } catch (e: IOException) {
         null
       }
