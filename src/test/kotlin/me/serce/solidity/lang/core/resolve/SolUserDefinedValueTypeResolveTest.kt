@@ -21,6 +21,55 @@ class SolUserDefinedValueTypeResolveTest : SolResolveTestBase() {
         }
   """)
 
+  fun testUserDefinedValueTypeResolveImported() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+          pragma solidity ^0.8.26;
+                
+          type Decimal18 is uint256;
+                  //x
+      """,
+      name = "a.sol"
+    ),
+    InlineFile(
+      """
+          pragma solidity ^0.8.26;      
+                
+          import {Decimal18} from "./a.sol";
+                  //^
+          contract b {
+            Decimal18 public user;
+          }
+                      
+    """
+    )
+  )
+
+  fun testUserDefinedValueTypeResolveImported2() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+          pragma solidity ^0.8.26;
+                
+          type Decimal18 is uint256;
+                  //x
+      """,
+      name = "a.sol"
+    ),
+    InlineFile(
+      """
+          pragma solidity ^0.8.26;      
+                
+          import {Decimal18} from "./a.sol";
+                  
+          contract b {
+            Decimal18 public user;
+            //^
+          }
+                      
+    """
+    )
+  )
+
   fun testUserDefinedValueTypeResolveAlias() = testResolveBetweenFiles(
     InlineFile(
       code = """
