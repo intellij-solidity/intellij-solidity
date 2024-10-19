@@ -105,20 +105,14 @@ class SolImportPathReference(element: SolImportPathElement) : SolReferenceBase<S
     }
 
     private fun remappingsFromFoundryConfigFile(file: VirtualFile): List<Pair<String, String>> {
-      val foundryConfigFile = file.findFileByRelativePath("foundry.toml")
-      if (foundryConfigFile == null) {
-        return emptyList()
-      }
+      val foundryConfigFile = file.findFileByRelativePath("foundry.toml") ?: return emptyList()
       val mapper = TomlMapper()
       val data = try {
         mapper.readTree(foundryConfigFile.readText())
       } catch (e: IOException) {
         null
       }
-      val remappings = data?.get("profile")?.get("default")?.get("remappings")
-      if (remappings == null) {
-        return emptyList()
-      }
+      val remappings = data?.get("profile")?.get("default")?.get("remappings") ?: return emptyList()
       return remappings //
         .filterIsInstance<TextNode>() //
         .map { //
