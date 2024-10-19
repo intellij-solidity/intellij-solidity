@@ -24,24 +24,22 @@ object SolResolver {
   fun resolveTypeNameUsingImports(element: PsiElement): Set<SolNamedElement> =
     CachedValuesManager.getCachedValue(element) {
       val result = if (element is SolFunctionCallElement) {
-        resolveError(element) +
-          resolveEvent(element) +
-          resolveContract(element) +
-          resolveEnum(element) +
-          resolveUserDefinedValueType(element) +
-          resolveConstant(element)
+        resolveTypeWhenFunctionCallElement(element)
       } else {
-        resolveError(element) +
-          resolveContract(element) +
-          resolveEvent(element) +
-          resolveEnum(element) +
-          resolveStruct(element) +
-          resolveUserDefinedValueType(element) +
+        resolveTypeWhenFunctionCallElement(element) +
           resolveAliases(element) +
-          resolveConstant(element)
+          resolveStruct(element)
       }
       CachedValueProvider.Result.create(result, PsiModificationTracker.MODIFICATION_COUNT)
     }
+
+  private fun resolveTypeWhenFunctionCallElement(element: PsiElement) =
+    resolveError(element) +
+      resolveContract(element) +
+      resolveEvent(element) +
+      resolveEnum(element) +
+      resolveUserDefinedValueType(element) +
+      resolveConstant(element)
 
   private fun resolveAliases(element: PsiElement): Set<SolNamedElement> {
     return resolveUsingImports(SolImportAlias::class.java, element, element.containingFile)
