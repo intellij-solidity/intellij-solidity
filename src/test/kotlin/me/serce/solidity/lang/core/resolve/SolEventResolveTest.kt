@@ -8,12 +8,14 @@ class SolEventResolveTest : SolResolveTestBase() {
 
   fun testEventWithNoArguments() = checkByCode(
     """
+       pragma solidity ^0.8.26;
+       
         contract B {
             event Closed();
                     //x
-            function close() {
-                Closed();
-                //^
+            function close() public {
+                emit Closed();
+                    //^
             }
         }
   """
@@ -21,29 +23,33 @@ class SolEventResolveTest : SolResolveTestBase() {
 
   fun testEventParent() = checkByCode(
     """
+       pragma solidity ^0.8.26;
+       
         contract A {
             event Closed();
                     //x
         }
 
         contract B is A {
-            function close() {
-                Closed();
-                //^
+            function close() public {
+                emit Closed();
+                    //^
             }
         }
   """
   )
 
-  fun testEventWithParemeters() = checkByCode(
+  fun testEventWithParameters() = checkByCode(
     """
+       pragma solidity ^0.8.26;
+       
         contract B {
             event Refunded(int a, uint256 b);
                     //x
 
-            function close() {
-                Refunded(1, 2);
-                //^
+            function close() public {
+                emit Refunded(1, 2);
+                      //^
             }
         }
   """
@@ -61,21 +67,120 @@ class SolEventResolveTest : SolResolveTestBase() {
     RecursionManager.disableMissedCacheAssertions(testRootDisposable)
     checkByCode(
       """
+         pragma solidity ^0.8.26;
+         
         contract B {
             event B();
+                //x  
                    
             function close() public {
                 emit B();
                    //^
             }
             
-            function B() {
-                   //x
+            function B() public {
             }
         }
     """
     )
   }
+
+  fun testContractTheSameNameAsEvent2() {
+    // A recursion guard check is disabled to prevent c.i.o.u.RecursionManager.CachingPreventedException
+    // from being thrown. The case highlights another issue that's worth fixing.
+    RecursionManager.disableMissedCacheAssertions(testRootDisposable)
+    InlineFile(
+      """
+         pragma solidity ^0.8.26;
+         
+        contract B {
+            event B();
+                   
+            function close() public {
+                emit B();
+            }
+            
+            function B() public {
+                   //^
+            }
+        }
+    """
+    )
+
+    val (refElement) = findElementAndDataInEditor<SolNamedElement>("^")
+
+    val references = refElement.references.mapNotNull { it?.resolve() }
+    assertTrue("Should fail to resolve ${refElement.text}", references.isEmpty())
+  }
+
+  fun testEventAtFileLevel() = checkByCode(
+    """
+        pragma solidity ^0.8.26;
+        
+        event Refunded(int a, uint256 b);
+                //x
+        contract B {
+
+            function close() public {
+                emit Refunded(1, 2);
+                    //^
+            }
+        }
+  """
+  )
+
+  fun testResolveImportedEvent() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+          pragma solidity ^0.8.26;
+          
+          event Closed();
+                  //x
+      """,
+      name = "a.sol"
+    ),
+    InlineFile(
+      """
+          pragma solidity ^0.8.26;      
+                
+          import {Closed} from "./a.sol";
+                  //^
+          contract b {
+              function emitEvent() public {
+                emit Closed();
+              }
+          }
+                      
+    """
+    )
+  )
+
+  fun testResolveImportedEvent2() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+          pragma solidity ^0.8.26;
+          
+          event Closed();
+                  //x
+      """,
+      name = "a.sol"
+    ),
+    InlineFile(
+      """
+          pragma solidity ^0.8.26;      
+                
+          import {Closed} from "./a.sol";
+                  
+          contract b {
+              function emitEvent() public {
+                emit Closed();
+                      //^
+              }
+          }
+                      
+    """
+    )
+  )
 
 
   override fun checkByCode(code: String) {
