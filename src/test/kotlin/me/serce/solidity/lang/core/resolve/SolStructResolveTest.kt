@@ -79,18 +79,19 @@ class SolStructResolveTest : SolResolveTestBase() {
       }
   """)
 
-  fun testResolveImportedStruct() {
-    val file1 = InlineFile(
+  fun testResolveImportedStruct() = testResolveBetweenFiles(
+    InlineFile(
       code = """
         struct Proposal {
                 //x
             uint256 id;
         }
-      """.trimIndent(),
+      """,
       name = "Abc.sol"
-    )
+    ),
 
-    val file2 = InlineFile("""
+    InlineFile(
+      """
         import "./Abc.sol";
         contract B { 
             function doit(uint256[] storage array) {
@@ -98,8 +99,145 @@ class SolStructResolveTest : SolResolveTestBase() {
                                    //^
             }
         }
-    """)
+    """
+    )
 
-    testResolveBetweenFiles(file1, file2)
-  }
+  )
+
+  fun testResolveImportedStruct2() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+        struct Proposal {
+                //x
+            uint256 id;
+        }
+      """,
+      name = "Abc.sol"
+    ),
+    InlineFile(
+      """
+          pragma solidity ^0.8.26;    
+            
+          import {Proposal} from "./Abc.sol";
+                    //^
+          contract B { 
+            function doit(uint256[] storage array) {
+                Proposal prop = Proposal(1);
+            }
+        }
+    """
+    )
+  )
+
+  fun testResolveStructFromAlias() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+          struct Prop {
+                //x
+              uint prop1;
+              uint prop2;
+          }
+    """,
+      name = "a.sol"
+    ),
+    InlineFile("""
+        pragma solidity ^0.8.26;
+        
+        import {Prop as Proposal} from "./a.sol";
+
+        contract C {
+            Proposal prop = Proposal(0, 1);
+            //^
+            function f() public {
+                prop.prop1;
+            }
+       }
+  """)
+  )
+
+  fun testResolveStructFromAlias2() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+          struct Prop {
+                //x
+              uint prop1;
+              uint prop2;
+          }
+    """,
+      name = "a.sol"
+    ),
+    InlineFile("""
+        pragma solidity ^0.8.26;
+        
+        import {Prop as Proposal} from "./a.sol";
+
+        contract C {
+            Proposal prop = Proposal(0, 1);
+                            //^
+            function f() public {
+                prop.prop1;
+            }
+       }
+  """)
+  )
+
+  fun testResolveStructFromAlias3() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+          struct Prop {
+                //x
+              uint prop1;
+              uint prop2;
+          }
+    """,
+      name = "a.sol"
+    ),
+    InlineFile("""
+        pragma solidity ^0.8.26;
+        
+        import {Prop as Proposal} from "./a.sol";
+                          //^
+
+        contract C {
+            Proposal prop = Proposal(0, 1);
+            function f() public {
+                prop.prop1;
+            }
+       }
+  """)
+  )
+
+  fun testResolveStructFromAlias4() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+          struct Prop {
+                //x
+              uint prop1;
+              uint prop2;
+          }
+    """,
+      name = "a.sol"
+    ),
+    InlineFile("""
+        pragma solidity ^0.8.26;
+        
+        import {Prop as Proposal} from "./a.sol";
+
+        contract C {
+            Proposal prop = Proposal(0, 1);
+            function f() public {
+                prop.prop1;
+                      //^
+            }
+       }
+  """)
+  )
 }

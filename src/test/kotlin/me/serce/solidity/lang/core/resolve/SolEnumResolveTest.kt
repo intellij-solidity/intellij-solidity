@@ -6,15 +6,13 @@ class SolEnumResolveTest : SolResolveTestBase() {
             enum B { A1, A2 }
                         //x
 
-            function f() {
+            function f() public {
                 B.A2;
                 //^
             }
         }
   """)
 
-  // TODO: implement top level enum resolution
-  /*
   fun testEnumResolveInFile() = checkByCode("""
       enum B { A1, A2 }
          //x
@@ -26,14 +24,13 @@ class SolEnumResolveTest : SolResolveTestBase() {
           }
       }
   """)
-  */
 
   fun testEnumItself() = checkByCode("""
         contract A {
             enum B { A1, A2 }
                //x
 
-            function f() {
+            function f() public {
                 B.A2;
               //^
             }
@@ -45,7 +42,7 @@ class SolEnumResolveTest : SolResolveTestBase() {
             enum B { A1, A2 }
                //x
 
-            function f(B test) {
+            function f(B test) public {
                      //^
             }
         }
@@ -58,7 +55,7 @@ class SolEnumResolveTest : SolResolveTestBase() {
         }
 
         contract C is A {
-            function f() {
+            function f() public {
                 B.A1;
                 //^
             }
@@ -72,7 +69,7 @@ class SolEnumResolveTest : SolResolveTestBase() {
         }
 
         contract C is A {
-            function f(B test) {
+            function f(B test) public {
                      //^
             }
         }
@@ -85,7 +82,7 @@ class SolEnumResolveTest : SolResolveTestBase() {
         }
 
         contract C {
-            function f(A.B test) {
+            function f(A.B test) public {
                        //^
             }
         }
@@ -98,10 +95,237 @@ class SolEnumResolveTest : SolResolveTestBase() {
         }
 
         contract C {
-            function f() {
+            function f() public {
                 A.B test = A.B.A1;
                               //^
             }
         }
   """)
+
+  fun testResolveImportedEnum() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+          pragma solidity ^0.8.26;
+          
+           enum B { A1, A2 }
+              //x
+      """,
+      name = "a.sol"
+    ),
+    InlineFile(
+      """
+          pragma solidity ^0.8.26;      
+                
+          import {B} from "./a.sol";
+                //^
+          contract b {
+              function f() {
+                  B.A2;
+              }
+          }
+    """
+    )
+  )
+
+  fun testResolveImportedEnum2() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+          pragma solidity ^0.8.26;
+          
+           enum B { A1, A2 }
+              //x
+      """,
+      name = "a.sol"
+    ),
+    InlineFile(
+      """
+          pragma solidity ^0.8.26;      
+                
+          import {B} from "./a.sol";
+                
+          contract b {
+              function f() {
+                  B.A2;
+                //^
+              }
+          }
+    """
+    )
+  )
+
+  fun testResolveEnumFromAlias() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+          enum B { A1, A2 }
+             //x
+    """,
+      name = "a.sol"
+    ),
+    InlineFile("""
+        pragma solidity ^0.8.26;
+        
+        import {B as enumB} from "./a.sol";
+
+        contract C {
+            function f() public {
+                enumB.A2;
+                //^
+            }
+       }
+  """)
+  )
+
+  fun testResolveEnumFromAlias2() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+          enum B { A1, A2 }
+                      //x
+    """,
+      name = "a.sol"
+    ),
+    InlineFile("""
+        pragma solidity ^0.8.26;
+        
+        import {B as enumB} from "./a.sol";
+
+        contract C {
+            function f() public {
+                enumB.A2;
+                    //^
+            }
+       }
+  """)
+  )
+
+  fun testResolveEnumFromAlias3() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+          enum B { A1, A2 }
+             //x
+    """,
+      name = "a.sol"
+    ),
+    InlineFile("""
+        pragma solidity ^0.8.26;
+        
+        import {B as enumB} from "./a.sol";
+                    //^
+
+        contract C {
+            function f() public {
+                enumB.A2;
+            }
+       }
+  """)
+  )
+
+  fun testResolveEnumFromAliasInInterface() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+         interface InterfaceI {
+                     //x
+            enum B { A1, A2 }
+         }
+    """,
+      name = "a.sol"
+    ),
+    InlineFile("""
+        pragma solidity ^0.8.26;
+        
+        import {InterfaceI as Types} from "./a.sol";
+                              //^
+
+        contract C {
+            function f() public {
+                Types.B.A2;
+            }
+       }
+  """)
+  )
+
+  fun testResolveEnumFromAliasInInterface2() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+         interface InterfaceI {
+                     //x
+            enum B { A1, A2 }
+         }
+    """,
+      name = "a.sol"
+    ),
+    InlineFile("""
+        pragma solidity ^0.8.26;
+        
+        import {InterfaceI as Types} from "./a.sol";
+
+        contract C {
+            function f() public {
+                Types.B.A2;
+                //^
+            }
+       }
+  """)
+  )
+
+  fun testResolveEnumFromAliasInInterface3() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+         interface InterfaceI {
+            enum B { A1, A2 }
+                       //x
+         }
+    """,
+      name = "a.sol"
+    ),
+    InlineFile("""
+        pragma solidity ^0.8.26;
+        
+        import {InterfaceI as Types} from "./a.sol";
+
+        contract C {
+            function f() public {
+                Types.B.A2;
+                       //^
+            }
+       }
+  """)
+  )
+
+  fun testResolveEnumFromAliasInInterface4() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+         interface InterfaceI {
+            enum B { A1, A2 }
+               //x
+         }
+    """,
+      name = "a.sol"
+    ),
+    InlineFile("""
+        pragma solidity ^0.8.26;
+        
+        import {InterfaceI as Types} from "./a.sol";
+
+        contract C {
+            function f() public {
+                Types.B.A2;
+                    //^
+            }
+       }
+  """)
+  )
 }
