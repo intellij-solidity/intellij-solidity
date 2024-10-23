@@ -1,6 +1,7 @@
 package me.serce.solidity.lang.core.resolve
 
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
 import me.serce.solidity.lang.psi.SolFunctionCallExpression
 import me.serce.solidity.lang.psi.SolNamedElement
 import me.serce.solidity.utils.SolTestBase
@@ -55,6 +56,17 @@ abstract class SolResolveTestBase : SolTestBase() {
     myFixture.openFileInEditor(file1.psiFile.virtualFile)
     val (resElement, _) = findElementAndDataInEditor<SolNamedElement>("x")
     assertEquals(resElement, resolved)
+  }
+
+  protected fun testResolveToAnotherFile(fileReference: PsiFile, file: PsiFile) {
+    myFixture.openFileInEditor(file.virtualFile)
+    val (refElement) = findElementAndDataInEditor<SolNamedElement>("^")
+
+    val resolved = checkNotNull(refElement.reference?.resolve()) {
+      "Failed to resolve ${refElement.text}"
+    }
+
+    assertEquals(fileReference.name, resolved.containingFile.name)
   }
 }
 
