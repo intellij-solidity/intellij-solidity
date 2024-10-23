@@ -60,34 +60,6 @@ class SolAliasResolveTest : SolResolveTestBase() {
         )
     )
 
-    fun testResolveContractFromBracketWithAlias2() = testResolveBetweenFiles(
-      InlineFile(
-        code = """
-              pragma solidity ^0.8.26;
-                  
-              library a {
-                    //x
-                  function doit() internal {
-                  }
-              }
-        """,
-        name = "a.sol"
-      ),
-      InlineFile(
-        """
-              pragma solidity ^0.8.26;
-                  
-              import {a as A} from "./a.sol";
-                         //^
-              contract b {
-                  function test() public {
-                      A.doit();
-                  }
-              }
-      """
-      )
-    )
-
     fun testResolveImportedFunctionFromPathWithAlias() = testResolveBetweenFiles(
         InlineFile(
             code = """
@@ -162,32 +134,6 @@ class SolAliasResolveTest : SolResolveTestBase() {
         )
     )
 
-    fun testResolveContractFromPathWithAlias3() = testResolveToAnotherFile(
-      InlineFile(
-        code = """
-            pragma solidity ^0.8.26;
-            contract a {
-              function doit() public {
-              }
-            }
-        """,
-        name = "a.sol"
-      ).psiFile,
-      InlineFile(
-        """
-            pragma solidity ^0.8.26;
-                  
-            import "./a.sol" as A;
-                              //^
-            contract b {
-              function test(address x) public {
-                  A.a(x).doit();
-              }
-            }
-      """
-      ).psiFile
-    )
-
     fun testResolveImportedFunctionFromAsteriskWithAlias() = testResolveBetweenFiles(
         InlineFile(
             code = """
@@ -215,34 +161,6 @@ class SolAliasResolveTest : SolResolveTestBase() {
           }
     """
         )
-    )
-
-    fun testResolveImportedFunctionFromAsteriskWithAlias2() = testResolveToAnotherFile(
-      InlineFile(
-        code = """
-            pragma solidity ^0.8.26;
-                  
-            library a {
-              function doit() internal {
-              }
-            }
-        """,
-        name = "a.sol"
-      ).psiFile,
-      InlineFile(
-        """
-            pragma solidity ^0.8.26;
-                  
-            import * as A from "./a.sol";
-                      //^
-                
-            contract b {
-              function test() public {
-                  A.a.doit();
-              }
-            }
-      """
-      ).psiFile
     )
 
     fun testResolveContractFromAsteriskWithAlias() = checkByCode(

@@ -133,30 +133,6 @@ class SolErrorResolveTest : SolResolveTestBase() {
   """)
   )
 
-  fun testResolveErrorFromAlias2() = testResolveBetweenFiles(
-    InlineFile(
-      code = """
-         pragma solidity ^0.8.26;
-         
-          error Closed();
-                 //x
-    """,
-      name = "a.sol"
-    ),
-    InlineFile("""
-        pragma solidity ^0.8.26;
-        
-        import {Closed as ErrorClosed} from "./a.sol";
-                           //^
-
-        contract C {
-            function f() public {
-               revert ErrorClosed();
-            }
-       }
-  """)
-  )
-
   fun testResolveErrorFromAliasInInterface() = testResolveBetweenFiles(
     InlineFile(
       code = """

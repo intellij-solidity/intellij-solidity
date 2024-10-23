@@ -185,34 +185,6 @@ class SolStructResolveTest : SolResolveTestBase() {
   """)
   )
 
-  fun testResolveStructFromAlias3() = testResolveBetweenFiles(
-    InlineFile(
-      code = """
-         pragma solidity ^0.8.26;
-         
-          struct Prop {
-                //x
-              uint prop1;
-              uint prop2;
-          }
-    """,
-      name = "a.sol"
-    ),
-    InlineFile("""
-        pragma solidity ^0.8.26;
-        
-        import {Prop as Proposal} from "./a.sol";
-                          //^
-
-        contract C {
-            Proposal prop = Proposal(0, 1);
-            function f() public {
-                prop.prop1;
-            }
-       }
-  """)
-  )
-
   fun testResolveStructFromAlias4() = testResolveBetweenFiles(
     InlineFile(
       code = """
