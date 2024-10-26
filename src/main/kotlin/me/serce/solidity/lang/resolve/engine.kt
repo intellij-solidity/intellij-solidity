@@ -27,7 +27,6 @@ object SolResolver {
         resolveTypeWhenFunctionCallElement(element)
       } else {
         resolveTypeWhenFunctionCallElement(element) +
-          resolveAliases(element) +
           resolveStruct(element)
       }
       CachedValueProvider.Result.create(result, PsiModificationTracker.MODIFICATION_COUNT)
@@ -39,7 +38,8 @@ object SolResolver {
       resolveEvent(element) +
       resolveEnum(element) +
       resolveUserDefinedValueType(element) +
-      resolveConstant(element)
+      resolveConstant(element) +
+      resolveAliases(element)
 
   private fun resolveAliases(element: PsiElement): Set<SolNamedElement> {
     return resolveUsingImports(SolImportAlias::class.java, element, element.containingFile)
@@ -51,11 +51,10 @@ object SolResolver {
     file: PsiFile,
   ): Set<T> {
     // If the elements has no name or text, we can't resolve it.
-    val elementName = element.nameOrText ?: return emptySet()
-
+    var elementName = element.nameOrText ?: return emptySet()
 
     // Retrieve all PSI elements with the name we're trying to lookup.
-    val elements: Collection<SolNamedElement> = StubIndex.getElements( //
+    var elements: Collection<SolNamedElement> = StubIndex.getElements( //
       SolNamedElementIndex.KEY, //
       elementName, //
       element.project, //
@@ -63,7 +62,24 @@ object SolResolver {
       SolNamedElement::class.java //
     )
 
+    elements.filterIsInstance<SolImportAlias>().firstOrNull().let {
+      if (it != null && it.parent is SolImportAliasedPair) {
+        (it.parent as SolImportAliasedPair).userDefinedTypeName.nameOrText.let { name ->
+          if (name != null) {
+            elements = StubIndex.getElements( //
+              SolNamedElementIndex.KEY, //
+              name, //
+              element.project, //
+              null, //
+              SolNamedElement::class.java //
+            )
+          }
+        }
+      }
+    }
+
     val resolvedImportedFiles = collectImports(file)
+
     val sameNameReferences = elements.filterIsInstance(target).filter {
       val containingFile = it.containingFile
       // During completion, IntelliJ copies PSI files, and therefore we need to ensure that we compare
