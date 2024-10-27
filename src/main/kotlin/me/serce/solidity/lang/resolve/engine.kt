@@ -63,7 +63,7 @@ object SolResolver {
     )
 
     elements.filterIsInstance<SolImportAlias>().firstOrNull().let {
-      if (it != null && it.parent is SolImportAliasedPair) {
+      if (it != null && it.parent is SolImportAliasedPair && it.containingFile == file) {
         (it.parent as SolImportAliasedPair).userDefinedTypeName.nameOrText.let { name ->
           if (name != null) {
             elements = StubIndex.getElements( //
