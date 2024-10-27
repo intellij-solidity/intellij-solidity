@@ -51,7 +51,7 @@ object SolResolver {
     file: PsiFile,
   ): Set<T> {
     // If the elements has no name or text, we can't resolve it.
-    var elementName = element.nameOrText ?: return emptySet()
+    val elementName = element.nameOrText ?: return emptySet()
 
     // Retrieve all PSI elements with the name we're trying to lookup.
     var elements: Collection<SolNamedElement> = StubIndex.getElements( //
