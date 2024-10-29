@@ -317,4 +317,160 @@ class SolAliasResolveTest : SolResolveTestBase() {
             )
         )
     }
+
+  fun testResolveWithChainedAliases() {
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+         import {enumLambda as A} from "./a.sol";
+         
+         
+    """,
+      name = "b.sol"
+    )
+
+    testResolveBetweenFiles(
+      InlineFile(
+        code = """
+         pragma solidity ^0.8.26;
+         
+         enum enumLambda { A1, A2 }
+             //x
+    """,
+        name = "a.sol"
+      ),
+      InlineFile(
+        """
+        pragma solidity ^0.8.26;
+        
+        import "./b.sol" as B;
+
+        contract C {
+            function f() public {
+                B.A.A2;
+                //^
+            }
+       }
+  """
+      )
+    )
+  }
+
+  fun testResolveWithChainedAliases2() {
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+         import {enumLambda as A} from "./a.sol";
+         
+         
+    """,
+      name = "b.sol"
+    )
+
+    testResolveBetweenFiles(
+      InlineFile(
+        code = """
+         pragma solidity ^0.8.26;
+         
+         enum enumLambda { A1, A2 }
+                              //x
+    """,
+        name = "a.sol"
+      ),
+      InlineFile(
+        """
+        pragma solidity ^0.8.26;
+        
+        import "./b.sol" as B;
+
+        contract C {
+            function f() public {
+                B.A.A2;
+                  //^
+            }
+       }
+  """
+      )
+    )
+  }
+
+  fun testResolveWithChainedAliases3() {
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+         import "./a.sol" as A;
+         
+         
+    """,
+      name = "b.sol"
+    )
+
+    testResolveBetweenFiles(
+      InlineFile(
+        code = """
+         pragma solidity ^0.8.26;
+         
+         enum enumLambda { A1, A2 }
+             //x
+    """,
+        name = "a.sol"
+      ),
+      InlineFile(
+        """
+        pragma solidity ^0.8.26;
+        
+        import "./b.sol" as B;
+
+        contract C {
+            function f() public {
+                B.A.enumLambda.A2;
+                    //^
+            }
+       }
+  """
+      )
+    )
+  }
+
+  fun testResolveWithChainedAliases4() {
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+         import "./a.sol" as A;
+         
+         
+    """,
+      name = "b.sol"
+    )
+
+    testResolveBetweenFiles(
+      InlineFile(
+        code = """
+         pragma solidity ^0.8.26;
+         
+         enum enumLambda { A1, A2 }
+                             //x
+    """,
+        name = "a.sol"
+      ),
+      InlineFile(
+        """
+        pragma solidity ^0.8.26;
+        
+        import "./b.sol" as B;
+
+        contract C {
+            function f() public {
+                B.A.enumLambda.A2;
+                             //^
+            }
+       }
+  """
+      )
+    )
+  }
 }
