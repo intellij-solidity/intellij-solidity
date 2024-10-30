@@ -124,6 +124,9 @@ class SolFunctionCallReference(element: SolFunctionCallExpression) : SolReferenc
     if (element.parent is SolRevertStatement) {
       return SolResolver.resolveTypeNameUsingImports(element).filterIsInstance<SolErrorDefinition>()
     }
+    if (element.parent is SolEmitStatement) {
+      return SolResolver.resolveTypeNameUsingImports(element).filterIsInstance<SolEventDefinition>()
+    }
     if (element.firstChild is SolPrimaryExpression) {
       val structs = SolResolver.resolveTypeNameUsingImports(element.firstChild).filterIsInstance<SolStructDefinition>()
       if (structs.isNotEmpty()) {

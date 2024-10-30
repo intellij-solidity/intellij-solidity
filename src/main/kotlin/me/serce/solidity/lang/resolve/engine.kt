@@ -24,20 +24,22 @@ object SolResolver {
   fun resolveTypeNameUsingImports(element: PsiElement): Set<SolNamedElement> =
     CachedValuesManager.getCachedValue(element) {
       val result = if (element is SolFunctionCallElement) {
-        resolveError(element) +
-          resolveEvent(element) +
-          resolveContract(element) +
-          resolveEnum(element) +
-          resolveUserDefinedValueType(element)
+        resolveTypeWhenFunctionCallElement(element)
       } else {
-        resolveContract(element) +
-          resolveEnum(element) +
-          resolveStruct(element) +
-          resolveUserDefinedValueType(element) +
-          resolveAliases(element)
+        resolveTypeWhenFunctionCallElement(element) +
+          resolveAliases(element) +
+          resolveStruct(element)
       }
       CachedValueProvider.Result.create(result, PsiModificationTracker.MODIFICATION_COUNT)
     }
+
+  private fun resolveTypeWhenFunctionCallElement(element: PsiElement) =
+    resolveError(element) +
+      resolveContract(element) +
+      resolveEvent(element) +
+      resolveEnum(element) +
+      resolveUserDefinedValueType(element) +
+      resolveConstant(element)
 
   private fun resolveAliases(element: PsiElement): Set<SolNamedElement> {
     return resolveUsingImports(SolImportAlias::class.java, element, element.containingFile)
@@ -49,10 +51,7 @@ object SolResolver {
     file: PsiFile,
   ): Set<T> {
     // If the elements has no name or text, we can't resolve it.
-    val elementName = element.nameOrText
-    if (elementName == null) {
-      return emptySet()
-    }
+    val elementName = element.nameOrText ?: return emptySet()
 
 
     // Retrieve all PSI elements with the name we're trying to lookup.
@@ -198,8 +197,10 @@ object SolResolver {
       element,
       { it.userDefinedValueTypeDefinitionList }) + resolveUsingImports(SolUserDefinedValueTypeDefinition::class.java, element, element.containingFile)
 
+  private fun resolveConstant(element: PsiElement): Set<SolNamedElement> =
+    resolveUsingImports(SolConstantVariable::class.java, element, element.containingFile)
   private fun resolveEvent(element: PsiElement): Set<SolNamedElement> =
-    resolveInnerType<SolEventDefinition>(element) { it.eventDefinitionList }
+    resolveInnerType<SolEventDefinition>(element) { it.eventDefinitionList } + resolveUsingImports(SolEventDefinition::class.java, element, element.containingFile)
 
   private fun resolveError(element: PsiElement): Set<SolNamedElement> =
     resolveInnerType<SolErrorDefinition>(element) { it.errorDefinitionList } + resolveUsingImports(SolErrorDefinition::class.java, element, element.containingFile)
@@ -534,11 +535,14 @@ object SolResolver {
           val userDefinedTypes = scopeChildren.asSequence()
             .filterIsInstance<SolUserDefinedValueTypeDefinition>()
 
+          val enums = scopeChildren.asSequence()
+            .filterIsInstance<SolEnumDefinition>()
+
           val imports = scopeChildren.asSequence().filterIsInstance<SolImportDirective>()
             .mapNotNull {  it.importPath?.reference?.resolve()?.containingFile }
             .map { lexicalDeclarations(visitedScopes, it, place) }
             .flatten()
-          imports + contracts + constantVariables + freeFunctions + userDefinedTypes
+          imports + contracts + constantVariables + freeFunctions + userDefinedTypes + enums
         } ?: emptySequence()
       }
 
