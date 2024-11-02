@@ -75,8 +75,9 @@ class SolMemberAccessReference(element: SolMemberAccessExpression) : SolReferenc
         true -> (element.parent.reference as SolFunctionCallReference).resolveFunctionCallAndFilter()
           .mapNotNull { it.resolveElement() }
 
-        else -> SolResolver.collectContracts(importAlias)
-          .filter { contract -> contract.name == element.identifier!!.text }
+        else -> {
+          return SolResolver.resolveTypeNameUsingImports(element).toList()
+        }
       }
     }
     return SolResolver.resolveMemberAccess(element).mapNotNull { it.resolveElement() }

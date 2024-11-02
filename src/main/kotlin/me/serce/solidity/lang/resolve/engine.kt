@@ -38,8 +38,7 @@ object SolResolver {
       resolveEvent(element) +
       resolveEnum(element) +
       resolveUserDefinedValueType(element) +
-      resolveConstant(element) +
-      resolveAliases(element)
+      resolveConstant(element)
 
   private fun resolveAliases(element: PsiElement): Set<SolNamedElement> {
     return resolveUsingImports(SolImportAlias::class.java, element, element.containingFile)
@@ -54,7 +53,7 @@ object SolResolver {
     val elementName = element.nameOrText ?: return emptySet()
 
     // Retrieve all PSI elements with the name we're trying to lookup.
-    var elements: Collection<SolNamedElement> = StubIndex.getElements( //
+    val elements: Collection<SolNamedElement> = StubIndex.getElements( //
       SolNamedElementIndex.KEY, //
       elementName, //
       element.project, //
@@ -62,35 +61,37 @@ object SolResolver {
       SolNamedElement::class.java //
     )
 
-    elements.filterIsInstance<SolImportAlias>().firstOrNull().let {
-      if (it != null && it.parent is SolImportAliasedPair && it.containingFile == file) {
-        (it.parent as SolImportAliasedPair).userDefinedTypeName.nameOrText.let { name ->
-          if (name != null) {
-            elements = StubIndex.getElements( //
-              SolNamedElementIndex.KEY, //
-              name, //
-              element.project, //
-              null, //
-              SolNamedElement::class.java //
-            )
-          }
-        }
-      }
-    }
-
     val resolvedImportedFiles = collectImports(file)
 
-    val sameNameReferences = elements.filterIsInstance(target).filter {
+    val sameNameReferences = elements.filter {
       val containingFile = it.containingFile
       // During completion, IntelliJ copies PSI files, and therefore we need to ensure that we compare
       // files against its original file.
       val originalFile = file.originalFile
       // Below, either include
-      containingFile == originalFile || resolvedImportedFiles.any { (containingFile == it.file) && it.names.let {it.isEmpty() || it.any { it.name == elementName }}}
-
-
+      containingFile == originalFile || resolvedImportedFiles.any { (containingFile == it.file) && it.names.let { it.isEmpty() || it.any { it.name == elementName } } }
     }
-    return sameNameReferences.toSet()
+
+    val sameNameReferencesAndType = sameNameReferences.filterIsInstance(target)
+    if (sameNameReferencesAndType.isNotEmpty()) {
+      return sameNameReferencesAndType.toSet()
+    } else if (sameNameReferences.filterIsInstance<SolImportAlias>().isNotEmpty()) {
+      val aliasElement = sameNameReferences.filterIsInstance<SolImportAlias>().first()
+      if (isAliasOfFile(aliasElement)) {
+        return emptySet()
+      } else {
+        val elementFromAlias = (aliasElement.parent as SolImportAliasedPair).userDefinedTypeName
+        val aliasFile =
+          aliasElement.parentOfType<SolImportDirective>()?.importPath?.reference?.resolve()?.containingFile
+        if (aliasFile != null) {
+          return resolveUsingImports(target, elementFromAlias, aliasFile)
+        }
+      }
+    } else {
+      return emptySet()
+    }
+
+    return emptySet()
   }
 
   data class ImportRecord(val file: PsiFile, val names: List<SolNamedElement>)
@@ -389,8 +390,15 @@ object SolResolver {
     }
   }
 
+  private fun isAliasOfFile(alias :SolImportAlias): Boolean {
+    return when (alias.parent) {
+      is SolImportAliasedPair -> false
+      else -> true
+    }
+  }
+
   //return the right element to search
-  fun getElementFromAlias(element: SolNamedElement, import: SolImportDirective): SolNamedElement {
+  private fun getElementFromAlias(element: SolNamedElement, import: SolImportDirective): SolNamedElement {
     if (import.importAlias?.name == element.name) {
         //match import * as A from "path"
         //match import "path" as A
