@@ -38,9 +38,10 @@ object SolResolver {
       resolveEvent(element) +
       resolveEnum(element) +
       resolveUserDefinedValueType(element) +
-      resolveConstant(element)
+      resolveConstant(element) +
+      resolveAliases(element)
 
-  private fun resolveAliases(element: PsiElement): Set<SolNamedElement> {
+  fun resolveAliases(element: PsiElement): Set<SolNamedElement> {
     return resolveUsingImports(SolImportAlias::class.java, element, element.containingFile)
   }
 
@@ -390,7 +391,7 @@ object SolResolver {
     }
   }
 
-  private fun isAliasOfFile(alias :SolImportAlias): Boolean {
+  fun isAliasOfFile(alias :SolImportAlias): Boolean {
     return when (alias.parent) {
       is SolImportAliasedPair -> false
       else -> true
@@ -432,6 +433,32 @@ object SolResolver {
       else -> element.getMembers()
         .filter { it.getName() == memberName && if (isFunctionCall) it !is SolFunctionReference else it !is SolFunctionDefinition}
     }
+  }
+
+  fun resolveMemberAccessWithAliases(element: PsiElement): List<SolNamedElement> {
+    resolveTypeNameUsingImports(element).let { result ->
+      if (result.isEmpty()) {
+        return emptyList()
+      } else if (result.any { it !is SolImportAlias }) {
+        result.filter { it !is SolImportAlias }.forEach {
+          if (it is SolEnumDefinition) {
+            val elementName = run {
+              var currentMember = element
+              while (currentMember.parent is SolMemberAccessExpression) {
+                currentMember = currentMember.parent as SolMemberAccessExpression
+              }
+              currentMember.nameOrText
+            }
+            return it.enumValueList.filter { enumValue -> enumValue.nameOrText == elementName }
+          }
+        }
+      } else if (element.parent is SolMemberAccessExpression) {
+        return resolveMemberAccessWithAliases(element.parent)
+      } else {
+        return emptyList()
+      }
+    }
+    return emptyList()
   }
 
   fun resolveContractMembers(contract: SolContractDefinition, skipThis: Boolean = false): List<SolMember> {
