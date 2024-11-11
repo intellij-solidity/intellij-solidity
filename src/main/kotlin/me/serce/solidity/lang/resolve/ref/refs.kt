@@ -78,14 +78,7 @@ class SolMemberAccessReference(element: SolMemberAccessExpression) : SolReferenc
         else -> {
           SolResolver.resolveTypeNameUsingImports(element).toList().let { resolvedNames ->
             return when (resolvedNames.isNotEmpty()) {
-              true -> {
-                if (resolvedNames.any { it !is SolImportAlias }) {
-                  resolvedNames.filter { it !is SolImportAlias }
-                } else {
-                  resolvedNames
-                }
-              }
-
+              true -> resolvedNames
               else -> SolResolver.resolveMemberAccessWithAliases(firstMemberElement)
             }
           }

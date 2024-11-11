@@ -23,11 +23,14 @@ import me.serce.solidity.wrap
 object SolResolver {
   fun resolveTypeNameUsingImports(element: PsiElement): Set<SolNamedElement> =
     CachedValuesManager.getCachedValue(element) {
-      val result = if (element is SolFunctionCallElement) {
+      var result = if (element is SolFunctionCallElement) {
         resolveTypeWhenFunctionCallElement(element)
       } else {
         resolveTypeWhenFunctionCallElement(element) +
           resolveStruct(element)
+      }
+      if (result.any { it !is SolImportAlias }) {
+        result = result.filter { it !is SolImportAlias }.toSet()
       }
       CachedValueProvider.Result.create(result, PsiModificationTracker.MODIFICATION_COUNT)
     }
