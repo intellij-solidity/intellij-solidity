@@ -225,7 +225,7 @@ class SolEventResolveTest : SolResolveTestBase() {
 
         contract C {
             function f() public {
-               emit Types.EventClosed();
+               emit Types.Closed();
                            //^
             }
        }
