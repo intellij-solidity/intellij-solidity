@@ -152,7 +152,7 @@ class SolErrorResolveTest : SolResolveTestBase() {
 
         contract C {
             function f() public {
-               revert Types.ErrorClosed();
+               revert Types.Closed();
                             //^
             }
        }
