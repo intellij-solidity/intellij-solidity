@@ -76,10 +76,17 @@ class SolMemberAccessReference(element: SolMemberAccessExpression) : SolReferenc
           .mapNotNull { it.resolveElement() }
 
         else -> {
-          SolResolver.resolveTypeNameUsingImports(element).toList().let {
-            return when (it.isNotEmpty()) {
-              true -> it
-              else -> return SolResolver.resolveMemberAccessWithAliases(firstMemberElement)
+          SolResolver.resolveTypeNameUsingImports(element).toList().let { resolvedNames ->
+            return when (resolvedNames.isNotEmpty()) {
+              true -> {
+                if (resolvedNames.any { it !is SolImportAlias }) {
+                  resolvedNames.filter { it !is SolImportAlias }
+                } else {
+                  resolvedNames
+                }
+              }
+
+              else -> SolResolver.resolveMemberAccessWithAliases(firstMemberElement)
             }
           }
         }
