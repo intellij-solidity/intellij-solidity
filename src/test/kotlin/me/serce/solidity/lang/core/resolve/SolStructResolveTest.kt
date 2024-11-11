@@ -191,8 +191,8 @@ class SolStructResolveTest : SolResolveTestBase() {
          pragma solidity ^0.8.26;
          
           struct Prop {
-                //x
               uint prop1;
+                  //x
               uint prop2;
           }
     """,
