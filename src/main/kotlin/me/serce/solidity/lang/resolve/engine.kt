@@ -27,6 +27,7 @@ object SolResolver {
         resolveTypeWhenFunctionCallElement(element)
       } else {
         resolveTypeWhenFunctionCallElement(element) +
+          resolveAliases(element) +
           resolveStruct(element)
       }
       if (result.any { it !is SolImportAlias }) {
@@ -41,8 +42,7 @@ object SolResolver {
       resolveEvent(element) +
       resolveEnum(element) +
       resolveUserDefinedValueType(element) +
-      resolveConstant(element) +
-      resolveAliases(element)
+      resolveConstant(element)
 
   fun resolveAliases(element: PsiElement): Set<SolNamedElement> {
     return resolveUsingImports(SolImportAlias::class.java, element, element.containingFile)
