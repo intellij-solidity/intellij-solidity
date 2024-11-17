@@ -895,6 +895,47 @@ class SolAliasResolveTest : SolResolveTestBase() {
                     //x
             }
         }
+    """, name = "a.sol"
+      ), InlineFile(
+        """
+        pragma solidity ^0.8.26;
+        
+        import "./b.sol" as B;
+
+        contract C {
+            function f() public {
+               B.A.contractA(address(0)).doit();
+                                        //^
+            }
+        }
+      """
+      )
+    )
+  }
+
+  fun testResolveStructInInterfaceWithChainedAliases() {
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+         import "./a.sol" as A;
+         
+    """,
+      name = "b.sol"
+    )
+
+    testResolveBetweenFiles(
+      InlineFile(
+        code = """
+         pragma solidity ^0.8.26;
+         
+         interface InterfaceTest{
+           struct structA {
+                  //x
+              address x;
+              uint256 y;
+          }
+        }
     """,
         name = "a.sol"
       ),
@@ -906,11 +947,55 @@ class SolAliasResolveTest : SolResolveTestBase() {
 
         contract C {
             function f() public {
-               B.A.contractA(address(0)).doit();
-                                        //^
+                 B.A.InterfaceTest.structA;
+                                    //^
             }
        }
-  """
+    """
+      )
+    )
+  }
+
+  fun testResolveStructInInterfaceWithChainedAliases2() {
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+         import "./a.sol" as A;
+         
+    """,
+      name = "b.sol"
+    )
+
+    testResolveBetweenFiles(
+      InlineFile(
+        code = """
+         pragma solidity ^0.8.26;
+         
+         interface InterfaceTest{
+           struct structA {
+              address x;
+              uint256 y;
+                    //x
+          }
+        }
+    """,
+        name = "a.sol"
+      ),
+      InlineFile(
+        """
+        pragma solidity ^0.8.26;
+        
+        import "./b.sol" as B;
+
+        contract C {
+            function f() public {
+                  B.A.structA testStruct = B.A.structA(address(0),2);
+                  testStruct.y;
+                           //^
+            }
+       }
+    """
       )
     )
   }
