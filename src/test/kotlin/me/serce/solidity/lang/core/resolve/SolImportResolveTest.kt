@@ -4,66 +4,36 @@ import com.intellij.psi.PsiNamedElement
 import me.serce.solidity.lang.psi.SolNamedElement
 
 class SolImportResolveTest : SolResolveTestBase() {
-  fun testImportPathResolve() {
-    val file1 = InlineFile(
+  fun testImportPathResolve() = testResolveToAnotherFile(
+    InlineFile(
       code = "contract a {}",
       name = "Ownable.sol"
-    )
-
-    InlineFile("""
+    ).psiFile,
+    InlineFile(
+      """
           import "./Ownable.sol";
                       //^
 
           contract b {}
-    """)
+    """).psiFile
+  )
 
-    val (refElement) = findElementAndDataInEditor<SolNamedElement>("^")
-
-    val resolved = checkNotNull(refElement.reference?.resolve()) {
-      "Failed to resolve ${refElement.text}"
-    }
-
-    assertEquals(file1.name, resolved.containingFile.name)
-  }
-
-  fun testImportPathResolveNpm() {
-    val file1 = myFixture.configureByFile("node_modules/util/contracts/TestImport.sol")
+  fun testImportPathResolveNpm() = testResolveToAnotherFile(
+    myFixture.configureByFile("node_modules/util/contracts/TestImport.sol"),
     myFixture.configureByFile("contracts/ImportUsage.sol")
+  )
 
-    val (refElement) = findElementAndDataInEditor<SolNamedElement>("^")
-
-    val resolved = checkNotNull(refElement.reference?.resolve()) {
-      "Failed to resolve ${refElement.text}"
-    }
-
-    assertEquals(file1.name, resolved.containingFile.name)
-  }
-
-  fun testImportPathResolveEthPM() {
-    val file1 = myFixture.configureByFile("installed_contracts/util/contracts/TestImport.sol")
+  fun testImportPathResolveEthPM() = testResolveToAnotherFile(
+    myFixture.configureByFile("installed_contracts/util/contracts/TestImport.sol"),
     myFixture.configureByFile("contracts/ImportUsageEthPM.sol")
+  )
 
-    val (refElement) = findElementAndDataInEditor<SolNamedElement>("^")
 
-    val resolved = checkNotNull(refElement.reference?.resolve()) {
-      "Failed to resolve ${refElement.text}"
-    }
-
-    assertEquals(file1.name, resolved.containingFile.name)
-  }
-
-  fun testImportPathResolveFoundry() {
-    val file1 = myFixture.configureByFile("lib/util/src/TestImport.sol")
+  fun testImportPathResolveFoundry() = testResolveToAnotherFile(
+    myFixture.configureByFile("lib/util/src/TestImport.sol"),
     myFixture.configureByFile("contracts/ImportUsageFoundry.sol")
+  )
 
-    val (refElement) = findElementAndDataInEditor<SolNamedElement>("^")
-
-    val resolved = checkNotNull(refElement.reference?.resolve()) {
-      "Failed to resolve ${refElement.text}"
-    }
-
-    assertEquals(file1.name, resolved.containingFile.name)
-  }
 
   fun testResolveNameClash() {
 

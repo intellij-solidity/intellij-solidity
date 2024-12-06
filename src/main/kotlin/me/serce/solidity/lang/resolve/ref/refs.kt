@@ -68,15 +68,21 @@ class SolMemberAccessReference(element: SolMemberAccessExpression) : SolReferenc
   }
 
   override fun multiResolve(): List<SolNamedElement> {
-    val importAlias = element.childOfType<SolPrimaryExpression>()
-      .let { it?.varLiteral?.let { varLiteral -> SolResolver.resolveAlias(varLiteral) } }
+    val firstMemberElement = element.childOfType<SolPrimaryExpression>()
+    val importAlias = firstMemberElement?.varLiteral?.let { varLiteral -> SolResolver.resolveAlias(varLiteral) }
     if (importAlias != null && SolResolver.isAliasOfFile(importAlias)) {
       return when (element.parent is SolFunctionCallExpression) {
         true -> (element.parent.reference as SolFunctionCallReference).resolveFunctionCallAndFilter()
           .mapNotNull { it.resolveElement() }
 
-        else -> SolResolver.collectContracts(importAlias)
-          .filter { contract -> contract.name == element.identifier!!.text }
+        else -> {
+          SolResolver.resolveTypeNameUsingImports(element).toList().let { resolvedNames ->
+            return when (resolvedNames.isNotEmpty()) {
+              true -> resolvedNames
+              else -> SolResolver.resolveMemberAccessWithAliases(firstMemberElement)
+            }
+          }
+        }
       }
     }
     return SolResolver.resolveMemberAccess(element).mapNotNull { it.resolveElement() }
