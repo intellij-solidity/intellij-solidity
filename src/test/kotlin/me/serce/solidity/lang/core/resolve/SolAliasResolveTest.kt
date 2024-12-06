@@ -990,7 +990,7 @@ class SolAliasResolveTest : SolResolveTestBase() {
 
         contract C {
             function f() public {
-                  B.A.structA testStruct = B.A.structA(address(0),2);
+                  B.A.InterfaceTest.structA memory testStruct = B.A.InterfaceTest.structA(address(0),2);
                   testStruct.y;
                            //^
             }
