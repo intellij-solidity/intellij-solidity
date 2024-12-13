@@ -248,7 +248,27 @@ object SolResolver {
         element.wrap()
       }
       when {
-        names.size > 2 -> emptySet()
+        names.size > 2 -> {
+          val indexNameWithoutAliases = names.indexOf(names.find { name ->
+            val resolved = resolveTypeNameUsingImports(name).first()
+            resolved !is SolImportAlias || !isAliasOfFile(resolved)
+          })
+          if (names.size - indexNameWithoutAliases == 2) {
+            resolveTypeNameUsingImports(names[indexNameWithoutAliases])
+              .filterIsInstance<SolContractDefinition>()
+              .firstOrNull()
+              ?.let { resolveInnerType(it, names[indexNameWithoutAliases + 1].nameOrText!!, f) } ?: emptySet()
+          } else if (names.size - indexNameWithoutAliases == 1) {
+            element.parentOfType<SolContractDefinition>()
+              ?.let {
+                names[indexNameWithoutAliases].nameOrText?.let { nameOrText ->
+                  resolveInnerType(it, nameOrText, f)
+                }
+              } ?: emptySet()
+          } else {
+            emptySet()
+          }
+        }
         names.size > 1 -> resolveTypeNameUsingImports(names[0])
           .filterIsInstance<SolContractDefinition>()
           .firstOrNull()
