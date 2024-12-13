@@ -97,13 +97,21 @@ class SolContractResolveTest : SolResolveTestBase() {
     """)
   )
 
-  fun testResolveSymbolAliases2() = checkByCode(
-    """
+  fun testResolveSymbolAliases2() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+          contract a {}
+                 //x
+      """,
+      name = "a.sol"
+    ),
+    InlineFile("""
           import {a as A} from "./a.sol";
-                     //x
+          
           contract b is A {}
                       //^
-    """
+                      
+    """)
   )
 
   fun testResolveSymbolAliasesChain() {
@@ -169,26 +177,26 @@ class SolContractResolveTest : SolResolveTestBase() {
     assertNull(refElement.reference?.resolve())
   }
 
-    fun testResolveWithCast() = testResolveBetweenFiles(
-        InlineFile(
-            code = """
-            contract A {
-                   //x
-                function doit2() {
-                }
-            }
-      """,
-            name = "a.sol"
-        ),
-        InlineFile("""
-          import "./a.sol";
+  fun testResolveWithCast() = testResolveBetweenFiles(
+      InlineFile(
+          code = """
+          contract A {
+                 //x
+              function doit2() {
+              }
+          }
+    """,
+          name = "a.sol"
+      ),
+      InlineFile("""
+        import "./a.sol";
 
-          contract B {
-            function doit(address some) {
-                A(some).doit2();
-              //^
-            }
-         }
-    """)
-    )
+        contract B {
+          function doit(address some) {
+              A(some).doit2();
+            //^
+          }
+       }
+  """)
+  )
 }
