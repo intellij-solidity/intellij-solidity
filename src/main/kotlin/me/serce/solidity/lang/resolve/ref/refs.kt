@@ -190,9 +190,12 @@ class SolFunctionCallReference(element: SolFunctionCallExpression) : SolReferenc
       .let { it?.varLiteral?.let { varLiteral -> SolResolver.resolveAlias(varLiteral) } }
 
     return if (importAlias != null && name != null) {
-      //if true, then it's a contract resolution like A.a
-      if (expression.firstChild is SolPrimaryExpression) {
-        SolResolver.collectContracts(importAlias).filter { contract -> contract.name == name }
+      //need to check if the penultimate member is an alias of file or a contract to know how to resolve the last member
+      val importPenultimateMember = SolResolver.collectImportDirective(importAlias)
+        .firstOrNull { it.importAlias != null && it.importAlias!!.text == expression.firstChild.lastChild.text }
+      //if true, then it's a file level resolution like fileAlias.element
+      if (importPenultimateMember != null && SolResolver.isAliasOfFile(importPenultimateMember)) {
+        SolResolver.collectChildrenOfFile(importAlias).filter { elem -> elem.getName() == name }
       } else {
         //looking to resolve member of a contract
         //first need to find the contract name

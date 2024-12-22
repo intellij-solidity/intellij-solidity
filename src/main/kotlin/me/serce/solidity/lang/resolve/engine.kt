@@ -205,6 +205,14 @@ object SolResolver {
     return collectImports(import).flatMap { it.file.childrenOfType<SolContractDefinition>() }
   }
 
+  fun collectChildrenOfFile(import: SolImportDirective): Collection<SolCallable> {
+    return collectImports(import).flatMap { it.file.childrenOfType<SolCallableElement>() }
+  }
+
+  fun collectImportDirective(import: SolImportDirective): Collection<SolImportDirective> {
+    return collectImports(import).flatMap { it.file.childrenOfType<SolImportDirective>() }
+  }
+
   private fun resolveContract(element: PsiElement): Set<SolContractDefinition> =
     resolveUsingImports(SolContractDefinition::class.java, element, element.containingFile)
   private fun resolveEnum(element: PsiElement): Set<SolNamedElement> =
