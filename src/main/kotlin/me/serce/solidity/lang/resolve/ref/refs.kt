@@ -186,16 +186,18 @@ class SolFunctionCallReference(element: SolFunctionCallExpression) : SolReferenc
   private fun resolveMemberFunctions(expression: SolMemberAccessExpression): Collection<SolCallable> {
     val name = expression.identifier?.text
 
-    val importAlias = expression.childOfType<SolPrimaryExpression>()
+    val importDirectiveAlias = expression.childOfType<SolPrimaryExpression>()
       .let { it?.varLiteral?.let { varLiteral -> SolResolver.resolveAlias(varLiteral) } }
 
-    return if (importAlias != null && name != null) {
+    return if (importDirectiveAlias != null && name != null) {
       //need to check if the penultimate member is an alias of file or a contract to know how to resolve the last member
-      val importPenultimateMember = SolResolver.collectImportDirective(importAlias)
+      val importPenultimateMember = SolResolver.collectImportDirective(importDirectiveAlias)
         .firstOrNull { it.importAlias != null && it.importAlias!!.text == expression.firstChild.lastChild.text }
       //if true, then it's a file level resolution like fileAlias.element
-      if (importPenultimateMember != null && SolResolver.isAliasOfFile(importPenultimateMember)) {
-        SolResolver.collectChildrenOfFile(importAlias).filter { elem -> elem.getName() == name }
+      if (importDirectiveAlias.importAlias?.text == expression.firstChild.lastChild.text
+        || importPenultimateMember != null && SolResolver.isAliasOfFile(importPenultimateMember)
+      ) {
+        SolResolver.collectChildrenOfFile(importDirectiveAlias).filter { elem -> elem.getName() == name }
       } else {
         //looking to resolve member of a contract
         //first need to find the contract name
@@ -206,7 +208,7 @@ class SolFunctionCallReference(element: SolFunctionCallExpression) : SolReferenc
         }
 
         //resolve member
-        SolResolver.collectContracts(importAlias).filter { contract -> contract.name == contractToLook }.map {
+        SolResolver.collectContracts(importDirectiveAlias).filter { contract -> contract.name == contractToLook }.map {
           SolResolver.resolveContractMembers(it).filterIsInstance<SolCallable>()
             .filter { member -> member.getName() == name }
         }.flatten()
