@@ -86,7 +86,9 @@ object SolResolver {
         val aliasFile =
           aliasElement.parentOfType<SolImportDirective>()?.importPath?.reference?.resolve()?.containingFile
         if (aliasFile != null) {
-          return resolveUsingImports(target, elementFromAlias, aliasFile)
+          return RecursionManager.doPreventingRecursion(aliasFile, true) {
+            resolveUsingImports(target, elementFromAlias, aliasFile)
+          } ?: emptySet()
         }
       }
     }
