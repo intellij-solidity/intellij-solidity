@@ -128,10 +128,16 @@ class SolFunctionCallReference(element: SolFunctionCallExpression) : SolReferenc
 
   fun resolveFunctionCall(): Collection<SolCallable> {
     if (element.parent is SolRevertStatement) {
-      return SolResolver.resolveTypeNameUsingImports(element).filterIsInstance<SolErrorDefinition>()
+      val errors = SolResolver.resolveTypeNameUsingImports(element).filterIsInstance<SolErrorDefinition>()
+      if (errors.isNotEmpty()) {
+        return errors
+      }
     }
     if (element.parent is SolEmitStatement) {
-      return SolResolver.resolveTypeNameUsingImports(element).filterIsInstance<SolEventDefinition>()
+      val events = SolResolver.resolveTypeNameUsingImports(element).filterIsInstance<SolEventDefinition>()
+      if (events.isNotEmpty()) {
+        return events
+      }
     }
     if (element.firstChild is SolPrimaryExpression) {
       val structs = SolResolver.resolveTypeNameUsingImports(element.firstChild).filterIsInstance<SolStructDefinition>()
