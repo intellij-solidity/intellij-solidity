@@ -81,9 +81,7 @@ object SolResolver {
       return sameNameReferencesAndType.toSet()
     } else if (sameNameReferences.filterIsInstance<SolImportAlias>().isNotEmpty()) {
       val aliasElement = sameNameReferences.filterIsInstance<SolImportAlias>().first()
-      if (isAliasOfFile(aliasElement)) {
-        return emptySet()
-      } else {
+      if (!isAliasOfFile(aliasElement)) {
         val elementFromAlias = (aliasElement.parent as SolImportAliasedPair).userDefinedTypeName
         val aliasFile =
           aliasElement.parentOfType<SolImportDirective>()?.importPath?.reference?.resolve()?.containingFile
@@ -91,8 +89,6 @@ object SolResolver {
           return resolveUsingImports(target, elementFromAlias, aliasFile)
         }
       }
-    } else {
-      return emptySet()
     }
 
     return emptySet()
