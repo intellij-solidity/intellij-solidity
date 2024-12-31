@@ -258,4 +258,117 @@ class SolAliasEnumResolveTest : SolResolveTestBase() {
        }
   """)
   )
+
+  fun testResolveEnumFromChainedAliasInInterface() {
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+         import {InterfaceI as Types} from "./a.sol";
+    """,
+      name = "b.sol"
+    )
+    testResolveBetweenFiles(
+      InlineFile(
+        code = """
+         pragma solidity ^0.8.26;
+         
+         interface InterfaceI {
+            enum enumLambda { A1, A2 }
+               //x
+         }
+    """,
+        name = "a.sol"
+      ),
+      InlineFile(
+        """
+        pragma solidity ^0.8.26;
+        
+        import "./b.sol" as B;
+
+        contract C {
+          function f() public {
+            B.Types.enumLambda.A2;
+                       //^
+          }
+        }
+      """
+      )
+    )
+  }
+
+  fun testResolveEnumMemberFromChainedAliasInInterface() {
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+         import {InterfaceI as Types} from "./a.sol";
+    """,
+      name = "b.sol"
+    )
+    testResolveBetweenFiles(
+      InlineFile(
+        code = """
+         pragma solidity ^0.8.26;
+         
+         interface InterfaceI {
+            enum enumLambda { A1, A2 }
+                                 //x
+         }
+    """,
+        name = "a.sol"
+      ),
+      InlineFile(
+        """
+        pragma solidity ^0.8.26;
+        
+        import "./b.sol" as B;
+
+        contract C {
+          function f() public {
+            B.Types.enumLambda.A2;
+                              //^
+          }
+        }
+      """
+      )
+    )
+  }
+
+  fun testResolveEnumAsParameterWithChainedAlias()  {
+      InlineFile(
+        code = """
+         pragma solidity ^0.8.26;
+         
+         import {ContractA as A} from "./a.sol";
+         
+         
+    """,
+        name = "b.sol"
+      )
+    testResolveBetweenFiles(
+      InlineFile(
+        code = """
+         pragma solidity ^0.8.26;
+         
+         contract ContractA {
+            enum enumLambda { A1, A2 }
+               //x
+         }
+    """,
+        name = "a.sol"
+      ),
+      InlineFile("""
+        pragma solidity ^0.8.26;
+        
+        import "./b.sol" as B;
+        
+        contract C {
+            function f(B.A.enumLambda test) public {
+                            //^
+            }
+        }
+  """)
+    )
+  }
 }
