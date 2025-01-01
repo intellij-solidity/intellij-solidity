@@ -87,4 +87,56 @@ class SolAliasVarResolveTest : SolResolveTestBase() {
   """
     )
   )
+
+  fun testResolveVarFromFileAliasInContract() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+          contract a {
+            address public user;
+                          //x
+          }
+    """,
+      name = "a.sol"
+    ),
+    InlineFile(
+      """
+        pragma solidity ^0.8.26;
+        
+        import "./a.sol" as A;
+
+        contract b {
+          address public user = A.a(address(0)).user();
+                                                //^ 
+        }
+  """
+    )
+  )
+
+  fun testResolveVarFromAliasInContract() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+          contract a {
+            address public user;
+                          //x
+          }
+    """,
+      name = "a.sol"
+    ),
+    InlineFile(
+      """
+        pragma solidity ^0.8.26;
+        
+        import {a as ContractA} from "./a.sol";
+
+        contract b {
+          address public user = ContractA(address(0)).user();
+                                                    //^ 
+        }
+  """
+    )
+  )
 }
