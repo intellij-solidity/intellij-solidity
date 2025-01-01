@@ -58,4 +58,33 @@ class SolAliasVarResolveTest : SolResolveTestBase() {
   """
     )
   )
+
+  fun testResolveConstantFromFileAliasInInterface() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+         interface InterfaceI {
+            address constant CONSTANT_A = address(0x1111111111111111111111111111111111111111);
+                              //x
+         }
+    """,
+      name = "a.sol"
+    ),
+    InlineFile(
+      """
+        pragma solidity ^0.8.26;
+        
+        import "./a.sol" as A;
+
+        contract b {
+            address public user;
+              function setUser() public {
+                user = A.InterfaceI.CONSTANT_A;
+                                    //^ 
+              }
+          }
+  """
+    )
+  )
 }
