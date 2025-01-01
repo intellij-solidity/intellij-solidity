@@ -13,7 +13,8 @@ class SolAliasEventResolveTest : SolResolveTestBase() {
     """,
       name = "a.sol"
     ),
-    InlineFile("""
+    InlineFile(
+      """
         pragma solidity ^0.8.26;
         
         import {Closed as EventClosed} from "./a.sol";
@@ -24,7 +25,8 @@ class SolAliasEventResolveTest : SolResolveTestBase() {
                         //^
             }
        }
-  """)
+  """
+    )
   )
 
   fun testResolveEventFromAliasInInterface() = testResolveBetweenFiles(
@@ -39,7 +41,8 @@ class SolAliasEventResolveTest : SolResolveTestBase() {
     """,
       name = "a.sol"
     ),
-    InlineFile("""
+    InlineFile(
+      """
         pragma solidity ^0.8.26;
         
         import {InterfaceI as Types} from "./a.sol";
@@ -50,6 +53,83 @@ class SolAliasEventResolveTest : SolResolveTestBase() {
                            //^
             }
        }
-  """)
+  """
+    )
   )
+
+  fun testResolveEventWithChainedAliases() {
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+         import {Closed as A} from "./a.sol";
+         
+    """,
+      name = "b.sol"
+    )
+
+    testResolveBetweenFiles(
+      InlineFile(
+        code = """
+         pragma solidity ^0.8.26;
+         
+         event Closed();
+              //x
+      """,
+        name = "a.sol"
+      ),
+      InlineFile(
+        """
+        pragma solidity ^0.8.26;
+        
+        import "./b.sol" as B;
+
+        contract C {
+            function f() public {
+                emit B.A;
+                     //^
+            }
+       }
+  """
+      )
+    )
+  }
+
+  fun testResolveEventWithChainedFileAlias() {
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+         import "./a.sol" as A;
+         
+    """,
+      name = "b.sol"
+    )
+
+    testResolveBetweenFiles(
+      InlineFile(
+        code = """
+         pragma solidity ^0.8.26;
+         
+         event Closed();
+              //x
+    """,
+        name = "a.sol"
+      ),
+      InlineFile(
+        """
+        pragma solidity ^0.8.26;
+        
+        import "./b.sol" as B;
+
+        contract C {
+            function f() public {
+                emit B.A.Closed;
+                          //^
+            }
+       }
+  """
+      )
+    )
+  }
 }
