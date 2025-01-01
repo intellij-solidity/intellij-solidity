@@ -140,7 +140,8 @@ class SolAliasStructResolveTest : SolResolveTestBase() {
     """,
       name = "a.sol"
     ),
-    InlineFile("""
+    InlineFile(
+      """
         pragma solidity ^0.8.26;
         
         import {Prop as Proposal} from "./a.sol";
@@ -152,7 +153,8 @@ class SolAliasStructResolveTest : SolResolveTestBase() {
                 prop.prop1;
             }
        }
-  """)
+  """
+    )
   )
 
   fun testResolveStructFromAlias2() = testResolveBetweenFiles(
@@ -168,7 +170,8 @@ class SolAliasStructResolveTest : SolResolveTestBase() {
     """,
       name = "a.sol"
     ),
-    InlineFile("""
+    InlineFile(
+      """
         pragma solidity ^0.8.26;
         
         import {Prop as Proposal} from "./a.sol";
@@ -180,7 +183,8 @@ class SolAliasStructResolveTest : SolResolveTestBase() {
                 prop.prop1;
             }
        }
-  """)
+  """
+    )
   )
 
   fun testResolveStructMemberFromAlias() = testResolveBetweenFiles(
@@ -196,7 +200,8 @@ class SolAliasStructResolveTest : SolResolveTestBase() {
     """,
       name = "a.sol"
     ),
-    InlineFile("""
+    InlineFile(
+      """
         pragma solidity ^0.8.26;
         
         import {Prop as Proposal} from "./a.sol";
@@ -208,6 +213,94 @@ class SolAliasStructResolveTest : SolResolveTestBase() {
                       //^
             }
        }
-  """)
+  """
+    )
   )
+
+  fun testResolveStructInInterfaceWithChainedFileAlias() {
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+         import "./a.sol" as A;
+         
+    """,
+      name = "b.sol"
+    )
+
+    testResolveBetweenFiles(
+      InlineFile(
+        code = """
+         pragma solidity ^0.8.26;
+         
+         interface InterfaceTest{
+           struct structA {
+                  //x
+              address x;
+              uint256 y;
+          }
+        }
+    """,
+        name = "a.sol"
+      ),
+      InlineFile(
+        """
+        pragma solidity ^0.8.26;
+        
+        import "./b.sol" as B;
+
+        contract C {
+            function f() public {
+                 B.A.InterfaceTest.structA;
+                                    //^
+            }
+       }
+    """
+      )
+    )
+  }
+
+  fun testResolveStructMemberInInterfaceWithChainedFileAlias() {
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+         import "./a.sol" as A;
+         
+    """,
+      name = "b.sol"
+    )
+
+    testResolveBetweenFiles(
+      InlineFile(
+        code = """
+         pragma solidity ^0.8.26;
+         
+         interface InterfaceTest{
+           struct structA {
+              address x;
+              uint256 y;
+                    //x
+          }
+        }
+    """,
+        name = "a.sol"
+      ),
+      InlineFile(
+        """
+        pragma solidity ^0.8.26;
+        
+        import "./b.sol" as B;
+
+        contract C {
+            function f() public {
+                  B.A.InterfaceTest.structA memory testStruct = B.A.InterfaceTest.structA(address(0),2);
+                  testStruct.y;
+                           //^
+            }
+       }
+    """
+      )
+    )
+  }
 }

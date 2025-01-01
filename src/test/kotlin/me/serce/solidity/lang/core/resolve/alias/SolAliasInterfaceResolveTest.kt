@@ -54,4 +54,44 @@ class SolAliasInterfaceResolveTest : SolResolveTestBase() {
        }
   """)
   )
+
+  fun testResolveInterfaceWithChainedFileAlias() {
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+         import "./a.sol" as A;
+         
+    """,
+      name = "b.sol"
+    )
+
+    testResolveBetweenFiles(
+      InlineFile(
+        code = """
+         pragma solidity ^0.8.26;
+         
+        interface InterfaceTest{
+                    //x
+            error errorB();
+        }
+    """,
+        name = "a.sol"
+      ),
+      InlineFile(
+        """
+        pragma solidity ^0.8.26;
+        
+        import "./b.sol" as B;
+
+        contract C {
+            function f() public {
+               revert B.A.InterfaceTest.errorB();
+                                //^
+            }
+       }
+  """
+      )
+    )
+  }
 }

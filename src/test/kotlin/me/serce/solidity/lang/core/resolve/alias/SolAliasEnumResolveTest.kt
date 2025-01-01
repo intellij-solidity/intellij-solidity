@@ -371,4 +371,84 @@ class SolAliasEnumResolveTest : SolResolveTestBase() {
   """)
     )
   }
+
+  fun testResolveEnumInInterfaceWithChainedFileAlias() {
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+         import "./a.sol" as A;
+         
+    """,
+      name = "b.sol"
+    )
+
+    testResolveBetweenFiles(
+      InlineFile(
+        code = """
+         pragma solidity ^0.8.26;
+         
+        interface InterfaceTest{
+            enum enumB { B1, B2 }
+                //x
+        }
+    """,
+        name = "a.sol"
+      ),
+      InlineFile(
+        """
+        pragma solidity ^0.8.26;
+        
+        import "./b.sol" as B;
+
+        contract C {
+            function f() public {
+                B.A.InterfaceTest.enumB.B1;
+                                  //^
+            }
+       }
+  """
+      )
+    )
+  }
+
+  fun testResolveEnumMemberInInterfaceWithChainedFileAlias() {
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+         import "./a.sol" as A;
+         
+    """,
+      name = "b.sol"
+    )
+
+    testResolveBetweenFiles(
+      InlineFile(
+        code = """
+         pragma solidity ^0.8.26;
+         
+        interface InterfaceTest{
+            enum enumB { B1, B2 }
+                        //x
+        }
+    """,
+        name = "a.sol"
+      ),
+      InlineFile(
+        """
+        pragma solidity ^0.8.26;
+        
+        import "./b.sol" as B;
+
+        contract C {
+            function f() public {
+                B.A.InterfaceTest.enumB.B1;
+                                      //^
+            }
+       }
+  """
+      )
+    )
+  }
 }

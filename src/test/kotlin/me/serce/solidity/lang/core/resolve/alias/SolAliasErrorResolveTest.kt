@@ -124,8 +124,48 @@ class SolAliasErrorResolveTest : SolResolveTestBase() {
 
         contract C {
             function f() public {
-                revert B.A.Closed;
+                revert B.A.Closed();
                           //^
+            }
+       }
+  """
+      )
+    )
+  }
+
+  fun testResolveErrorInInterfaceWithChainedFileAlias() {
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+         import "./a.sol" as A;
+         
+    """,
+      name = "b.sol"
+    )
+
+    testResolveBetweenFiles(
+      InlineFile(
+        code = """
+         pragma solidity ^0.8.26;
+         
+        interface InterfaceTest{
+            error errorB();
+                    //x
+        }
+    """,
+        name = "a.sol"
+      ),
+      InlineFile(
+        """
+        pragma solidity ^0.8.26;
+        
+        import "./b.sol" as B;
+
+        contract C {
+            function f() public {
+               revert B.A.InterfaceTest.errorB();
+                                        //^
             }
        }
   """

@@ -111,8 +111,8 @@ class SolAliasEventResolveTest : SolResolveTestBase() {
         code = """
          pragma solidity ^0.8.26;
          
-         event Closed();
-              //x
+         event eventA();
+                //x
     """,
         name = "a.sol"
       ),
@@ -124,8 +124,8 @@ class SolAliasEventResolveTest : SolResolveTestBase() {
 
         contract C {
             function f() public {
-                emit B.A.Closed;
-                          //^
+                emit B.A.eventA();
+                        //^
             }
        }
   """
