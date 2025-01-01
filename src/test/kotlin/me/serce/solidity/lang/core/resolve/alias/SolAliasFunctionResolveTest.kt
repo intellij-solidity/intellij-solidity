@@ -204,4 +204,48 @@ class SolAliasFunctionResolveTest : SolResolveTestBase() {
       )
     )
   }
+
+  fun testResolveFunctionFromChainedFileAlias() {
+    InlineFile(
+      code = """
+        pragma solidity ^0.8.26;
+        
+        import "./z.sol" as Z;
+            
+        contract a {
+            function doit() public {
+            }
+        }
+        """, name = "a.sol"
+    )
+
+    testResolveBetweenFiles(
+      InlineFile(
+        code = """
+          pragma solidity ^0.8.26;
+              
+          contract z {
+              function doit2() public {
+                      //x
+              }
+          }
+          """, name = "z.sol"
+      ),
+
+      InlineFile(
+        """
+          pragma solidity ^0.8.26;
+              
+          import * as A from "./a.sol";
+            
+          contract b {
+              function test(address x) public {
+                  A.Z.z(x).doit2();
+                          //^
+              }
+          }
+          """
+      )
+    )
+  }
 }
