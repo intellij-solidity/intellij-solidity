@@ -28,4 +28,30 @@ class SolAliasInterfaceResolveTest : SolResolveTestBase() {
        }
   """)
   )
+
+  fun testResolveInterfaceFromFileAlias() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+         interface InterfaceI {
+                     //x
+            enum B { A1, A2 }
+         }
+    """,
+      name = "a.sol"
+    ),
+    InlineFile("""
+        pragma solidity ^0.8.26;
+        
+        import "./a.sol" as A;
+
+        contract C {
+            function f() public {
+                A.InterfaceI.B.A2;
+                 //^
+            }
+       }
+  """)
+  )
 }
