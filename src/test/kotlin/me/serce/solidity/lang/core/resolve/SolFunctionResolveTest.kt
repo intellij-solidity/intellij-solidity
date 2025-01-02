@@ -520,6 +520,30 @@ class SolFunctionResolveTest : SolResolveTestBase() {
         }
   """)
 
+  fun testResolveFunctionWithTypeAlias() = checkByCode("""
+    type Foo is uint256;
+
+    library FooLib {
+        function isHappy(Foo f) internal pure returns(bool) {
+                    //x   
+            return Foo.unwrap(f) > 100;
+        }
+    }
+    
+    using {
+    FooLib.isHappy
+    } for Foo global;
+    
+    library TestLib {
+        function doStuff() internal pure {
+            Foo foo = Foo.wrap(17);
+            if (foo.isHappy()) {
+                    //^
+            }
+        }
+    }
+  """)
+
   fun checkIsResolved(@Language("Solidity") code: String) {
     val (refElement, _) = resolveInCode<SolFunctionCallExpression>(code)
     assertNotNull(refElement.reference?.resolve())
