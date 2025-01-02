@@ -531,7 +531,7 @@ class SolFunctionResolveTest : SolResolveTestBase() {
     }
     
     using {
-    FooLib.isHappy
+        FooLib.isHappy
     } for Foo global;
     
     library TestLib {
