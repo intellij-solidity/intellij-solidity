@@ -3,12 +3,10 @@ package me.serce.solidity.lang.psi.impl
 import com.intellij.lang.ASTNode
 import com.intellij.openapi.util.RecursionManager
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.stubs.IStubElementType
-import com.intellij.psi.util.CachedValueProvider
-import com.intellij.psi.util.CachedValuesManager
-import com.intellij.psi.util.PsiModificationTracker
-import com.intellij.psi.util.nextLeaf
+import com.intellij.psi.util.*
 import com.intellij.ui.IconManager
 import me.serce.solidity.firstInstance
 import me.serce.solidity.ide.SolidityIcons
@@ -510,18 +508,32 @@ abstract class SolMemberAccessElement(node: ASTNode) : SolNamedElementImpl(node)
       ?.flatMap { SolResolver.resolveTypeNameUsingImports(it) }
       ?.filterIsInstance<SolContractDefinition>()
       ?: emptyList()
-    val libraries = (superContracts + contract.wrap())
-            .asSequence()
-            .flatMap { it.usingForDeclarationList }
+    val usingForDeclarationsFoundInContracts = (superContracts + contract.wrap())
+      .asSequence()
+      .flatMap { it.usingForDeclarationList }
       .filter {
         val usingType = it.type
         usingType == null || usingType == type
-      }
-      .mapNotNull { it.library }
-      .distinct()
-      .flatMap { it.functionDefinitionList }
-            .toList()
-    return libraries
+      }.toList()
+    if (usingForDeclarationsFoundInContracts.isNotEmpty()) {
+      return usingForDeclarationsFoundInContracts
+        .mapNotNull { it.library }
+        .distinct()
+        .flatMap { it.functionDefinitionList }
+    } else {
+      //using for declaration can be at file level
+      val file: PsiFile? = contract?.containingFile
+      return file
+        ?.childrenOfType<SolUsingForDeclaration>()
+        ?.filter {
+          val usingType = it.type
+          usingType == null || usingType == type
+        }
+        ?.mapNotNull { it.library }
+        ?.distinct()
+        ?.flatMap { it.functionDefinitionList }
+        ?: emptyList()
+    }
   }
 }
 
