@@ -544,7 +544,7 @@ class SolFunctionResolveTest : SolResolveTestBase() {
     }
   """)
 
-  fun testResolveFunctionWithTypeAlias() = checkByCode("""
+  fun testResolveFunctionWithUsingForAtFileLevelWithFunction() = checkByCode("""
     pragma solidity ^0.8.26;
     
     type Foo is uint256;
