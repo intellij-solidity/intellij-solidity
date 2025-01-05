@@ -570,6 +570,54 @@ class SolFunctionResolveTest : SolResolveTestBase() {
     }
   """)
 
+  fun testResolveFunctionWithUsingForAtFileLevelWithMultipleFunctions() = checkByCode(
+    """
+    //example from https://docs.soliditylang.org/en/v0.8.28/contracts.html
+    pragma solidity ^0.8.13;
+
+    struct Data { mapping(uint => bool) flags; }
+    
+    using {insert, remove, contains} for Data;
+    
+    function insert(Data storage self, uint value)
+        returns (bool)
+    {
+        if (self.flags[value])
+            return false;
+        self.flags[value] = true;
+        return true;
+    }
+    
+    function remove(Data storage self, uint value)
+              //x
+        returns (bool)
+    {
+        if (!self.flags[value])
+            return false;
+        self.flags[value] = false;
+        return true;
+    }
+    
+    function contains(Data storage self, uint value)
+        view
+        returns (bool)
+    {
+        return self.flags[value];
+    }
+    
+    
+    contract C {
+        Data knownValues;
+    
+        function register(uint value) public {
+            require(knownValues.insert(value));
+            require(knownValues.remove(value));
+                                //^
+        }
+    }
+  """
+  )
+
   fun checkIsResolved(@Language("Solidity") code: String) {
     val (refElement, _) = resolveInCode<SolFunctionCallExpression>(code)
     assertNotNull(refElement.reference?.resolve())

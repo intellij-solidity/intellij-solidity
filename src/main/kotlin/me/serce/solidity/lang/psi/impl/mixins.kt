@@ -5,7 +5,6 @@ import com.intellij.openapi.util.RecursionManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.stubs.IStubElementType
-import com.intellij.psi.tree.TokenSet
 import com.intellij.psi.util.*
 import com.intellij.ui.IconManager
 import me.serce.solidity.firstInstance
@@ -629,13 +628,12 @@ abstract class SolUsingForMixin(node: ASTNode) : SolElementImpl(node), SolUsingF
       }
       return list.mapNotNull {
         val identifiers = (it as SolUserDefinedTypeNameImplMixin).findIdentifiers()
-        val contract = SolResolver.resolveTypeNameUsingImports(identifiers.first())
-          .filterIsInstance<SolContractDefinition>()
-          .firstOrNull()
-        if (identifiers.size > 1) {
-          contract?.functionDefinitionList?.find { function -> function.name == identifiers[1].text }
+        val lexicalFinding = SolResolver.lexicalDeclarations(identifiers.first()).filterIsInstance<SolCallableElement>()
+          .filter { element -> element.name == identifiers.first().text }.firstOrNull()
+        if (identifiers.size > 1 && lexicalFinding is SolContractDefinition) {
+          lexicalFinding.functionDefinitionList.find { function -> function.name == identifiers[1].text }
         } else {
-          contract
+          lexicalFinding
         }
       }
     }
