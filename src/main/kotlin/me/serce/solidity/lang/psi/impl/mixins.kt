@@ -614,11 +614,9 @@ abstract class SolErrorDefMixin : SolStubbedNamedElementImpl<SolErrorDefStub>, S
 abstract class SolUsingForMixin(node: ASTNode) : SolElementImpl(node), SolUsingForElement {
   override val type: SolType?
     get() {
-      val allChildren = node.getChildren(TokenSet.ANY)
-      val forPartElement =
-        allChildren[allChildren.lastIndex - 1].takeIf { it.text != "global" } ?: allChildren[allChildren.lastIndex - 3]
-      return if (forPartElement.elementType != MULT) {
-        getSolType(forPartElement.psi as SolTypeName?)
+      val list = getTypeNameList()
+      return if (findChildByType<PsiElement>(MULT) == null) {
+        getSolType(list.last())
       } else {
         null
       }
