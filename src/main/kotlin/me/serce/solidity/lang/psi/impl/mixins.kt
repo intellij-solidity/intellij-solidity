@@ -630,9 +630,15 @@ abstract class SolUsingForMixin(node: ASTNode) : SolElementImpl(node), SolUsingF
         list = list.subList(0, list.lastIndex)
       }
       return list.mapNotNull {
-        SolResolver.resolveTypeNameUsingImports(it as SolUserDefinedTypeName)
-          .filterIsInstance<SolCallableElement>()
+        val identifiers = (it as SolUserDefinedTypeNameImplMixin).findIdentifiers()
+        val contract = SolResolver.resolveTypeNameUsingImports(identifiers.first())
+          .filterIsInstance<SolContractDefinition>()
           .firstOrNull()
+        if (identifiers.size > 1) {
+          contract?.functionDefinitionList?.find { function -> function.name == identifiers[1].text }
+        } else {
+          contract
+        }
       }
     }
 }
