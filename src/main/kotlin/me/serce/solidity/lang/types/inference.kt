@@ -241,10 +241,10 @@ fun SolMemberAccessExpression.getMembers(): List<SolMember> {
         ?: emptyList()
     }
     else -> {
-      val fromLibraries = (this as? SolMemberAccessElement)?.collectUsingForLibraryFunctions()?.let { it.map { it.toLibraryFunDefinition() } } ?: emptyList()
+      val usingFromFunctions = (this as? SolMemberAccessElement)?.collectUsingForLibraryFunctions()?.let { it.map { it.toLibraryFunDefinition() } } ?: emptyList()
       val stateVarRefs = (expr.reference?.resolve()?.let { it as? SolStateVariableDeclaration }?.takeIf { v -> v.visibility?.let { it == Visibility.PUBLIC || it == Visibility.EXTERNAL || it == Visibility.INTERNAL && v.findContract()?.contractType == ContractType.LIBRARY } ?: false}?.let { SolVariableType(it).getMembers(it.project) } ?: emptyList())
       val typeMembers = expr.type.getMembers(this.project)
-      if (fromLibraries.isEmpty() && stateVarRefs.isEmpty()) typeMembers else typeMembers + fromLibraries + stateVarRefs
+      if (usingFromFunctions.isEmpty() && stateVarRefs.isEmpty()) typeMembers else typeMembers + usingFromFunctions + stateVarRefs
     }
   }
 }
