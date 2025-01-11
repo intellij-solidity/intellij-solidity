@@ -515,37 +515,31 @@ abstract class SolMemberAccessElement(node: ASTNode) : SolNamedElementImpl(node)
         usingType == null || usingType == type
       }.toList()
     if (usingForDeclarationsFoundInContracts.isNotEmpty()) {
-      return usingForDeclarationsFoundInContracts
-        .flatMap { it.usingElementList }
-        .distinct()
-        .flatMap {
-          when (it) {
-            is SolContractDefinition -> it.functionDefinitionList
-            is SolFunctionDefinition -> it.wrap()
-            else -> emptyList()
-          }
-        }
+      return collectFunctionsFromUsingElements(usingForDeclarationsFoundInContracts)
     } else {
       //using for declaration can be at file level
-      val usingForDeclarationFileLevel = contract
+      val usingForDeclarationFileLevel: List<SolUsingForDeclaration> = contract
         ?.containingFile
         ?.childrenOfType<SolUsingForDeclaration>()
         ?.filter {
           val usingType = it.type
           usingType == null || usingType == type
-        }
-      return usingForDeclarationFileLevel
-        ?.flatMap { it.usingElementList }
-        ?.distinct()
-        ?.flatMap {
-          when (it) {
-            is SolContractDefinition -> it.functionDefinitionList
-            is SolFunctionDefinition -> it.wrap()
-            else -> emptyList()
-          }
-        }
-        ?: emptyList()
+        } ?: emptyList()
+      return collectFunctionsFromUsingElements(usingForDeclarationFileLevel)
     }
+  }
+
+  private fun collectFunctionsFromUsingElements(usingForDeclarationsList: List<SolUsingForDeclaration>): List<SolFunctionDefinition> {
+    return usingForDeclarationsList
+      .flatMap { it.usingElementList }
+      .distinct()
+      .flatMap {
+        when (it) {
+          is SolContractDefinition -> it.functionDefinitionList
+          is SolFunctionDefinition -> it.wrap()
+          else -> emptyList()
+        }
+      }
   }
 }
 
