@@ -182,7 +182,6 @@ class SolEventResolveTest : SolResolveTestBase() {
     )
   )
 
-
   override fun checkByCode(code: String) {
     checkByCodeInternal<SolFunctionCallExpression, SolNamedElement>(code)
   }

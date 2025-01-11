@@ -340,5 +340,4 @@ class SolVarResolveTest : SolResolveTestBase() {
     """
     )
   )
-
 }

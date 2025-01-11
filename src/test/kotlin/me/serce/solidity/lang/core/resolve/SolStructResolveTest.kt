@@ -128,4 +128,36 @@ class SolStructResolveTest : SolResolveTestBase() {
     """
     )
   )
+
+
+
+  fun testResolveStructFromInterface() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+         pragma solidity ^0.8.26;
+         
+         interface InterfaceTest {
+          struct Prop {
+              uint prop1;
+                  //x
+              uint prop2;
+          }
+         }
+    """,
+      name = "a.sol"
+    ),
+    InlineFile("""
+        pragma solidity ^0.8.26;
+        
+        import {InterfaceTest} from "./a.sol";
+
+        contract C {
+            InterfaceTest.Prop prop = InterfaceTest.Prop(0, 1);
+            function f() public {
+                prop.prop1;
+                      //^
+            }
+       }
+  """)
+  )
 }
