@@ -520,6 +520,104 @@ class SolFunctionResolveTest : SolResolveTestBase() {
         }
   """)
 
+  fun testResolveFunctionWithUsingForAtFileLevel() = checkByCode("""
+    pragma solidity ^0.8.26;
+    
+    type Foo is uint256;
+
+    library FooLib {
+        function isHappy(Foo f) internal pure returns(bool) {
+                    //x   
+            return Foo.unwrap(f) > 100;
+        }
+    }
+    
+    using FooLib for Foo;
+    
+    library TestLib {
+        function doStuff() internal pure {
+            Foo foo = Foo.wrap(17);
+            if (foo.isHappy()) {
+                    //^
+            }
+        }
+    }
+  """)
+
+  fun testResolveFunctionWithUsingForAtFileLevelWithFunction() = checkByCode("""
+    pragma solidity ^0.8.26;
+    
+    type Foo is uint256;
+
+    library FooLib {
+        function isHappy(Foo f) internal pure returns(bool) {
+                    //x   
+            return Foo.unwrap(f) > 100;
+        }
+    }
+    
+    using {
+        FooLib.isHappy
+    } for Foo global;
+    
+    library TestLib {
+        function doStuff() internal pure {
+            Foo foo = Foo.wrap(17);
+            if (foo.isHappy()) {
+                    //^
+            }
+        }
+    }
+  """)
+
+  fun testResolveFunctionWithUsingForAtFileLevelWithMultipleFunctions() = checkByCode(
+    """
+    //example from https://docs.soliditylang.org/en/v0.8.28/contracts.html
+    pragma solidity ^0.8.13;
+
+    struct Data { mapping(uint => bool) flags; }
+    
+    using {insert, remove, contains} for Data;
+    
+    function insert(Data storage self, uint value)
+        returns (bool)
+    {
+        if (self.flags[value])
+            return false;
+        self.flags[value] = true;
+        return true;
+    }
+    
+    function remove(Data storage self, uint value)
+              //x
+        returns (bool)
+    {
+        if (!self.flags[value])
+            return false;
+        self.flags[value] = false;
+        return true;
+    }
+    
+    function contains(Data storage self, uint value)
+        view
+        returns (bool)
+    {
+        return self.flags[value];
+    }
+    
+    
+    contract C {
+        Data knownValues;
+    
+        function register(uint value) public {
+            require(knownValues.insert(value));
+            require(knownValues.remove(value));
+                                //^
+        }
+    }
+  """
+  )
+
   fun checkIsResolved(@Language("Solidity") code: String) {
     val (refElement, _) = resolveInCode<SolFunctionCallExpression>(code)
     assertNotNull(refElement.reference?.resolve())

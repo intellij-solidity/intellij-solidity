@@ -5,10 +5,7 @@ import com.intellij.openapi.util.RecursionManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiWhiteSpace
 import com.intellij.psi.stubs.IStubElementType
-import com.intellij.psi.util.CachedValueProvider
-import com.intellij.psi.util.CachedValuesManager
-import com.intellij.psi.util.PsiModificationTracker
-import com.intellij.psi.util.nextLeaf
+import com.intellij.psi.util.*
 import com.intellij.ui.IconManager
 import me.serce.solidity.firstInstance
 import me.serce.solidity.ide.SolidityIcons
@@ -510,18 +507,39 @@ abstract class SolMemberAccessElement(node: ASTNode) : SolNamedElementImpl(node)
       ?.flatMap { SolResolver.resolveTypeNameUsingImports(it) }
       ?.filterIsInstance<SolContractDefinition>()
       ?: emptyList()
-    val libraries = (superContracts + contract.wrap())
-            .asSequence()
-            .flatMap { it.usingForDeclarationList }
+    val usingForDeclarationsFoundInContracts = (superContracts + contract.wrap())
+      .asSequence()
+      .flatMap { it.usingForDeclarationList }
       .filter {
         val usingType = it.type
         usingType == null || usingType == type
-      }
-      .mapNotNull { it.library }
+      }.toList()
+    if (usingForDeclarationsFoundInContracts.isNotEmpty()) {
+      return collectFunctionsFromUsingElements(usingForDeclarationsFoundInContracts)
+    } else {
+      //using for declaration can be at file level
+      val usingForDeclarationFileLevel: List<SolUsingForDeclaration> = contract
+        ?.containingFile
+        ?.childrenOfType<SolUsingForDeclaration>()
+        ?.filter {
+          val usingType = it.type
+          usingType == null || usingType == type
+        } ?: emptyList()
+      return collectFunctionsFromUsingElements(usingForDeclarationFileLevel)
+    }
+  }
+
+  private fun collectFunctionsFromUsingElements(usingForDeclarationsList: List<SolUsingForDeclaration>): List<SolFunctionDefinition> {
+    return usingForDeclarationsList
+      .flatMap { it.usingElementList }
       .distinct()
-      .flatMap { it.functionDefinitionList }
-            .toList()
-    return libraries
+      .flatMap {
+        when (it) {
+          is SolContractDefinition -> it.functionDefinitionList
+          is SolFunctionDefinition -> it.wrap()
+          else -> emptyList()
+        }
+      }
   }
 }
 
@@ -590,16 +608,29 @@ abstract class SolUsingForMixin(node: ASTNode) : SolElementImpl(node), SolUsingF
   override val type: SolType?
     get() {
       val list = getTypeNameList()
-      return if (list.size > 1) {
-        getSolType(list[1])
+      return if (findChildByType<PsiElement>(MULT) == null) {
+        getSolType(list.last())
       } else {
         null
       }
     }
-  override val library: SolContractDefinition?
-    get() = SolResolver.resolveTypeNameUsingImports(getTypeNameList()[0] as SolUserDefinedTypeName)
-      .filterIsInstance<SolContractDefinition>()
-      .firstOrNull()
+  override val usingElementList: List<SolCallableElement>
+    get() {
+      var list = getTypeNameList()
+      if (type != null) {
+        list = list.subList(0, list.lastIndex)
+      }
+      return list.mapNotNull {
+        val identifiers = (it as SolUserDefinedTypeNameImplMixin).findIdentifiers()
+        val lexicalFinding = SolResolver.lexicalDeclarations(identifiers.first()).filterIsInstance<SolCallableElement>()
+          .filter { element -> element.name == identifiers.first().text }.firstOrNull()
+        if (identifiers.size > 1 && lexicalFinding is SolContractDefinition) {
+          lexicalFinding.functionDefinitionList.find { function -> function.name == identifiers[1].text }
+        } else {
+          lexicalFinding
+        }
+      }
+    }
 }
 
 

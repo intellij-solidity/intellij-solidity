@@ -124,7 +124,7 @@ interface SolHasModifiersElement : SolReferenceElement
 
 interface SolUsingForElement : PsiElement {
   val type: SolType?
-  val library: SolContractDefinition?
+  val usingElementList: List<SolCallableElement>
   fun getTypeNameList(): List<SolTypeName>
 }
 
