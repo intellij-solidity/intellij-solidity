@@ -181,15 +181,20 @@ object SolResolver {
     if (!visited.add((imports.firstOrNull() ?: return emptyList()).containingFile)) {
       return emptySet()
     }
-
-    val (resolvedImportedFiles, concreteResolvedImportedFiles) = imports.partition { it.importAliasedPairList.isEmpty() }.toList()
+    val (resolvedImportedFiles, concreteResolvedImportedFiles) = imports.partition { it.importAliasedPairList.isEmpty() }
+      .toList()
       .map {
         it.mapNotNull {
           val containingFile = it.importPath?.reference?.resolve()?.containingFile ?: return@mapNotNull null
           val aliases = it.importAliasedPairList
           val names = if (aliases.isNotEmpty()) {
-            aliases.mapNotNull { it.importAlias } + aliases.mapNotNull { it.userDefinedTypeName.name?.let { tn -> containingFile.childrenOfType<SolContractDefinition>().find { it.name == tn } } }
-          } else containingFile.childrenOfType<SolCallableElement>().toList().flatMap { (if (it is SolContractDefinition) resolveContractMembers(it) else emptyList()) + it }
+            aliases.mapNotNull { it.importAlias } + aliases.mapNotNull {
+              it.userDefinedTypeName.name?.let { tn ->
+                containingFile.childrenOfType<SolContractDefinition>().find { it.name == tn }
+              }
+            }
+          } else containingFile.childrenOfType<SolCallableElement>().toList()
+            .flatMap { (if (it is SolContractDefinition) resolveContractMembers(it) else emptyList()) + it } + containingFile.childrenOfType<SolUserDefinedValueTypeDefElement>()
           ImportRecord(containingFile, names.filterIsInstance<SolNamedElement>())
         }
       }

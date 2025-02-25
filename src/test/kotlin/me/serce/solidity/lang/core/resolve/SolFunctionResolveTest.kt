@@ -570,6 +570,44 @@ class SolFunctionResolveTest : SolResolveTestBase() {
     }
   """)
 
+  fun testResolveFunctionWithUsingForInImportedFile() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+          pragma solidity ^0.8.10;
+
+          type Foo is uint256;
+          
+          library FooLib {
+              function isHappy(Foo f) internal pure returns(bool) {
+                        //x
+                  return Foo.unwrap(f) > 100;
+              }
+          }
+          
+          using {
+            FooLib.isHappy
+          } for Foo global;
+      """,
+      name = "a.sol"
+    ),
+    InlineFile(
+      """
+          pragma solidity ^0.8.26;
+                
+          import "./a.sol";
+              
+          contract FooImport {
+              function doStuff() internal pure {
+                  Foo foo = Foo.wrap(17);
+                  if (foo.isHappy()) { // does not auto-complete, or navigate
+                            //^
+                  }
+              }
+          }
+    """
+    )
+  )
+
   fun testResolveFunctionWithUsingForAtFileLevelWithMultipleFunctions() = checkByCode(
     """
     //example from https://docs.soliditylang.org/en/v0.8.28/contracts.html
