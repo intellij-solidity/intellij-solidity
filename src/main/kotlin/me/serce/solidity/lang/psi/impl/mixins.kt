@@ -502,31 +502,33 @@ abstract class SolMemberAccessElement(node: ASTNode) : SolNamedElementImpl(node)
   fun collectUsingForLibraryFunctions(): List<SolFunctionDefinition> {
     val type = expression.type.takeIf { it != SolUnknown } ?: return emptyList()
     val contract = findContract()
-    val superContracts = contract
-      ?.collectSupers
-      ?.flatMap { SolResolver.resolveTypeNameUsingImports(it) }
-      ?.filterIsInstance<SolContractDefinition>()
-      ?: emptyList()
-    val usingForDeclarationsFoundInContracts = (superContracts + contract.wrap())
-      .asSequence()
-      .flatMap { it.usingForDeclarationList }
-      .filter {
-        val usingType = it.type
-        usingType == null || usingType == type
-      }.toList()
-    if (usingForDeclarationsFoundInContracts.isNotEmpty()) {
-      return collectFunctionsFromUsingElements(usingForDeclarationsFoundInContracts)
-    } else {
-      //using for declaration can be at file level
-      val usingForDeclarationFileLevel: List<SolUsingForDeclaration> = contract
-        ?.containingFile
-        ?.childrenOfType<SolUsingForDeclaration>()
-        ?.filter {
-          val usingType = it.type
-          usingType == null || usingType == type
-        } ?: emptyList()
-      return collectFunctionsFromUsingElements(usingForDeclarationFileLevel)
-    }
+    val usingForElementFromImports = SolResolver.collectUsingForElementFromImports(containingFile)
+    return collectFunctionsFromUsingElements(usingForElementFromImports.toList())
+//    val superContracts = contract
+//      ?.collectSupers
+//      ?.flatMap { SolResolver.resolveTypeNameUsingImports(it) }
+//      ?.filterIsInstance<SolContractDefinition>()
+//      ?: emptyList()
+//    val usingForDeclarationsFoundInContracts = (superContracts + contract.wrap())
+//      .asSequence()
+//      .flatMap { it.usingForDeclarationList }
+//      .filter {
+//        val usingType = it.type
+//        usingType == null || usingType == type
+//      }.toList()
+//    if (usingForDeclarationsFoundInContracts.isNotEmpty()) {
+//      return collectFunctionsFromUsingElements(usingForDeclarationsFoundInContracts)
+//    } else {
+//      //using for declaration can be at file level
+//      val usingForDeclarationFileLevel: List<SolUsingForDeclaration> = contract
+//        ?.containingFile
+//        ?.childrenOfType<SolUsingForDeclaration>()
+//        ?.filter {
+//          val usingType = it.type
+//          usingType == null || usingType == type
+//        } ?: emptyList()
+//      return collectFunctionsFromUsingElements(usingForDeclarationFileLevel)
+//    }
   }
 
   private fun collectFunctionsFromUsingElements(usingForDeclarationsList: List<SolUsingForDeclaration>): List<SolFunctionDefinition> {
