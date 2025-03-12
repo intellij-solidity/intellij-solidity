@@ -671,26 +671,6 @@ class SolFunctionResolveTest : SolResolveTestBase() {
   fun testResolveFunctionWithUsingForInImportedFileWithMultipleTypes2() {
     InlineFile(
       code = """
-        pragma solidity ^0.8.10;
-        
-        type Foo2 is uint256;
-        
-        library Foo2Lib {
-            function someThing(Foo2 f) internal pure returns(bool) {
-                        //x
-                return Foo2.unwrap(f) > 100;
-            }
-        }
-        
-        using {
-        Foo2Lib.someThing
-        } for Foo2 global;
-    """,
-      name = "Foo2.sol"
-    )
-    testResolveBetweenFiles(
-      InlineFile(
-        code = """
           pragma solidity ^0.8.10;
           
           import "./Foo2.sol";
@@ -707,7 +687,28 @@ class SolFunctionResolveTest : SolResolveTestBase() {
             FooLib.isHappy
           } for Foo global;
       """,
-        name = "Foo.sol"
+      name = "Foo.sol"
+    )
+
+    testResolveBetweenFiles(
+      InlineFile(
+        code = """
+        pragma solidity ^0.8.10;
+        
+        type Foo2 is uint256;
+        
+        library Foo2Lib {
+            function someThing(Foo2 f) internal pure returns(bool) {
+                        //x
+                return Foo2.unwrap(f) > 100;
+            }
+        }
+        
+        using {
+        Foo2Lib.someThing
+        } for Foo2 global;
+    """,
+        name = "Foo2.sol"
       ),
       InlineFile(
         """
