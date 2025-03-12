@@ -221,9 +221,9 @@ object SolResolver {
       psiFile.childrenOfType<SolContractDefinition>().flatMap { contract ->
         contract.usingForDeclarationList
       } +
-      psiFile.childrenOfType<SolImportDirective>().map { import ->
+      psiFile.childrenOfType<SolImportDirective>().flatMap { import ->
         val resolvedFile: PsiFile = import.importPath?.reference?.resolve()?.containingFile ?: return emptyList()
-        return collectUsingForElementFromImports(resolvedFile)
+        collectUsingForElementFromImports(resolvedFile)
       }
   }
 
