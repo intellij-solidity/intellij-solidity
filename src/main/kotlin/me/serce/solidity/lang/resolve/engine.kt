@@ -216,7 +216,7 @@ object SolResolver {
     return collectImports(import).flatMap { it.file.childrenOfType<SolImportDirective>() }
   }
 
-  fun collectUsingForElementFromImports(psiFile: PsiFile): List<SolUsingForDeclaration> {
+  fun collectUsingForElementFromImports(psiFile: PsiFile): Collection<SolUsingForDeclaration> {
     return psiFile.childrenOfType<SolUsingForDeclaration>() +
       psiFile.childrenOfType<SolContractDefinition>().flatMap { contract ->
         contract.usingForDeclarationList
