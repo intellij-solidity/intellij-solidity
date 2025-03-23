@@ -68,6 +68,7 @@ intellijPlatform {
     pluginConfiguration {
         name = "Intellij-Solidity"
     }
+    sandboxContainer.set(file(project.rootDir.canonicalPath + "/.sandbox"))
 }
 
 configurations {
