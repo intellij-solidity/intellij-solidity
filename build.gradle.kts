@@ -69,18 +69,15 @@ intellijPlatform {
         name = "Intellij-Solidity"
     }
 }
-configurations.implementation{
-    exclude("org.slf4j")
+
+configurations {
+    implementation {
+        exclude("org.slf4j")
+    }
+    runtimeOnly {
+        exclude("org.slf4j")
+    }
 }
-
-
-//configurations {
-//    runtime
-//    lexer
-//    parser
-//    runtime.exclude group : "org.slf4j"  // IntelliJ uses slf4j which results in a class loader conflict
-//    implementation.exclude group : "org.slf4j"  // IntelliJ uses slf4j which results in a class loader conflict
-//}
 
 tasks {
     clean {
