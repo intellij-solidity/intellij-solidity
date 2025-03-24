@@ -16,7 +16,6 @@ plugins {
     id("org.jetbrains.kotlin.jvm").version("1.8.10")
     id("org.jetbrains.grammarkit").version("2022.3.1")
     id("org.jetbrains.intellij.platform") version "2.3.0"
-    id("org.jetbrains.intellij.platform.migration").version("2.3.0")
     id("net.researchgate.release").version("3.0.2")
     id("jacoco")
 }
