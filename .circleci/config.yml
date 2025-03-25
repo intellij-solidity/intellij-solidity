@@ -8,7 +8,7 @@ jobs:
       - restore_cache:
           key: v1-gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
       - restore_cache:
-          key: v1-gradle-cache-{{ checksum "build.gradle" }}
+          key: v1-gradle-cache-{{ checksum "build.gradle.kts" }}
       - run:
           name: Run tests
           command: |
@@ -23,7 +23,7 @@ jobs:
       - save_cache:
           paths:
             - ~/.gradle/caches
-          key: v1-gradle-cache-{{ checksum "build.gradle" }}
+          key: v1-gradle-cache-{{ checksum "build.gradle.kts" }}
 workflows:
   version: 2
   workflow:
