@@ -50,6 +50,21 @@ class SolImportResolveTest : SolResolveTestBase() {
     assertEquals("abc", resolved.name)
   }
 
+  fun testResolveFunctionImportClash() {
+    myFixture.configureByFile("contracts/a/lib.sol")
+    myFixture.configureByFile("contracts/b/b.sol")
+    myFixture.configureByFile("contracts/b/lib.sol")
+
+    myFixture.configureByFile("contracts/ImportLibNameClash.sol")
+    val (refElement) = findElementAndDataInEditor<SolNamedElement>("^")
+
+    val resolved = checkNotNull(refElement.reference?.resolve() as? PsiNamedElement) {
+      "Failed to resolve ${refElement.text}"
+    }
+
+    assertEquals("lib", resolved.name)
+  }
+
   fun testRecursiveImport() {
     myFixture.configureByFile("recursive/B.sol")
     myFixture.configureByFile("recursive/C.sol")
