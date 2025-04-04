@@ -177,19 +177,28 @@ object SolResolver {
   /**
    * Collects imports of all declarations for a given file recursively.
    */
-  private fun collectImports(imports: Collection<SolImportDirective>, visited: MutableSet<PsiFile>): Collection<ImportRecord> {
+  private fun collectImports(
+    imports: Collection<SolImportDirective>,
+    visited: MutableSet<PsiFile>
+  ): Collection<ImportRecord> {
     if (!visited.add((imports.firstOrNull() ?: return emptyList()).containingFile)) {
       return emptySet()
     }
 
-    val (resolvedImportedFiles, concreteResolvedImportedFiles) = imports.partition { it.importAliasedPairList.isEmpty() }.toList()
+    val (resolvedImportedFiles, concreteResolvedImportedFiles) = imports.partition { it.importAliasedPairList.isEmpty() }
+      .toList()
       .map {
-        it.mapNotNull {
-          val containingFile = it.importPath?.reference?.resolve()?.containingFile ?: return@mapNotNull null
-          val aliases = it.importAliasedPairList
+        it.mapNotNull { import ->
+          val containingFile = import.importPath?.reference?.resolve()?.containingFile ?: return@mapNotNull null
+          val aliases = import.importAliasedPairList
           val names = if (aliases.isNotEmpty()) {
-            aliases.mapNotNull { it.importAlias } + aliases.mapNotNull { it.userDefinedTypeName.name?.let { tn -> containingFile.childrenOfType<SolContractDefinition>().find { it.name == tn } } }
-          } else containingFile.childrenOfType<SolCallableElement>().toList().flatMap { (if (it is SolContractDefinition) resolveContractMembers(it) else emptyList()) + it }
+            aliases.mapNotNull { importAliasPair -> importAliasPair.importAlias } + aliases.mapNotNull { importAliasPair ->
+              importAliasPair.userDefinedTypeName.name?.let { tn ->
+                containingFile.childrenOfType<SolContractDefinition>().find { contract -> contract.name == tn }
+              }
+            }
+          } else containingFile.childrenOfType<SolCallableElement>().toList()
+            .flatMap { element -> (if (element is SolContractDefinition) resolveContractMembers(element) else emptyList()) + it }
           ImportRecord(containingFile, names.filterIsInstance<SolNamedElement>())
         }
       }
