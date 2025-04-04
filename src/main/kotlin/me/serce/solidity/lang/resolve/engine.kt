@@ -204,7 +204,23 @@ object SolResolver {
       }
 
     val result = concreteResolvedImportedFiles + resolvedImportedFiles
-    return result + result.map { collectImports(it.file.childrenOfType<SolImportDirective>(), visited) }.flatten()
+    return result + result.map { record ->
+      val contractsOrLibsInFile = record.file.childrenOfType<SolContractDefinition>()
+      //support only with one contract or lib by file
+      if (contractsOrLibsInFile.size == 1 && isExternalLibrary(contractsOrLibsInFile.first())) {
+        emptyList()
+      } else {
+        collectImports(record.file.childrenOfType<SolImportDirective>(), visited)
+      }
+    }.flatten()
+  }
+
+  private fun isExternalLibrary(element: SolContractDefinition): Boolean {
+    return (element.contractType == ContractType.LIBRARY
+      && element.functionDefinitionList.all { function ->
+        function.visibility == Visibility.EXTERNAL
+          || function.visibility == Visibility.PUBLIC
+    })
   }
 
   //collect all SolContractDefinition recursively from imports
