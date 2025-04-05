@@ -570,6 +570,165 @@ class SolFunctionResolveTest : SolResolveTestBase() {
     }
   """)
 
+  fun testResolveFunctionWithUsingForInImportedFile() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+          pragma solidity ^0.8.10;
+
+          type Foo is uint256;
+          
+          library FooLib {
+              function isHappy(Foo f) internal pure returns(bool) {
+                        //x
+                  return Foo.unwrap(f) > 100;
+              }
+          }
+          
+          using {
+            FooLib.isHappy
+          } for Foo global;
+      """,
+      name = "a.sol"
+    ),
+    InlineFile(
+      """
+          pragma solidity ^0.8.26;
+                
+          import "./a.sol";
+              
+          contract FooImport {
+              function doStuff() internal pure {
+                  Foo foo = Foo.wrap(17);
+                  if (foo.isHappy()) { // does not auto-complete, or navigate
+                            //^
+                  }
+              }
+          }
+    """
+    )
+  )
+
+  fun testResolveFunctionWithUsingForInImportedFileWithMultipleTypes() {
+    InlineFile(
+      code = """
+        pragma solidity ^0.8.10;
+        
+        type Foo2 is uint256;
+        
+        library Foo2Lib {
+            function someThing(Foo2 f) internal pure returns(bool) {
+                return Foo2.unwrap(f) > 100;
+            }
+        }
+        
+        using {
+        Foo2Lib.someThing
+        } for Foo2 global;
+    """,
+      name = "Foo2.sol"
+    )
+    testResolveBetweenFiles(
+      InlineFile(
+        code = """
+          pragma solidity ^0.8.10;
+          
+          import "./Foo2.sol";
+          
+          type Foo is uint256;
+          
+          library FooLib {
+              function isHappy(Foo f) internal pure returns(bool) {
+                        //x
+                  return Foo.unwrap(f) > 100;
+              }
+          }
+          
+          using {
+            FooLib.isHappy
+          } for Foo global;
+      """,
+        name = "Foo.sol"
+      ),
+      InlineFile(
+        """
+          pragma solidity ^0.8.10;
+                
+          import "./Foo.sol";
+              
+          contract FooImport {
+              function doStuff() internal pure {
+                  Foo foo = Foo.wrap(17);
+                  if (foo.isHappy()) { // does not auto-complete, or navigate
+                            //^
+                  }
+              }
+          }
+    """
+      )
+    )
+  }
+
+  fun testResolveFunctionWithUsingForInImportedFileWithMultipleTypes2() {
+    InlineFile(
+      code = """
+          pragma solidity ^0.8.10;
+          
+          import "./Foo2.sol";
+          
+          type Foo is uint256;
+          
+          library FooLib {
+              function isHappy(Foo f) internal pure returns(bool) {
+                  return Foo.unwrap(f) > 100;
+              }
+          }
+          
+          using {
+            FooLib.isHappy
+          } for Foo global;
+      """,
+      name = "Foo.sol"
+    )
+
+    testResolveBetweenFiles(
+      InlineFile(
+        code = """
+        pragma solidity ^0.8.10;
+        
+        type Foo2 is uint256;
+        
+        library Foo2Lib {
+            function someThing(Foo2 f) internal pure returns(bool) {
+                        //x
+                return Foo2.unwrap(f) > 100;
+            }
+        }
+        
+        using {
+        Foo2Lib.someThing
+        } for Foo2 global;
+    """,
+        name = "Foo2.sol"
+      ),
+      InlineFile(
+        """
+          pragma solidity ^0.8.10;
+                
+          import "./Foo.sol";
+              
+          contract FooImport {
+              function doStuff() internal pure {
+                  Foo2 foo = Foo2.wrap(17);
+                  if (foo.someThing()) { // does not auto-complete, or navigate
+                            //^
+                  }
+              }
+          }
+    """
+      )
+    )
+  }
+
   fun testResolveFunctionWithUsingForAtFileLevelWithMultipleFunctions() = checkByCode(
     """
     //example from https://docs.soliditylang.org/en/v0.8.28/contracts.html
