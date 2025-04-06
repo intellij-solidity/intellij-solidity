@@ -217,14 +217,20 @@ object SolResolver {
   }
 
   fun collectUsingForElementFromImports(psiFile: PsiFile): Collection<SolUsingForDeclaration> {
-    return psiFile.childrenOfType<SolUsingForDeclaration>() +
-      psiFile.childrenOfType<SolContractDefinition>().flatMap { contract ->
+    return CachedValuesManager.getCachedValue(psiFile) {
+      val res = collectUsingForElementFromImports0(psiFile)
+      CachedValueProvider.Result.create(res, PsiModificationTracker.MODIFICATION_COUNT)
+    }
+  }
+
+  private fun collectUsingForElementFromImports0(psiFile: PsiFile): Collection<SolUsingForDeclaration> {
+    return psiFile.childrenOfType<SolUsingForDeclaration>() + psiFile.childrenOfType<SolContractDefinition>()
+      .flatMap { contract ->
         contract.usingForDeclarationList
-      } +
-      psiFile.childrenOfType<SolImportDirective>().flatMap { import ->
-        val resolvedFile: PsiFile = import.importPath?.reference?.resolve()?.containingFile ?: return emptyList()
-        collectUsingForElementFromImports(resolvedFile)
-      }
+      } + psiFile.childrenOfType<SolImportDirective>().flatMap { import ->
+      val resolvedFile: PsiFile = import.importPath?.reference?.resolve()?.containingFile ?: return emptyList()
+      collectUsingForElementFromImports(resolvedFile)
+    }
   }
 
   private fun resolveContract(element: PsiElement): Set<SolContractDefinition> =
