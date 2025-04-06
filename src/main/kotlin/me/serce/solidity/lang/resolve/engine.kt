@@ -237,6 +237,17 @@ object SolResolver {
     return collectImports(import).flatMap { it.file.childrenOfType<SolImportDirective>() }
   }
 
+  fun collectUsingForElementFromImports(psiFile: PsiFile): Collection<SolUsingForDeclaration> {
+    return psiFile.childrenOfType<SolUsingForDeclaration>() +
+      psiFile.childrenOfType<SolContractDefinition>().flatMap { contract ->
+        contract.usingForDeclarationList
+      } +
+      psiFile.childrenOfType<SolImportDirective>().flatMap { import ->
+        val resolvedFile: PsiFile = import.importPath?.reference?.resolve()?.containingFile ?: return emptyList()
+        collectUsingForElementFromImports(resolvedFile)
+      }
+  }
+
   private fun resolveContract(element: PsiElement): Set<SolContractDefinition> =
     resolveUsingImports(SolContractDefinition::class.java, element, element.containingFile)
   private fun resolveEnum(element: PsiElement): Set<SolNamedElement> =
