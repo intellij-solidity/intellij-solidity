@@ -217,6 +217,7 @@ object SolResolver {
 
   private fun isExternalLibrary(element: SolContractDefinition): Boolean {
     return (element.contractType == ContractType.LIBRARY
+      && element.functionDefinitionList.isNotEmpty()
       && element.functionDefinitionList.all { function ->
         function.visibility == Visibility.EXTERNAL
           || function.visibility == Visibility.PUBLIC
