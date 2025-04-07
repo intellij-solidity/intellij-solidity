@@ -198,7 +198,9 @@ object SolResolver {
               }
             }
           } else containingFile.childrenOfType<SolCallableElement>().toList()
-            .flatMap { element -> (if (element is SolContractDefinition) resolveContractMembers(element) else emptyList()) + element }
+            .flatMap { element ->
+              (if (element is SolContractDefinition) resolveContractMembers(element) else emptyList()) + element
+            } + containingFile.childrenOfType<SolUserDefinedValueTypeDefElement>()
           ImportRecord(containingFile, names.filterIsInstance<SolNamedElement>())
         }
       }
