@@ -243,6 +243,12 @@
         <lang.structureViewExtension implementation="me.serce.solidity.ide.SolStructureViewExtension"/>
 
         <typeHierarchyProvider language="Solidity" implementationClass="me.serce.solidity.ide.SolHierarchyTypeProvider"/>
+
+        <projectConfigurable id="Settings.Solidity"
+                             groupId="language"
+                             nonDefaultProject="false"
+                             instance="me.serce.solidity.settings.SolidityConfigurable"
+                             displayName="Solidity"/>
     </extensions>
 
     <actions>
