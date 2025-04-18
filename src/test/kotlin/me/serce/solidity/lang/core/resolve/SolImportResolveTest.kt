@@ -79,5 +79,18 @@ class SolImportResolveTest : SolResolveTestBase() {
     assertEquals("C", resolved.name)
   }
 
+  fun testCircularImport() {
+    myFixture.configureByFile("circular/IMain.sol")
+    myFixture.configureByFile("circular/IRandomLib.sol")
+    myFixture.configureByFile("circular/Main.sol")
+    val (refElement) = findElementAndDataInEditor<SolNamedElement>("^")
+
+    val resolved = checkNotNull(refElement.reference?.resolve() as? PsiNamedElement) {
+      "Failed to resolve ${refElement.text}"
+    }
+
+    assertEquals("RandomStruct", resolved.name)
+  }
+
   override fun getTestDataPath() = "src/test/resources/fixtures/import/"
 }
