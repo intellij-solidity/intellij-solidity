@@ -501,12 +501,13 @@ abstract class SolMemberAccessElement(node: ASTNode) : SolNamedElementImpl(node)
 
   fun collectUsingForLibraryFunctions(): List<SolFunctionDefinition> {
     val type = expression.type.takeIf { it != SolUnknown } ?: return emptyList()
-    val usingForElementFromImports = RecursionManager.doPreventingRecursion(containingFile, true) {
-        SolResolver.collectUsingForElementFromImports(containingFile).filter {
+    val usingForElementFromImports =
+      RecursionManager.doPreventingRecursion(containingFile, true) {
+        SolResolver.collectUsingForElementFromImports(containingFile, hashSetOf()).filter {
           val usingType = it.type
           usingType == null || usingType == type
         }
-    } ?: emptyList()
+      } ?: emptyList()
     return collectFunctionsFromUsingElements(usingForElementFromImports)
   }
 
