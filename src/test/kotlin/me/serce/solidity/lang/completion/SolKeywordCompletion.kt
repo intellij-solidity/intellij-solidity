@@ -34,7 +34,7 @@ class SolKeywordCompletion : SolCompletionTestBase() {
   )
 
   fun testOnFunctionKeywords() = checkCompletion(
-    hashSetOf("external ", "internal ", "public ", "private ", "payable", "pure" , "view"), """
+    hashSetOf("external ", "internal ", "public ", "private ", "payable", "pure", "view"), """
         contract A {
             function test() /*caret*/ 
         } 
@@ -54,13 +54,42 @@ class SolKeywordCompletion : SolCompletionTestBase() {
   )
 
   fun testKeywordsVariable() = checkCompletion(
-    hashSetOf("constant ", "external ", "internal ", "public ", "private "), """
+    hashSetOf("constant ", "internal ", "public ", "private ", "override ", "immutable ", "transient "),
+    """
         contract A{
             uint256 /*caret*/
         }
         
   """
   )
+
+  fun testKeywordOnModifierCompletion() = checkCompletion(
+    hashSetOf("override ", "virtual "), """
+      contract A{
+        modifier test() /*caret*/
+       
+      }
+  """
+  )
+
+  fun testKeywordOnFallbackCompletion() = checkCompletion(
+    hashSetOf("external ", "virtual ", "override ", "pure ", "view ", "payable "), """
+      contract A{
+        fallback() /*caret*/
+       
+      }
+  """
+  )
+
+  fun testKeywordOnReceiveCompletion() = checkCompletion(
+    hashSetOf("external ", "virtual ", "override ", "payable "), """
+      contract A{
+        receive() /*caret*/
+       
+      }
+  """
+  )
+
 
   fun testThisKeywordNotInMemberAccess() = checkCompletion(
     hashSetOf("call", "code", "delegatecall", "transfer", "balance", "codehash", "send", "staticcall"), """
