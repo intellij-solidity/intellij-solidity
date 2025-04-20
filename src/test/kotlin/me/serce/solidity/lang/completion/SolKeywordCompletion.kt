@@ -3,13 +3,13 @@ package me.serce.solidity.lang.completion
 class SolKeywordCompletion : SolCompletionTestBase() {
 
   fun testRootCompletion() = checkCompletion(
-    hashSetOf("pragma solidity", "pragma ", "library ", "contract ", "abstract ", "enum ", "struct", "event"), """
+    hashSetOf("pragma solidity", "pragma ", "library ", "contract ", "abstract ", "enum ", "struct", "event", "error", "using", "type"), """
       /*caret*/
   """
   )
 
   fun testKeywordInContractCompletion() = checkCompletion(
-    hashSetOf("function ", "mapping", "modifier", "struct", "this", "event", "enum", "fallback", "receive"), """
+    hashSetOf("function ", "mapping", "modifier", "struct", "this", "event", "enum", "fallback", "receive", "constructor", "error","using", "type"), """
       contract A{
         /*caret*/
       }
@@ -34,7 +34,7 @@ class SolKeywordCompletion : SolCompletionTestBase() {
   )
 
   fun testOnFunctionKeywords() = checkCompletion(
-    hashSetOf("external ", "internal ", "public ", "private ", "payable", "pure", "view"), """
+    hashSetOf("external ", "internal ", "public ", "private ", "payable", "pure", "view", "virtual", "override", "returns"), """
         contract A {
             function test() /*caret*/ 
         } 
@@ -60,6 +60,35 @@ class SolKeywordCompletion : SolCompletionTestBase() {
             uint256 /*caret*/
         }
         
+  """
+  )
+
+  fun testKeywordOnConstructorCompletion() = checkCompletion(
+    hashSetOf("payable ", "internal ", "public "), """
+      contract A{
+        constructor()/*caret*/
+      }
+  """
+  )
+
+  fun testKeywordOnEventCompletion() = checkCompletion(
+    hashSetOf("indexed "), """
+      event /*caret*/
+      
+  """
+  )
+
+  fun testKeywordOnUsingCompletion() = checkCompletion(
+    hashSetOf("for "), """
+      using test /*caret*/
+      
+  """
+  )
+
+  fun testKeywordOnUsingForCompletion() = checkCompletion(
+    hashSetOf("global "), """
+      using test for uint256 /*caret*/
+      
   """
   )
 
