@@ -74,7 +74,12 @@ class SolKeywordCompletion : SolCompletionTestBase() {
       "else",
       "delete",
       "payable",
-      "new"
+      "new",
+      "do",
+      "continue",
+      "try",
+      "catch",
+      "emit"
     ), """
         contract A {
             function test() {
