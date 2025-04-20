@@ -3,14 +3,51 @@ package me.serce.solidity.lang.completion
 class SolKeywordCompletion : SolCompletionTestBase() {
 
   fun testRootCompletion() = checkCompletion(
-    hashSetOf("pragma solidity", "pragma ", "library ", "contract ", "abstract ", "enum ", "struct", "event", "error", "using", "type"), """
+    hashSetOf(
+      "pragma solidity",
+      "pragma ",
+      "library ",
+      "contract ",
+      "abstract ",
+      "enum ",
+      "struct",
+      "event",
+      "error",
+      "using",
+      "type",
+      "import "
+    ), """
       /*caret*/
   """
   )
 
+  fun testKeywordOnContractCompletion() = checkCompletion(
+    hashSetOf(
+      "layout "
+    ), """
+      contract A /*caret*/
+  """
+  )
+
   fun testKeywordInContractCompletion() = checkCompletion(
-    hashSetOf("function ", "mapping", "modifier", "struct", "this", "event", "enum", "fallback", "receive", "constructor", "error","using", "type"), """
+    contractBodyElement, """
       contract A{
+        /*caret*/
+      }
+  """
+  )
+
+  fun testKeywordInInterfaceCompletion() = checkCompletion(
+    contractBodyElement, """
+      interface A{
+        /*caret*/
+      }
+  """
+  )
+
+  fun testKeywordInLibraryCompletion() = checkCompletion(
+    contractBodyElement, """
+      library A{
         /*caret*/
       }
   """
@@ -24,7 +61,7 @@ class SolKeywordCompletion : SolCompletionTestBase() {
   )
 
   fun testInFunctionKeywords() = checkCompletion(
-    hashSetOf("this", "return", "while", "assembly", "assert", "require", "revert", "super"), """
+    hashSetOf("this", "return", "while", "assembly", "assert", "require", "revert", "super", "if", "else"), """
         contract A {
             function test() {
                 /*caret*/
@@ -34,10 +71,24 @@ class SolKeywordCompletion : SolCompletionTestBase() {
   )
 
   fun testOnFunctionKeywords() = checkCompletion(
-    hashSetOf("external ", "internal ", "public ", "private ", "payable", "pure", "view", "virtual", "override", "returns"), """
+    hashSetOf("external ", "internal ", "public ", "private ", "virtual", "override", "returns") + stateMutability, """
         contract A {
             function test() /*caret*/ 
         } 
+  """
+  )
+
+  fun testDataLocationKeywords() = checkCompletion(
+    dataLocation, """
+        contract A {
+            function test(uint256 /*caret*/
+        } 
+  """
+  )
+
+  fun testImportFromKeyword() = checkCompletion(
+    hashSetOf("from "), """
+        import { x } /*caret*/
   """
   )
 
@@ -102,7 +153,7 @@ class SolKeywordCompletion : SolCompletionTestBase() {
   )
 
   fun testKeywordOnFallbackCompletion() = checkCompletion(
-    hashSetOf("external ", "virtual ", "override ", "pure ", "view ", "payable "), """
+    hashSetOf("external ", "virtual ", "override ") + stateMutability, """
       contract A{
         fallback() /*caret*/
        

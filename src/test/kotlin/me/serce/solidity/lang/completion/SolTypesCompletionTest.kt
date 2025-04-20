@@ -10,6 +10,14 @@ class SolTypesCompletionTest : SolCompletionTestBase() {
   """
   )
 
+  fun testPayableAddressTypeCompletions() = checkCompletion(
+    hashSetOf("payable"), """
+     contract A {
+      address /*caret*/
+     }
+  """
+  )
+
   fun testBaseTypesSubsetCompletion() = checkCompletion(
     elementaryTypeB, """
      contract A {

@@ -47,4 +47,30 @@ abstract class SolCompletionTestBase : SolTestBase() {
     "int128 ",
     "int256 "
   ) + elementaryTypeB
+
+  val dataLocation = hashSetOf(
+    "memory",
+    "storage",
+    "calldata"
+  )
+
+  val stateMutability = hashSetOf(
+    "pure", "view", "payable"
+  )
+
+  val contractBodyElement = hashSetOf(
+    "constructor",
+    "function ",
+    "modifier",
+    "fallback",
+    "receive",
+    "struct",
+    "enum",
+    "type",
+    "event",
+    "error",
+    "using",
+    "mapping",
+    "this"
+  ) + elementaryType
 }
