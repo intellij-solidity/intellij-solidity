@@ -9,7 +9,7 @@ class SolNatSpecCompletionTest : SolCompletionTestBase() {
   )
 
   fun testNatSpecTagCompletion() = checkCompletion(
-    hashSetOf("author"), """
+    hashSetOf("author", "title", "dev", "param", "inheritdoc", "custom", "return", "notice"), """
         /**
          * @/*caret*/
          */ 
