@@ -61,7 +61,21 @@ class SolKeywordCompletion : SolCompletionTestBase() {
   )
 
   fun testInFunctionKeywords() = checkCompletion(
-    hashSetOf("this", "return", "while", "assembly", "assert", "require", "revert", "super", "if", "else"), """
+    hashSetOf(
+      "this",
+      "return",
+      "while",
+      "assembly",
+      "assert",
+      "require",
+      "revert",
+      "super",
+      "if",
+      "else",
+      "delete",
+      "payable",
+      "new"
+    ), """
         contract A {
             function test() {
                 /*caret*/
@@ -105,8 +119,7 @@ class SolKeywordCompletion : SolCompletionTestBase() {
   )
 
   fun testKeywordsVariable() = checkCompletion(
-    hashSetOf("constant ", "internal ", "public ", "private ", "override ", "immutable ", "transient "),
-    """
+    hashSetOf("constant ", "internal ", "public ", "private ", "override ", "immutable ", "transient "), """
         contract A{
             uint256 /*caret*/
         }

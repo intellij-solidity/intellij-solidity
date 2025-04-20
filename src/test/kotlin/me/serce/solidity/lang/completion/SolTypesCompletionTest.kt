@@ -41,4 +41,12 @@ class SolTypesCompletionTest : SolCompletionTestBase() {
   """
   )
 
+  fun testFunctionTypeCompletions() = checkCompletion(
+    elementaryType + hashSetOf("mapping"), """
+     contract A {
+      function b(/*caret*/
+     }
+  """
+  )
+
 }
