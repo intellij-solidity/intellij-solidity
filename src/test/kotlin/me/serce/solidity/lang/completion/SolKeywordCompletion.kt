@@ -8,15 +8,16 @@ class SolKeywordCompletion : SolCompletionTestBase() {
       "pragma ",
       "library ",
       "contract ",
+      "interface ",
       "abstract ",
       "enum ",
-      "struct",
-      "event",
-      "error",
-      "using",
-      "type",
+      "struct ",
+      "event ",
+      "error ",
+      "using ",
+      "type ",
       "import "
-    ), """
+    ) + elementaryType, """
       /*caret*/
   """
   )
