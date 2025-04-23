@@ -8,6 +8,33 @@ import com.intellij.util.ProcessingContext
 
 const val KEYWORD_PRIORITY = 10.0
 
+val KEYWORD_TYPE = arrayOf(
+  "address ",
+  "string ",
+  "fixed",
+  "ufixed",
+  "uint8 ",
+  "uint16 ",
+  "uint32 ",
+  "uint64 ",
+  "uint128 ",
+  "uint256 ",
+  "int8 ",
+  "int16 ",
+  "int32 ",
+  "int64 ",
+  "int128 ",
+  "int256 ",
+  "bytes ",
+  "bytes4 ",
+  "bytes8 ",
+  "bytes16 ",
+  "bytes20 ",
+  "bytes32 ",
+  "byte ",
+  "bool "
+)
+
 class SolKeywordCompletionProvider(private vararg val keywords: String) : CompletionProvider<CompletionParameters>() {
   override fun addCompletions(
     parameters: CompletionParameters,
@@ -22,11 +49,32 @@ class SolKeywordCompletionProvider(private vararg val keywords: String) : Comple
 
 class SolKeywordCompletionContributor : CompletionContributor(), DumbAware {
   init {
+
     extend(
-      CompletionType.BASIC, rootDeclaration(),
-      SolKeywordCompletionProvider("pragma ", "import ", "contract ", "library "))
+      CompletionType.BASIC, rootDeclaration(), SolKeywordCompletionProvider(
+        *(arrayOf(
+          "pragma ",
+          "import ",
+          "contract ",
+          "library ",
+          "interface ",
+          "abstract ",
+          "enum ",
+          "struct ",
+          "event ",
+          "error ",
+          "using ",
+          "type "
+        ) + KEYWORD_TYPE)
+
+      )
+    )
     extend(CompletionType.BASIC, rootDeclaration(), object : CompletionProvider<CompletionParameters>() {
-      override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext, result: CompletionResultSet) {
+      override fun addCompletions(
+        parameters: CompletionParameters,
+        context: ProcessingContext,
+        result: CompletionResultSet
+      ) {
         val pragmaBuilder = LookupElementBuilder
           .create("pragma solidity")
           .bold()
