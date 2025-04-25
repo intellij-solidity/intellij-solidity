@@ -145,7 +145,8 @@ ImportDirective ::= ImportDirectivePart ';'
 
 
 ContractDefinition ::= abstract? ( contract | library | interface ) Identifier
-                     ( is InheritanceSpecifier (',' InheritanceSpecifier )* )?
+                     ( LayoutAtSpecifier
+                     | is InheritanceSpecifier (',' InheritanceSpecifier )* )*
                      '{' ContractPart* '}' {
     pin = 2
     implements = "me.serce.solidity.lang.psi.SolContractOrLibElement"
@@ -153,6 +154,9 @@ ContractDefinition ::= abstract? ( contract | library | interface ) Identifier
     stubClass = "me.serce.solidity.lang.stubs.SolContractOrLibDefStub"
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
+
+// layout at are not the keywords yet
+private LayoutAtSpecifier ::= 'layout' 'at' Expression
 
 private ContractPart ::=
     // the of StateVariableDeclaration and FunctionDefinition is important to ensure that
