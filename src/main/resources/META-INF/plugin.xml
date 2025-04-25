@@ -21,6 +21,24 @@
         Thank you for your support! Huge thank you to
         all of you who sponsor the plugin development, @punk3155 in particular!❤️
 
+        <b>v2.4.6</b>
+        In this release:
+        <ul>
+        <ul>
+          <li>Fixed stack overflow in circular imports, thank you @Paulalex85!</li>
+          <li>Fixed import resolution for libraries with identical names, thank you @Paulalex85!</li>
+          <li>Added cache to import collection for faster indexing, thank you @Paulalex85!</li>
+          <li>Fixed resolution of functions from imported contracts with custom types and <code>using</code>, thank you @Paulalex85!</li>
+          <li>Added file-level <code>using for</code> support, thank you @Paulalex85!</li>
+          <li>Fixed resolving of elements imported with aliases, thank you @Paulalex85!</li>
+          <li>Improved file-level import handling, thank you @Paulalex85!</li>
+          <li>Support foundry <code>remappings.toml</code>, thank you @Paulalex85!</li>
+          <li>Fixed "Find Usages" for modifiers, thank you @Paulalex85!</li>
+          <li>Added references for contracts in the inherited doc tag values, thank you @mbolotov!</li>
+          <li>Function and contract resolution with aliases, thank you @Paulalex85!</li>
+          <li>Added latest EVM opcode set, thank you @Paulalex85!</li>
+        </ul>
+        </ul>
         <b>v2.4.5</b>
         In this release:
         <ul>
@@ -32,18 +50,6 @@
           <li>Inline rename refactoring, thank you @mbolotov!</li>
           <li>New Optimize imports action, thank you @mbolotov!</li>
           <li>Added hierarchy view provider, thank you @mbolotov!</li>
-        </ul>
-        <b>v2.4.4</b>
-        In this release:
-        <ul>
-          <li>Import fixes and improvements, thank you @mbolotov!</li>
-          <li>Fix Yul references and highlight keywords, thank you @mbolotov!</li>
-          <li>Unused elements inspection, thank you @mbolotov!</li>
-          <li>Solidity elements structure in the structure view & a new icon set, thank you @mbolotov!</li>
-          <li>Fix function and variable name spelling issues, thank you @standstaff!</li>
-          <li>Member access inspection and resolve fixes, thank you @mbolotov!</li>
-          <li>Gas estimation display hints, thank you @mbolotov!</li>
-          <li>Exception fixes, yours @SerCeMan!</li>
         </ul>
 
         A special thank you to tetu.io who made the @mboloov's contributions possible! 🎉
