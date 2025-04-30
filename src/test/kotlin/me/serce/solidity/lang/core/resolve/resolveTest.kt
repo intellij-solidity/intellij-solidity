@@ -1,5 +1,7 @@
 package me.serce.solidity.lang.core.resolve
 
+import com.intellij.openapi.command.WriteCommandAction
+import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import me.serce.solidity.lang.psi.SolFunctionCallExpression
@@ -56,6 +58,18 @@ abstract class SolResolveTestBase : SolTestBase() {
     myFixture.openFileInEditor(file1.psiFile.virtualFile)
     val (resElement, _) = findElementAndDataInEditor<SolNamedElement>("x")
     assertEquals(resElement, resolved)
+  }
+
+  protected fun testResolveAfterUpdateBetweenFiles(file1: InlineFile, file2: InlineFile, updatedCode: String) {
+    testResolveBetweenFiles(file1, file2)
+
+    WriteCommandAction.runWriteCommandAction(project) {
+      val document = PsiDocumentManager.getInstance(project).getDocument(file2.psiFile)!!
+      document.setText(updatedCode)
+      PsiDocumentManager.getInstance(project).commitDocument(document)
+    }
+
+    testResolveBetweenFiles(file1, file2)
   }
 
   protected fun testResolveToAnotherFile(fileReference: PsiFile, file: PsiFile) {

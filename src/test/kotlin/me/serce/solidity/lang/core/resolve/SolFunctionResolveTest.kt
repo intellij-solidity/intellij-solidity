@@ -729,6 +729,88 @@ class SolFunctionResolveTest : SolResolveTestBase() {
     )
   }
 
+  fun testResolveFunctionWithUsingForInImportedFileWithMultipleTypesUpdate() {
+    InlineFile(
+      code = """
+        pragma solidity ^0.8.10;
+        
+        type Foo2 is uint256;
+        
+        library Foo2Lib {
+            function someThing(Foo2 f) internal pure returns(bool) {
+                return Foo2.unwrap(f) > 100;
+            }
+        }
+        
+        using {
+        Foo2Lib.someThing
+        } for Foo2 global;
+    """,
+      name = "Foo2.sol"
+    )
+    testResolveAfterUpdateBetweenFiles(
+      InlineFile(
+        code = """
+          pragma solidity ^0.8.10;
+          
+          import "./Foo2.sol";
+          
+          type Foo is uint256;
+          
+          library FooLib {
+              function isHappy(Foo f) internal pure returns(bool) {
+                        //x
+                  return Foo.unwrap(f) > 100;
+              }
+          }
+          
+          using {
+            FooLib.isHappy
+          } for Foo global;
+      """,
+        name = "Foo.sol"
+      ),
+      InlineFile(
+        """
+          pragma solidity ^0.8.10;
+                
+          contract FooImport {
+              function doStuff() internal pure {
+                  Foo foo = Foo.wrap(17);
+                  if (foo.isHappy()) { // does not auto-complete, or navigate
+                            //^
+                  }
+                  
+                  Foo2 foo2 = Foo2.wrap(12);
+                  if (foo2.someThing()) { // does not auto-complete or navigate if file is edited
+          
+                  }
+              }
+          }
+    """
+      ),
+      """
+          pragma solidity ^0.8.10;
+                
+          import "./Foo.sol";
+              
+          contract FooImport {
+              function doStuff() internal pure {
+                  Foo foo = Foo.wrap(17);
+                  if (foo.isHappy()) { // does not auto-complete, or navigate
+                            //^
+                  }
+                  
+//                  Foo2 foo2 = Foo2.wrap(12);
+//                  if (foo2.someThing()) { // does not auto-complete or navigate if file is edited
+//          
+//                  }
+              }
+          }
+    """
+    )
+  }
+
   fun testResolveFunctionWithUsingForAtFileLevelWithMultipleFunctions() = checkByCode(
     """
     //example from https://docs.soliditylang.org/en/v0.8.28/contracts.html
