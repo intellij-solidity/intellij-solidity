@@ -66,7 +66,6 @@ abstract class SolResolveTestBase : SolTestBase() {
     WriteCommandAction.runWriteCommandAction(project) {
       val document = PsiDocumentManager.getInstance(project).getDocument(file2.psiFile)!!
       document.setText(updatedCode)
-      PsiDocumentManager.getInstance(project).commitDocument(document)
     }
 
     testResolveBetweenFiles(file1, file2)

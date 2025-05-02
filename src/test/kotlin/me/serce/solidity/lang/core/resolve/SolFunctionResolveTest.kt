@@ -773,6 +773,8 @@ class SolFunctionResolveTest : SolResolveTestBase() {
       InlineFile(
         """
           pragma solidity ^0.8.10;
+          
+          import "./Foo.sol";
                 
           contract FooImport {
               function doStuff() internal pure {
