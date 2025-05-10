@@ -16,7 +16,7 @@ image:./logo/logo_256.png[link=https://plugins.jetbrains.com/idea/plugin/9475-in
 
 == Supporting the plugin
 
-You can support the development by sponsoring the plugin on Github ❤️, supporting the plugin with crypto through the link:https://gitcoin.co/grants/1047/intellij-solidity[Gitcoin grant], or even simply clicking ★ on GitHub and rating it on the link:https://plugins.jetbrains.com/idea/plugin/9475-intellij-solidity[plugin page].
+You can support the development by sponsoring the plugin on Github ❤️, or even by simply clicking ★ on GitHub and rating it on the link:https://plugins.jetbrains.com/idea/plugin/9475-intellij-solidity[plugin page].
 
 == Reporting an issue
 
