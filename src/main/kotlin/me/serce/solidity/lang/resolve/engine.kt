@@ -241,10 +241,9 @@ object SolResolver {
 
   fun collectUsingForElementFromImports(
     psiFile: PsiFile,
-    visited: MutableSet<PsiFile>
   ): Collection<SolUsingForDeclaration> {
     return CachedValuesManager.getCachedValue(psiFile) {
-      val res = collectUsingForElementFromImports0(psiFile, visited)
+      val res = collectUsingForElementFromImports0(psiFile, hashSetOf())
       CachedValueProvider.Result.create(res, res.map { it.containingFile } + psiFile)
     }
   }

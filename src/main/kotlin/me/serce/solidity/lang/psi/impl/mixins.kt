@@ -503,7 +503,7 @@ abstract class SolMemberAccessElement(node: ASTNode) : SolNamedElementImpl(node)
     val type = expression.type.takeIf { it != SolUnknown } ?: return emptyList()
     val usingForElementFromImports =
       RecursionManager.doPreventingRecursion(containingFile, true) {
-        SolResolver.collectUsingForElementFromImports(containingFile, hashSetOf()).filter {
+        SolResolver.collectUsingForElementFromImports(containingFile).filter {
           val usingType = it.type
           usingType == null || usingType == type
         }
