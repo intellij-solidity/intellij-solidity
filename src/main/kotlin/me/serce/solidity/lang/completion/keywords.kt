@@ -35,15 +35,19 @@ val KEYWORD_TYPE = arrayOf(
   "bool "
 )
 
+val KEYWORD_CONTRACT_BODY = arrayOf(
+  "constructor", "function ", "modifier ", "fallback", "receive", "mapping", "this"
+)
+
+val KEYWORD_ROOT_AND_BODY = arrayOf(
+  "enum ", "struct ", "event ", "error ", "using ", "type "
+)
+
 class SolKeywordCompletionProvider(private vararg val keywords: String) : CompletionProvider<CompletionParameters>() {
   override fun addCompletions(
-    parameters: CompletionParameters,
-    context: ProcessingContext,
-    result: CompletionResultSet
+    parameters: CompletionParameters, context: ProcessingContext, result: CompletionResultSet
   ) {
-    keywords
-      .map { LookupElementBuilder.create(it) }
-      .forEach { result.addElement(it.keywordPrioritised()) }
+    keywords.map { LookupElementBuilder.create(it) }.forEach { result.addElement(it.keywordPrioritised()) }
   }
 }
 
@@ -59,13 +63,7 @@ class SolKeywordCompletionContributor : CompletionContributor(), DumbAware {
           "library ",
           "interface ",
           "abstract ",
-          "enum ",
-          "struct ",
-          "event ",
-          "error ",
-          "using ",
-          "type "
-        ) + KEYWORD_TYPE)
+        ) + KEYWORD_TYPE + KEYWORD_ROOT_AND_BODY)
 
       )
     )
@@ -87,6 +85,10 @@ class SolKeywordCompletionContributor : CompletionContributor(), DumbAware {
       }
     })
 
-    extend(CompletionType.BASIC, insideContract().andNot(inMemberAccess()), SolKeywordCompletionProvider("this"))
+    extend(
+      CompletionType.BASIC,
+      insideContract().andNot(inMemberAccess()),
+      SolKeywordCompletionProvider(*(arrayOf(*KEYWORD_TYPE, *KEYWORD_ROOT_AND_BODY, *KEYWORD_CONTRACT_BODY)))
+    )
   }
 }

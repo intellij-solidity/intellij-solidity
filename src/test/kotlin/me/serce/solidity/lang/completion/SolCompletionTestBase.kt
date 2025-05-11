@@ -61,15 +61,15 @@ abstract class SolCompletionTestBase : SolTestBase() {
   val contractBodyElement = hashSetOf(
     "constructor",
     "function ",
-    "modifier",
+    "modifier ",
     "fallback",
     "receive",
-    "struct",
-    "enum",
-    "type",
-    "event",
-    "error",
-    "using",
+    "struct ",
+    "enum ",
+    "type ",
+    "event ",
+    "error ",
+    "using ",
     "mapping",
     "this"
   ) + elementaryType
