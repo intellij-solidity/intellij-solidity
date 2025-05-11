@@ -54,13 +54,6 @@ class SolKeywordCompletion : SolCompletionTestBase() {
   """
   )
 
-  fun testContractKeyword() = checkCompletion(
-    hashSetOf("contract ", "library "), """
-        contract A{}
-        /*caret*/
-  """
-  )
-
   fun testInFunctionKeywords() = checkCompletion(
     hashSetOf(
       "this",

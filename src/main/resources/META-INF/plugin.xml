@@ -115,8 +115,6 @@
         <codeInsight.daemonBoundCodeVisionProvider implementation="me.serce.solidity.ide.hints.SolGasEstimationInlayProvider"/>
 
         <completion.contributor language="Solidity"
-                                implementationClass="me.serce.solidity.lang.completion.SolBaseTypesCompletionContributor"/>
-        <completion.contributor language="Solidity"
                                 implementationClass="me.serce.solidity.lang.completion.SolKeywordCompletionContributor"/>
         <completion.contributor language="Solidity"
                                 implementationClass="me.serce.solidity.lang.completion.SolFunctionCompletionContributor"/>

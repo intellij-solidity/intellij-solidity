@@ -4,6 +4,7 @@ import com.intellij.codeInsight.completion.*
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.editor.EditorModificationUtil
 import com.intellij.openapi.project.DumbAware
+import com.intellij.patterns.StandardPatterns
 import com.intellij.util.ProcessingContext
 
 const val KEYWORD_PRIORITY = 10.0
@@ -64,9 +65,9 @@ class SolKeywordCompletionContributor : CompletionContributor(), DumbAware {
           "interface ",
           "abstract ",
         ) + KEYWORD_TYPE + KEYWORD_ROOT_AND_BODY)
-
       )
     )
+
     extend(CompletionType.BASIC, rootDeclaration(), object : CompletionProvider<CompletionParameters>() {
       override fun addCompletions(
         parameters: CompletionParameters,
@@ -87,7 +88,7 @@ class SolKeywordCompletionContributor : CompletionContributor(), DumbAware {
 
     extend(
       CompletionType.BASIC,
-      insideContract().andNot(inMemberAccess()),
+      StandardPatterns.and(insideContract(), StandardPatterns.not(inMemberAccess())),
       SolKeywordCompletionProvider(*(arrayOf(*KEYWORD_TYPE, *KEYWORD_ROOT_AND_BODY, *KEYWORD_CONTRACT_BODY)))
     )
   }

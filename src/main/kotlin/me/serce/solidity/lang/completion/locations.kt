@@ -18,7 +18,7 @@ fun revertStartStatement() =
     .inside(SolRevertStatement::class.java)
     .afterLeaf("revert")
 
-fun stateVarInsideContract() =
+fun stateVarInsideContract(): ElementPattern<PsiElement> =
   psiElement(SolidityTokenTypes.IDENTIFIER)
     .inside(psiElement(SolPrimaryExpression::class.java))
     .inside(SolidityFile::class.java)
@@ -47,3 +47,8 @@ fun mapExpression(): ElementPattern<PsiElement> =
 fun pathImportExpression(): ElementPattern<PsiElement> =
   psiElement(SolidityTokenTypes.STRINGLITERAL).inside(SolImportPath::class.java)
 
+fun insideContract(): ElementPattern<PsiElement> = psiElement()
+  .inside(psiElement(SolPrimaryExpression::class.java))
+  .inside(SolidityFile::class.java)
+
+fun inMemberAccess(): ElementPattern<PsiElement> = psiElement().inside(SolMemberAccessExpression::class.java)
