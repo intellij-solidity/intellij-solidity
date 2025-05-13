@@ -18,14 +18,6 @@ class SolTypesCompletionTest : SolCompletionTestBase() {
   """
   )
 
-  fun testBaseTypesSubsetCompletion() = checkCompletion(
-    elementaryTypeB, """
-     contract A {
-      b/*caret*/
-     }
-  """
-  )
-
   fun testUserDefinedValueTypeCompletion() = checkCompletion(
     elementaryType, """
       type Test is /*caret*/

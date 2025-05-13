@@ -18,17 +18,6 @@ abstract class SolCompletionTestBase : SolTestBase() {
     }
   }
 
-  val elementaryTypeB = hashSetOf(
-    "bytes ",
-    "bytes4 ",
-    "bytes8 ",
-    "bytes16 ",
-    "bytes20 ",
-    "bytes32 ",
-    "byte ",
-    "bool "
-  )
-
   val elementaryType = hashSetOf(
     "address ",
     "string ",
@@ -45,8 +34,16 @@ abstract class SolCompletionTestBase : SolTestBase() {
     "int32 ",
     "int64 ",
     "int128 ",
-    "int256 "
-  ) + elementaryTypeB
+    "int256 ",
+    "bytes ",
+    "bytes4 ",
+    "bytes8 ",
+    "bytes16 ",
+    "bytes20 ",
+    "bytes32 ",
+    "byte ",
+    "bool "
+  )
 
   val dataLocation = hashSetOf(
     "memory",
