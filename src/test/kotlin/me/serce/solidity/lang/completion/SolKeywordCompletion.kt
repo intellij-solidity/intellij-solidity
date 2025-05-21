@@ -84,7 +84,7 @@ class SolKeywordCompletion : SolCompletionTestBase() {
   )
 
   fun testOnFunctionKeywords() = checkCompletion(
-    hashSetOf("external ", "internal ", "public ", "private ", "virtual", "override", "returns") + stateMutability, """
+    hashSetOf("external ", "internal ", "public ", "private ", "virtual ", "override", "returns") + stateMutability, """
         contract A {
             function test() /*caret*/ 
         } 

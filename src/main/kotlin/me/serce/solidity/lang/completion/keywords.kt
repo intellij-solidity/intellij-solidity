@@ -4,7 +4,6 @@ import com.intellij.codeInsight.completion.*
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.editor.EditorModificationUtil
 import com.intellij.openapi.project.DumbAware
-import com.intellij.patterns.StandardPatterns
 import com.intellij.util.ProcessingContext
 
 const val KEYWORD_PRIORITY = 10.0
@@ -67,6 +66,10 @@ val KEYWORD_FUNCTION = arrayOf(
   "emit"
 )
 
+val KEYWORD_ON_FUNCTION = arrayOf("external ", "internal ", "public ", "private ", "virtual ", "override", "returns")
+
+val KEYWORD_STATE_MUTABILITY = arrayOf("pure ", "view ", "payable ")
+
 class SolKeywordCompletionProvider(private vararg val keywords: String) : CompletionProvider<CompletionParameters>() {
   override fun addCompletions(
     parameters: CompletionParameters, context: ProcessingContext, result: CompletionResultSet
@@ -112,7 +115,7 @@ class SolKeywordCompletionContributor : CompletionContributor(), DumbAware {
     extend(
       CompletionType.BASIC,
       insideFunction(),
-      SolKeywordCompletionProvider(*(arrayOf(*KEYWORD_FUNCTION)))
+      SolKeywordCompletionProvider(*(arrayOf(*KEYWORD_FUNCTION+ KEYWORD_ON_FUNCTION + KEYWORD_STATE_MUTABILITY)))
     )
   }
 }

@@ -52,7 +52,7 @@ abstract class SolCompletionTestBase : SolTestBase() {
   )
 
   val stateMutability = hashSetOf(
-    "pure", "view", "payable"
+    "pure ", "view ", "payable "
   )
 
   val contractBodyElement = hashSetOf(
