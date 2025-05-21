@@ -46,6 +46,27 @@ val KEYWORD_ROOT_AND_BODY = arrayOf(
 
 val KEYWORD_ON_CONTRACT = arrayOf("layout ")
 
+val KEYWORD_FUNCTION = arrayOf(
+  "this",
+  "return",
+  "while",
+  "assembly",
+  "assert",
+  "require",
+  "revert",
+  "super",
+  "if",
+  "else",
+  "delete",
+  "payable",
+  "new",
+  "do",
+  "continue",
+  "try",
+  "catch",
+  "emit"
+)
+
 class SolKeywordCompletionProvider(private vararg val keywords: String) : CompletionProvider<CompletionParameters>() {
   override fun addCompletions(
     parameters: CompletionParameters, context: ProcessingContext, result: CompletionResultSet
@@ -88,10 +109,10 @@ class SolKeywordCompletionContributor : CompletionContributor(), DumbAware {
       }
     })
 
-//    extend(
-//      CompletionType.BASIC,
-//      StandardPatterns.and(insideContract(), StandardPatterns.not(inMemberAccess())),
-//      SolKeywordCompletionProvider(*(arrayOf(*KEYWORD_TYPE, *KEYWORD_ROOT_AND_BODY, *KEYWORD_CONTRACT_BODY)))
-//    )
+    extend(
+      CompletionType.BASIC,
+      insideFunction(),
+      SolKeywordCompletionProvider(*(arrayOf(*KEYWORD_FUNCTION)))
+    )
   }
 }
