@@ -16,7 +16,7 @@ fun emitStartStatement() =
 fun revertStartStatement() =
   psiElement(SolidityTokenTypes.IDENTIFIER)
     .inside(SolRevertStatement::class.java)
-    .afterLeaf("revert")
+    .afterLeaf(psiElement(SolidityTokenTypes.REVERT_STATEMENT))
 
 fun stateVarInsideContract(): ElementPattern<PsiElement> =
   psiElement(SolidityTokenTypes.IDENTIFIER)
