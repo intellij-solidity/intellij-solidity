@@ -54,3 +54,6 @@ fun insideContract(): ElementPattern<PsiElement> = psiElement()
 fun insideFunction(): ElementPattern<PsiElement> = psiElement().inside(psiElement(SolFunctionDefinition::class.java))
 
 fun inMemberAccess(): ElementPattern<PsiElement> = psiElement().inside(SolMemberAccessExpression::class.java)
+
+fun inFunctionParameterDef(): ElementPattern<PsiElement> = psiElement()
+  .inside(SolParameterDef::class.java)

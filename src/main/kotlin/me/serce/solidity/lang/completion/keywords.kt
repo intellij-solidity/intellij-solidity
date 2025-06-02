@@ -70,6 +70,10 @@ val KEYWORD_ON_FUNCTION = arrayOf("external ", "internal ", "public ", "private 
 
 val KEYWORD_STATE_MUTABILITY = arrayOf("pure ", "view ", "payable ")
 
+val KEYWORD_DATA_LOCATION = arrayOf(
+  "memory", "storage", "calldata"
+)
+
 class SolKeywordCompletionProvider(private vararg val keywords: String) : CompletionProvider<CompletionParameters>() {
   override fun addCompletions(
     parameters: CompletionParameters, context: ProcessingContext, result: CompletionResultSet
@@ -115,7 +119,11 @@ class SolKeywordCompletionContributor : CompletionContributor(), DumbAware {
     extend(
       CompletionType.BASIC,
       insideFunction(),
-      SolKeywordCompletionProvider(*(arrayOf(*KEYWORD_FUNCTION+ KEYWORD_ON_FUNCTION + KEYWORD_STATE_MUTABILITY)))
+      SolKeywordCompletionProvider(*(arrayOf(*KEYWORD_FUNCTION + KEYWORD_ON_FUNCTION + KEYWORD_STATE_MUTABILITY)))
+    )
+
+    extend(
+      CompletionType.BASIC, inFunctionParameterDef(), SolKeywordCompletionProvider(*(arrayOf(*KEYWORD_DATA_LOCATION)))
     )
   }
 }
