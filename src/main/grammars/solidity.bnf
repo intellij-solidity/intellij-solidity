@@ -175,7 +175,7 @@ private ContractPart ::=
 InheritanceSpecifier ::= UserDefinedTypeName ( '(' Expression ( ',' Expression )* ')' )?
 
 VisibilityModifier ::= ( public | internal | private )
-MutationModifier ::= (constant | immutable)
+MutationModifier ::= (constant | immutable | transient)
 
 StateVariableDeclaration ::= TypeName (MutationModifier | VisibilityModifier | OverrideSpecifier)* Identifier ('=' Expression)? ';'  {
     implements = "me.serce.solidity.lang.psi.SolStateVarElement"
