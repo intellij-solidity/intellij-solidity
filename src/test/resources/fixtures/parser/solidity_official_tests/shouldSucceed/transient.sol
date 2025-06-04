@@ -1,16 +1,12 @@
-contract C {
+contract C1 {
     address public immutable transient;
 }
 
-contract C {
-    address payable transient a;
-}
-
-contract C {
+contract C3 {
     int constant public transient = 0;
 }
 
-contract C {
+contract C4 {
     uint public transient pubt;
     uint internal transient it;
     uint private transient prvt;
@@ -20,7 +16,7 @@ contract C {
     uint transient private tprv;
 }
 
-contract C {
+contract C5 {
     function () transient f;
     function (uint) external transient y;
     function () transient internal fti;
@@ -29,18 +25,18 @@ contract C {
     function () internal internal transient fiit;
 }
 
-contract D { }
+contract D1 { }
 
-contract C {
+contract C6 {
     address transient a;
     bool transient b;
-    D transient d;
+    D1 transient d;
     uint transient x;
     bytes32 transient y;
 }
 
-contract C {
-function transient() public pure { }
+contract C7 {
+    function transient() public pure { }
 }
 
 error CustomError(uint transient);
@@ -51,7 +47,7 @@ struct S {
     int transient;
 }
 
-contract D {
+contract C8 {
     function f() public pure returns (uint) {
     uint transient = 1;
     return transient;
