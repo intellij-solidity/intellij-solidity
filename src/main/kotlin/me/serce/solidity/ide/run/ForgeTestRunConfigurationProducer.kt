@@ -72,11 +72,13 @@ class ForgeTestRunConfigurationProducer : LazyRunConfigurationProducer<ForgeTest
 
   fun runTest(project: Project, fullTestName: String) {
     val configuration = ForgeTestRunConfiguration(project, configurationFactory, "Forge Test - $fullTestName")
-
-    val (contractName, testName) = fullTestName.split(".")
-    configuration.testName = testName
-    configuration.contractName = contractName
     configuration.workingDirectory = project.basePath ?: ""
+
+    val regex = Regex("(\\w+)\\.?(\\w+)?")
+    regex.matchEntire(fullTestName)?.let { m ->
+      configuration.contractName = m.destructured.component1()
+      configuration.testName = m.destructured.component2()
+    }
 
     val runManager = RunManager.getInstance(project)
     val runnerAndConfigurationSettings = runManager.createConfiguration(configuration, configurationFactory)
