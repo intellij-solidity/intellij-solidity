@@ -175,9 +175,10 @@ private ContractPart ::=
 InheritanceSpecifier ::= UserDefinedTypeName ( '(' Expression ( ',' Expression )* ')' )?
 
 VisibilityModifier ::= ( public | internal | private )
-MutationModifier ::= (constant | immutable | 'transient')
+private transient_kw ::= &('transient' (Identifier | VisibilityModifier)) Identifier
+MutationModifier ::= (constant | immutable | transient_kw)
 
-StateVariableDeclaration ::= TypeName (MutationModifier | VisibilityModifier | OverrideSpecifier)* Identifier ('=' Expression)? ';'  {
+StateVariableDeclaration ::= TypeName (MutationModifier | VisibilityModifier | OverrideSpecifier )* Identifier ('=' Expression)? ';'  {
     implements = "me.serce.solidity.lang.psi.SolStateVarElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolStateVarDeclMixin"
     stubClass = "me.serce.solidity.lang.stubs.SolStateVarDeclStub"
