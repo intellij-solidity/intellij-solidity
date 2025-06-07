@@ -14,6 +14,7 @@ Address: 'address';
 Anonymous: 'anonymous';
 As: 'as';
 Assembly: 'assembly' -> pushMode(AssemblyBlockMode);
+At: 'at'; // not a real keyword
 Bool: 'bool';
 Break: 'break';
 Bytes: 'bytes';
@@ -54,6 +55,7 @@ Indexed: 'indexed';
 Interface: 'interface';
 Internal: 'internal';
 Is: 'is';
+Layout: 'layout'; // not a real keyword
 Library: 'library';
 Mapping: 'mapping';
 Memory: 'memory';
@@ -85,11 +87,13 @@ SignedIntegerType:
 Storage: 'storage';
 String: 'string';
 Struct: 'struct';
+Transient: 'transient';  // not a real keyword
 True: 'true';
 Try: 'try';
 Type: 'type';
 Ufixed: 'ufixed' | ('ufixed' [1-9][0-9]+ 'x' [1-9][0-9]+);
 Unchecked: 'unchecked';
+Unicode: 'unicode';
 /**
  * Sized unsigned integer types.
  * uint is an alias of uint256.
@@ -295,16 +299,16 @@ YulHex: 'hex';
  */
 YulEVMBuiltin:
 	'stop' | 'add' | 'sub' | 'mul' | 'div' | 'sdiv' | 'mod' | 'smod' | 'exp' | 'not'
-    | 'lt' | 'gt' | 'slt' | 'sgt' | 'eq' | 'iszero' | 'and' | 'or' | 'xor' | 'byte'
-    | 'shl' | 'shr' | 'sar' | 'addmod' | 'mulmod' | 'signextend' | 'keccak256'
-    | 'pop' | 'mload' | 'mstore' | 'mstore8' | 'sload' | 'sstore' | 'tload' | 'tstore' | 'msize' | 'gas'
-    | 'address' | 'balance' | 'selfbalance' | 'caller' | 'callvalue' | 'calldataload'
-    | 'calldatasize' | 'calldatacopy' | 'extcodesize' | 'extcodecopy' | 'returndatasize'
-    | 'returndatacopy' | 'mcopy' | 'extcodehash' | 'create' | 'create2' | 'call' | 'callcode'
-    | 'delegatecall' | 'staticcall' | 'return' | 'revert' | 'selfdestruct' | 'invalid'
-    | 'log0' | 'log1' | 'log2' | 'log3' | 'log4' | 'chainid' | 'origin' | 'gasprice'
-    | 'blockhash' | 'blobhash' | 'coinbase' | 'timestamp' | 'number' | 'difficulty' | 'prevrandao' | 'gaslimit'
-    | 'basefee' | 'blobbasefee';
+	| 'lt' | 'gt' | 'slt' | 'sgt' | 'eq' | 'iszero' | 'and' | 'or' | 'xor' | 'byte'
+	| 'shl' | 'shr' | 'sar' | 'addmod' | 'mulmod' | 'signextend' | 'keccak256'
+	| 'pop' | 'mload' | 'mstore' | 'mstore8' | 'sload' | 'sstore' | 'tload' | 'tstore'| 'msize' | 'gas'
+	| 'address' | 'balance' | 'selfbalance' | 'caller' | 'callvalue' | 'calldataload'
+	| 'calldatasize' | 'calldatacopy' | 'extcodesize' | 'extcodecopy' | 'returndatasize'
+	| 'returndatacopy' | 'mcopy' | 'extcodehash' | 'create' | 'create2' | 'call' | 'callcode'
+	| 'delegatecall' | 'staticcall' | 'return' | 'revert' | 'selfdestruct' | 'invalid'
+	| 'log0' | 'log1' | 'log2' | 'log3' | 'log4' | 'chainid' | 'origin' | 'gasprice'
+	| 'blockhash' | 'blobhash' | 'coinbase' | 'timestamp' | 'number' | 'difficulty'
+	| 'prevrandao' | 'gaslimit' | 'basefee' | 'blobbasefee';
 
 YulLBrace: '{' -> pushMode(YulMode);
 YulRBrace: '}' -> popMode;
