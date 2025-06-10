@@ -57,3 +57,6 @@ fun inMemberAccess(): ElementPattern<PsiElement> = psiElement().inside(SolMember
 
 fun inFunctionParameterDef(): ElementPattern<PsiElement> = psiElement()
   .inside(SolParameterDef::class.java)
+
+fun inImportDeclaration(): ElementPattern<PsiElement> = psiElement()
+  .inside(SolImportDirective::class.java)

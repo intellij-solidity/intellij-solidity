@@ -125,5 +125,8 @@ class SolKeywordCompletionContributor : CompletionContributor(), DumbAware {
     extend(
       CompletionType.BASIC, inFunctionParameterDef(), SolKeywordCompletionProvider(*(arrayOf(*KEYWORD_DATA_LOCATION)))
     )
+    extend(
+      CompletionType.BASIC, inImportDeclaration(), SolKeywordCompletionProvider("from ")
+    )
   }
 }
