@@ -50,8 +50,8 @@ class ForgeTestRunConfigurationProducer : LazyRunConfigurationProducer<ForgeTest
       is SolFunctionDefinition -> {
         if (element.isTestFunction()) {
           configuration.name = "${element.contract?.name}.${element.name}"
-          configuration.testName = element.name
-          configuration.contractName = element.contract?.name
+          configuration.testName = element.name ?: ""
+          configuration.contractName = element.contract?.name ?: ""
           configuration.workingDirectory = project.basePath ?: ""
           sourceElement.set(element)
           return true
@@ -60,7 +60,7 @@ class ForgeTestRunConfigurationProducer : LazyRunConfigurationProducer<ForgeTest
 
       is SolContractDefinition -> {
         configuration.name = element.name ?: ""
-        configuration.contractName = element.name
+        configuration.contractName = element.name ?: ""
         configuration.workingDirectory = project.basePath ?: ""
         sourceElement.set(element)
         return true

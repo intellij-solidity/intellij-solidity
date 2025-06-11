@@ -39,14 +39,14 @@ class ForgeTestRunConfigurationEditor : SettingsEditor<ForgeTestRunConfiguration
   }
 
   override fun resetEditorFrom(configuration: ForgeTestRunConfiguration) {
-    contractNameField.text = configuration.contractName ?: ""
-    testNameField.text = configuration.testName ?: ""
+    contractNameField.text = configuration.contractName
+    testNameField.text = configuration.testName
     workingDirectoryField.text = configuration.workingDirectory
   }
 
   override fun applyEditorTo(configuration: ForgeTestRunConfiguration) {
-    configuration.contractName = contractNameField.text.ifEmpty { null }
-    configuration.testName = testNameField.text.ifEmpty { null }
+    configuration.contractName = contractNameField.text
+    configuration.testName = testNameField.text
     configuration.workingDirectory = workingDirectoryField.text
   }
 

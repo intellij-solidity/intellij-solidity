@@ -16,8 +16,8 @@ class ForgeTestRunConfiguration(
   name: String
 ) : LocatableConfigurationBase<ForgeTestCommandLineState>(project, factory, name) {
 
-  var contractName: String? = null
-  var testName: String? = null
+  var contractName: String = ""
+  var testName: String = ""
   var workingDirectory: String = project.basePath ?: ""
 
   override fun getConfigurationEditor() = ForgeTestRunConfigurationEditor()
@@ -28,10 +28,9 @@ class ForgeTestRunConfiguration(
   @Throws(InvalidDataException::class)
   override fun readExternal(element: Element) {
     super.readExternal(element)
-    testName = JDOMExternalizerUtil.getChildrenValueAttributes(element, "testName")[0]
-    contractName = JDOMExternalizerUtil.getChildrenValueAttributes(element, "contractName")[0]
-    workingDirectory =
-      JDOMExternalizerUtil.getChildrenValueAttributes(element, "workingDirectory")[0] ?: workingDirectory
+    testName = element.getChild("testName")?.getAttributeValue(Constants.VALUE) ?: ""
+    contractName = element.getChild("contractName")?.getAttributeValue(Constants.VALUE) ?: ""
+    workingDirectory = element.getChild("workingDirectory")?.getAttributeValue(Constants.VALUE) ?: ""
   }
 
   @Throws(WriteExternalException::class)
