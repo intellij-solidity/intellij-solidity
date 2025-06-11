@@ -21,11 +21,11 @@ class ForgeTestCommandLineState(
       .withExePath("${USER_HOME}/.foundry/bin/forge")
       .withParameters("test")
       .withParameters("-vvvv")
-    configuration.testName?.let { testName ->
+    configuration.testName.takeIf { it.isNotBlank() }?.let { testName ->
       cmd.addParameter("--match-test")
       cmd.addParameter(testName)
     }
-    configuration.contractName?.let { contractName ->
+    configuration.contractName.takeIf { it.isNotBlank() }?.let { contractName ->
       cmd.addParameter("--match-contract")
       cmd.addParameter(contractName)
     }
