@@ -6,6 +6,7 @@ import com.intellij.execution.process.ProcessOutputTypes
 import com.intellij.openapi.util.Key
 
 class ForgeTestTransformingProcessHandler(cmdLine: GeneralCommandLine) : OSProcessHandler(cmdLine) {
+  private val compilerFailRegex = Regex("^Compiler run failed:$")
   private val suiteStartRegex = Regex("^Ran \\d+ tests? for (.*\\.t\\.sol):(.*)$")
   private val suiteEndRegex =
     Regex("^Suite result: (\\w+)\\. (\\d+) passed; (\\d+) failed; (\\d+) skipped; finished in (\\d+\\.?\\d+)(.+) \\(.*\\)$")
@@ -13,6 +14,7 @@ class ForgeTestTransformingProcessHandler(cmdLine: GeneralCommandLine) : OSProce
   private val summaryRegex =
     Regex("^Ran (\\d+) test suites in (\\d+\\.?\\d+)(.+) \\(.+\\): (\\d+) tests passed, (\\d+) failed, (\\d+) skipped \\(\\d+ total tests\\)$")
 
+  private var isFail = false
   private var suiteName = ""
   private var activeTest = ""
   private var allTestsRan = false
@@ -21,6 +23,16 @@ class ForgeTestTransformingProcessHandler(cmdLine: GeneralCommandLine) : OSProce
     val line = text.trimEnd('\n', '\r')
       .removeSuffix("\n")
       .removeSuffix("\r")
+
+    if (isFail) {
+      super.notifyTextAvailable("$line\n", outputType)
+      return
+    }
+    if (compilerFailRegex.matches(line)) {
+      isFail = true
+      super.notifyTextAvailable("$line\n", ProcessOutputTypes.STDERR)
+      return
+    }
 
     if (allTestsRan) return
     if (summaryRegex.matches(line)) {
