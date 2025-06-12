@@ -128,5 +128,8 @@ class SolKeywordCompletionContributor : CompletionContributor(), DumbAware {
     extend(
       CompletionType.BASIC, inImportDeclaration(), SolKeywordCompletionProvider("from ")
     )
+    extend(
+      CompletionType.BASIC, inStateVariableDeclaration(), SolKeywordCompletionProvider("constant ", "internal ", "public ", "private ", "override ", "immutable ", "transient ")
+    )
   }
 }
