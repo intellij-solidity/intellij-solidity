@@ -2,16 +2,43 @@ package me.serce.solidity.lang.completion
 
 class SolTypesCompletionTest : SolCompletionTestBase() {
 
-  fun testStateVarsTypeCompletions() = checkCompletion(hashSetOf("address ", "uint ", "int "), """
+  fun testStateVarsTypeCompletions() = checkCompletion(
+    elementaryType, """
      contract A {
       /*caret*/
      }
-  """)
+  """
+  )
 
-  fun testBaseTypesSubsetCompletion() = checkCompletion(hashSetOf("bytes ", "byte ", "bool "), """
+  fun testPayableAddressTypeCompletions() = checkCompletion(
+    hashSetOf("payable"), """
      contract A {
-      b/*caret*/
+      address /*caret*/
      }
-  """)
+  """
+  )
+
+  fun testUserDefinedValueTypeCompletion() = checkCompletion(
+    elementaryType, """
+      type Test is /*caret*/
+  """
+  )
+
+  fun testMappingKeyTypeCompletion() = checkCompletion(
+    elementaryType, """
+      contract A {
+      mapping(/*caret*/
+     }
+       
+  """
+  )
+
+  fun testFunctionTypeCompletions() = checkCompletion(
+    elementaryType + hashSetOf("mapping"), """
+     contract A {
+      function b(/*caret*/
+     }
+  """
+  )
 
 }

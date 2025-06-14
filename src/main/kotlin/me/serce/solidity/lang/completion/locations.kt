@@ -7,6 +7,7 @@ import com.intellij.psi.PsiElement
 import me.serce.solidity.lang.core.SolidityFile
 import me.serce.solidity.lang.core.SolidityTokenTypes
 import me.serce.solidity.lang.psi.*
+import me.serce.solidity.lang.types.SolType
 
 
 fun emitStartStatement() =
@@ -16,9 +17,9 @@ fun emitStartStatement() =
 fun revertStartStatement() =
   psiElement(SolidityTokenTypes.IDENTIFIER)
     .inside(SolRevertStatement::class.java)
-    .afterLeaf("revert")
+    .afterLeaf(psiElement(SolidityTokenTypes.REVERT_STATEMENT))
 
-fun stateVarInsideContract() =
+fun stateVarInsideContract(): ElementPattern<PsiElement> =
   psiElement(SolidityTokenTypes.IDENTIFIER)
     .inside(psiElement(SolPrimaryExpression::class.java))
     .inside(SolidityFile::class.java)
@@ -47,3 +48,19 @@ fun mapExpression(): ElementPattern<PsiElement> =
 fun pathImportExpression(): ElementPattern<PsiElement> =
   psiElement(SolidityTokenTypes.STRINGLITERAL).inside(SolImportPath::class.java)
 
+fun insideContract(): ElementPattern<PsiElement> = psiElement()
+  .inside(psiElement(SolPrimaryExpression::class.java))
+  .inside(SolidityFile::class.java)
+
+fun insideFunction(): ElementPattern<PsiElement> = psiElement().inside(psiElement(SolFunctionDefinition::class.java))
+
+fun inMemberAccess(): ElementPattern<PsiElement> = psiElement().inside(SolMemberAccessExpression::class.java)
+
+fun inFunctionParameterDef(): ElementPattern<PsiElement> = psiElement()
+  .inside(SolParameterDef::class.java)
+
+fun inImportDeclaration(): ElementPattern<PsiElement> = psiElement()
+  .inside(SolImportDirective::class.java)
+
+fun inStateVariableDeclaration(): ElementPattern<PsiElement> = psiElement(SolidityTokenTypes.IDENTIFIER)
+  .inside(psiElement(SolPrimaryExpression::class.java))
