@@ -86,11 +86,8 @@ class SolidityFoldingBuilder : CustomFoldingBuilder(), DumbAware {
     }
 
     private fun spanMultipleLines(node: ASTNode, document: Document): Boolean {
-      return spanMultipleLines(node.textRange, document)
-    }
-
-    private fun spanMultipleLines(range: TextRange, document: Document): Boolean {
-      return document.getLineNumber(range.startOffset) < document.getLineNumber(range.endOffset)
+      val textRange = node.textRange
+      return document.getLineNumber(textRange.startOffset) < document.getLineNumber(textRange.endOffset)
     }
   }
 }
