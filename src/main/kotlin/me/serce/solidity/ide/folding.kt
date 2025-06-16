@@ -12,7 +12,12 @@ import com.intellij.psi.PsiElement
 import me.serce.solidity.lang.core.SolidityTokenTypes
 
 class SolidityFoldingBuilder : CustomFoldingBuilder(), DumbAware {
-  override fun buildLanguageFoldRegions(descriptors: MutableList<FoldingDescriptor>, root: PsiElement, document: Document, quick: Boolean) {
+  override fun buildLanguageFoldRegions(
+    descriptors: MutableList<FoldingDescriptor>,
+    root: PsiElement,
+    document: Document,
+    quick: Boolean
+  ) {
     collectDescriptorsRecursively(root.node, document, descriptors)
   }
 
@@ -20,11 +25,14 @@ class SolidityFoldingBuilder : CustomFoldingBuilder(), DumbAware {
     val type = node.elementType
     return when (type) {
       SolidityTokenTypes.BLOCK -> "{...}"
-      SolidityTokenTypes.COMMENT -> "/*...*/"
+      SolidityTokenTypes.COMMENT,
+      SolidityTokenTypes.NAT_SPEC_TAG -> "/*...*/"
+
       SolidityTokenTypes.CONTRACT_DEFINITION,
       SolidityTokenTypes.ENUM_DEFINITION,
       SolidityTokenTypes.STRUCT_DEFINITION,
       SolidityTokenTypes.FUNCTION_DEFINITION -> "${node.text.substringBefore("{")} {...} "
+
       else -> "..."
     }
   }
@@ -44,13 +52,33 @@ class SolidityFoldingBuilder : CustomFoldingBuilder(), DumbAware {
       if (
         type === SolidityTokenTypes.BLOCK && spanMultipleLines(node, document) ||
         type === SolidityTokenTypes.COMMENT ||
-        type === SolidityTokenTypes.CONTRACT_DEFINITION ||
-        type === SolidityTokenTypes.STRUCT_DEFINITION ||
-        type === SolidityTokenTypes.ENUM_DEFINITION ||
+        type === SolidityTokenTypes.NAT_SPEC_TAG ||
+        type === SolidityTokenTypes.CONTRACT_DEFINITION && spanMultipleLines(node, document) ||
+        type === SolidityTokenTypes.STRUCT_DEFINITION && spanMultipleLines(node, document) ||
+        type === SolidityTokenTypes.ENUM_DEFINITION && spanMultipleLines(node, document) ||
         type === SolidityTokenTypes.FUNCTION_DEFINITION &&
         node.findChildByType(SolidityTokenTypes.PARAMETER_LIST)?.let { spanMultipleLines(it, document) } == true) {
 
-        descriptors.add(FoldingDescriptor(node, node.textRange))
+        // NatSpec has to be handled separately to ensure the whole block is folded
+        if (type === SolidityTokenTypes.COMMENT || type === SolidityTokenTypes.NAT_SPEC_TAG) {
+          val prevElementType = node.treePrev?.elementType
+          if (prevElementType != SolidityTokenTypes.COMMENT //
+            && prevElementType != SolidityTokenTypes.NAT_SPEC_TAG
+          ) {
+            var last = node
+            var next = node.treeNext
+            while (next != null && (next.elementType == SolidityTokenTypes.COMMENT //
+                || next.elementType == SolidityTokenTypes.NAT_SPEC_TAG)
+            ) {
+              last = next
+              next = next.treeNext
+            }
+            val range = TextRange(node.startOffset, last.textRange.endOffset)
+            descriptors.add(FoldingDescriptor(node, range))
+          }
+        } else {
+          descriptors.add(FoldingDescriptor(node, node.textRange))
+        }
       }
       for (child in node.getChildren(null)) {
         collectDescriptorsRecursively(child, document, descriptors)
@@ -58,7 +86,10 @@ class SolidityFoldingBuilder : CustomFoldingBuilder(), DumbAware {
     }
 
     private fun spanMultipleLines(node: ASTNode, document: Document): Boolean {
-      val range = node.textRange
+      return spanMultipleLines(node.textRange, document)
+    }
+
+    private fun spanMultipleLines(range: TextRange, document: Document): Boolean {
       return document.getLineNumber(range.startOffset) < document.getLineNumber(range.endOffset)
     }
   }
@@ -78,7 +109,8 @@ class VisualStudioCustomFoldingProvider : CustomFoldingProvider() {
 
   override fun getPlaceholderText(elementText: String): String {
     val textAfterMarker = elementText.replaceFirst("[/*#-]*\\s*region(.*)".toRegex(), "$1")
-    val result = if (elementText.startsWith("/*")) StringUtil.trimEnd(textAfterMarker, "*/").trim { it <= ' ' } else textAfterMarker.trim { it <= ' ' }
+    val result = if (elementText.startsWith("/*")) StringUtil.trimEnd(textAfterMarker, "*/")
+      .trim { it <= ' ' } else textAfterMarker.trim { it <= ' ' }
     return if (result.isEmpty()) "..." else result
   }
 
