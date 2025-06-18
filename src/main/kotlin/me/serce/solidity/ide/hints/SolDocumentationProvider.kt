@@ -11,7 +11,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.impl.source.tree.LeafPsiElement
 import com.intellij.psi.util.*
 import com.intellij.psi.util.elementType
-import com.intellij.refactoring.suggested.endOffset
+import me.serce.solidity.ide.hints.endOffset
 import com.jetbrains.rd.util.getOrCreate
 import me.serce.solidity.ide.SolHighlighter
 import me.serce.solidity.ide.colors.SolColor
@@ -97,7 +97,7 @@ class SolDocumentationProvider : AbstractDocumentationProvider() {
           else -> emptyList()
         }
       } else emptyList()
-    }.reversed()
+      }.asReversed()
     if (comments.isNotEmpty()) {
       builder.append(CONTENT_START)
       var prevText = ""

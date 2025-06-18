@@ -44,8 +44,8 @@ abstract class SolStubbedElementImpl<StubT : StubElement<*>> : StubBasedPsiEleme
 
   override fun getReference(): SolReference? = null
 
-  // FQN isn't needed in paring tests
-  override fun toString(): String = "${javaClass.simpleName}($elementType)"
+  // FQN isn't needed in parsing tests
+  override fun toString(): String = "${javaClass.simpleName}(${node.elementType})"
 }
 
 abstract class SolStubbedNamedElementImpl<S> :

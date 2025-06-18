@@ -29,3 +29,6 @@ abstract class AbstractParameterInfoHandler<O : PsiElement, T : Any> : Parameter
 
 val PsiElement.startOffset: Int
   get() = textRange.startOffset
+
+val PsiElement.endOffset: Int
+  get() = textRange.endOffset

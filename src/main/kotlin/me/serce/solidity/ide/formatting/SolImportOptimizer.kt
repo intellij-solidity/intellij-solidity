@@ -54,8 +54,8 @@ class SolImportOptimizer : ImportOptimizer {
     val first = list.first().containingFile.let { it.children.filterIsInstance<SolPragmaDirective>().firstOrNull() ?: it.firstChild }
     val parent = first.parent
     list.forEach { it.delete() }
-    imports.reversed().forEach { parent.addAfter(it, first) }
-    parent.childrenOfType<SolImportDirective>().reversed().filter { SolResolver.collectUsedElements(it).isEmpty() }.forEach { it.delete() }
+    imports.asReversed().forEach { parent.addAfter(it, first) }
+    parent.childrenOfType<SolImportDirective>().asReversed().filter { SolResolver.collectUsedElements(it).isEmpty() }.forEach { it.delete() }
   }
 
   private fun processLight(file: PsiFile, list: List<SolImportDirective>): Runnable {
