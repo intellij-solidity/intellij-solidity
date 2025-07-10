@@ -61,7 +61,7 @@ open class ForgetTestOutputTransformer {
       val duration = durationStr.toDouble()
       val durationFmt = when (unit) {
         "µs" -> "%.0f".format(duration / 1_000)
-        "ms" -> "%.0f".format(duration)
+        "ms" -> "%.0f".format(duration * 1000)
         "s" -> "%.0f".format(duration * 1_000)
         "m" -> "%.0f".format(duration * 60_000)
         "h" -> "%.0f".format(duration * 3_600_000)
