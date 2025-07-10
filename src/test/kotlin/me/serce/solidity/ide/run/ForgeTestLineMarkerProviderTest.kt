@@ -4,7 +4,6 @@ import com.intellij.icons.AllIcons
 import me.serce.solidity.utils.SolTestBase
 
 class ForgeTestLineMarkerProviderTest : SolTestBase() {
-
   fun testGutterIconsForTestFile() {
     InlineFile("""
         //- Counter.t.sol
