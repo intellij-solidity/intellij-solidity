@@ -139,6 +139,8 @@
                         implementationClass="me.serce.solidity.ide.formatting.SolidityFormattingModelBuilder"/>
 
         <codeInsight.lineMarkerProvider language="Solidity"
+                                        implementationClass="me.serce.solidity.ide.annotation.ForgeTestLineMarkerProvider" order="first"/>
+        <codeInsight.lineMarkerProvider language="Solidity"
                                         implementationClass="me.serce.solidity.ide.annotation.SolidityLineMarkerProvider"/>
 
 
@@ -239,6 +241,11 @@
                                  enabledByDefault="false"
                                  level="WEAK WARNING"
                                  implementationClass="me.serce.solidity.ide.inspections.UnusedElementInspection"/>
+
+        <!-- Forge Test Runner -->
+        <configurationType implementation="me.serce.solidity.ide.run.ForgeTestRunConfigurationType"/>
+        <runConfigurationProducer
+                implementation="me.serce.solidity.ide.run.ForgeTestRunConfigurationProducer" />
 
         <errorHandler implementation="me.serce.solidity.ide.SentryReportSubmitter"/>
 
