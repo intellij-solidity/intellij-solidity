@@ -13,6 +13,8 @@ import me.serce.solidity.lang.psi.SolFunctionDefinition
 import me.serce.solidity.lang.psi.Visibility
 
 class ForgeTestRunConfigurationProducer : LazyRunConfigurationProducer<ForgeTestRunConfiguration>() {
+  private val testNameRegex = Regex("(\\w+)\\.?(\\w+)?")
+
   override fun getConfigurationFactory() = ForgeTestRunConfigurationFactory(ForgeTestRunConfigurationType())
 
   override fun isConfigurationFromContext(
@@ -74,8 +76,7 @@ class ForgeTestRunConfigurationProducer : LazyRunConfigurationProducer<ForgeTest
     val configuration = ForgeTestRunConfiguration(project, configurationFactory, "Forge Test - $fullTestName")
     configuration.workingDirectory = project.basePath ?: ""
 
-    val regex = Regex("(\\w+)\\.?(\\w+)?")
-    regex.matchEntire(fullTestName)?.let { m ->
+    testNameRegex.matchEntire(fullTestName)?.let { m ->
       configuration.contractName = m.destructured.component1()
       configuration.testName = m.destructured.component2()
     }
