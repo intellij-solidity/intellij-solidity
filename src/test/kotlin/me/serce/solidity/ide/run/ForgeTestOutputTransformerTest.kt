@@ -8,7 +8,7 @@ class ForgeTestOutputTransformerTest : SolTestBase() {
   private val compilerSuccessLine = "Compiler run successful!"
   private val compilerFailLine = "Compiler run failed:"
   private val suiteStartLine = { contract: String -> "Ran 3 tests for test/$contract.t.sol:$contract" }
-  private val suiteEndLine = { duration: String -> "Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in ${duration}ms (868.32µs CPU time)" }
+  private val suiteEndLine = { duration: String -> "Suite result: ok. 1 passed; 0 failed; 0 skipped; finished in ${duration} (868.32µs CPU time)" }
   private val testPassLine = { fn: String -> "[PASS] $fn() (gas: 34345)" }
   private val testFailLine = { fn: String, error: String -> "[FAIL: $error] $fn() (gas: 34345)" }
   private val summaryLine = "Ran 5 test suite in 285.26ms (5.68ms CPU time): 6 tests passed, 2 failed, 0 skipped (8 total tests)"
@@ -20,10 +20,8 @@ class ForgeTestOutputTransformerTest : SolTestBase() {
   private val teamcityTestFinishLine = { fn: String -> "##teamcity[testFinished name='$fn()']\n" }
 
   fun testCompilerFailed() {
-    val lines = transformer.transformLine(compilerFailLine)
-    assert(transformer.isFail)
-
-    lines?.let {
+    transformer.transformLine(compilerFailLine)?.let {
+      assert(transformer.isFail)
       assertEquals("Expected only one line", it.size, 1)
       assertEquals("Compiler run failed:\n", it[0])
     }
@@ -32,17 +30,16 @@ class ForgeTestOutputTransformerTest : SolTestBase() {
   }
 
   fun testAllTestsRan() {
-    val lines = transformer.transformLine(summaryLine)
-    assert(transformer.allTestsRan)
-    assertNull("Expected no transformed output", lines)
-    assertNull("Subsequent lines should not be transformed", transformer.transformLine("subsequent line"))
+    transformer.transformLine(summaryLine)?.let {
+      assert(transformer.allTestsRan)
+      assertNull("Expected no transformed output", it)
+      assertNull("Subsequent lines should not be transformed", transformer.transformLine("subsequent line"))
+    }
   }
 
   fun testSuiteStart() {
-    val lines = transformer.transformLine(suiteStartLine("Counter"))
-    assertEquals("Counter", transformer.suiteName)
-
-    lines?.let {
+    transformer.transformLine(suiteStartLine("Counter"))?.let {
+      assertEquals("Counter", transformer.suiteName)
       assertEquals("Expected only one line", it.size, 1)
       assertEquals(teamcitySuiteStartLine("Counter"), it[0])
     }
@@ -50,19 +47,26 @@ class ForgeTestOutputTransformerTest : SolTestBase() {
 
   fun testSuiteEnd() {
     transformer.suiteName = "Counter"
-    val lines = transformer.transformLine(suiteEndLine("123"))
 
-    lines?.let {
+    transformer.transformLine(suiteEndLine("123µs"))?.let {
+      assertEquals("Expected only one line", it.size, 1)
+      assertEquals(teamcitySuiteEndLine("Counter", "0"), it[0])
+    }
+
+    transformer.transformLine(suiteEndLine("123ms"))?.let {
       assertEquals("Expected only one line", it.size, 1)
       assertEquals(teamcitySuiteEndLine("Counter", "123"), it[0])
+    }
+
+    transformer.transformLine(suiteEndLine("123s"))?.let {
+      assertEquals("Expected only one line", it.size, 1)
+      assertEquals(teamcitySuiteEndLine("Counter", "123000"), it[0])
     }
   }
 
   fun testTestPassStart() {
-    val lines = transformer.transformLine(testPassLine("testIncrementSuccess"))
-    assertEquals("testIncrementSuccess()", transformer.activeTest)
-
-    lines?.let {
+    transformer.transformLine(testPassLine("testIncrementSuccess"))?.let {
+      assertEquals("testIncrementSuccess()", transformer.activeTest)
       assertEquals("Expected 2 lines", it.size, 2)
       assertEquals(teamcityTestStartLine("testIncrementSuccess"), it[0])
       assertEquals("${testPassLine("testIncrementSuccess")}\n", it[1])
@@ -72,10 +76,8 @@ class ForgeTestOutputTransformerTest : SolTestBase() {
   }
 
   fun testTestFailStart() {
-    val lines = transformer.transformLine(testFailLine("testIncrementFail", "some error"))
-    assertEquals("testIncrementFail()", transformer.activeTest)
-
-    lines?.let {
+    transformer.transformLine(testFailLine("testIncrementFail", "some error"))?.let {
+      assertEquals("testIncrementFail()", transformer.activeTest)
       assertEquals("Expected 3 lines", it.size, 3)
       assertEquals(teamcityTestStartLine("testIncrementFail"), it[0])
       assertEquals(teamcityTestFailLine("testIncrementFail", "some error"), it[1])
@@ -87,9 +89,8 @@ class ForgeTestOutputTransformerTest : SolTestBase() {
 
   fun testTestFinish() {
     transformer.activeTest = "testIncrementSuccess()"
-    val lines = transformer.transformLine("")
 
-    lines?.let {
+    transformer.transformLine("")?.let {
       assertEquals("Expected 2 lines", it.size, 2)
       assertEquals(teamcityTestFinishLine("testIncrementSuccess"), it[0])
       assertEquals("\n", it[1])
