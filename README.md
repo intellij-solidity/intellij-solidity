@@ -34,9 +34,9 @@ Please attach the screenshot for every issue if possible. It will make the issue
 ./gradlew runIdea
 ```
 
-## Discuss
+## Community
 
-Please check out the new [discussions](https://github.com/intellij-solidity/intellij-solidity/discussions) section.
+Join our [discord](https://discord.gg/2pARGQ8RMf) community.
 
 ## Contribute
 
