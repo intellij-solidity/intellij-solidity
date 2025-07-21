@@ -13,6 +13,7 @@
 * Goto declaration
 * Find usages
 * Code formatting
+* Forge test runner with gutter icons for running tests in `*.t.sol` files
 
 ## Supporting the plugin
 

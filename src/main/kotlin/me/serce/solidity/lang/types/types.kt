@@ -222,10 +222,11 @@ data class SolContract(val ref: SolContractDefinition, val builtin: Boolean = fa
 
   override fun getParents(): List<SolContract> {
     return ref.supers
-      .flatMap { it.reference?.multiResolve() ?: emptyList() }
-      .filterIsInstance<SolContractDefinition>()
-      .map { SolContract(it) }
-      .reversed()
+    .flatMap { it.reference?.multiResolve() ?: emptyList() }
+    .filterIsInstance<SolContractDefinition>()
+    .map { SolContract(it) }
+    .toList()
+    .asReversed()
   }
 
   override fun isAssignableFrom(other: SolType): Boolean =
