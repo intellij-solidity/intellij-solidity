@@ -121,15 +121,6 @@ open class SolFormattingBlock(
       }
     }
 
-    node.elementType == INLINE_ARRAY_EXPRESSION -> {
-      val lBracketIndex = subBlocks.indexOfFirst { it is ASTBlock && it.node?.elementType == LBRACKET }
-      if (lBracketIndex != -1 && lBracketIndex < childIndex) {
-        Indent.getNormalIndent()
-      } else {
-        Indent.getNoneIndent()
-      }
-    }
-
     node.elementType == UNCHECKED_BLOCK -> Indent.getNormalIndent()
     node.elementType == TERNARY_EXPRESSION -> Indent.getNormalIndent()
     else -> Indent.getNoneIndent()
