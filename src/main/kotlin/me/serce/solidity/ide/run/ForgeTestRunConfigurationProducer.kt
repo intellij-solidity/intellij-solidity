@@ -91,7 +91,7 @@ class ForgeTestRunConfigurationProducer : LazyRunConfigurationProducer<ForgeTest
 }
 
 private fun SolFunctionDefinition.isTestFunction(): Boolean {
-  // Check if function name starts with 'test' and is public/external
+  // Check if the function name starts with 'test' and is public/external
   return name?.startsWith("test") == true &&
     (visibility == null || visibility == Visibility.PUBLIC || visibility == Visibility.EXTERNAL)
 }
