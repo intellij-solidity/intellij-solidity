@@ -151,6 +151,47 @@ class RenameTest : SolTestBase() {
         }
     """)
 
+  fun testStructInALibraryScopeRename() = doTest(
+    "cat", """
+        library lib {
+            struct dog/*caret*/ {
+                uint256 a;
+                uint256 b;
+            }
+
+            function f() internal returns (dog memory) {
+                dog memory r;
+                return r;
+            }
+        }
+
+        contract c {
+            function f() internal returns (lib.dog memory) {
+                return lib.f();
+            }
+        }
+    """, """
+        library lib {
+            struct cat {
+                uint256 a;
+                uint256 b;
+            }
+
+            function f() internal returns (cat memory) {
+                cat memory r;
+                return r;
+            }
+        }
+
+        contract c {
+            function f() internal returns (lib.cat memory) {
+                return lib.f();
+            }
+        }
+    """
+  )
+
+
   private fun doTest(
     newName: String,
     @Language("Solidity") before: String,
