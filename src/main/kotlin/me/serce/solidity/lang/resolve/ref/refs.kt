@@ -27,6 +27,24 @@ class SolUserDefinedTypeNameReference(element: SolUserDefinedTypeName) : SolRefe
   override fun getVariants() = SolCompleter.completeTypeName(element)
 }
 
+class SolQualifierTypeNameReference(
+  element: SolUserDefinedTypeName, private val identifier: PsiElement
+) : SolReferenceBase<SolUserDefinedTypeName>(element), SolReference {
+
+  override fun calculateDefaultRangeInElement(): TextRange {
+    return TextRange(identifier.startOffsetInParent, identifier.startOffsetInParent + identifier.textLength)
+  }
+
+  override fun multiResolve(): Collection<PsiElement> {
+    return SolResolver.resolveTypeNameUsingImports(identifier)
+  }
+
+  override fun handleElementRename(newName: String): PsiElement {
+    doRename(identifier, newName)
+    return element
+  }
+}
+
 class SolVarLiteralReference(element: SolVarLiteral) : SolReferenceBase<SolVarLiteral>(element), SolReference {
   override fun multiResolve() = SolResolver.resolveVarLiteralReference(element)
 

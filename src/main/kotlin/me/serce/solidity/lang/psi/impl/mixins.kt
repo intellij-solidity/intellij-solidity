@@ -464,6 +464,18 @@ abstract class SolUserDefinedTypeNameImplMixin : SolStubbedElementImpl<SolTypeRe
 
   override fun getReference(): SolReference = SolUserDefinedTypeNameReference(this)
 
+  override fun getReferences(): Array<SolReference> {
+    val identifiers = findIdentifiers()
+    val baseRef = SolUserDefinedTypeNameReference(this)
+    return when {
+      identifiers.size > 1 -> arrayOf(
+        SolQualifierTypeNameReference(this, identifiers.first()), baseRef
+      )
+
+      else -> arrayOf(baseRef)
+    }
+  }
+
   override val referenceNameElement: PsiElement
     get() = findIdentifiers().last()
 
