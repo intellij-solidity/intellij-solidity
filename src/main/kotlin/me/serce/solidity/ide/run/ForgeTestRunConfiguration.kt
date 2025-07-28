@@ -37,13 +37,13 @@ class ForgeTestRunConfiguration(
   override fun writeExternal(element: Element) {
     super.writeExternal(element)
 
-    testName?.let {
+    testName.let {
       val tnEle = Element("testName")
       tnEle.setAttribute(Constants.VALUE, it)
       element.addContent(tnEle)
     }
 
-    contractName?.let {
+    contractName.let {
       val cnEle = Element("contractName")
       cnEle.setAttribute(Constants.VALUE, it)
       element.addContent(cnEle)

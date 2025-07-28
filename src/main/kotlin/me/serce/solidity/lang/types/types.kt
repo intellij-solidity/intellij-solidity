@@ -488,7 +488,7 @@ data class SolVariableType(val ref: SolStateVariableDeclaration): SolType {
 
 private fun getReferenceTypeMembers(project: Project, usage: Usage) =
     getSdkMembers(SolInternalTypeFactory.of(project).functionType).map {
-      it.getName()?.let { name -> if (it is SolCallable && name.startsWith("__")) changeName(it, name.substring(2), usage) else it }
+      it.getName()?.let { name -> if (it is SolCallable && name.startsWith("__")) changeName(it, name.substring(2)) else it }
         ?: it
     }
 
@@ -602,6 +602,6 @@ private fun getSdkMembers(solContract: SolContract): List<SolMember> {
     return solContract.ref.let { it.functionDefinitionList + it.stateVariableDeclarationList }
 }
 
-private fun changeName(it: SolCallable, newName: String, callable: Usage): SolMember {
+private fun changeName(it: SolCallable, newName: String): SolMember {
   return BuiltinCallable(it.parseParameters(), it.parseType(), newName)
 }
