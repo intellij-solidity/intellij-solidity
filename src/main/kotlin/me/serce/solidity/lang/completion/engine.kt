@@ -124,12 +124,16 @@ object SolCompleter {
 
 }
 
-class ContractLookupElement(val contract: SolContractDefinition) : LookupElement() {
-  override fun getLookupString(): String = contract.name!!
+class ContractLookupElement(private val contract: SolContractDefinition) : LookupElement() {
+  // read the lookup string on the contract lookup element construction to avoid the exception
+  // when #getLookupString is called without a read action when the UI is painted.
+  private val contractName: String = contract.name ?: ""
+
+  override fun getLookupString(): String = contractName
 
   override fun renderElement(presentation: LookupElementPresentation) {
     presentation.icon = contract.icon
-    presentation.itemText = contract.name
+    presentation.itemText = contractName
     presentation.typeText = "from ${contract.containingFile.name}"
   }
 
