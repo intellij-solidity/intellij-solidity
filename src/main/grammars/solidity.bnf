@@ -450,7 +450,10 @@ EmitStatement ::= emit FunctionCallExpression {pin=1}
 /* A revert statement. The contained expression needs to refer to an error. */
 // Note, revert can't be a keyword as it could be used as e.g. a function name
 RevertStatement ::= 'revert' FunctionCallExpression
-SeqExpression ::= '(' ((Expression ',') | ',')* Expression? ')' {pin=1}
+// Tuple or parenthesized expression. Allow optional elements like `(,x)`
+// and avoid excessive backtracking on deeply nested expressions by using
+// a comma-separated list of optional expressions.
+SeqExpression ::= '(' ([Expression] (',' [Expression])* ','?)? ')' {pin=1}
 VariableDefinition ::= VariableDeclaration ( '=' Expression )?
 
 // see https://solidity.readthedocs.io/en/v0.4.21/miscellaneous.html#order-of-precedence-of-operators

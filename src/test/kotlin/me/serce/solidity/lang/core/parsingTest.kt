@@ -65,6 +65,20 @@ class SolidityCompleteCustomParsingTest : SolidityParsingTestBase("fixtures/pars
   fun testUnchecked() = doTest(true, true)
   fun testUserDefinedValueTypes() = doTest(true, true)
   fun testUsing() = doTest(true, true)
+  // The code below test is inlined as is rather than being placed in a .sol file
+  // because prior to 2.4.7, the parser would cause IntelliJ to hang on this input.
+  fun testDeepNesting() = doCodeTest("""
+    contract C {
+        function f() public pure {
+            uint ok = 0;
+            uint nok = 0;
+
+            (-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-ok++))))))))))))))))))))))))))))));
+
+            (-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-nok++))))))))))))))))))))))))))))));
+        }
+    }
+  """.trimIndent())
 }
 
 class SolidityCompleteOfficialSuccessfulParsingTest :
