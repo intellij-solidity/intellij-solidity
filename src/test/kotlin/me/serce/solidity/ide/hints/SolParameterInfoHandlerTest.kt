@@ -50,7 +50,7 @@ class SolParameterInfoHandlerTest : SolTestBase() {
                 foo(/*caret*/);
             }
         }
-    """, "<no arguments>", 0)
+    """, "<no parameters>", 0)
 
   fun testInt() = checkByText("""
         contract A {
@@ -130,7 +130,7 @@ class SolParameterInfoHandlerTest : SolTestBase() {
                 foo.bar(/*caret*/);
             }
         }
-    """, "<no arguments>", 0)
+    """, "<no parameters>", 0)
 
   fun testMultipleParameter2() = checkByText("""
         contract A {
