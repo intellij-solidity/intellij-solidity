@@ -93,6 +93,9 @@ open class SolFormattingBlock(
       parentType in setOf(IF_STATEMENT, WHILE_STATEMENT, DO_WHILE_STATEMENT, FOR_STATEMENT) && childType != BLOCK -> {
         Indent.getNormalIndent()
       }
+      
+      // pasted code inside a block
+      type == BLOCK && childType == IDENTIFIER -> Indent.getNormalIndent()
 
       // all function calls
       parentType in setOf(FUNCTION_INVOCATION, YUL_FUNCTION_CALL) -> Indent.getNormalIndent()
@@ -120,7 +123,10 @@ open class SolFormattingBlock(
         Indent.getNoneIndent()
       }
     }
-
+    
+    node.elementType == FUNCTION_CALL_ARGUMENTS -> Indent.getNormalIndent(false)
+    node.elementType == MAP_EXPRESSION -> Indent.getContinuationIndent(false)
+    node.elementType == PARAMETER_LIST -> Indent.getNormalIndent()
     node.elementType == UNCHECKED_BLOCK -> Indent.getNormalIndent()
     node.elementType == TERNARY_EXPRESSION -> Indent.getNormalIndent()
     else -> Indent.getNoneIndent()
