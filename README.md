@@ -2,6 +2,8 @@
 
 [![Build Status](https://circleci.com/gh/intellij-solidity/intellij-solidity.svg?style=svg)](https://circleci.com/gh/intellij-solidity/intellij-solidity)
 ![JetBrains plugins](https://img.shields.io/jetbrains/plugin/d/9475-intellij-solidity.svg)
+[![codecov](https://codecov.io/gh/intellij-solidity/intellij-solidity/graph/badge.svg?token=ETJgfCcutP)](https://codecov.io/gh/intellij-solidity/intellij-solidity)
+[![Discord](https://img.shields.io/badge/Community-Discord-%235865F2.svg)](https://discord.gg/2pARGQ8RMf)
 
 [<img src="./logo/logo_256.png" width="128" height="128" alt="Plugin logo">](https://plugins.jetbrains.com/idea/plugin/9475-intellij-solidity)
 
