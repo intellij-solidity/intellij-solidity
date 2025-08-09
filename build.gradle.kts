@@ -1,4 +1,7 @@
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatform
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 
 val kotlin_version: String by project
 val sentry_version: String by project
@@ -45,6 +48,14 @@ intellijPlatform {
         name = "Intellij-Solidity"
         version = project.version.toString()
     }
+
+    pluginVerification {
+        // disable the intellij-solidity plugin name warning
+        freeArgs.addAll(listOf("-mute", "TemplateWordInPluginName"))
+        ides {
+            ide(IntelliJPlatformType.IntellijIdeaUltimate, "2024.2.6")
+        }
+    }
 }
 
 grammarKit {
@@ -53,6 +64,10 @@ grammarKit {
 
 tasks.named<JavaExec>("runIde") {
     maxHeapSize = "1G"
+}
+
+tasks.named<VerifyPluginTask>("verifyPlugin") {
+    offline.set(true)
 }
 
 repositories {

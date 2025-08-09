@@ -4,7 +4,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.QueryExecutorBase
 import com.intellij.openapi.application.ex.ApplicationEx
 import com.intellij.openapi.progress.EmptyProgressIndicator
-import com.intellij.openapi.progress.util.ProgressIndicatorUtils
+import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.util.Condition
 import com.intellij.psi.PsiElement
 import com.intellij.psi.search.GlobalSearchScope.FilesScope
@@ -51,8 +51,10 @@ fun SolContractDefinition.findAllImplementations(): HashSet<SolContractDefinitio
   if (application.isDispatchThread) {
     findAllImplementationsInAction(implQueue, implementations)
   } else {
-    ProgressIndicatorUtils.runInReadActionWithWriteActionPriority({
-      findAllImplementationsInAction(implQueue, implementations)
+    ProgressManager.getInstance().runProcess({
+      application.runReadAction {
+        findAllImplementationsInAction(implQueue, implementations)
+      }
     }, EmptyProgressIndicator())
   }
   implementations.remove(this)

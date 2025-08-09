@@ -12,7 +12,6 @@ import com.intellij.patterns.PlatformPatterns.psiElement
 import com.intellij.psi.PsiElement
 import com.intellij.psi.codeStyle.CodeStyleManager
 import com.intellij.psi.impl.source.tree.LeafPsiElement
-import com.intellij.refactoring.suggested.endOffset
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.stubs.StubIndex
 import com.intellij.util.ProcessingContext
@@ -96,7 +95,7 @@ class SolContextCompletionContributor : CompletionContributor(), DumbAware {
                   val insert = ": ${if (needComma) "," else ""}"
                   context.document.insertString(context.selectionEndOffset, insert)
                   context.editor.caretModel.currentCaret.moveToOffset(context.selectionEndOffset - 1)
-                  CodeStyleManager.getInstance(context.project).reformatText(parent.containingFile, parent.startOffset, parent.endOffset)
+                  CodeStyleManager.getInstance(context.project).reformatText(parent.containingFile, parent.startOffset, parent.textRange.endOffset)
                 }
               }
             }

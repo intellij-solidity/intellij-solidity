@@ -5,7 +5,6 @@ import com.intellij.lang.annotation.Annotator
 import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
-import com.intellij.refactoring.suggested.endOffset
 import me.serce.solidity.ide.colors.SolColor
 import me.serce.solidity.ide.hints.startOffset
 import me.serce.solidity.lang.psi.*
@@ -36,16 +35,16 @@ class SolidityAnnotator : Annotator {
         element.nameIdentifier?.let { applyColor(holder, it, SolColor.ERROR_NAME) }
       }
       is SolHexLiteral -> {
-        if ((element.endOffset - element.startOffset) > 4) {
+        if ((element.textRange.endOffset - element.startOffset) > 4) {
           applyColor(holder, TextRange(element.startOffset, element.startOffset + 3), SolColor.KEYWORD)
-          applyColor(holder, TextRange(element.startOffset + 3, element.endOffset), SolColor.STRING)
+          applyColor(holder, TextRange(element.startOffset + 3, element.textRange.endOffset), SolColor.STRING)
         } else {
           applyColor(holder, element, SolColor.STRING)
         }
       }
       is SolRevertStatement -> applyColor(holder, element.firstChild, SolColor.KEYWORD)
       is SolOverrideSpecifier -> {
-        if ((element.endOffset - element.startOffset) > 8) {
+        if ((element.textRange.endOffset - element.startOffset) > 8) {
           applyColor(holder, TextRange(element.startOffset, element.startOffset + 8), SolColor.KEYWORD)
         }
       }
