@@ -15,6 +15,7 @@ import com.intellij.psi.util.childrenOfType
 import com.intellij.util.ArrayQuery
 import com.intellij.util.CollectionQuery
 import com.intellij.util.EmptyQuery
+import com.intellij.util.FilteredQuery
 import com.intellij.util.Processor
 import com.intellij.util.Query
 import me.serce.solidity.lang.SolidityFileType
@@ -72,6 +73,8 @@ private fun findAllImplementationsInAction(
       .forEach(Processor { implQueue.add(it) })
   }
 }
+
+fun <U> Query<U>.filterQuery(condition: Condition<U>): Query<U> = FilteredQuery(this, condition)
 
 fun SolContractDefinition.findImplementations(): Query<SolContractDefinition> {
   val virtualFile = containingFile.virtualFile
