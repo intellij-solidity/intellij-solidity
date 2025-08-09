@@ -18,12 +18,27 @@
 
     <change-notes><![CDATA[
       <p>
-        Thank you for your support! Huge thank you to
-        all of you who sponsor the plugin development, @punk3155 in particular!❤️
+        A huge thank you to all of you who have sponsored the plugin development! ❤️
 
-        <b>v2.4.6</b>
+        We've created a new [Discord](https://discord.gg/2pARGQ8RMf) community. Join to discuss Solidity, the plugin
+        features you'd like to see, and the issues you're experiencing with the plugin.
+
+        <b>v2.4.7</b>
         In this release:
         <ul>
+          <li>Added auto-completion for multiline comments, yours @SerCeMan!</li>
+          <li>Fixed parsing performance of deeply nested sequences, yours @SerCeMan!</li>
+          <li>Fixed renaming of qualified references, yours @SerCeMan!</li>
+          <li>Fixed inline array formatting, yours @SerCeMan!</li>
+          <li>Added Forge Test Run Configuration, thank you @passabilities!</li>
+          <li>Added enums to the structure view, yours @SerCeMan!</li>
+          <li>Improved folding of natspec comments, yours @SerCeMan!</li>
+          <li>Added support for transient keyword, thank you @Paulalex85!</li>
+          <li>Fixed "using for" resolution cache, thank you @Paulalex85!</li>
+          <li>Added support for custom storage syntax, yours @SerCeMan!</li>
+        </ul>
+        <b>v2.4.6</b>
+        In this release:
         <ul>
           <li>Fixed stack overflow in circular imports, thank you @Paulalex85!</li>
           <li>Fixed import resolution for libraries with identical names, thank you @Paulalex85!</li>
@@ -38,21 +53,6 @@
           <li>Function and contract resolution with aliases, thank you @Paulalex85!</li>
           <li>Added latest EVM opcode set, thank you @Paulalex85!</li>
         </ul>
-        </ul>
-        <b>v2.4.5</b>
-        In this release:
-        <ul>
-          <li>Updated solidity version in the templates, thank you @ereztdev!</li>
-          <li>Resolved StackOverflowError on imports with the same name, yours @SerCeMan!</li>
-          <li>Supported string casting in fixed bytes types, thank you @Paulalex85!</li>
-          <li>Enabled hints for function call arguments, thank you @mbolotov!</li>
-          <li>Fixed documentation display for functions with modifiers, thank you @mbolotov!</li>
-          <li>Inline rename refactoring, thank you @mbolotov!</li>
-          <li>New Optimize imports action, thank you @mbolotov!</li>
-          <li>Added hierarchy view provider, thank you @mbolotov!</li>
-        </ul>
-
-        A special thank you to tetu.io who made the @mboloov's contributions possible! 🎉
       </p>
     ]]>
     </change-notes>
