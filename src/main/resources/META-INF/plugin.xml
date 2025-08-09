@@ -59,10 +59,10 @@
 
     <!--
         See https://plugins.jetbrains.com/docs/intellij/build-number-ranges.html
-        See https://youtrack.jetbrains.com/articles/IDEA-A-2100661478/IntelliJ-IDEA-2023.1-231.8109.175-build-Release-Notes
-        231.8109.175 is IntelliJ IDEA 2023.1
+        See https://youtrack.jetbrains.com/articles/IDEA-A-2100662423/IntelliJ-IDEA-2024.2.6-242.26775.15-build-Release-Notes
+        242.26775.15 is IntelliJ IDEA 2024.2.6
     -->
-    <idea-version since-build="231.8109.175"/>
+    <idea-version since-build="242.26775.15"/>
 
     <!-- See https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html for the full list of modules -->
     <depends>com.intellij.modules.lang</depends>
