@@ -8,17 +8,20 @@ import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.execution.runners.ProgramRunner
 import com.intellij.execution.testframework.sm.SMTestRunnerConnectionUtil
 import com.intellij.execution.testframework.sm.runner.SMTRunnerConsoleProperties
-import org.apache.commons.lang.SystemUtils.USER_HOME
 
 class ForgeTestCommandLineState(
   private val configuration: ForgeTestRunConfiguration,
   environment: ExecutionEnvironment
 ) : CommandLineState(environment) {
+  companion object {
+    private val USER_HOME = System.getProperty("user.home")
+  }
+
   @Throws(ExecutionException::class)
   override fun startProcess(): ProcessHandler {
     val cmd = GeneralCommandLine()
       .withWorkDirectory(configuration.workingDirectory)
-      .withExePath("${USER_HOME}/.foundry/bin/forge")
+      .withExePath("$USER_HOME/.foundry/bin/forge")
       .withParameters("test")
       .withParameters("-vvvv")
     configuration.testName.takeIf { it.isNotBlank() }?.let { testName ->

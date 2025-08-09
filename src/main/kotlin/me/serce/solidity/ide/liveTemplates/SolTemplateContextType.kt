@@ -10,3 +10,4 @@ class SolTemplateContextType : FileTypeBasedContextType(
   SolidityLanguage.id,
   SolidityFileType
 )
+

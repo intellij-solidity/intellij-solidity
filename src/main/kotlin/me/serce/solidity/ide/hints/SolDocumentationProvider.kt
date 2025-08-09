@@ -11,7 +11,6 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.impl.source.tree.LeafPsiElement
 import com.intellij.psi.util.*
 import com.intellij.psi.util.elementType
-import com.intellij.refactoring.suggested.endOffset
 import com.jetbrains.rd.util.getOrCreate
 import me.serce.solidity.ide.SolHighlighter
 import me.serce.solidity.ide.colors.SolColor
@@ -121,7 +120,7 @@ class SolDocumentationProvider : AbstractDocumentationProvider() {
         }
         text = text.split("\n").filter { it.contains("[^/]".toRegex()) }.joinToString("\n")
         getDoc(e.containingFile)?.let {doc ->
-          if (i > 0 && (i > 1 || prevText.isNotBlank()) && doc.getLineNumber(e.textOffset) != doc.getLineNumber(comments[i - 1].endOffset)) {
+          if (i > 0 && (i > 1 || prevText.isNotBlank()) && doc.getLineNumber(e.textOffset) != doc.getLineNumber(comments[i - 1].textRange.endOffset)) {
             text = "\n" + text
           } else text
         }

@@ -2,7 +2,6 @@ package me.serce.solidity.ide
 
 import com.intellij.codeInsight.TargetElementUtil
 import com.intellij.ide.hierarchy.*
-import com.intellij.ide.util.treeView.AlphaComparator
 import com.intellij.ide.util.treeView.NodeDescriptor
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.actionSystem.DataContext
@@ -88,7 +87,13 @@ class SolTypeHierarchyBrowser(element: SolContractDefinition) : TypeHierarchyBro
 
   override fun getComparator(): Comparator<NodeDescriptor<*>>? {
     val state = HierarchyBrowserManager.getInstance(myProject).state
-    return if (state != null && state.SORT_ALPHABETICALLY) AlphaComparator.INSTANCE else Comparator<NodeDescriptor<*>> { o1, o2 -> 0 }
+    return if (state != null && state.SORT_ALPHABETICALLY) {
+      Comparator<NodeDescriptor<*>> { o1, o2 ->
+        o1.toString().compareTo(o2.toString(), ignoreCase = true)
+      }
+    } else {
+      Comparator { _, _ -> 0 }
+    }
   }
 
   override fun isInterface(p0: PsiElement): Boolean = false /*(p0 as? SolContractDefinition)?.contractType == ContractType.INTERFACE*/
