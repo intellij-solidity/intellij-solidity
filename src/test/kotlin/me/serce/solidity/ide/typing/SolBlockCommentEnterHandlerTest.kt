@@ -41,6 +41,22 @@ class SolBlockCommentEnterHandlerTest : SolTestBase() {
     myFixture.type('\n')
   }
 
+  fun testBlockCommentEnterWithinText() = checkByText(
+    """
+      /*
+       * foo<caret>
+       */
+    """.trimIndent(),
+    """
+      /*
+       * foo
+       * <caret>
+       */
+    """.trimIndent()
+  ) {
+    myFixture.type('\n')
+  }
+
   fun testBlockCommentContinuationWithIndent() = checkByText(
     """
       contract C {
