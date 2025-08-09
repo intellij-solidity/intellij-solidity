@@ -24,6 +24,10 @@ class SolBlockCommentEnterHandler : EnterHandlerDelegateAdapter() {
     val indent = document.charsSequence.subSequence(lineStart, offset).toString()
 
     return when {
+      trimmedPrev.endsWith("*/") -> {
+        Result.Continue
+      }
+
       trimmedPrev.startsWith("/*") -> {
         document.insertString(offset, " * \n$indent */")
         editor.caretModel.moveToOffset(offset + 3)

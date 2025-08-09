@@ -14,6 +14,34 @@ class SolBlockCommentEnterHandlerTest : SolTestBase() {
     myFixture.type('\n')
   }
 
+  fun testBlockCommentAfterTheCommentEnds() = checkByText(
+    """
+      /*
+       * a comment
+       */<caret>
+    """.trimIndent(),
+    """
+      /*
+       * a comment
+       */
+      <caret>
+    """.trimIndent()
+  ) {
+    myFixture.type('\n')
+  }
+
+  fun testBlockCommentDoesNotIndentOneLineComments() = checkByText(
+    """
+      /* a comment */<caret>
+    """.trimIndent(),
+    """
+      /* a comment */
+      <caret>
+    """.trimIndent()
+  ) {
+    myFixture.type('\n')
+  }
+
   fun testBlockCommentContinuationWithDoubleStars() = checkByText(
     "/**<caret>",
     """
