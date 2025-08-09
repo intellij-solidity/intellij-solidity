@@ -1,3 +1,5 @@
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+
 val kotlin_version: String by project
 val sentry_version: String by project
 
@@ -5,9 +7,9 @@ plugins {
     java
     idea
     jacoco
-    kotlin("jvm") version "1.8.10"
-    id("org.jetbrains.grammarkit") version "2022.3.1"
-    id("org.jetbrains.intellij") version "1.17.3"
+    kotlin("jvm") version "1.9.25"
+    id("org.jetbrains.grammarkit") version "2022.3.2.2"
+    id("org.jetbrains.intellij.platform") version "2.7.0"
     id("net.researchgate.release") version "3.0.2"
 }
 
@@ -38,14 +40,11 @@ tasks.named<Delete>("clean") {
     delete("gen")
 }
 
-intellij {
-    pluginName.set("Intellij-Solidity")
-    version.set("2023.1")
-    type.set("IU")
-    downloadSources.set(true)
-    updateSinceUntilBuild.set(false)
-    plugins.set(listOf("JavaScript"))
-    sandboxDir.set(project.rootDir.canonicalPath + "/.sandbox")
+intellijPlatform {
+    pluginConfiguration {
+        name = "Intellij-Solidity"
+        version = project.version.toString()
+    }
 }
 
 grammarKit {
@@ -58,8 +57,9 @@ tasks.named<JavaExec>("runIde") {
 
 repositories {
     mavenCentral()
-    maven("https://www.jetbrains.com/intellij-repository/releases")
-    maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
+    intellijPlatform {
+        defaultRepositories()
+    }
 }
 
 configurations {
@@ -74,8 +74,16 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlin_version")
     implementation("io.sentry:sentry:$sentry_version")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-toml:2.13.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.6")
 
-    testImplementation("junit:junit:4.11")
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.opentest4j:opentest4j:1.3.0")
+
+    intellijPlatform {
+        intellijIdeaUltimate("2024.2.6")
+        bundledPlugins("JavaScript")
+        testFramework(TestFrameworkType.Platform)
+    }
 }
 
 release {
@@ -98,20 +106,18 @@ tasks.named("compileKotlin") {
 tasks.named<org.jetbrains.grammarkit.tasks.GenerateLexerTask>("generateLexer") {
     val solLexerName = "_SolidityLexer"
     sourceFile.set(file("src/main/grammars/${solLexerName}.flex"))
-    targetDir.set("gen/me/serce/solidity")
-    targetClass.set(solLexerName)
-    skeleton.set(file("src/main/grammars/idea-flex.skeleton"))
+    targetOutputDir.set(file("gen/me/serce/solidity"))
     purgeOldFiles.set(true)
 }
 
 tasks.named<org.jetbrains.grammarkit.tasks.GenerateParserTask>("generateParser") {
     val pkg = "me/serce/solidity"
     sourceFile.set(file("src/main/grammars/solidity.bnf"))
-    targetRoot.set("gen")
+    targetRootOutputDir.set(file("gen"))
     pathToParser.set("$pkg/SolidityParser.java")
     pathToPsiRoot.set("$pkg/psi")
     purgeOldFiles.set(true)
-    outputs.dir(file("$targetRoot/$pkg"))
+    outputs.dir(file("gen/$pkg"))
 }
 
 // codecov

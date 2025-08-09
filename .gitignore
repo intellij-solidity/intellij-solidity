@@ -9,6 +9,7 @@ gen
 .sandbox
 .DS_Store
 /out/
+.intellijPlatform/
 
 ### Java ###
 *.class
