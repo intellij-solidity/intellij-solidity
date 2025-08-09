@@ -144,7 +144,7 @@
         <codeInsight.lineMarkerProvider language="Solidity"
                                         implementationClass="me.serce.solidity.ide.annotation.ForgeTestLineMarkerProvider" order="first"/>
         <codeInsight.lineMarkerProvider language="Solidity"
-                                        implementationClass="me.serce.solidity.ide.annotation.SolidityLineMarkerProvider"/>
+                                        implementationClass="me.serce.solidity.ide.annotation.SolLineMarkerProvider"/>
 
 
         <internalFileTemplate name="Solidity Contract"/>
