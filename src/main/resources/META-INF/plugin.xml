@@ -102,6 +102,9 @@
         <!-- Commenter -->
         <lang.commenter language="Solidity" implementationClass="me.serce.solidity.ide.SolCommenter"/>
 
+        <!-- Block comment typing support -->
+        <enterHandlerDelegate implementation="me.serce.solidity.ide.typing.SolBlockCommentEnterHandler"/>
+
         <!-- Brace Matcher -->
         <lang.braceMatcher language="Solidity" implementationClass="me.serce.solidity.ide.SolBraceMatcher"/>
 
