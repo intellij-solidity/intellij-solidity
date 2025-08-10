@@ -124,8 +124,11 @@ open class SolFormattingBlock(
       }
     }
     
-    node.elementType == FUNCTION_CALL_ARGUMENTS -> Indent.getNormalIndent(false)
-    node.elementType == MAP_EXPRESSION -> Indent.getContinuationIndent(false)
+    // inside a function call
+    node.elementType == STATEMENT -> Indent.getContinuationIndent()
+    node.elementType in listOf(FUNCTION_CALL_ARGUMENTS, FUNCTION_INVOCATION) -> Indent.getNormalIndent()
+    
+    node.elementType == MAP_EXPRESSION -> Indent.getNormalIndent()
     node.elementType == PARAMETER_LIST -> Indent.getNormalIndent()
     node.elementType == UNCHECKED_BLOCK -> Indent.getNormalIndent()
     node.elementType == TERNARY_EXPRESSION -> Indent.getNormalIndent()
