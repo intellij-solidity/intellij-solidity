@@ -104,7 +104,9 @@
 
         <!-- Block comment typing support -->
         <enterHandlerDelegate implementation="me.serce.solidity.ide.typing.SolBlockCommentEnterHandler"/>
-
+      
+        <typedHandler implementation="me.serce.solidity.ide.typing.SolSemicolonTypedHandler"/>
+      
         <!-- Brace Matcher -->
         <lang.braceMatcher language="Solidity" implementationClass="me.serce.solidity.ide.SolBraceMatcher"/>
 
