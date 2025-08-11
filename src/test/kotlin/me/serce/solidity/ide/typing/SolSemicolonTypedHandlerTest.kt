@@ -122,4 +122,134 @@ class SolSemicolonTypedHandlerTest : SolTestBase() {
   ) {
     myFixture.type(';')
   }
+
+  fun testInsertBeforeLineCommentOnSameLine() = checkByText(
+    """
+      contract C {
+        function b() public {
+          a(1, 2<caret>) // trailing
+        }
+      }
+    """.trimIndent(),
+    """
+      contract C {
+        function b() public {
+          a(1, 2);<caret> // trailing
+        }
+      }
+    """.trimIndent()
+  ) {
+    myFixture.type(';')
+  }
+
+  fun testDoNotMoveWhenSemicolonAlreadyPresentSameLine() = checkByText(
+    """
+      contract C {
+        function b() public {
+          a(1, 2<caret>); // already there
+        }
+      }
+    """.trimIndent(),
+    """
+      contract C {
+        function b() public {
+          a(1, 2;<caret>); // already there
+        }
+      }
+    """.trimIndent()
+  ) {
+    myFixture.type(';')
+  }
+
+  fun testDoNotMoveWhenSemicolonOnNextLine() = checkByText(
+    """
+      contract C {
+        function b() public {
+          a(
+            1,
+            2<caret>
+          )
+          ;
+        }
+      }
+    """.trimIndent(),
+    """
+      contract C {
+        function b() public {
+          a(
+            1,
+            2;<caret>
+          )
+          ;
+        }
+      }
+    """.trimIndent()
+  ) {
+    myFixture.type(';')
+  }
+
+  fun testDoNotMoveWhenWhenSemicolonAndBlockCommentSameLine() = checkByText(
+    """
+      contract C {
+        function b() public {
+          a(1, 2<caret>) /* note */ ;
+        }
+      }
+    """.trimIndent(),
+    """
+      contract C {
+        function b() public {
+          a(1, 2;<caret>) /* note */ ;
+        }
+      }
+    """.trimIndent()
+  ) {
+    myFixture.type(';')
+  }
+
+  fun testSkipBlockCommentBetweenCaretAndParenAcrossLines() = checkByText(
+    """
+      contract C {
+        function b() public {
+          a(
+            1,
+            2<caret>
+          /* mid */
+          )
+        }
+      }
+    """.trimIndent(),
+    """
+      contract C {
+        function b() public {
+          a(
+            1,
+            2
+          /* mid */
+          );<caret>
+        }
+      }
+    """.trimIndent()
+  ) {
+    myFixture.type(';')
+  }
+
+  fun testNonParenSignificantTokenAhead_DefaultInsert() = checkByText(
+    """
+      contract C {
+        function b() public {
+          a(1<caret> , 2) // comma ahead first -> default
+        }
+      }
+    """.trimIndent(),
+    """
+      contract C {
+        function b() public {
+          a(1;<caret> , 2) // comma ahead first -> default
+        }
+      }
+    """.trimIndent()
+  ) {
+    myFixture.type(';')
+  }
 }
