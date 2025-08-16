@@ -42,6 +42,7 @@ class SolidityCompleteCustomParsingTest : SolidityParsingTestBase("fixtures/pars
   fun testError() = doTest(true, true)
   fun testFallback() = doTest(true, true)
   fun testFunctions() = doTest(true, true)
+  fun testHexLiteralEmpty() = doTest(true, true)
   fun testImports() = doTest(true, true)
   fun testIdentifier() = doTest(true, true)
   fun testInterfaces() = doTest(true, true)
