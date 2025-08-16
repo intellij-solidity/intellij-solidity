@@ -75,7 +75,7 @@ open class SolFormattingBlock(
         STRUCT_DEFINITION
       ) -> Indent.getNormalIndent()
 
-      childType.isContractPart() -> Indent.getNormalIndent()
+      type == CONTRACT_DEFINITION && childType.isContractPart() -> Indent.getNormalIndent()
 
       // fields inside structs
       type == STRUCT_DEFINITION && childType == VARIABLE_DECLARATION -> Indent.getNormalIndent()
