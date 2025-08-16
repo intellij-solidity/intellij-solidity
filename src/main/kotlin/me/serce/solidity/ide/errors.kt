@@ -1,14 +1,20 @@
 package me.serce.solidity.ide
 
 import com.intellij.diagnostic.IdeaReportingEvent
+import com.intellij.ide.DataManager
 import com.intellij.ide.plugins.PluginManagerCore
+import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.application.ApplicationInfo
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.ErrorReportSubmitter
 import com.intellij.openapi.diagnostic.IdeaLoggingEvent
 import com.intellij.openapi.diagnostic.SubmittedReportInfo
 import com.intellij.openapi.diagnostic.SubmittedReportInfo.SubmissionStatus.FAILED
 import com.intellij.openapi.diagnostic.SubmittedReportInfo.SubmissionStatus.NEW_ISSUE
 import com.intellij.openapi.extensions.PluginId
+import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.progress.Task
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.util.Consumer
 import io.sentry.DefaultSentryClientFactory
@@ -39,47 +45,61 @@ class SentryReportSubmitter : ErrorReportSubmitter() {
     parentComponent: Component,
     consumer: Consumer<in SubmittedReportInfo>
   ): Boolean {
-    val ijEvent = events.firstOrNull()
-    if (ijEvent == null) {
-      return true
-    }
     if (pluginVersion.endsWith("-SNAPSHOT")) {
-      // do not report errors from dev-versions. If someone uses a dev version, he will
-      // be able to report the issue and all related info as a github issue or even fix it.
+      // do not report errors from dev-versions. If someone uses a dev version, they will
+      // be able to report the issue and all related info as a Github issue or even fix it.
       consumer.consume(SubmittedReportInfo(null, "Error submission is disabled in dev versions", FAILED))
       return false
     }
-    val eventBuilder = EventBuilder()
-      .withMessage(ijEvent.message)
-      .withLevel(Event.Level.ERROR)
-      .withTag("build", ApplicationInfo.getInstance().build.asString())
-      .withTag("plugin_version", pluginVersion)
-      .withTag("os", SystemInfo.OS_NAME)
-      .withTag("os_version", SystemInfo.OS_VERSION)
-      .withTag("os_arch", SystemInfo.OS_ARCH)
-      .withTag("java_version", SystemInfo.JAVA_VERSION)
-      .withTag("java_runtime_version", SystemInfo.JAVA_RUNTIME_VERSION)
-    val error = when (ijEvent) {
-      is IdeaReportingEvent -> ijEvent.data.throwable
-      else -> ijEvent.throwable
-    }
-    if (error != null) {
-      eventBuilder.withSentryInterface(ExceptionInterface(error))
-    }
-    if (additionalInfo != null) {
-      eventBuilder.withExtra("additional_info", additionalInfo)
-    }
-    if (events.size > 1) {
-      eventBuilder.withExtra("extra_events", events.drop(1).joinToString("\n") { it.toString() })
-    }
-    return try {
-      Sentry.capture(eventBuilder)
-      consumer.consume(SubmittedReportInfo(null, "Error has been successfully reported", NEW_ISSUE))
-      true
-    } catch (e: ConnectionException) {
-      // sentry is temporarily unavailable
-      consumer.consume(SubmittedReportInfo(null, "Error submission has failed", FAILED))
-      false
-    }
+
+    val context = DataManager.getInstance().getDataContext(parentComponent)
+    val project: Project? = CommonDataKeys.PROJECT.getData(context)
+    object : Task.Backgroundable(project, "Sending error reports", false) {
+      override fun run(indicator: ProgressIndicator) {
+        var success = true
+        for (ijEvent in events) {
+          val eventBuilder = EventBuilder()
+            .withMessage(ijEvent.message)
+            .withLevel(Event.Level.ERROR)
+            .withTag("build", ApplicationInfo.getInstance().build.asString())
+            .withTag("plugin_version", pluginVersion)
+            .withTag("os", SystemInfo.OS_NAME)
+            .withTag("os_version", SystemInfo.OS_VERSION)
+            .withTag("os_arch", SystemInfo.OS_ARCH)
+            .withTag("java_version", SystemInfo.JAVA_VERSION)
+            .withTag("java_runtime_version", SystemInfo.JAVA_RUNTIME_VERSION)
+          // replace with `error.throwable` when the minimum version is updated to 2025.1, see
+          // https://youtrack.jetbrains.com/issue/IJPL-175997/Error-Reporting-API-made-ApiStatus.Internal-in-2025.1
+          val error = when (ijEvent) {
+            is IdeaReportingEvent -> ijEvent.data.throwable
+            else -> ijEvent.throwable
+          }
+          if (error != null) {
+            eventBuilder.withSentryInterface(ExceptionInterface(error))
+          }
+          if (additionalInfo != null) {
+            eventBuilder.withExtra("additional_info", additionalInfo)
+          }
+          if (events.size > 1) {
+            eventBuilder.withExtra("extra_events", events.drop(1).joinToString("\n") { it.toString() })
+          }
+          try {
+            Sentry.capture(eventBuilder)
+          } catch (_: ConnectionException) {
+            // sentry is temporarily unavailable
+            success = false
+          }
+        }
+        ApplicationManager.getApplication().invokeLater {
+          if (success) {
+            consumer.consume(SubmittedReportInfo(null, "Error has been successfully reported", NEW_ISSUE))
+          } else {
+            consumer.consume(SubmittedReportInfo(null, "Error submission has failed", FAILED))
+          }
+        }
+      }
+    }.queue()
+
+    return true
   }
 }
