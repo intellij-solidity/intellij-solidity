@@ -254,6 +254,7 @@
 
         <defaultLiveTemplates file="/liveTemplates/Solidity.xml"/>
         <liveTemplateContext
+                contextId="SOLIDITY"
                 implementation="me.serce.solidity.ide.liveTemplates.SolTemplateContextType"/>
 
         <lang.structureViewExtension implementation="me.serce.solidity.ide.SolStructureViewExtension"/>

@@ -6,7 +6,6 @@ import me.serce.solidity.lang.SolidityLanguage
 import java.util.*
 
 class SolTemplateContextType : FileTypeBasedContextType(
-  SolidityLanguage.id.uppercase(Locale.getDefault()),
   SolidityLanguage.id,
   SolidityFileType
 )
