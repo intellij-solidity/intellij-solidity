@@ -72,17 +72,23 @@ class SolDocumentationProvider : AbstractDocumentationProvider() {
 
   private val commentsRegex = "^/\\*\\*|\\*/$|^///".toRegex()
 
-  override fun generateDoc(elementOrNull: PsiElement?, originalElement: PsiElement?): String? {
-    var element = (elementOrNull ?: return null)
-      .takeIf { it.textRange.contains(originalElement?.textRange ?: return@takeIf true) }
-      ?: originalElement?.parent
-      ?: elementOrNull
-
+  override fun generateDoc(psiElement: PsiElement, originalElement: PsiElement?): String? {
+    var element = psiElement
+    val range = originalElement?.textRange
+    if (range != null && !element.textRange.contains(range)) {
+      element = originalElement.parent ?: psiElement
+    }
     if (element is SolMemberAccessExpression) {
-      element = SolResolver.resolveMemberAccess(element).filterIsInstance<SolFunctionDefinition>().firstOrNull() ?: return null
+      val resolvedFunctions = SolResolver.resolveMemberAccess(element).filterIsInstance<SolFunctionDefinition>().firstOrNull()
+      if (resolvedFunctions == null) {
+        return null
+      }
+      element = resolvedFunctions
     }
     val builder = StringBuilder()
-    if (!builder.appendDefinition(element)) return null
+    if (!builder.appendDefinition(element)) {
+      return null
+    }
     data class DocWrapper(val document: Document?)
     val doc = mutableMapOf<PsiFile, DocWrapper>()
 
