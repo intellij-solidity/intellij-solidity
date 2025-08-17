@@ -108,6 +108,7 @@ object SolResolver {
     SolEnumDefinition::class.java,
     SolErrorDefinition::class.java,
     SolStructDefinition::class.java,
+    SolUserDefinedValueTypeDefinition::class.java,
   )
 
   fun collectUsedElements(o: SolImportDirective): List<String> {
@@ -192,9 +193,12 @@ object SolResolver {
           val containingFile = import.importPath?.reference?.resolve()?.containingFile ?: return@mapNotNull null
           val aliases = import.importAliasedPairList
           val names = if (aliases.isNotEmpty()) {
+            val exportedDeclarations = containingFile.children.filterIsInstance<SolNamedElement>().filter { element ->
+              exportElements.any { it.isAssignableFrom(element.javaClass) }
+            }
             aliases.mapNotNull { importAliasPair -> importAliasPair.importAlias } + aliases.mapNotNull { importAliasPair ->
               importAliasPair.userDefinedTypeName.name?.let { tn ->
-                containingFile.childrenOfType<SolContractDefinition>().find { contract -> contract.name == tn }
+                exportedDeclarations.find { it.name == tn }
               }
             }
           } else containingFile.childrenOfType<SolCallableElement>().toList()
