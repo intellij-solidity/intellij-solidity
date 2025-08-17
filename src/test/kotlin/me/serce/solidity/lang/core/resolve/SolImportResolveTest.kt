@@ -92,5 +92,46 @@ class SolImportResolveTest : SolResolveTestBase() {
     assertEquals("RandomStruct", resolved.name)
   }
 
+  fun testImportStructAndConstant() {
+    InlineFile(
+      """
+      struct Struct1 {
+          string foo;
+      }
+
+      string constant STR_CONST = "1";
+    """.trimIndent(), "Utils.sol"
+    )
+    InlineFile(
+      """
+        pragma solidity ^0.8.0;
+
+        import {Struct1, STR_CONST} from "./Utils.sol";
+
+        contract C1 {
+            Struct1 public s1;
+            //^
+            function test() public pure returns (string memory) {
+                return STR_CONST;
+                       //^
+            }
+        }
+      """.trimIndent()
+    )
+
+    val (structElement, constElement) = findMultipleElementAndDataInEditor<SolNamedElement>("^")
+    val structRef = structElement.first
+    val structResolved = checkNotNull(structRef.reference?.resolve() as? PsiNamedElement) {
+      "Failed to resolve ${structRef.text}"
+    }
+    assertEquals("Struct1", structResolved.name)
+
+    val constRef = constElement.first
+    val constResolved = checkNotNull(constRef.reference?.resolve() as? PsiNamedElement) {
+      "Failed to resolve ${constRef.text}"
+    }
+    assertEquals("STR_CONST", constResolved.name)
+  }
+
   override fun getTestDataPath() = "src/test/resources/fixtures/import/"
 }
