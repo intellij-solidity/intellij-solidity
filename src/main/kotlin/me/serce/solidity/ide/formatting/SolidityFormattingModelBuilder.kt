@@ -34,19 +34,30 @@ class SolidityFormattingModelBuilder : FormattingModelBuilder {
   private val topLevelDeclarations =
     TokenSet.create(CONTRACT_DEFINITION, STRUCT_DEFINITION, ENUM_DEFINITION, ERROR_DEFINITION)
 
+  private val openingBraces = TokenSet.create(LPAREN, LBRACE, LBRACKET)
+
+  private val declarationOrParameterLists =
+    TokenSet.create(VARIABLE_DECLARATION, PARAMETER_LIST, INDEXED_PARAMETER_LIST)
+
+  private val controlFlowStatements =
+    TokenSet.create(IF_STATEMENT, WHILE_STATEMENT, FOR_STATEMENT, DO_WHILE_STATEMENT)
+
+  private val pragmaOrImport = TokenSet.create(PRAGMA_DIRECTIVE, IMPORT_DIRECTIVE)
+
+  private val contractMembers = TokenSet.create(
+    FUNCTION_DEFINITION,
+    EVENT_DEFINITION,
+    ERROR_DEFINITION,
+    STRUCT_DEFINITION,
+    STATE_VARIABLE_DECLARATION
+  )
+
   fun createSpacingBuilder(settings: CodeStyleSettings): SpacingBuilder {
     return SpacingBuilder(settings, SolidityLanguage)
-      .between(TokenSet.create(LPAREN, LBRACE, LBRACKET), COMMENT).spaces(1)
-      .after(TokenSet.create(LPAREN, LBRACE, LBRACKET)).none()
-      // Some old versions do not support .before(TokenSet), so we use more verbose form
-      // https://github.com/JetBrains/intellij-community/commit/fd4c8224c17d041bf53d556f5c74ffaf20acffe3
-      // no spaces between - and > to prevent the formatter from breaking -> which could be separate tokens.
+      .between(openingBraces, COMMENT).spaces(1)
+      .after(openingBraces).none()
       .between(MINUS, MORE).none()
-      .before(RPAREN).none()
-      .before(RBRACE).none()
-      .before(RBRACKET).none()
-      .before(COMMA).none()
-      .before(SEMICOLON).none()
+      .before(TokenSet.create(RPAREN, RBRACE, RBRACKET, COMMA, SEMICOLON)).none()
       .around(BINARY_OPERATORS).spaces(1)
       .beforeInside(COLON, MAP_EXPRESSION_CLAUSE).spaces(0)
       .afterInside(COLON, MAP_EXPRESSION_CLAUSE).spaces(1)
@@ -73,15 +84,14 @@ class SolidityFormattingModelBuilder : FormattingModelBuilder {
       ).spaces(1)
       .beforeInside(LPAREN, FUNCTION_CALL_EXPRESSION).none()
       .after(CONTROL_STRUCTURES).spaces(1)
-      .beforeInside(STATEMENT, TokenSet.create(IF_STATEMENT, WHILE_STATEMENT, FOR_STATEMENT, DO_WHILE_STATEMENT))
-      .spaces(1)
+      .beforeInside(STATEMENT, controlFlowStatements).spaces(1)
       .after(CONTRACT).spaces(1)
       .aroundInside(
         IDENTIFIER,
         TokenSet.create(CONTRACT_DEFINITION, PRAGMA_DIRECTIVE, STRUCT_DEFINITION, PARAMETER_DEF)
       ).spaces(1)
-      .afterInside(TYPE_NAME, TokenSet.create(VARIABLE_DECLARATION, PARAMETER_LIST, INDEXED_PARAMETER_LIST)).spaces(1)
-      .beforeInside(IDENTIFIER, TokenSet.create(VARIABLE_DECLARATION, PARAMETER_LIST, INDEXED_PARAMETER_LIST)).spaces(1)
+      .afterInside(TYPE_NAME, declarationOrParameterLists).spaces(1)
+      .beforeInside(IDENTIFIER, declarationOrParameterLists).spaces(1)
       .after(COMMA).spaces(1)
       .beforeInside(BLOCK, STATEMENT).spaces(1)
       .beforeInside(UNCHECKED_BLOCK, STATEMENT).spaces(1)
@@ -98,12 +108,12 @@ class SolidityFormattingModelBuilder : FormattingModelBuilder {
       .between(EVENT_DEFINITION, EVENT_DEFINITION).blankLines(0)
       // 0 lines between error definitions
       .between(ERROR_DEFINITION, ERROR_DEFINITION).blankLines(0)
-      // 1 line between pragma and import/contract/struct definition
-      .between(PRAGMA_DIRECTIVE, TokenSet.create(IMPORT_DIRECTIVE, CONTRACT_DEFINITION, STRUCT_DEFINITION))
+      // 1 line between pragma and import directive
+      .between(PRAGMA_DIRECTIVE, TokenSet.create(IMPORT_DIRECTIVE))
       .blankLines(1)
       // 1 line between pragma/import and contract/struct definition
       .between(
-        TokenSet.create(PRAGMA_DIRECTIVE, IMPORT_DIRECTIVE),
+        pragmaOrImport,
         topLevelDeclarations
       ).blankLines(1)
       // 1 line between contracts/structs
@@ -115,21 +125,6 @@ class SolidityFormattingModelBuilder : FormattingModelBuilder {
       .between(STATE_VARIABLE_DECLARATION, STATE_VARIABLE_DECLARATION).blankLines(0)
       // allow for 0 lines between state constant variable declarations
       .between(CONSTANT_VARIABLE_DECLARATION, CONSTANT_VARIABLE_DECLARATION).blankLines(0)
-      .between(
-        TokenSet.create(
-          FUNCTION_DEFINITION,
-          EVENT_DEFINITION,
-          ERROR_DEFINITION,
-          STRUCT_DEFINITION,
-          STATE_VARIABLE_DECLARATION
-        ),
-        TokenSet.create(
-          FUNCTION_DEFINITION,
-          EVENT_DEFINITION,
-          ERROR_DEFINITION,
-          STRUCT_DEFINITION,
-          STATE_VARIABLE_DECLARATION
-        )
-      ).blankLines(1)
+      .between(contractMembers, contractMembers).blankLines(1)
   }
 }
