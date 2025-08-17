@@ -15,7 +15,8 @@ class SolImportResolveTest : SolResolveTestBase() {
                       //^
 
           contract b {}
-    """).psiFile
+    """
+    ).psiFile
   )
 
   fun testImportPathResolveNpm() = testResolveToAnotherFile(
@@ -100,18 +101,21 @@ class SolImportResolveTest : SolResolveTestBase() {
       }
 
       string constant STR_CONST = "1";
+      
+      type UserDefinedType is string;
     """.trimIndent(), "Utils.sol"
     )
     InlineFile(
       """
         pragma solidity ^0.8.0;
 
-        import {Struct1, STR_CONST} from "./Utils.sol";
+        import {Struct1, STR_CONST, UserDefinedType} from "./Utils.sol";
 
         contract C1 {
             Struct1 public s1;
             //^
-            function test() public pure returns (string memory) {
+            function test() public pure returns (UserDefinedType memory) {
+                                                    //^
                 return STR_CONST;
                        //^
             }
@@ -119,12 +123,18 @@ class SolImportResolveTest : SolResolveTestBase() {
       """.trimIndent()
     )
 
-    val (structElement, constElement) = findMultipleElementAndDataInEditor<SolNamedElement>("^")
+    val (structElement, userDefinedTypeElement, constElement) = findMultipleElementAndDataInEditor<SolNamedElement>("^")
     val structRef = structElement.first
     val structResolved = checkNotNull(structRef.reference?.resolve() as? PsiNamedElement) {
       "Failed to resolve ${structRef.text}"
     }
     assertEquals("Struct1", structResolved.name)
+
+    val userDefinedTypeRef = userDefinedTypeElement.first
+    val userDefinedTypeResolved = checkNotNull(userDefinedTypeRef.reference?.resolve() as? PsiNamedElement) {
+      "Failed to resolve ${userDefinedTypeRef.text}"
+    }
+    assertEquals("UserDefinedType", userDefinedTypeResolved.name)
 
     val constRef = constElement.first
     val constResolved = checkNotNull(constRef.reference?.resolve() as? PsiNamedElement) {

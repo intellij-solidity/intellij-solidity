@@ -108,6 +108,7 @@ object SolResolver {
     SolEnumDefinition::class.java,
     SolErrorDefinition::class.java,
     SolStructDefinition::class.java,
+    SolUserDefinedValueTypeDefinition::class.java,
   )
 
   fun collectUsedElements(o: SolImportDirective): List<String> {
