@@ -152,5 +152,11 @@ class SolKeywordCompletionContributor : CompletionContributor(), DumbAware {
       inConstructorDeclaration(),
       SolKeywordCompletionProvider("payable ", "internal ", "public ")
     )
+
+    extend(
+      CompletionType.BASIC,
+      inEventDeclaration(),
+      SolKeywordCompletionProvider("indexed ")
+    )
   }
 }

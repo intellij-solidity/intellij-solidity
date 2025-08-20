@@ -69,3 +69,7 @@ fun inFunctionDeclaration(): ElementPattern<PsiElement> = psiElement()
 
 fun inConstructorDeclaration(): ElementPattern<PsiElement> = psiElement()
   .inside(SolConstructorDefinition::class.java)
+
+fun inEventDeclaration(): ElementPattern<PsiElement> = psiElement()
+  .inside(SolEventDefinition::class.java)
+
