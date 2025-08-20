@@ -7,7 +7,6 @@ import com.intellij.psi.PsiElement
 import me.serce.solidity.lang.core.SolidityFile
 import me.serce.solidity.lang.core.SolidityTokenTypes
 import me.serce.solidity.lang.psi.*
-import me.serce.solidity.lang.types.SolType
 
 
 fun emitStartStatement() =
@@ -64,3 +63,6 @@ fun inImportDeclaration(): ElementPattern<PsiElement> = psiElement()
 
 fun inStateVariableDeclaration(): ElementPattern<PsiElement> = psiElement(SolidityTokenTypes.IDENTIFIER)
   .inside(psiElement(SolPrimaryExpression::class.java))
+
+fun inFunctionDeclaration(): ElementPattern<PsiElement> = psiElement()
+  .inside(SolFunctionDefinition::class.java)
