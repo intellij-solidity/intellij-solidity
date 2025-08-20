@@ -66,3 +66,6 @@ fun inStateVariableDeclaration(): ElementPattern<PsiElement> = psiElement(Solidi
 
 fun inFunctionDeclaration(): ElementPattern<PsiElement> = psiElement()
   .inside(SolFunctionDefinition::class.java)
+
+fun inConstructorDeclaration(): ElementPattern<PsiElement> = psiElement()
+  .inside(SolConstructorDefinition::class.java)

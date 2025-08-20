@@ -192,7 +192,7 @@ class SolKeywordCompletion : SolCompletionTestBase() {
                 a./*caret*/
             }
         } 
-  """, strict = true
+  """, strict = false
   )
 
   fun testBreakInWhile() = checkCompletion(

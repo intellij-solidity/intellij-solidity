@@ -147,5 +147,10 @@ class SolKeywordCompletionContributor : CompletionContributor(), DumbAware {
       inFunctionDeclaration(),
       SolKeywordCompletionProvider("external ", "virtual ", "override ", "payable ")
     )
+    extend(
+      CompletionType.BASIC,
+      inConstructorDeclaration(),
+      SolKeywordCompletionProvider("payable ", "internal ", "public ")
+    )
   }
 }
