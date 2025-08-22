@@ -8,7 +8,7 @@
 
       <p>
         You can support the plugin development by <a href="https://github.com/intellij-solidity/intellij-solidity">sponsoring</a> ❤️ the plugin on Github,
-        supporting the project on <a href="https://gitcoin.co/grants/1047/intellij-solidity">GitCoin</a>, or by clicking star on <a href="https://github.com/intellij-solidity/intellij-solidity">GitHub</a>
+        or by clicking star on <a href="https://github.com/intellij-solidity/intellij-solidity">GitHub</a>
         and rating it on the <a href="https://plugins.jetbrains.com/plugin/9475-intellij-solidity">plugin page</a>.
       </p>
       <p>
@@ -18,45 +18,51 @@
 
     <change-notes><![CDATA[
       <p>
-        Thank you for your support! Huge thank you to
-        all of you who sponsor the plugin development, @punk3155 in particular!❤️
+        A huge thank you to all of you who have sponsored the plugin development! ❤️
 
-        <b>v2.4.5</b>
+        We've created a new [Discord](https://discord.gg/2pARGQ8RMf) community. Join to discuss Solidity, the plugin
+        features you'd like to see, and the issues you're experiencing with the plugin.
+
+        <b>v2.4.7</b>
         In this release:
         <ul>
-          <li>Updated solidity version in the templates, thank you @ereztdev!</li>
-          <li>Resolved StackOverflowError on imports with the same name, yours @SerCeMan!</li>
-          <li>Supported string casting in fixed bytes types, thank you @Paulalex85!</li>
-          <li>Enabled hints for function call arguments, thank you @mbolotov!</li>
-          <li>Fixed documentation display for functions with modifiers, thank you @mbolotov!</li>
-          <li>Inline rename refactoring, thank you @mbolotov!</li>
-          <li>New Optimize imports action, thank you @mbolotov!</li>
-          <li>Added hierarchy view provider, thank you @mbolotov!</li>
+          <li>Added auto-completion for multiline comments, yours @SerCeMan!</li>
+          <li>Fixed parsing performance of deeply nested sequences, yours @SerCeMan!</li>
+          <li>Fixed renaming of qualified references, yours @SerCeMan!</li>
+          <li>Fixed inline array formatting, yours @SerCeMan!</li>
+          <li>Added Forge Test Run Configuration, thank you @passabilities!</li>
+          <li>Added enums to the structure view, yours @SerCeMan!</li>
+          <li>Improved folding of natspec comments, yours @SerCeMan!</li>
+          <li>Added support for transient keyword, thank you @Paulalex85!</li>
+          <li>Fixed "using for" resolution cache, thank you @Paulalex85!</li>
+          <li>Added support for custom storage syntax, yours @SerCeMan!</li>
         </ul>
-        <b>v2.4.4</b>
+        <b>v2.4.6</b>
         In this release:
         <ul>
-          <li>Import fixes and improvements, thank you @mbolotov!</li>
-          <li>Fix Yul references and highlight keywords, thank you @mbolotov!</li>
-          <li>Unused elements inspection, thank you @mbolotov!</li>
-          <li>Solidity elements structure in the structure view & a new icon set, thank you @mbolotov!</li>
-          <li>Fix function and variable name spelling issues, thank you @standstaff!</li>
-          <li>Member access inspection and resolve fixes, thank you @mbolotov!</li>
-          <li>Gas estimation display hints, thank you @mbolotov!</li>
-          <li>Exception fixes, yours @SerCeMan!</li>
+          <li>Fixed stack overflow in circular imports, thank you @Paulalex85!</li>
+          <li>Fixed import resolution for libraries with identical names, thank you @Paulalex85!</li>
+          <li>Added cache to import collection for faster indexing, thank you @Paulalex85!</li>
+          <li>Fixed resolution of functions from imported contracts with custom types and <code>using</code>, thank you @Paulalex85!</li>
+          <li>Added file-level <code>using for</code> support, thank you @Paulalex85!</li>
+          <li>Fixed resolving of elements imported with aliases, thank you @Paulalex85!</li>
+          <li>Improved file-level import handling, thank you @Paulalex85!</li>
+          <li>Support foundry <code>remappings.toml</code>, thank you @Paulalex85!</li>
+          <li>Fixed "Find Usages" for modifiers, thank you @Paulalex85!</li>
+          <li>Added references for contracts in the inherited doc tag values, thank you @mbolotov!</li>
+          <li>Function and contract resolution with aliases, thank you @Paulalex85!</li>
+          <li>Added latest EVM opcode set, thank you @Paulalex85!</li>
         </ul>
-
-        A special thank you to tetu.io who made the @mboloov's contributions possible! 🎉
       </p>
     ]]>
     </change-notes>
 
     <!--
         See https://plugins.jetbrains.com/docs/intellij/build-number-ranges.html
-        See https://youtrack.jetbrains.com/articles/IDEA-A-2100661478/IntelliJ-IDEA-2023.1-231.8109.175-build-Release-Notes
-        231.8109.175 is IntelliJ IDEA 2023.1
+        See https://youtrack.jetbrains.com/articles/IDEA-A-2100662423/IntelliJ-IDEA-2024.2.6-242.26775.15-build-Release-Notes
+        242.26775.15 is IntelliJ IDEA 2024.2.6
     -->
-    <idea-version since-build="231.8109.175"/>
+    <idea-version since-build="242.26775.15"/>
 
     <!-- See https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html for the full list of modules -->
     <depends>com.intellij.modules.lang</depends>
@@ -96,6 +102,9 @@
         <!-- Commenter -->
         <lang.commenter language="Solidity" implementationClass="me.serce.solidity.ide.SolCommenter"/>
 
+        <!-- Block comment typing support -->
+        <enterHandlerDelegate implementation="me.serce.solidity.ide.typing.SolBlockCommentEnterHandler"/>
+
         <!-- Brace Matcher -->
         <lang.braceMatcher language="Solidity" implementationClass="me.serce.solidity.ide.SolBraceMatcher"/>
 
@@ -131,7 +140,9 @@
                         implementationClass="me.serce.solidity.ide.formatting.SolidityFormattingModelBuilder"/>
 
         <codeInsight.lineMarkerProvider language="Solidity"
-                                        implementationClass="me.serce.solidity.ide.annotation.SolidityLineMarkerProvider"/>
+                                        implementationClass="me.serce.solidity.ide.annotation.ForgeTestLineMarkerProvider" order="first"/>
+        <codeInsight.lineMarkerProvider language="Solidity"
+                                        implementationClass="me.serce.solidity.ide.annotation.SolLineMarkerProvider"/>
 
 
         <internalFileTemplate name="Solidity Contract"/>
@@ -232,10 +243,16 @@
                                  level="WEAK WARNING"
                                  implementationClass="me.serce.solidity.ide.inspections.UnusedElementInspection"/>
 
+        <!-- Forge Test Runner -->
+        <configurationType implementation="me.serce.solidity.ide.run.ForgeTestRunConfigurationType"/>
+        <runConfigurationProducer
+                implementation="me.serce.solidity.ide.run.ForgeTestRunConfigurationProducer" />
+
         <errorHandler implementation="me.serce.solidity.ide.SentryReportSubmitter"/>
 
         <defaultLiveTemplates file="/liveTemplates/Solidity.xml"/>
         <liveTemplateContext
+                contextId="SOLIDITY"
                 implementation="me.serce.solidity.ide.liveTemplates.SolTemplateContextType"/>
 
         <lang.structureViewExtension implementation="me.serce.solidity.ide.SolStructureViewExtension"/>

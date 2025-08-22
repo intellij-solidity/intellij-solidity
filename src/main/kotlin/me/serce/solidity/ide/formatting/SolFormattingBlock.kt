@@ -75,7 +75,10 @@ open class SolFormattingBlock(
         STRUCT_DEFINITION
       ) -> Indent.getNormalIndent()
 
-      childType.isContractPart() -> Indent.getNormalIndent()
+      type == CONTRACT_DEFINITION && childType.isContractPart() -> Indent.getNormalIndent()
+
+      // inheritance specifiers
+      type == CONTRACT_DEFINITION && childType == INHERITANCE_SPECIFIER -> Indent.getNormalIndent()
 
       // fields inside structs
       type == STRUCT_DEFINITION && childType == VARIABLE_DECLARATION -> Indent.getNormalIndent()
@@ -87,12 +90,15 @@ open class SolFormattingBlock(
 
       // inside a block, list of parameters, etc..
       parentType in setOf(BLOCK, UNCHECKED_BLOCK, ENUM_DEFINITION, YUL_BLOCK, PARAMETER_LIST, INDEXED_PARAMETER_LIST,
-        MAP_EXPRESSION, SEQ_EXPRESSION, TYPED_DECLARATION_LIST, RETURN_ST) -> Indent.getNormalIndent()
+        MAP_EXPRESSION, SEQ_EXPRESSION, INLINE_ARRAY_EXPRESSION, TYPED_DECLARATION_LIST, RETURN_ST) -> Indent.getNormalIndent()
 
       // all expressions inside parens should have indentation when lines are split
       parentType in setOf(IF_STATEMENT, WHILE_STATEMENT, DO_WHILE_STATEMENT, FOR_STATEMENT) && childType != BLOCK -> {
         Indent.getNormalIndent()
       }
+      
+      // pasted code inside a block
+      type == BLOCK && childType == IDENTIFIER -> Indent.getNormalIndent()
 
       // all function calls
       parentType in setOf(FUNCTION_INVOCATION, YUL_FUNCTION_CALL) -> Indent.getNormalIndent()
@@ -120,7 +126,13 @@ open class SolFormattingBlock(
         Indent.getNoneIndent()
       }
     }
-
+    
+    // inside a function call
+    node.elementType == STATEMENT -> Indent.getContinuationIndent()
+    node.elementType in listOf(FUNCTION_CALL_ARGUMENTS, FUNCTION_INVOCATION) -> Indent.getNormalIndent()
+    
+    node.elementType == MAP_EXPRESSION -> Indent.getNormalIndent()
+    node.elementType == PARAMETER_LIST -> Indent.getNormalIndent()
     node.elementType == UNCHECKED_BLOCK -> Indent.getNormalIndent()
     node.elementType == TERNARY_EXPRESSION -> Indent.getNormalIndent()
     else -> Indent.getNoneIndent()

@@ -139,12 +139,13 @@ private fun compare(o1: Any?, o2: Any?, getter: (SolFunctionDefinition) -> Enum<
 }
 
 class SolTreeElement(item: PsiFile) : PsiTreeElementBase<PsiFile>(item) {
-  override fun getPresentableText() = element?.virtualFile?.presentableName // TODO: name
+  override fun getPresentableText() = element?.name
 
   override fun getChildrenBase(): Collection<StructureViewTreeElement> {
     val el = element ?: return emptyList()
     return (el.childrenOfType<SolContractDefinition>().map(::SolContractTreeElement) +
-      el.childrenOfType<SolStructDefinition>().map(::SolStructTreeElement))
+      el.childrenOfType<SolStructDefinition>().map(::SolStructTreeElement) +
+      el.childrenOfType<SolEnumDefinition>().map(::SolLeafTreeElement))
       .sortedBy { it.element?.textOffset }
   }
 }

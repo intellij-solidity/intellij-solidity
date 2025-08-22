@@ -108,6 +108,7 @@ object SolResolver {
     SolEnumDefinition::class.java,
     SolErrorDefinition::class.java,
     SolStructDefinition::class.java,
+    SolUserDefinedValueTypeDefinition::class.java,
   )
 
   fun collectUsedElements(o: SolImportDirective): List<String> {
@@ -192,9 +193,12 @@ object SolResolver {
           val containingFile = import.importPath?.reference?.resolve()?.containingFile ?: return@mapNotNull null
           val aliases = import.importAliasedPairList
           val names = if (aliases.isNotEmpty()) {
+            val exportedDeclarations = containingFile.children.filterIsInstance<SolNamedElement>().filter { element ->
+              exportElements.any { it.isAssignableFrom(element.javaClass) }
+            }
             aliases.mapNotNull { importAliasPair -> importAliasPair.importAlias } + aliases.mapNotNull { importAliasPair ->
               importAliasPair.userDefinedTypeName.name?.let { tn ->
-                containingFile.childrenOfType<SolContractDefinition>().find { contract -> contract.name == tn }
+                exportedDeclarations.find { it.name == tn }
               }
             }
           } else containingFile.childrenOfType<SolCallableElement>().toList()
@@ -239,20 +243,28 @@ object SolResolver {
     return collectImports(import).flatMap { it.file.childrenOfType<SolImportDirective>() }
   }
 
-  fun collectUsingForElementFromImports(psiFile: PsiFile): Collection<SolUsingForDeclaration> {
+  fun collectUsingForElementFromImports(
+    psiFile: PsiFile,
+  ): Collection<SolUsingForDeclaration> {
     return CachedValuesManager.getCachedValue(psiFile) {
-      val res = collectUsingForElementFromImports0(psiFile)
-      CachedValueProvider.Result.create(res, PsiModificationTracker.MODIFICATION_COUNT)
+      val res = collectUsingForElementFromImports0(psiFile, hashSetOf())
+      CachedValueProvider.Result.create(res, res.map { it.containingFile } + psiFile)
     }
   }
 
-  private fun collectUsingForElementFromImports0(psiFile: PsiFile): Collection<SolUsingForDeclaration> {
+  private fun collectUsingForElementFromImports0(
+    psiFile: PsiFile,
+    visited: MutableSet<PsiFile>
+  ): Collection<SolUsingForDeclaration> {
+    if (!visited.add(psiFile)) {
+      return emptySet()
+    }
     return psiFile.childrenOfType<SolUsingForDeclaration>() + psiFile.childrenOfType<SolContractDefinition>()
       .flatMap { contract ->
         contract.usingForDeclarationList
       } + psiFile.childrenOfType<SolImportDirective>().flatMap { import ->
       val resolvedFile: PsiFile = import.importPath?.reference?.resolve()?.containingFile ?: return emptyList()
-      collectUsingForElementFromImports(resolvedFile)
+      collectUsingForElementFromImports0(resolvedFile, visited)
     }
   }
 

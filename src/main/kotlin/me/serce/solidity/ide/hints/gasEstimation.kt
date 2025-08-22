@@ -15,6 +15,7 @@ import com.intellij.openapi.components.serviceIfCreated
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
+import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.openapi.vfs.findDirectory
@@ -67,7 +68,7 @@ class SolGasEstimationService(project: Project) {
   private fun readCompiledData() {
     jsonNode = null
     val compiledOutputFile = hardHatRoot!!.findDirectory(relativePath)?.children?.firstOrNull { it.name.endsWith(".json") }
-    compiledOutputFile?.toNioPath()?.toFile()?.let { jsonNode = ObjectMapper().readTree(it) }
+    compiledOutputFile?.inputStream?.use { jsonNode = ObjectMapper().readTree(it) }
   }
 
   @Volatile
@@ -75,8 +76,8 @@ class SolGasEstimationService(project: Project) {
 
   fun findEstimation(element: SolFunctionDefElement): String? {
     if (jsonNode == null) return null
-    val elementPath = kotlin.runCatching { element.containingFile.virtualFile.toNioPath() }.getOrNull() ?: return null
-    val file = hardHatRoot?.toNioPath()?.relativize(elementPath)?.toString()?.replace("\\", "/")
+    val elementVf = element.containingFile.virtualFile
+    val file = hardHatRoot?.let { VfsUtilCore.getRelativePath(elementVf, it, '/') }?.replace("\\", "/")
       ?: return null
     val contract = element.findContract()?.name ?: ""
 

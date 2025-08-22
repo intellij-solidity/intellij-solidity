@@ -15,7 +15,7 @@
 
   tokens = [
     comment='regexp:(//.*)|(/\\*(?:.|[\\n\\r])*?\\*/)'
-    hexLiteral='regexp:hex"([0-9a-fA-F]+)"'
+    hexLiteral='regexp:hex"([_0-9a-fA-F]*)"'
     stringLiteral='regexp:("([^"\r\n\\]|\\.)*")|unicode("([^"])*")'
     decimalNumber='regexp:([0-9][_0-9]*)'
     fixedNumber='regexp:(([0-9][_0-9]*)+\.[_0-9]*|([0-9][_0-9]*)*\.([0-9][_0-9]*))'
@@ -145,7 +145,8 @@ ImportDirective ::= ImportDirectivePart ';'
 
 
 ContractDefinition ::= abstract? ( contract | library | interface ) Identifier
-                     ( is InheritanceSpecifier (',' InheritanceSpecifier )* )?
+                     ( LayoutAtSpecifier
+                     | is InheritanceSpecifier (',' InheritanceSpecifier )* )*
                      '{' ContractPart* '}' {
     pin = 2
     implements = "me.serce.solidity.lang.psi.SolContractOrLibElement"
@@ -153,6 +154,9 @@ ContractDefinition ::= abstract? ( contract | library | interface ) Identifier
     stubClass = "me.serce.solidity.lang.stubs.SolContractOrLibDefStub"
     elementTypeFactory = "me.serce.solidity.lang.stubs.ImplKt.factory"
 }
+
+// layout at are not the keywords yet
+private LayoutAtSpecifier ::= 'layout' 'at' Expression
 
 private ContractPart ::=
     // the of StateVariableDeclaration and FunctionDefinition is important to ensure that
@@ -171,9 +175,10 @@ private ContractPart ::=
 InheritanceSpecifier ::= UserDefinedTypeName ( '(' Expression ( ',' Expression )* ')' )?
 
 VisibilityModifier ::= ( public | internal | private )
-MutationModifier ::= (constant | immutable)
+private transient_kw ::= &('transient' (Identifier | VisibilityModifier)) Identifier
+MutationModifier ::= (constant | immutable | transient_kw)
 
-StateVariableDeclaration ::= TypeName (MutationModifier | VisibilityModifier | OverrideSpecifier)* Identifier ('=' Expression)? ';'  {
+StateVariableDeclaration ::= TypeName (MutationModifier | VisibilityModifier | OverrideSpecifier )* Identifier ('=' Expression)? ';'  {
     implements = "me.serce.solidity.lang.psi.SolStateVarElement"
     mixin = "me.serce.solidity.lang.psi.impl.SolStateVarDeclMixin"
     stubClass = "me.serce.solidity.lang.stubs.SolStateVarDeclStub"
@@ -445,7 +450,10 @@ EmitStatement ::= emit FunctionCallExpression {pin=1}
 /* A revert statement. The contained expression needs to refer to an error. */
 // Note, revert can't be a keyword as it could be used as e.g. a function name
 RevertStatement ::= 'revert' FunctionCallExpression
-SeqExpression ::= '(' ((Expression ',') | ',')* Expression? ')' {pin=1}
+// Tuple or parenthesized expression. Allow optional elements like `(,x)`
+// and avoid excessive backtracking on deeply nested expressions by using
+// a comma-separated list of optional expressions.
+SeqExpression ::= '(' ([Expression] (',' [Expression])* ','?)? ')' {pin=1}
 VariableDefinition ::= VariableDeclaration ( '=' Expression )?
 
 // see https://solidity.readthedocs.io/en/v0.4.21/miscellaneous.html#order-of-precedence-of-operators
