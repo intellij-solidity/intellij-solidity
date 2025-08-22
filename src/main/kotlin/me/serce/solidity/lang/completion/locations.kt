@@ -73,3 +73,20 @@ fun inConstructorDeclaration(): ElementPattern<PsiElement> = psiElement()
 fun inEventDeclaration(): ElementPattern<PsiElement> = psiElement()
   .inside(SolEventDefinition::class.java)
 
+fun inUsingForDeclaration(): ElementPattern<PsiElement> = psiElement()
+  .inside(SolUsingForDeclaration::class.java)
+
+fun insideLoop(): ElementPattern<PsiElement> = psiElement().inside(
+  StandardPatterns.or(
+    psiElement(SolWhileStatement::class.java),
+    psiElement(SolForStatement::class.java)
+  )
+)
+
+fun isAfterAddressKeyword(): ElementPattern<PsiElement> =
+  psiElement()
+    .afterLeaf(psiElement(SolidityTokenTypes.ADDRESS))
+
+fun inMappingDeclaration(): ElementPattern<PsiElement> = psiElement()
+  .afterLeaf(psiElement(SolidityTokenTypes.LPAREN).afterLeaf(psiElement(SolidityTokenTypes.MAPPING)))
+

@@ -10,14 +10,6 @@ class SolTypesCompletionTest : SolCompletionTestBase() {
   """
   )
 
-  fun testPayableAddressTypeCompletions() = checkCompletion(
-    hashSetOf("payable"), """
-     contract A {
-      address /*caret*/
-     }
-  """
-  )
-
   fun testUserDefinedValueTypeCompletion() = checkCompletion(
     elementaryType, """
       type Test is /*caret*/
@@ -33,10 +25,29 @@ class SolTypesCompletionTest : SolCompletionTestBase() {
   """
   )
 
+  fun testMappingValueTypeCompletion() = checkCompletion(
+    elementaryType, """
+      contract A {
+      mapping(address =>/*caret*/
+     }
+       
+  """
+  )
+
   fun testFunctionTypeCompletions() = checkCompletion(
     elementaryType + hashSetOf("mapping"), """
      contract A {
       function b(/*caret*/
+     }
+  """
+  )
+
+  fun testInsideFunctionTypeCompletions() = checkCompletion(
+    elementaryType, """
+     contract A {
+      function b() {
+      /*caret*/
+      }
      }
   """
   )

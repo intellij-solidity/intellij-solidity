@@ -40,7 +40,7 @@ val KEYWORD_CONTRACT_BODY = arrayOf(
 )
 
 val KEYWORD_ROOT_AND_BODY = arrayOf(
-  "enum ", "struct ", "event ", "error ", "using ", "type "
+  "enum ", "struct ", "event ", "error ", "using ", "type ", "global "
 )
 
 val KEYWORD_ON_CONTRACT = arrayOf("layout ")
@@ -119,11 +119,13 @@ class SolKeywordCompletionContributor : CompletionContributor(), DumbAware {
     extend(
       CompletionType.BASIC,
       insideFunction(),
-      SolKeywordCompletionProvider(*(arrayOf(*KEYWORD_FUNCTION + KEYWORD_ON_FUNCTION + KEYWORD_STATE_MUTABILITY)))
+      SolKeywordCompletionProvider(*(arrayOf(*KEYWORD_FUNCTION + KEYWORD_ON_FUNCTION + KEYWORD_STATE_MUTABILITY + KEYWORD_TYPE)))
     )
 
     extend(
-      CompletionType.BASIC, inFunctionParameterDef(), SolKeywordCompletionProvider(*(arrayOf(*KEYWORD_DATA_LOCATION)))
+      CompletionType.BASIC,
+      inFunctionParameterDef(),
+      SolKeywordCompletionProvider(*(arrayOf(*KEYWORD_DATA_LOCATION + KEYWORD_TYPE + "mapping")))
     )
     extend(
       CompletionType.BASIC, inImportDeclaration(), SolKeywordCompletionProvider("from ")
@@ -157,6 +159,33 @@ class SolKeywordCompletionContributor : CompletionContributor(), DumbAware {
       CompletionType.BASIC,
       inEventDeclaration(),
       SolKeywordCompletionProvider("indexed ")
+    )
+
+    extend(
+      CompletionType.BASIC,
+      inUsingForDeclaration(),
+      SolKeywordCompletionProvider("for ")
+    )
+
+    extend(
+      CompletionType.BASIC,
+      insideContract(),
+      SolKeywordCompletionProvider("override ", "virtual ")
+    )
+    extend(
+      CompletionType.BASIC,
+      insideLoop(),
+      SolKeywordCompletionProvider("break")
+    )
+    extend(
+      CompletionType.BASIC,
+      isAfterAddressKeyword(),
+      SolKeywordCompletionProvider("payable")
+    )
+    extend(
+      CompletionType.BASIC,
+      inMappingDeclaration(),
+      SolKeywordCompletionProvider(*(arrayOf(*KEYWORD_TYPE)))
     )
   }
 }

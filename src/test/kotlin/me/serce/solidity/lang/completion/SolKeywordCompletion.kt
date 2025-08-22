@@ -218,4 +218,12 @@ class SolKeywordCompletion : SolCompletionTestBase() {
     }
   """
   )
+
+  fun testPayableAddressTypeCompletions() = checkCompletion(
+    hashSetOf("payable"), """
+     contract A {
+      address /*caret*/
+     }
+  """
+  )
 }
