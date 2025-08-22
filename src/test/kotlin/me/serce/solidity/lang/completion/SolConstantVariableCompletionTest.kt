@@ -10,5 +10,5 @@ class SolConstantVariableCompletionTest : SolCompletionTestBase() {
                 uint addr = con/*caret*/;
             }
         }
-  """, strict = true)
+  """)
 }

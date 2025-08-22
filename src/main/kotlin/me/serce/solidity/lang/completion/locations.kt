@@ -87,6 +87,10 @@ fun isAfterAddressKeyword(): ElementPattern<PsiElement> =
   psiElement()
     .afterLeaf(psiElement(SolidityTokenTypes.ADDRESS))
 
-fun inMappingDeclaration(): ElementPattern<PsiElement> = psiElement()
-  .afterLeaf(psiElement(SolidityTokenTypes.LPAREN).afterLeaf(psiElement(SolidityTokenTypes.MAPPING)))
+fun inMappingDeclaration(): ElementPattern<PsiElement> = StandardPatterns.or(
+  psiElement()
+    .afterLeaf(psiElement(SolidityTokenTypes.LPAREN).afterLeaf(psiElement(SolidityTokenTypes.MAPPING))),
+  psiElement().afterLeaf(psiElement(SolidityTokenTypes.TO))
+)
+
 

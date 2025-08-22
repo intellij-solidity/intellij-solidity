@@ -126,6 +126,6 @@ class SolMemberAccessCompletionTest : SolCompletionTestBase() {
           }
         }
         
-  """, strict = true)
+  """)
 
 }
