@@ -11,7 +11,6 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.impl.source.tree.LeafPsiElement
 import com.intellij.psi.util.*
 import com.intellij.psi.util.elementType
-import com.intellij.refactoring.suggested.endOffset
 import com.jetbrains.rd.util.getOrCreate
 import me.serce.solidity.ide.SolHighlighter
 import me.serce.solidity.ide.colors.SolColor
@@ -73,17 +72,23 @@ class SolDocumentationProvider : AbstractDocumentationProvider() {
 
   private val commentsRegex = "^/\\*\\*|\\*/$|^///".toRegex()
 
-  override fun generateDoc(elementOrNull: PsiElement?, originalElement: PsiElement?): String? {
-    var element = (elementOrNull ?: return null)
-      .takeIf { it.textRange.contains(originalElement?.textRange ?: return@takeIf true) }
-      ?: originalElement?.parent
-      ?: elementOrNull
-
+  override fun generateDoc(psiElement: PsiElement, originalElement: PsiElement?): String? {
+    var element = psiElement
+    val range = originalElement?.textRange
+    if (range != null && !element.textRange.contains(range)) {
+      element = originalElement.parent ?: psiElement
+    }
     if (element is SolMemberAccessExpression) {
-      element = SolResolver.resolveMemberAccess(element).filterIsInstance<SolFunctionDefinition>().firstOrNull() ?: return null
+      val resolvedFunctions = SolResolver.resolveMemberAccess(element).filterIsInstance<SolFunctionDefinition>().firstOrNull()
+      if (resolvedFunctions == null) {
+        return null
+      }
+      element = resolvedFunctions
     }
     val builder = StringBuilder()
-    if (!builder.appendDefinition(element)) return null
+    if (!builder.appendDefinition(element)) {
+      return null
+    }
     data class DocWrapper(val document: Document?)
     val doc = mutableMapOf<PsiFile, DocWrapper>()
 
@@ -121,7 +126,7 @@ class SolDocumentationProvider : AbstractDocumentationProvider() {
         }
         text = text.split("\n").filter { it.contains("[^/]".toRegex()) }.joinToString("\n")
         getDoc(e.containingFile)?.let {doc ->
-          if (i > 0 && (i > 1 || prevText.isNotBlank()) && doc.getLineNumber(e.textOffset) != doc.getLineNumber(comments[i - 1].endOffset)) {
+          if (i > 0 && (i > 1 || prevText.isNotBlank()) && doc.getLineNumber(e.textOffset) != doc.getLineNumber(comments[i - 1].textRange.endOffset)) {
             text = "\n" + text
           } else text
         }

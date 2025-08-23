@@ -38,10 +38,14 @@ class SolidityFormattingTest : SolLightPlatformCodeInsightFixtureTestCase() {
   fun testErrors() = this.doTest()
   fun testEnum() = this.doTest()
   fun testStatementLineBreak() = this.doTest()
+  fun testStatementLineBreakAtEnd() = this.doTest()
   fun testBlankLinesBetweenContracts() = this.doTest()
   fun testBlankLinesBetweenContractParts() = this.doTest()
+  fun testBlankLinesBetweenContractAndStruct() = this.doTest()
   fun testSpaceAfterReturns() = this.doTest()
   fun testMultisigWallet() = this.doTest()
+  fun testInlineArray() = this.doTest()
+  fun testInheritanceList() = this.doTest()
 
   override fun getTestDataPath() = "src/test/resources/fixtures/formatter/"
 }

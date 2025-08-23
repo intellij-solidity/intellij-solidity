@@ -57,7 +57,7 @@ class SolArgumentsDescription(
 ) {
 
   val valid = callable.canBeApplied(callArguments)
-  val presentText = if (arguments.isEmpty()) "<no arguments>" else arguments.joinToString(", ")
+  val presentText = if (arguments.isEmpty()) "<no parameters>" else arguments.joinToString(", ")
 
   fun getArgumentRange(index: Int): TextRange {
     if (index < 0 || index >= arguments.size) {

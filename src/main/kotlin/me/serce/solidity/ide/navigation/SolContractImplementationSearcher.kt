@@ -4,7 +4,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.QueryExecutorBase
 import com.intellij.openapi.application.ex.ApplicationEx
 import com.intellij.openapi.progress.EmptyProgressIndicator
-import com.intellij.openapi.progress.util.ProgressIndicatorUtils
+import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.util.Condition
 import com.intellij.psi.PsiElement
 import com.intellij.psi.search.GlobalSearchScope.FilesScope
@@ -15,6 +15,7 @@ import com.intellij.psi.util.childrenOfType
 import com.intellij.util.ArrayQuery
 import com.intellij.util.CollectionQuery
 import com.intellij.util.EmptyQuery
+import com.intellij.util.FilteredQuery
 import com.intellij.util.Processor
 import com.intellij.util.Query
 import me.serce.solidity.lang.SolidityFileType
@@ -50,8 +51,10 @@ fun SolContractDefinition.findAllImplementations(): HashSet<SolContractDefinitio
   if (application.isDispatchThread) {
     findAllImplementationsInAction(implQueue, implementations)
   } else {
-    ProgressIndicatorUtils.runInReadActionWithWriteActionPriority({
-      findAllImplementationsInAction(implQueue, implementations)
+    ProgressManager.getInstance().runProcess({
+      application.runReadAction {
+        findAllImplementationsInAction(implQueue, implementations)
+      }
     }, EmptyProgressIndicator())
   }
   implementations.remove(this)
@@ -72,6 +75,8 @@ private fun findAllImplementationsInAction(
       .forEach(Processor { implQueue.add(it) })
   }
 }
+
+fun <U> Query<U>.filterQuery(condition: Condition<U>): Query<U> = FilteredQuery(this, condition)
 
 fun SolContractDefinition.findImplementations(): Query<SolContractDefinition> {
   val virtualFile = containingFile.virtualFile
