@@ -72,7 +72,8 @@ open class SolFormattingBlock(
         FUNCTION_DEFINITION,
         CONSTRUCTOR_DEFINITION,
         IF_STATEMENT,
-        STRUCT_DEFINITION
+        STRUCT_DEFINITION,
+        YUL_BLOCK
       ) -> Indent.getNormalIndent()
 
       type == CONTRACT_DEFINITION && childType.isContractPart() -> Indent.getNormalIndent()
@@ -96,7 +97,7 @@ open class SolFormattingBlock(
       parentType in setOf(IF_STATEMENT, WHILE_STATEMENT, DO_WHILE_STATEMENT, FOR_STATEMENT) && childType != BLOCK -> {
         Indent.getNormalIndent()
       }
-      
+
       // pasted code inside a block
       type == BLOCK && childType == IDENTIFIER -> Indent.getNormalIndent()
 
@@ -126,11 +127,11 @@ open class SolFormattingBlock(
         Indent.getNoneIndent()
       }
     }
-    
+
     // inside a function call
     node.elementType == STATEMENT -> Indent.getContinuationIndent()
     node.elementType in listOf(FUNCTION_CALL_ARGUMENTS, FUNCTION_INVOCATION) -> Indent.getNormalIndent()
-    
+
     node.elementType == MAP_EXPRESSION -> Indent.getNormalIndent()
     node.elementType == PARAMETER_LIST -> Indent.getNormalIndent()
     node.elementType == UNCHECKED_BLOCK -> Indent.getNormalIndent()
@@ -145,7 +146,8 @@ open class SolFormattingBlock(
   override fun getAlignment(): Alignment? = alignment
 
   override fun getSpacing(child1: Block?, child2: Block): Spacing? {
-    if ((child2 as? SolFormattingBlock)?.astNode?.elementType == COMMENT) {
+    val node2 = (child2 as? SolFormattingBlock)?.astNode
+    if (node2 != null && node2.elementType == COMMENT && node2.treeParent?.elementType != YUL_BLOCK) {
       // SpacingBuilder does not allow to use the KeepingFirstColumnSpacing option, so calling it directly
       return Spacing.createKeepingFirstColumnSpacing(0, Int.MAX_VALUE, true, 1)
     }
