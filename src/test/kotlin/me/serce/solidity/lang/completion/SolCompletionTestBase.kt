@@ -17,4 +17,57 @@ abstract class SolCompletionTestBase : SolTestBase() {
       assertTrue("$completions doesn't contain all $required", completions.containsAll(required))
     }
   }
+
+  val elementaryType = hashSetOf(
+    "address ",
+    "string ",
+    "fixed",
+    "ufixed",
+    "uint8 ",
+    "uint16 ",
+    "uint32 ",
+    "uint64 ",
+    "uint128 ",
+    "uint256 ",
+    "int8 ",
+    "int16 ",
+    "int32 ",
+    "int64 ",
+    "int128 ",
+    "int256 ",
+    "bytes ",
+    "bytes4 ",
+    "bytes8 ",
+    "bytes16 ",
+    "bytes20 ",
+    "bytes32 ",
+    "byte ",
+    "bool "
+  )
+
+  val dataLocation = hashSetOf(
+    "memory",
+    "storage",
+    "calldata"
+  )
+
+  val stateMutability = hashSetOf(
+    "pure ", "view ", "payable "
+  )
+
+  val contractBodyElement = hashSetOf(
+    "constructor",
+    "function ",
+    "modifier ",
+    "fallback",
+    "receive",
+    "struct ",
+    "enum ",
+    "type ",
+    "event ",
+    "error ",
+    "using ",
+    "mapping",
+    "this"
+  ) + elementaryType
 }

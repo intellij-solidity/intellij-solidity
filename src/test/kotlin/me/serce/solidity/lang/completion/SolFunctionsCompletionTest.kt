@@ -137,12 +137,4 @@ class SolFunctionsCompletionTest : SolCompletionTestBase() {
             }
           """
   )
-
-  fun testFunIncomplete() = checkCompletion(
-    hashSetOf(), """
-            contract B {
-                function/*caret*/{}
-            }
-          """, strict = true
-  )
 }

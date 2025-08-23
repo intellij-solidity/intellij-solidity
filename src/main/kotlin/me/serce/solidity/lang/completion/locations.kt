@@ -16,9 +16,9 @@ fun emitStartStatement() =
 fun revertStartStatement() =
   psiElement(SolidityTokenTypes.IDENTIFIER)
     .inside(SolRevertStatement::class.java)
-    .afterLeaf("revert")
+    .afterLeaf(psiElement(SolidityTokenTypes.REVERT_STATEMENT))
 
-fun stateVarInsideContract() =
+fun stateVarInsideContract(): ElementPattern<PsiElement> =
   psiElement(SolidityTokenTypes.IDENTIFIER)
     .inside(psiElement(SolPrimaryExpression::class.java))
     .inside(SolidityFile::class.java)
@@ -46,4 +46,51 @@ fun mapExpression(): ElementPattern<PsiElement> =
 
 fun pathImportExpression(): ElementPattern<PsiElement> =
   psiElement(SolidityTokenTypes.STRINGLITERAL).inside(SolImportPath::class.java)
+
+fun insideContract(): ElementPattern<PsiElement> = psiElement()
+  .inside(psiElement(SolPrimaryExpression::class.java))
+  .inside(SolidityFile::class.java)
+
+fun insideFunction(): ElementPattern<PsiElement> = psiElement().inside(psiElement(SolFunctionDefinition::class.java))
+
+fun inMemberAccess(): ElementPattern<PsiElement> = psiElement().inside(SolMemberAccessExpression::class.java)
+
+fun inFunctionParameterDef(): ElementPattern<PsiElement> = psiElement()
+  .inside(SolParameterDef::class.java)
+
+fun inImportDeclaration(): ElementPattern<PsiElement> = psiElement()
+  .inside(SolImportDirective::class.java)
+
+fun inStateVariableDeclaration(): ElementPattern<PsiElement> = psiElement(SolidityTokenTypes.IDENTIFIER)
+  .inside(psiElement(SolPrimaryExpression::class.java))
+
+fun inFunctionDeclaration(): ElementPattern<PsiElement> = psiElement()
+  .inside(SolFunctionDefinition::class.java)
+
+fun inConstructorDeclaration(): ElementPattern<PsiElement> = psiElement()
+  .inside(SolConstructorDefinition::class.java)
+
+fun inEventDeclaration(): ElementPattern<PsiElement> = psiElement()
+  .inside(SolEventDefinition::class.java)
+
+fun inUsingForDeclaration(): ElementPattern<PsiElement> = psiElement()
+  .inside(SolUsingForDeclaration::class.java)
+
+fun insideLoop(): ElementPattern<PsiElement> = psiElement().inside(
+  StandardPatterns.or(
+    psiElement(SolWhileStatement::class.java),
+    psiElement(SolForStatement::class.java)
+  )
+)
+
+fun isAfterAddressKeyword(): ElementPattern<PsiElement> =
+  psiElement()
+    .afterLeaf(psiElement(SolidityTokenTypes.ADDRESS))
+
+fun inMappingDeclaration(): ElementPattern<PsiElement> = StandardPatterns.or(
+  psiElement()
+    .afterLeaf(psiElement(SolidityTokenTypes.LPAREN).afterLeaf(psiElement(SolidityTokenTypes.MAPPING))),
+  psiElement().afterLeaf(psiElement(SolidityTokenTypes.TO))
+)
+
 
