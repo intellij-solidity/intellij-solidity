@@ -204,11 +204,11 @@ object SolResolver {
                 exportedDeclarations.find { it.name == tn }
               }
             }
-          } else containingFile.childrenOfType<SolCallableElement>().toList()
-            .flatMap { element ->
-              (if (element is SolContractDefinition) resolveContractMembers(element) else emptyList()) + element
-            } + containingFile.childrenOfType<SolUserDefinedValueTypeDefElement>()
-          ImportRecord(containingFile, names.filterIsInstance<SolNamedElement>())
+          } else {
+            // no alias restrictions
+            emptyList()
+          }
+          ImportRecord(containingFile, names)
         }
       }
 
