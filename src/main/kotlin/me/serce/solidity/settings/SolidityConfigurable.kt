@@ -21,6 +21,10 @@ class SolidityConfigurable(internal val project: Project) :
     HELP_TOPIC, CONFIGURABLE_ID
   ) {
 
+  lateinit var intellijSolidityFormatter: JRadioButton
+  lateinit var foundryFormatter: JRadioButton
+  lateinit var prettierFormatter: JRadioButton
+
   lateinit var disabledConfiguration: JRadioButton
   private lateinit var automaticConfiguration: JRadioButton
   private lateinit var manualConfiguration: JRadioButton
@@ -32,6 +36,41 @@ class SolidityConfigurable(internal val project: Project) :
     // Configuration mode row
     // *********************
     return panel {
+      buttonsGroup {
+        row {
+          intellijSolidityFormatter =
+            radioButton(
+              "Intellij-Solidity"
+            ).bindSelected(
+              FormatterTypeProperty(
+                settings,
+                FormatterType.INTELLIJ_SOLIDITY
+              )
+            ).component
+        }
+        row {
+          foundryFormatter =
+            radioButton(
+              "Foundry"
+            ).bindSelected(
+              FormatterTypeProperty(
+                settings,
+                FormatterType.FOUNDRY
+              )
+            ).component
+        }
+        row {
+          prettierFormatter =
+            radioButton(
+              "Prettier"
+            ).bindSelected(
+              FormatterTypeProperty(
+                settings,
+                FormatterType.PRETTIER
+              )
+            ).component
+        }
+      }
       buttonsGroup {
         row {
           disabledConfiguration =
@@ -89,6 +128,19 @@ class SolidityConfigurable(internal val project: Project) :
         }
       }
 
+    }
+  }
+
+  private class FormatterTypeProperty(
+    private val settings: SoliditySettings,
+    private val formatterType: FormatterType
+  ) : MutableProperty<Boolean> {
+    override fun get(): Boolean = settings.formatterType == formatterType
+
+    override fun set(value: Boolean) {
+      if (value) {
+        settings.formatterType = formatterType
+      }
     }
   }
 

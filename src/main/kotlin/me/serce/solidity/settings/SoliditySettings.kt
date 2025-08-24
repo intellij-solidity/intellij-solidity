@@ -14,6 +14,12 @@ class SoliditySettings :
       state.configurationMode = value
     }
 
+  var formatterType: FormatterType
+    get() = state.formatterType
+    set(value) {
+      state.formatterType = value
+    }
+
   fun isEnabled(): Boolean {
     return configurationMode !== ConfigurationMode.DISABLED
   }

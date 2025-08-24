@@ -11,9 +11,17 @@ enum class ConfigurationMode {
   MANUAL
 }
 
+@ApiStatus.Internal
+enum class FormatterType {
+  INTELLIJ_SOLIDITY,
+  FOUNDRY,
+  PRETTIER
+}
+
 @Service
 @ApiStatus.Internal
 class SoliditySettingsState : BaseState() {
+  var formatterType by enum(FormatterType.INTELLIJ_SOLIDITY)
   var configurationMode by enum(ConfigurationMode.AUTOMATIC)
 
 }
