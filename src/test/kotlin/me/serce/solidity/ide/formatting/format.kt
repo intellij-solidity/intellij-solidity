@@ -46,6 +46,7 @@ class SolidityFormattingTest : SolLightPlatformCodeInsightFixtureTestCase() {
   fun testMultisigWallet() = this.doTest()
   fun testInlineArray() = this.doTest()
   fun testInheritanceList() = this.doTest()
+  fun testChainedMethodCall() = this.doTest()
 
   override fun getTestDataPath() = "src/test/resources/fixtures/formatter/"
 }

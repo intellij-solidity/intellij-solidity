@@ -59,6 +59,10 @@ open class SolFormattingBlock(
     val type = astNode.elementType
     val parent = astNode.treeParent
     val parentType = parent?.elementType
+    val firstChild = astNode.firstChildNode
+    val firstChildType = firstChild?.elementType
+    val lastChild = astNode.lastChildNode // the expression on the right-hand side
+    val lastChildIsComposite = lastChild is CompositeElement && lastChild != firstChild
     if (type == FUNCTION_INVOCATION || type == SEQ_EXPRESSION ||
       parent != null && type in binaryExpressionTypes &&
       doc?.let { it.getLineNumber(parent.startOffset) != it.getLineNumber(astNode.startOffset) } == true) {
@@ -86,7 +90,7 @@ open class SolFormattingBlock(
 
       // ternary expression
       childType == TERNARY_EXPRESSION -> Indent.getNormalIndent()
-      type == TERNARY_EXPRESSION -> if (astNode.firstChildNode == child) Indent.getNoneIndent() else Indent.getNormalIndent()
+      type == TERNARY_EXPRESSION -> if (firstChild == child) Indent.getNoneIndent() else Indent.getNormalIndent()
 
 
       // inside a block, list of parameters, etc..
@@ -101,11 +105,18 @@ open class SolFormattingBlock(
       // pasted code inside a block
       type == BLOCK && childType == IDENTIFIER -> Indent.getNormalIndent()
 
+      // chained function calls: if the callee is another call, indent subsequent parts
+      type == FUNCTION_CALL_EXPRESSION && firstChildType == FUNCTION_CALL_EXPRESSION && child != firstChild -> {
+        Indent.getContinuationIndent()
+      }
+
       // all function calls
       parentType in setOf(FUNCTION_INVOCATION, YUL_FUNCTION_CALL) -> Indent.getNormalIndent()
 
-      // multi-line assign expression
-      type in setOf(VARIABLE_DEFINITION, ASSIGNMENT_EXPRESSION) && astNode.lastChildNode.takeIf { it is CompositeElement && it != astNode.firstChildNode } == child -> {
+      // multi-line assign expression & return expressions
+      type in setOf(
+        VARIABLE_DEFINITION, ASSIGNMENT_EXPRESSION, RETURN_ST
+      ) && lastChildIsComposite && lastChild == child -> {
         enforceChildIndent = true
         Indent.getNormalIndent()
       }
