@@ -98,10 +98,6 @@ object SolResolver {
 
   data class ImportRecord(val file: PsiFile, val names: List<SolNamedElement>)
 
-  fun collectImports(file: PsiFile): Collection<ImportRecord> {
-    return collectImports(file.childrenOfType<SolImportDirective>()).filter { it.file !== file }
-  }
-
   private val exportElements = setOf(
     SolContractDefinition::class.java,
     SolConstantVariableDeclaration::class.java,
@@ -160,6 +156,13 @@ object SolResolver {
 
   data class ImportedName(val ref: SolNamedElement, val target: SolNamedElement)
 
+  fun collectImports(file: PsiFile): Collection<ImportRecord> {
+    val all = hashSetOf<ImportRecord>() 
+    for (directive in file.childrenOfType<SolImportDirective>()) {
+      all.addAll(collectImports(directive))
+    }
+    return all
+  }
 
   fun collectImports(import: SolImportDirective): Collection<ImportRecord> {
     return CachedValuesManager.getCachedValue(import) {
@@ -168,7 +171,7 @@ object SolResolver {
     }
   }
 
-  fun collectImports(imports: Collection<SolImportDirective>): Collection<ImportRecord> {
+  private fun collectImports(imports: Collection<SolImportDirective>): Collection<ImportRecord> {
     return RecursionManager.doPreventingRecursion(imports, true) {
       val visited: MutableSet<PsiFile> = hashSetOf()
       collectImports(imports, visited)
@@ -201,11 +204,11 @@ object SolResolver {
                 exportedDeclarations.find { it.name == tn }
               }
             }
-          } else containingFile.childrenOfType<SolCallableElement>().toList()
-            .flatMap { element ->
-              (if (element is SolContractDefinition) resolveContractMembers(element) else emptyList()) + element
-            } + containingFile.childrenOfType<SolUserDefinedValueTypeDefElement>()
-          ImportRecord(containingFile, names.filterIsInstance<SolNamedElement>())
+          } else {
+            // no alias restrictions
+            emptyList()
+          }
+          ImportRecord(containingFile, names)
         }
       }
 
@@ -288,14 +291,6 @@ object SolResolver {
 
   private fun resolveError(element: PsiElement): Set<SolNamedElement> =
     resolveInnerType<SolErrorDefinition>(element) { it.errorDefinitionList } + resolveUsingImports(SolErrorDefinition::class.java, element, element.containingFile)
-
-  private inline fun <reified T : SolNamedElement> resolveInFile(element: PsiElement) : Set<T> {
-    return element.parentOfType<SolidityFile>()
-      ?.children
-      ?.filterIsInstance<T>()
-      ?.filter { it.name == element.text }
-      ?.toSet() ?: emptySet()
-  }
 
   private fun <T : SolNamedElement> resolveInnerType(
     element: PsiElement,
