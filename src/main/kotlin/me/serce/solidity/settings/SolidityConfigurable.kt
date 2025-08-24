@@ -9,6 +9,7 @@ import com.intellij.ui.ContextHelpLabel
 import com.intellij.ui.dsl.builder.MutableProperty
 import com.intellij.ui.dsl.builder.bindSelected
 import com.intellij.ui.dsl.builder.panel
+import com.intellij.ui.layout.selected
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import javax.swing.JRadioButton
@@ -25,7 +26,6 @@ class SolidityConfigurable(internal val project: Project) :
   lateinit var foundryFormatter: JRadioButton
   lateinit var prettierFormatter: JRadioButton
 
-  lateinit var disabledConfiguration: JRadioButton
   private lateinit var automaticConfiguration: JRadioButton
   private lateinit var manualConfiguration: JRadioButton
 
@@ -36,98 +36,85 @@ class SolidityConfigurable(internal val project: Project) :
     // Configuration mode row
     // *********************
     return panel {
-      buttonsGroup {
-        row {
-          intellijSolidityFormatter =
-            radioButton(
-              "Intellij-Solidity"
-            ).bindSelected(
-              FormatterTypeProperty(
-                settings,
-                FormatterType.INTELLIJ_SOLIDITY
-              )
-            ).component
+      collapsibleGroup("Formatter") {
+        buttonsGroup {
+          row {
+            intellijSolidityFormatter =
+              radioButton(
+                "Intellij-Solidity"
+              ).bindSelected(
+                FormatterTypeProperty(
+                  settings,
+                  FormatterType.INTELLIJ_SOLIDITY
+                )
+              ).component
+          }
+          row {
+            foundryFormatter =
+              radioButton(
+                "Foundry"
+              ).bindSelected(
+                FormatterTypeProperty(
+                  settings,
+                  FormatterType.FOUNDRY
+                )
+              ).component
+          }
+          row {
+            prettierFormatter =
+              radioButton(
+                "Prettier"
+              ).bindSelected(
+                FormatterTypeProperty(
+                  settings,
+                  FormatterType.PRETTIER
+                )
+              ).component
+          }
         }
-        row {
-          foundryFormatter =
-            radioButton(
-              "Foundry"
-            ).bindSelected(
-              FormatterTypeProperty(
-                settings,
-                FormatterType.FOUNDRY
+        buttonsGroup {
+          row {
+            automaticConfiguration =
+              radioButton(
+                JavaScriptBundle.message(
+                  "settings.javascript.linters.autodetect.configure.automatically",
+                  displayName
+                )
+              ).bindSelected(
+                ConfigurationModeProperty(
+                  settings,
+                  ConfigurationMode.AUTOMATIC
+                )
+              ).component
+
+            val detectAutomaticallyHelpText =
+              JavaScriptBundle.message(
+                "settings.javascript.linters.autodetect.configure.automatically.help.text",
+                ApplicationNamesInfo.getInstance().fullProductName,
+                displayName,
+                "foundry.toml"
               )
-            ).component
-        }
-        row {
-          prettierFormatter =
-            radioButton(
-              "Prettier"
-            ).bindSelected(
-              FormatterTypeProperty(
-                settings,
-                FormatterType.PRETTIER
-              )
-            ).component
-        }
+
+            val helpLabel = ContextHelpLabel.create(detectAutomaticallyHelpText)
+            helpLabel.border = JBUI.Borders.emptyLeft(UIUtil.DEFAULT_HGAP)
+            cell(helpLabel)
+          }
+          row {
+            manualConfiguration =
+              radioButton(
+                JavaScriptBundle.message(
+                  "settings.javascript.linters.autodetect.configure.manually",
+                  displayName
+                )
+              ).bindSelected(
+                ConfigurationModeProperty(
+                  settings,
+                  ConfigurationMode.MANUAL
+                )
+              ).component
+          }
+        }.visibleIf(foundryFormatter.selected)
       }
-      buttonsGroup {
-        row {
-          disabledConfiguration =
-            radioButton(
-              JavaScriptBundle.message(
-                "settings.javascript.linters.autodetect.disabled",
-                displayName
-              )
-            ).bindSelected(
-              ConfigurationModeProperty(
-                settings,
-                ConfigurationMode.DISABLED
-              )
-            ).component
-        }
-        row {
-          automaticConfiguration =
-            radioButton(
-              JavaScriptBundle.message(
-                "settings.javascript.linters.autodetect.configure.automatically",
-                displayName
-              )
-            ).bindSelected(
-              ConfigurationModeProperty(
-                settings,
-                ConfigurationMode.AUTOMATIC
-              )
-            ).component
-
-          val detectAutomaticallyHelpText =
-            JavaScriptBundle.message(
-              "settings.javascript.linters.autodetect.configure.automatically.help.text",
-              ApplicationNamesInfo.getInstance().fullProductName,
-              displayName,
-              "solidity.json"
-            )
-
-          val helpLabel = ContextHelpLabel.create(detectAutomaticallyHelpText)
-          helpLabel.border = JBUI.Borders.emptyLeft(UIUtil.DEFAULT_HGAP)
-          cell(helpLabel)
-        }
-        row {
-          manualConfiguration =
-            radioButton(
-              JavaScriptBundle.message(
-                "settings.javascript.linters.autodetect.configure.manually",
-                displayName
-              )
-            ).bindSelected(
-              ConfigurationModeProperty(
-                settings,
-                ConfigurationMode.MANUAL
-              )
-            ).component
-        }
-      }
-
     }
   }
 

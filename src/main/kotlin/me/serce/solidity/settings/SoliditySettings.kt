@@ -20,11 +20,6 @@ class SoliditySettings :
       state.formatterType = value
     }
 
-  fun isEnabled(): Boolean {
-    return configurationMode !== ConfigurationMode.DISABLED
-  }
-
-
   companion object {
     @JvmStatic
     fun getInstance(project: Project): SoliditySettings = project.service()

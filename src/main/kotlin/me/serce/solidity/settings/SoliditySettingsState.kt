@@ -6,7 +6,6 @@ import org.jetbrains.annotations.ApiStatus
 
 @ApiStatus.Internal
 enum class ConfigurationMode {
-  DISABLED,
   AUTOMATIC,
   MANUAL
 }
