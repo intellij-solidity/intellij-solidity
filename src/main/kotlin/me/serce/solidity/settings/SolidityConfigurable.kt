@@ -5,14 +5,21 @@ import com.intellij.openapi.application.ApplicationNamesInfo
 import com.intellij.openapi.options.BoundSearchableConfigurable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogPanel
+import com.intellij.openapi.ui.TextFieldWithBrowseButton
+import com.intellij.openapi.ui.ValidationInfo
+import com.intellij.openapi.vfs.VfsUtil
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.ContextHelpLabel
 import com.intellij.ui.dsl.builder.MutableProperty
 import com.intellij.ui.dsl.builder.bindSelected
+import com.intellij.ui.dsl.builder.bindText
 import com.intellij.ui.dsl.builder.panel
+import com.intellij.ui.layout.ValidationInfoBuilder
 import com.intellij.ui.layout.selected
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
 import javax.swing.JRadioButton
+import kotlin.io.path.Path
 
 private const val HELP_TOPIC = "reference.settings.solidity"
 
@@ -23,11 +30,14 @@ class SolidityConfigurable(internal val project: Project) :
   ) {
 
   lateinit var intellijSolidityFormatter: JRadioButton
-  lateinit var foundryFormatter: JRadioButton
-  lateinit var prettierFormatter: JRadioButton
+  private lateinit var foundryFormatter: JRadioButton
+  private lateinit var prettierFormatter: JRadioButton
 
-  private lateinit var automaticConfiguration: JRadioButton
-  private lateinit var manualConfiguration: JRadioButton
+  private lateinit var foundryAutomaticConfiguration: JRadioButton
+  private lateinit var foundryManualConfiguration: JRadioButton
+
+  private lateinit var prettierAutomaticConfiguration: JRadioButton
+  private lateinit var prettierManualConfiguration: JRadioButton
 
   override fun createPanel(): DialogPanel {
     val settings: SoliditySettings = SoliditySettings.getInstance(project)
@@ -74,7 +84,7 @@ class SolidityConfigurable(internal val project: Project) :
         }
         buttonsGroup {
           row {
-            automaticConfiguration =
+            foundryAutomaticConfiguration =
               radioButton(
                 JavaScriptBundle.message(
                   "settings.javascript.linters.autodetect.configure.automatically",
@@ -88,7 +98,7 @@ class SolidityConfigurable(internal val project: Project) :
               ).component
 
             val detectAutomaticallyHelpText =
-              ApplicationNamesInfo.getInstance().fullProductName + " will use foundry installed in the " +
+              ApplicationNamesInfo.getInstance().fullProductName + " will use the forge executable installed at " +
                 "USER_HOME/.foundry/bin/forge and the foundry.toml configuration file located in the same " +
                 "folder as the current file or any of its parent folders."
 
@@ -97,7 +107,7 @@ class SolidityConfigurable(internal val project: Project) :
             cell(helpLabel)
           }
           row {
-            manualConfiguration =
+            foundryManualConfiguration =
               radioButton(
                 JavaScriptBundle.message(
                   "settings.javascript.linters.autodetect.configure.manually",
@@ -114,7 +124,7 @@ class SolidityConfigurable(internal val project: Project) :
 
         buttonsGroup {
           row {
-            automaticConfiguration =
+            prettierAutomaticConfiguration =
               radioButton(
                 JavaScriptBundle.message(
                   "settings.javascript.linters.autodetect.configure.automatically",
@@ -140,7 +150,7 @@ class SolidityConfigurable(internal val project: Project) :
             cell(helpLabel)
           }
           row {
-            manualConfiguration =
+            prettierManualConfiguration =
               radioButton(
                 JavaScriptBundle.message(
                   "settings.javascript.linters.autodetect.configure.manually",
@@ -154,6 +164,21 @@ class SolidityConfigurable(internal val project: Project) :
               ).component
           }
         }.visibleIf(prettierFormatter.selected)
+
+        panel {
+          row("Forge executable") {
+            textFieldWithBrowseButton("Forge executable") { fileChosen(it) }.bindText(
+              settings::executablePath
+            )
+          }.visibleIf(foundryManualConfiguration.selected)
+
+          row("Path of foundry.toml") {
+            textFieldWithBrowseButton(
+              "Path of foundry.toml",
+              project,
+            ) { fileChosen(it) }.bindText(settings::configPath).validationOnInput(validateConfigDir("foundry.toml"))
+          }.visibleIf(foundryManualConfiguration.selected)
+        }
       }
     }
   }
@@ -182,6 +207,27 @@ class SolidityConfigurable(internal val project: Project) :
         settings.configurationMode = mode
       }
     }
+  }
+
+  private fun validateConfigDir(nameFile: String): ValidationInfoBuilder.(TextFieldWithBrowseButton) -> ValidationInfo? =
+    {
+      val selected = VfsUtil.findFile(Path(it.text), true)
+      if (selected == null || !selected.exists()) {
+        ValidationInfo("Failed to locate " + nameFile + " configuration file", it)
+      } else {
+        if (!selected.isFoundryToml()) {
+          ValidationInfo("Failed to locate " + nameFile + " configuration file", it)
+        } else {
+          null
+        }
+      }
+    }
+
+  private fun VirtualFile.isFoundryToml() = name == "foundry.toml"
+
+
+  private fun fileChosen(file: VirtualFile): String {
+    return file.path
   }
 
   companion object {

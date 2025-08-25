@@ -22,5 +22,7 @@ enum class FormatterType {
 class SoliditySettingsState : BaseState() {
   var formatterType by enum(FormatterType.INTELLIJ_SOLIDITY)
   var configurationMode by enum(ConfigurationMode.AUTOMATIC)
+  var executablePath by string()
+  var configPath by string()
 
 }
