@@ -78,7 +78,7 @@ class SolidityConfigurable(internal val project: Project) :
               radioButton(
                 JavaScriptBundle.message(
                   "settings.javascript.linters.autodetect.configure.automatically",
-                  displayName
+                  "Foundry"
                 )
               ).bindSelected(
                 ConfigurationModeProperty(
@@ -88,12 +88,9 @@ class SolidityConfigurable(internal val project: Project) :
               ).component
 
             val detectAutomaticallyHelpText =
-              JavaScriptBundle.message(
-                "settings.javascript.linters.autodetect.configure.automatically.help.text",
-                ApplicationNamesInfo.getInstance().fullProductName,
-                displayName,
-                "foundry.toml"
-              )
+              ApplicationNamesInfo.getInstance().fullProductName + " will use foundry installed in the " +
+                "USER_HOME/.foundry/bin/forge and the foundry.toml configuration file located in the same " +
+                "folder as the current file or any of its parent folders."
 
             val helpLabel = ContextHelpLabel.create(detectAutomaticallyHelpText)
             helpLabel.border = JBUI.Borders.emptyLeft(UIUtil.DEFAULT_HGAP)
@@ -104,7 +101,7 @@ class SolidityConfigurable(internal val project: Project) :
               radioButton(
                 JavaScriptBundle.message(
                   "settings.javascript.linters.autodetect.configure.manually",
-                  displayName
+                  "Foundry"
                 )
               ).bindSelected(
                 ConfigurationModeProperty(
