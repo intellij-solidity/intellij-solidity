@@ -111,6 +111,49 @@ class SolidityConfigurable(internal val project: Project) :
               ).component
           }
         }.visibleIf(foundryFormatter.selected)
+
+        buttonsGroup {
+          row {
+            automaticConfiguration =
+              radioButton(
+                JavaScriptBundle.message(
+                  "settings.javascript.linters.autodetect.configure.automatically",
+                  "Prettier"
+                )
+              ).bindSelected(
+                ConfigurationModeProperty(
+                  settings,
+                  ConfigurationMode.AUTOMATIC
+                )
+              ).component
+
+            val detectAutomaticallyHelpText =
+              JavaScriptBundle.message(
+                "settings.javascript.linters.autodetect.configure.automatically.help.text",
+                ApplicationNamesInfo.getInstance().fullProductName,
+                "prettier-plugin-solidity",
+                ".prettierrc"
+              )
+
+            val helpLabel = ContextHelpLabel.create(detectAutomaticallyHelpText)
+            helpLabel.border = JBUI.Borders.emptyLeft(UIUtil.DEFAULT_HGAP)
+            cell(helpLabel)
+          }
+          row {
+            manualConfiguration =
+              radioButton(
+                JavaScriptBundle.message(
+                  "settings.javascript.linters.autodetect.configure.manually",
+                  "Prettier"
+                )
+              ).bindSelected(
+                ConfigurationModeProperty(
+                  settings,
+                  ConfigurationMode.MANUAL
+                )
+              ).component
+          }
+        }.visibleIf(prettierFormatter.selected)
       }
     }
   }
