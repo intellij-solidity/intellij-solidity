@@ -3,6 +3,7 @@ package me.serce.solidity.settings
 import com.intellij.lang.javascript.JavaScriptBundle
 import com.intellij.openapi.application.ApplicationNamesInfo
 import com.intellij.openapi.options.BoundSearchableConfigurable
+import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogPanel
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
@@ -122,48 +123,30 @@ class SolidityConfigurable(internal val project: Project) :
           }
         }.visibleIf(foundryFormatter.selected)
 
-        buttonsGroup {
-          row {
-            prettierAutomaticConfiguration =
-              radioButton(
-                JavaScriptBundle.message(
-                  "settings.javascript.linters.autodetect.configure.automatically",
-                  "Prettier"
-                )
-              ).bindSelected(
-                ConfigurationModeProperty(
-                  settings,
-                  ConfigurationMode.AUTOMATIC
-                )
-              ).component
-
-            val detectAutomaticallyHelpText =
-              JavaScriptBundle.message(
-                "settings.javascript.linters.autodetect.configure.automatically.help.text",
-                ApplicationNamesInfo.getInstance().fullProductName,
-                "prettier-plugin-solidity",
-                ".prettierrc"
-              )
-
-            val helpLabel = ContextHelpLabel.create(detectAutomaticallyHelpText)
-            helpLabel.border = JBUI.Borders.emptyLeft(UIUtil.DEFAULT_HGAP)
-            cell(helpLabel)
-          }
-          row {
-            prettierManualConfiguration =
-              radioButton(
-                JavaScriptBundle.message(
-                  "settings.javascript.linters.autodetect.configure.manually",
-                  "Prettier"
-                )
-              ).bindSelected(
-                ConfigurationModeProperty(
-                  settings,
-                  ConfigurationMode.MANUAL
-                )
-              ).component
-          }
+        row {
+          link(
+            "Prettier configuration options",
+            { ShowSettingsUtil.getInstance().showSettingsDialog(project, "Prettier") })
+          val helpLabel =
+            ContextHelpLabel.create("Don't forget to add the .sol extension in the \"Rule for files\" field")
+          helpLabel.border = JBUI.Borders.emptyLeft(UIUtil.DEFAULT_HGAP)
+          cell(helpLabel)
         }.visibleIf(prettierFormatter.selected)
+
+        panel {
+          row("Forge executable") {
+            textFieldWithBrowseButton("Forge executable") { fileChosen(it) }.bindText(
+              settings::executablePath
+            )
+          }.visibleIf(foundryManualConfiguration.selected)
+
+          row("Path of foundry.toml") {
+            textFieldWithBrowseButton(
+              "Path of foundry.toml",
+              project,
+            ) { fileChosen(it) }.bindText(settings::configPath).validationOnInput(validateConfigDir("foundry.toml"))
+          }.visibleIf(foundryManualConfiguration.selected)
+        }
 
         panel {
           row("Forge executable") {
