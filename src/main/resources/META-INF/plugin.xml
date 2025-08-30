@@ -141,6 +141,9 @@
         <lang.formatter language="Solidity"
                         implementationClass="me.serce.solidity.ide.formatting.SolidityFormattingModelBuilder"/>
 
+        <formattingService implementation="me.serce.solidity.ide.formatting.SolidityExternalFormatter" />
+        <lang.formatter.restriction implementation="me.serce.solidity.ide.formatting.SolidityFormattingRestriction"/>
+
         <codeInsight.lineMarkerProvider language="Solidity"
                                         implementationClass="me.serce.solidity.ide.annotation.ForgeTestLineMarkerProvider" order="first"/>
         <codeInsight.lineMarkerProvider language="Solidity"

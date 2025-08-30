@@ -37,9 +37,6 @@ class SolidityConfigurable(internal val project: Project) :
   private lateinit var foundryAutomaticConfiguration: JRadioButton
   private lateinit var foundryManualConfiguration: JRadioButton
 
-  private lateinit var prettierAutomaticConfiguration: JRadioButton
-  private lateinit var prettierManualConfiguration: JRadioButton
-
   override fun createPanel(): DialogPanel {
     val settings: SoliditySettings = SoliditySettings.getInstance(project)
 
