@@ -123,8 +123,8 @@ class SolidityConfigurable(internal val project: Project) :
 
         row {
           link(
-            "Prettier configuration options",
-            { ShowSettingsUtil.getInstance().showSettingsDialog(project, "Prettier") })
+            "Prettier configuration options"
+          ) { ShowSettingsUtil.getInstance().showSettingsDialog(project, "Prettier") }
           val helpLabel =
             ContextHelpLabel.create("Don't forget to add the .sol extension in the \"Rule for files\" field")
           helpLabel.border = JBUI.Borders.emptyLeft(UIUtil.DEFAULT_HGAP)
@@ -142,7 +142,7 @@ class SolidityConfigurable(internal val project: Project) :
             textFieldWithBrowseButton(
               "Path of foundry.toml",
               project,
-            ) { fileChosen(it) }.bindText(settings::configPath).validationOnInput(validateConfigDir("foundry.toml"))
+            ) { fileChosen(it) }.bindText(settings::configPath).validationOnInput(validateFoundryTomlConfigDir())
           }
         }.visibleIf(foundryManualConfiguration.selected.and(foundryFormatter.selected))
       }.expanded = true
@@ -175,14 +175,14 @@ class SolidityConfigurable(internal val project: Project) :
     }
   }
 
-  private fun validateConfigDir(nameFile: String): ValidationInfoBuilder.(TextFieldWithBrowseButton) -> ValidationInfo? =
+  private fun validateFoundryTomlConfigDir(): ValidationInfoBuilder.(TextFieldWithBrowseButton) -> ValidationInfo? =
     {
       val selected = VfsUtil.findFile(Path(it.text), true)
       if (selected == null || !selected.exists()) {
-        ValidationInfo("Failed to locate " + nameFile + " configuration file", it)
+        ValidationInfo("Failed to locate foundry.toml configuration file", it)
       } else {
         if (!selected.isFoundryToml()) {
-          ValidationInfo("Failed to locate " + nameFile + " configuration file", it)
+          ValidationInfo("Failed to locate foundry.toml configuration file", it)
         } else {
           null
         }
