@@ -16,6 +16,7 @@ import com.intellij.ui.dsl.builder.bindSelected
 import com.intellij.ui.dsl.builder.bindText
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.layout.ValidationInfoBuilder
+import com.intellij.ui.layout.and
 import com.intellij.ui.layout.selected
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
@@ -135,30 +136,15 @@ class SolidityConfigurable(internal val project: Project) :
             textFieldWithBrowseButton("Forge executable") { fileChosen(it) }.bindText(
               settings::executablePath
             )
-          }.visibleIf(foundryManualConfiguration.selected)
+          }
 
           row("Path of foundry.toml") {
             textFieldWithBrowseButton(
               "Path of foundry.toml",
               project,
             ) { fileChosen(it) }.bindText(settings::configPath).validationOnInput(validateConfigDir("foundry.toml"))
-          }.visibleIf(foundryManualConfiguration.selected)
-        }
-
-        panel {
-          row("Forge executable") {
-            textFieldWithBrowseButton("Forge executable") { fileChosen(it) }.bindText(
-              settings::executablePath
-            )
-          }.visibleIf(foundryManualConfiguration.selected)
-
-          row("Path of foundry.toml") {
-            textFieldWithBrowseButton(
-              "Path of foundry.toml",
-              project,
-            ) { fileChosen(it) }.bindText(settings::configPath).validationOnInput(validateConfigDir("foundry.toml"))
-          }.visibleIf(foundryManualConfiguration.selected)
-        }
+          }
+        }.visibleIf(foundryManualConfiguration.selected.and(foundryFormatter.selected))
       }.expanded = true
     }
   }
