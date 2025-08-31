@@ -159,7 +159,7 @@ class SolidityConfigurable(internal val project: Project) :
             ) { fileChosen(it) }.bindText(settings::configPath).validationOnInput(validateConfigDir("foundry.toml"))
           }.visibleIf(foundryManualConfiguration.selected)
         }
-      }
+      }.expanded = true
     }
   }
 
