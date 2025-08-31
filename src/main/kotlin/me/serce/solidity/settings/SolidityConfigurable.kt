@@ -126,7 +126,7 @@ class SolidityConfigurable(internal val project: Project) :
             "Prettier configuration options"
           ) { ShowSettingsUtil.getInstance().showSettingsDialog(project, "Prettier") }
           val helpLabel =
-            ContextHelpLabel.create("Don't forget to add the .sol extension in the \"Rule for files\" field")
+            ContextHelpLabel.create("Require prettier-plugin-solidity and to add the .sol extension in the \"Rule for files\" field")
           helpLabel.border = JBUI.Borders.emptyLeft(UIUtil.DEFAULT_HGAP)
           cell(helpLabel)
         }.visibleIf(prettierFormatter.selected)
