@@ -29,12 +29,13 @@ class SolidityExternalFormatter : AsyncDocumentFormattingService() {
     }
 
     val psiFile: PsiFile = request.context.containingFile
+    val foundryExePath = settings.executablePath.ifBlank { "$userHome/.foundry/bin/forge" }
 
     return try {
       val cmd = GeneralCommandLine()
         .withParentEnvironmentType(GeneralCommandLine.ParentEnvironmentType.CONSOLE)
         .withWorkDirectory(project.basePath)
-        .withExePath("$userHome/.foundry/bin/forge")
+        .withExePath(foundryExePath)
         .withParameters(buildList {
           add("fmt")
           add("-")
