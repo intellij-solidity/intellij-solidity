@@ -1,6 +1,5 @@
 package me.serce.solidity.settings
 
-import com.intellij.lang.javascript.JavaScriptBundle
 import com.intellij.openapi.application.ApplicationNamesInfo
 import com.intellij.openapi.options.BoundSearchableConfigurable
 import com.intellij.openapi.options.ShowSettingsUtil
@@ -25,11 +24,9 @@ import kotlin.io.path.Path
 
 private const val HELP_TOPIC = "reference.settings.solidity"
 
-class SolidityConfigurable(internal val project: Project) :
-  BoundSearchableConfigurable(
-    "Solidity",
-    HELP_TOPIC, CONFIGURABLE_ID
-  ) {
+class SolidityConfigurable(internal val project: Project) : BoundSearchableConfigurable(
+  "Solidity", HELP_TOPIC, CONFIGURABLE_ID
+) {
 
   lateinit var intellijSolidityFormatter: JRadioButton
   private lateinit var foundryFormatter: JRadioButton
@@ -45,76 +42,58 @@ class SolidityConfigurable(internal val project: Project) :
       collapsibleGroup("Formatter") {
         buttonsGroup {
           row {
-            intellijSolidityFormatter =
-              radioButton(
-                "Intellij-Solidity"
-              ).bindSelected(
-                FormatterTypeProperty(
-                  settings,
-                  FormatterType.INTELLIJ_SOLIDITY
-                )
-              ).component
+            intellijSolidityFormatter = radioButton(
+              "Intellij-Solidity"
+            ).bindSelected(
+              FormatterTypeProperty(
+                settings, FormatterType.INTELLIJ_SOLIDITY
+              )
+            ).component
           }
           row {
-            foundryFormatter =
-              radioButton(
-                "Foundry"
-              ).bindSelected(
-                FormatterTypeProperty(
-                  settings,
-                  FormatterType.FOUNDRY
-                )
-              ).component
+            foundryFormatter = radioButton(
+              "Foundry"
+            ).bindSelected(
+              FormatterTypeProperty(
+                settings, FormatterType.FOUNDRY
+              )
+            ).component
           }
           row {
-            prettierFormatter =
-              radioButton(
-                "Prettier"
-              ).bindSelected(
-                FormatterTypeProperty(
-                  settings,
-                  FormatterType.PRETTIER
-                )
-              ).component
+            prettierFormatter = radioButton(
+              "Prettier"
+            ).bindSelected(
+              FormatterTypeProperty(
+                settings, FormatterType.PRETTIER
+              )
+            ).component
           }
         }
         buttonsGroup {
           row {
-            foundryAutomaticConfiguration =
-              radioButton(
-                JavaScriptBundle.message(
-                  "settings.javascript.linters.autodetect.configure.automatically",
-                  "Foundry"
-                )
-              ).bindSelected(
-                ConfigurationModeProperty(
-                  settings,
-                  ConfigurationMode.AUTOMATIC
-                )
-              ).component
+            foundryAutomaticConfiguration = radioButton(
+              "Automatic Foundry configuration"
+            ).bindSelected(
+              ConfigurationModeProperty(
+                settings, ConfigurationMode.AUTOMATIC
+              )
+            ).component
 
             val detectAutomaticallyHelpText =
-              ApplicationNamesInfo.getInstance().fullProductName + " will use the forge executable installed at " +
-                "USER_HOME/.foundry/bin/forge and the foundry.toml configuration file located in the same " +
-                "folder as the current file or any of its parent folders."
+              ApplicationNamesInfo.getInstance().fullProductName + " will use the forge executable installed at " + "USER_HOME/.foundry/bin/forge and the foundry.toml configuration file located in the same " + "folder as the current file or any of its parent folders."
 
             val helpLabel = ContextHelpLabel.create(detectAutomaticallyHelpText)
             helpLabel.border = JBUI.Borders.emptyLeft(UIUtil.DEFAULT_HGAP)
             cell(helpLabel)
           }
           row {
-            foundryManualConfiguration =
-              radioButton(
-                JavaScriptBundle.message(
-                  "settings.javascript.linters.autodetect.configure.manually",
-                  "Foundry"
-                )
-              ).bindSelected(
-                ConfigurationModeProperty(
-                  settings,
-                  ConfigurationMode.MANUAL
-                )
-              ).component
+            foundryManualConfiguration = radioButton(
+              "Manual Foundry configuration"
+            ).bindSelected(
+              ConfigurationModeProperty(
+                settings, ConfigurationMode.MANUAL
+              )
+            ).component
           }
         }.visibleIf(foundryFormatter.selected)
 
@@ -147,8 +126,7 @@ class SolidityConfigurable(internal val project: Project) :
   }
 
   private class FormatterTypeProperty(
-    private val settings: SoliditySettings,
-    private val formatterType: FormatterType
+    private val settings: SoliditySettings, private val formatterType: FormatterType
   ) : MutableProperty<Boolean> {
     override fun get(): Boolean = settings.formatterType == formatterType
 
@@ -172,19 +150,18 @@ class SolidityConfigurable(internal val project: Project) :
     }
   }
 
-  private fun validateFoundryTomlConfigDir(): ValidationInfoBuilder.(TextFieldWithBrowseButton) -> ValidationInfo? =
-    {
-      val selected = VfsUtil.findFile(Path(it.text), true)
-      if (selected == null || !selected.exists()) {
+  private fun validateFoundryTomlConfigDir(): ValidationInfoBuilder.(TextFieldWithBrowseButton) -> ValidationInfo? = {
+    val selected = VfsUtil.findFile(Path(it.text), true)
+    if (selected == null || !selected.exists()) {
+      ValidationInfo("Failed to locate foundry.toml configuration file", it)
+    } else {
+      if (!selected.isFoundryToml()) {
         ValidationInfo("Failed to locate foundry.toml configuration file", it)
       } else {
-        if (!selected.isFoundryToml()) {
-          ValidationInfo("Failed to locate foundry.toml configuration file", it)
-        } else {
-          null
-        }
+        null
       }
     }
+  }
 
   private fun VirtualFile.isFoundryToml() = name == "foundry.toml"
 
