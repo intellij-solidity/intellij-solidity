@@ -41,9 +41,6 @@ class SolidityConfigurable(internal val project: Project) :
   override fun createPanel(): DialogPanel {
     val settings: SoliditySettings = SoliditySettings.getInstance(project)
 
-    // *********************
-    // Configuration mode row
-    // *********************
     return panel {
       collapsibleGroup("Formatter") {
         buttonsGroup {
