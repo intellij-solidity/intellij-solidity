@@ -19,12 +19,11 @@ class SolidityAnnotator : Annotator {
   }
 
   private fun highlight(element: SolElement, holder: AnnotationHolder) {
+    fun keyword() = applyColor(holder, element, SolColor.KEYWORD)
     when (element) {
       is SolNumberType -> applyColor(holder, element, SolColor.TYPE)
       is SolElementaryTypeName -> applyColor(holder, element, SolColor.TYPE)
-      is SolStateMutabilitySpecifier -> if (element.text == "payable") {
-        applyColor(holder, element, SolColor.KEYWORD)
-      }
+      is SolStateMutabilitySpecifier -> if (element.text == "payable") keyword()
       is SolEnumValue -> applyColor(holder, element, SolColor.ENUM_VALUE)
       is SolMemberAccessExpression -> when(element.expression.firstChild.text) {
         "super" -> applyColor(holder, element.expression.firstChild, SolColor.KEYWORD)
@@ -100,7 +99,9 @@ class SolidityAnnotator : Annotator {
       }
       is SolYulVariableDeclaration, is SolYulSwitchStatement, is SolYulSwitchCase ->
         applyColor(holder, element.firstChild, SolColor.KEYWORD)
-      is SolYulLeave, is SolYulBreak, is SolYulContinue, is SolYulDefault -> applyColor(holder, element, SolColor.KEYWORD)
+      is SolYulLeave, is SolYulBreak, is SolYulContinue, is SolYulDefault -> keyword()
+      is SolLayoutAt -> keyword()
+      is SolMutationModifier -> keyword() // transient
     }
   }
 
