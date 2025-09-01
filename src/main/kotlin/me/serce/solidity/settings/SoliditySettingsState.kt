@@ -10,7 +10,7 @@ enum class ConfigurationMode {
 enum class FormatterType {
   INTELLIJ_SOLIDITY,
   FOUNDRY,
-  PRETTIER
+  DISABLED
 }
 
 class SoliditySettingsState : BaseState() {

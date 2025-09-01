@@ -115,7 +115,7 @@ class SolidityExternalFormatter : AsyncDocumentFormattingService() {
     val settings = SoliditySettings.getInstance(project)
     return when (settings.formatterType) {
       FormatterType.FOUNDRY -> true
-      FormatterType.PRETTIER -> false
+      FormatterType.DISABLED -> false
       FormatterType.INTELLIJ_SOLIDITY -> false
     }
   }

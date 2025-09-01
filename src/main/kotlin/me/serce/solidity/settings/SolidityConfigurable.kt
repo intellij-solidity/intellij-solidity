@@ -2,7 +2,6 @@ package me.serce.solidity.settings
 
 import com.intellij.openapi.application.ApplicationNamesInfo
 import com.intellij.openapi.options.BoundSearchableConfigurable
-import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogPanel
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
@@ -30,7 +29,7 @@ class SolidityConfigurable(internal val project: Project) : BoundSearchableConfi
 
   lateinit var intellijSolidityFormatter: JRadioButton
   private lateinit var foundryFormatter: JRadioButton
-  private lateinit var prettierFormatter: JRadioButton
+  private lateinit var disabledFormatter: JRadioButton
 
   private lateinit var foundryAutomaticConfiguration: JRadioButton
   private lateinit var foundryManualConfiguration: JRadioButton
@@ -60,13 +59,17 @@ class SolidityConfigurable(internal val project: Project) : BoundSearchableConfi
             ).component
           }
           row {
-            prettierFormatter = radioButton(
-              "Prettier"
+            disabledFormatter = radioButton(
+              "Disabled"
             ).bindSelected(
               FormatterTypeProperty(
-                settings, FormatterType.PRETTIER
+                settings, FormatterType.DISABLED
               )
             ).component
+            val helpLabel =
+              ContextHelpLabel.create("Disable the built-in formatter to enable external formatters such as Prettier")
+            helpLabel.border = JBUI.Borders.emptyLeft(UIUtil.DEFAULT_HGAP)
+            cell(helpLabel)
           }
         }
         buttonsGroup {
@@ -96,16 +99,6 @@ class SolidityConfigurable(internal val project: Project) : BoundSearchableConfi
             ).component
           }
         }.visibleIf(foundryFormatter.selected)
-
-        row {
-          link(
-            "Prettier configuration options"
-          ) { ShowSettingsUtil.getInstance().showSettingsDialog(project, "Prettier") }
-          val helpLabel =
-            ContextHelpLabel.create("Require prettier-plugin-solidity and to add the .sol extension in the \"Rule for files\" field")
-          helpLabel.border = JBUI.Borders.emptyLeft(UIUtil.DEFAULT_HGAP)
-          cell(helpLabel)
-        }.visibleIf(prettierFormatter.selected)
 
         panel {
           row("Forge executable") {
