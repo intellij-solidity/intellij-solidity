@@ -136,4 +136,22 @@ class SolContractResolveTest : SolResolveTestBase() {
        }
   """)
   )
+
+  fun testResolveLibraryInUsingFor() = checkByCode("""
+    pragma solidity ^0.8.26;
+    
+    type Foo is uint256;
+
+    library FooLib {
+              //x   
+        function isHappy(Foo f) internal pure returns(bool) {
+            return Foo.unwrap(f) > 100;
+        }
+    }
+    
+    using {
+        FooLib.isHappy
+          //^
+    } for Foo global;
+     """)
 }
