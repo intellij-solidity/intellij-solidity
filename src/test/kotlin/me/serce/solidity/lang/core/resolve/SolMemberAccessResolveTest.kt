@@ -84,22 +84,4 @@ class SolMemberAccessResolveTest : SolResolveTestBase() {
           }
       }
   """)
-
-  fun testResolveFunctionInUsingFor() = checkByCode("""
-    pragma solidity ^0.8.26;
-    
-    type Foo is uint256;
-
-    library FooLib {
-        function isHappy(Foo f) internal pure returns(bool) {
-                    //x   
-            return Foo.unwrap(f) > 100;
-        }
-    }
-    
-    using {
-        FooLib.isHappy
-                //^
-    } for Foo global;
-     """)
 }

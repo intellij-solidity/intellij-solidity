@@ -11,6 +11,7 @@ import com.intellij.util.Processors
 import me.serce.solidity.lang.core.SolidityFile
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.psi.impl.SolNewExpressionElement
+import me.serce.solidity.lang.psi.impl.SolUserDefinedTypeNameImplMixin
 import me.serce.solidity.lang.psi.parentOfType
 import me.serce.solidity.lang.resolve.ref.SolFunctionCallReference
 import me.serce.solidity.lang.resolve.ref.SolReference
@@ -568,6 +569,17 @@ object SolResolver {
       .map { resolveTypeNameStrict(it).firstOrNull() }
       .filterIsInstance<SolContractDefinition>()
       .flatMap { resolveContractMembers(it) }
+  }
+
+  fun resolveUsingForElement(element: SolTypeName): SolCallableElement? {
+    val identifiers = (element as SolUserDefinedTypeNameImplMixin).findIdentifiers()
+    val lexicalFinding = lexicalDeclarations(identifiers.first()).filterIsInstance<SolCallableElement>()
+      .filter { element -> element.name == identifiers.first().text }.firstOrNull()
+    return if (identifiers.size > 1 && lexicalFinding is SolContractDefinition) {
+      lexicalFinding.functionDefinitionList.find { function -> function.name == identifiers[1].text }
+    } else {
+      lexicalFinding
+    }
   }
 
   fun lexicalDeclarations(place: PsiElement, stop: (PsiElement) -> Boolean = { false }): Sequence<SolNamedElement> {
