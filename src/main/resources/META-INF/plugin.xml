@@ -139,6 +139,9 @@
         <lang.formatter language="Solidity"
                         implementationClass="me.serce.solidity.ide.formatting.SolidityFormattingModelBuilder"/>
 
+        <formattingService implementation="me.serce.solidity.ide.formatting.SolidityExternalFormatter" />
+        <lang.formatter.restriction implementation="me.serce.solidity.ide.formatting.SolidityFormattingRestriction"/>
+
         <codeInsight.lineMarkerProvider language="Solidity"
                                         implementationClass="me.serce.solidity.ide.annotation.ForgeTestLineMarkerProvider" order="first"/>
         <codeInsight.lineMarkerProvider language="Solidity"
@@ -258,6 +261,12 @@
         <lang.structureViewExtension implementation="me.serce.solidity.ide.SolStructureViewExtension"/>
 
         <typeHierarchyProvider language="Solidity" implementationClass="me.serce.solidity.ide.SolHierarchyTypeProvider"/>
+
+        <projectConfigurable id="Settings.Solidity"
+                             groupId="language"
+                             nonDefaultProject="false"
+                             instance="me.serce.solidity.settings.SolidityConfigurable"
+                             displayName="Solidity"/>
     </extensions>
 
     <actions>
