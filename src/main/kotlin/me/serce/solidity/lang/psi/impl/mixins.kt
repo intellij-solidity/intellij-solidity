@@ -615,14 +615,7 @@ abstract class SolUsingForMixin(node: ASTNode) : SolElementImpl(node), SolUsingF
         list = list.subList(0, list.lastIndex)
       }
       return list.mapNotNull {
-        val identifiers = (it as SolUserDefinedTypeNameImplMixin).findIdentifiers()
-        val lexicalFinding = SolResolver.lexicalDeclarations(identifiers.first()).filterIsInstance<SolCallableElement>()
-          .filter { element -> element.name == identifiers.first().text }.firstOrNull()
-        if (identifiers.size > 1 && lexicalFinding is SolContractDefinition) {
-          lexicalFinding.functionDefinitionList.find { function -> function.name == identifiers[1].text }
-        } else {
-          lexicalFinding
-        }
+        SolResolver.resolveUsingForElement(it)
       }
     }
 }
