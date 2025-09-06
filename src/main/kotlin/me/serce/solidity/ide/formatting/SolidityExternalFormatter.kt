@@ -10,6 +10,7 @@ import com.intellij.formatting.service.AsyncFormattingRequest
 import com.intellij.formatting.service.FormattingService.Feature
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiFile
+import me.serce.solidity.lang.core.SolidityFile
 import me.serce.solidity.settings.FormatterType
 import me.serce.solidity.settings.SoliditySettings
 import java.nio.charset.StandardCharsets
@@ -110,8 +111,11 @@ class SolidityExternalFormatter : AsyncDocumentFormattingService() {
     return EnumSet.noneOf(Feature::class.java)
   }
 
-  override fun canFormat(p0: PsiFile): Boolean {
-    val project: Project = p0.project
+  override fun canFormat(file: PsiFile): Boolean {
+    if (file !is SolidityFile) {
+      return false
+    }
+    val project: Project = file.project
     val settings = SoliditySettings.getInstance(project)
     return when (settings.formatterType) {
       FormatterType.FOUNDRY -> true
