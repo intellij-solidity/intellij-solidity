@@ -5,6 +5,19 @@ import me.serce.solidity.settings.FormatterType
 import me.serce.solidity.settings.SoliditySettings
 
 class SolidityFormattingRestrictionTest : BasePlatformTestCase() {
+  // ensure the changes in settings don't leak beyond the current test case. 
+  private lateinit var originalFormatterType: FormatterType
+
+  override fun setUp() {
+    super.setUp()
+    originalFormatterType = SoliditySettings.getInstance(project).formatterType
+  }
+
+  override fun tearDown() = try {
+    SoliditySettings.getInstance(project).formatterType = originalFormatterType
+  } finally {
+    super.tearDown()
+  }
 
   fun testNonSolidityFilesAreAlwaysAllowed() {
     val psi = myFixture.configureByText("A.txt", "plain text")
