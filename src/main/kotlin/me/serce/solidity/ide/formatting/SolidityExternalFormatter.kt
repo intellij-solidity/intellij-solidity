@@ -9,11 +9,15 @@ import com.intellij.formatting.service.AsyncDocumentFormattingService
 import com.intellij.formatting.service.AsyncFormattingRequest
 import com.intellij.formatting.service.FormattingService.Feature
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.SystemInfo
 import com.intellij.psi.PsiFile
+import com.intellij.util.SystemProperties
 import me.serce.solidity.lang.core.SolidityFile
 import me.serce.solidity.settings.FormatterType
 import me.serce.solidity.settings.SoliditySettings
+import org.jetbrains.annotations.VisibleForTesting
 import java.nio.charset.StandardCharsets
+import java.nio.file.Paths
 import java.util.*
 import java.util.concurrent.ExecutionException
 
@@ -23,14 +27,13 @@ class SolidityExternalFormatter : AsyncDocumentFormattingService() {
     val formattingContext: FormattingContext = request.context
     val project = formattingContext.project
     val settings = SoliditySettings.getInstance(project)
-    val userHome = System.getProperty("user.home")
 
     if (settings.formatterType == FormatterType.INTELLIJ_SOLIDITY) {
       return null
     }
 
     val psiFile: PsiFile = request.context.containingFile
-    val foundryExePath = settings.executablePath.ifBlank { "$userHome/.foundry/bin/forge" }
+    val foundryExePath = resolveForgeExecutable(settings, SystemInfo.isWindows)
 
     return try {
       val cmd = GeneralCommandLine()
@@ -84,6 +87,17 @@ class SolidityExternalFormatter : AsyncDocumentFormattingService() {
     }
   }
 
+  @VisibleForTesting
+  fun resolveForgeExecutable(settings: SoliditySettings, isWindows: Boolean): String {
+    val settingsPath = settings.executablePath.trim()
+    if (settingsPath.isNotEmpty()) {
+      return settingsPath
+    }
+    val home = SystemProperties.getUserHome()
+    val execName = if (isWindows) "forge.exe" else "forge"
+    return Paths.get(home, ".foundry", "bin", execName).toString()
+  }
+
   private fun isWarning(line: String): Boolean {
     val l = line.trim().lowercase()
     return l.startsWith("warning:")
@@ -97,7 +111,6 @@ class SolidityExternalFormatter : AsyncDocumentFormattingService() {
       else -> stderr
     }
   }
-
 
   override fun getNotificationGroupId(): String {
     return "Solidity"
