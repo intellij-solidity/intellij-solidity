@@ -20,9 +20,22 @@
       <p>
         A huge thank you to all of you who have sponsored the plugin development! ❤️
 
-        We've created a new [Discord](https://discord.gg/2pARGQ8RMf) community. Join to discuss Solidity, the plugin
-        features you'd like to see, and the issues you're experiencing with the plugin.
+        We've created a new <a href="https://discord.gg/2pARGQ8RMf">Discord</a> community.
+        Join to discuss Solidity, the plugin features you'd like to see, and the issues you're experiencing with the plugin.
 
+        <b>v2.4.8</b>
+        In this release:
+        <ul>
+          <li>Support for external formatters (Foundry, Prettier), thank you @Paulalex85!</li>
+          <li>Performance fixed for reference resolution, yours @SerCeMan!</li>
+          <li>Highlighting for the "transient" and "layout at" keywords, thank you @mbolotov!</li>
+          <li>Fixed non-contract resolving through imports, yours @SerCeMan!</li>
+          <li>Parser fixes to allowed empty hex strings, yours @SerCeMan!</li>
+          <li>Added missing keywords in auto-completion, thank you @Paulalex85!</li>
+          <li>Fix indentation for paste inside blocks and function signatures, thank you @ruinmi!</li>
+          <li>Formatting improvements: continuation indent for chained calls; indentation inside assembly comment blocks; correct indentation of inheritance lists; yours @SerCeMan!</li>
+          <li>Platform, build upgrades, and bug fixes yours @SerCeMan!</li>
+        </ul>
         <b>v2.4.7</b>
         In this release:
         <ul>
@@ -36,22 +49,6 @@
           <li>Added support for transient keyword, thank you @Paulalex85!</li>
           <li>Fixed "using for" resolution cache, thank you @Paulalex85!</li>
           <li>Added support for custom storage syntax, yours @SerCeMan!</li>
-        </ul>
-        <b>v2.4.6</b>
-        In this release:
-        <ul>
-          <li>Fixed stack overflow in circular imports, thank you @Paulalex85!</li>
-          <li>Fixed import resolution for libraries with identical names, thank you @Paulalex85!</li>
-          <li>Added cache to import collection for faster indexing, thank you @Paulalex85!</li>
-          <li>Fixed resolution of functions from imported contracts with custom types and <code>using</code>, thank you @Paulalex85!</li>
-          <li>Added file-level <code>using for</code> support, thank you @Paulalex85!</li>
-          <li>Fixed resolving of elements imported with aliases, thank you @Paulalex85!</li>
-          <li>Improved file-level import handling, thank you @Paulalex85!</li>
-          <li>Support foundry <code>remappings.toml</code>, thank you @Paulalex85!</li>
-          <li>Fixed "Find Usages" for modifiers, thank you @Paulalex85!</li>
-          <li>Added references for contracts in the inherited doc tag values, thank you @mbolotov!</li>
-          <li>Function and contract resolution with aliases, thank you @Paulalex85!</li>
-          <li>Added latest EVM opcode set, thank you @Paulalex85!</li>
         </ul>
       </p>
     ]]>
