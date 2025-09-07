@@ -136,12 +136,23 @@ data class SolInteger(val unsigned: Boolean, val size: Int, val digitCount: Int?
       return inferIntegerType(numberLiteral.parseLiteral())
     }
 
-    fun inferType(numberLiteral: SolHexLiteral): SolInteger {
+    fun inferType(numberLiteral: SolHexLiteral): SolInteger? {
       val withoutPrefix = numberLiteral.text.substring(3) //
         .removeSurrounding("\"") //
         .removeSurrounding("'") //
         .replace("_", "") // underscore is an allowed separator in hex literals
-      val parse = LiteralParseResult(withoutPrefix.toBigInteger(16), NumericLiteralType.HEX, withoutPrefix.length)
+      val value = when {
+          withoutPrefix.isEmpty() -> BigInteger.ZERO
+          else -> try {
+            withoutPrefix.toBigInteger(16)
+          } catch (_: NumberFormatException) {
+            null
+          }
+      }
+      if (value == null) {
+        return null
+      }
+      val parse = LiteralParseResult(value, NumericLiteralType.HEX, withoutPrefix.length)
       return inferIntegerType(parse)
     }
 
