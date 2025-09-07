@@ -118,8 +118,8 @@ class SolDocumentationProvider : AbstractDocumentationProvider() {
             SolidityTokenTypes.COMMENT -> {
               // replacing internal '*' characters which start a line
               val split = text.split("*").filter { it.isNotEmpty() }
-              split.foldIndexed("") {i, a, t -> if (i == 0) a + t else {
-                  a.trimEnd(' ') + (if (split[i - 1].lastOrNull { it == '\n' || !it.isWhitespace() } == '\n') "" else "*") + t
+              split.foldIndexed("") { j, a, t -> if (j == 0) a + t else {
+                  a.trimEnd(' ') + (if (split[j - 1].lastOrNull { it == '\n' || !it.isWhitespace() } == '\n') "" else "*") + t
                 } }
             }
             else -> text

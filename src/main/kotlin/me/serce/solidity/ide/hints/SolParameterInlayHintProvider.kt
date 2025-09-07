@@ -21,14 +21,9 @@ class SolParameterInlayHintProvider : InlayParameterHintsProvider {
   }
 }
 
-enum class HintType(
-     private val description: String,
-    defaultEnabled: Boolean
-) {
+enum class HintType() {
 
   TUPLE_HINT(
-    "myTupleHintDescription",
-      true
   ) {
       override fun provideHints(e: PsiElement): List<InlayInfo> {
           val item = e as? SolDeclarationItem ?: return emptyList()
@@ -39,8 +34,6 @@ enum class HintType(
   },
 
     PARAMETER_HINT(
-      "myHintDescription",
-        true
     ) {
         override fun provideHints(e: PsiElement): List<InlayInfo> {
             val callElement = e.parentOfType<SolFunctionCallElement>(true) ?: return emptyList()
