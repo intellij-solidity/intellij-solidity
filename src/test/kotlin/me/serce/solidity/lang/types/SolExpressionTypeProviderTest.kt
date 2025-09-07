@@ -386,6 +386,10 @@ class SolExpressionTypeProviderTest : SolTestBase() {
     Assert.assertFalse(bytes2.isAssignableFrom("hex\"12\"".inferType()))
     // bytes2 d = hex"123"; // not allowed
     Assert.assertFalse(bytes2.isAssignableFrom("hex\"123\"".inferType()))
+    // bytes2 g = hex""; // fine
+    Assert.assertTrue(bytes2.isAssignableFrom("hex\"\"".inferType()))
+    // bytes2 c = hex"zzz"; // not allowed
+    Assert.assertFalse(bytes2.isAssignableFrom("hex\"zzz\"".inferType()))
     // bytes2 e = "x"; // not allowed
     Assert.assertFalse(bytes2.isAssignableFrom("\"x\"".inferType()))
     // bytes2 f = "xyz"; // not allowed
