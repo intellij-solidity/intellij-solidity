@@ -22,7 +22,7 @@ class SolUserDefinedTypeNameReference(element: SolUserDefinedTypeName) : SolRefe
       return SolResolver.resolveNewExpression(parent)
     } else if (parent is SolUsingForElement) {
       val resolved = SolResolver.resolveUsingForElement(element)
-      return if (resolved != null) listOf(resolved) else emptyList()
+      if (resolved != null) return listOf(resolved)
     }
     return SolResolver.resolveTypeNameUsingImports(element)
   }
