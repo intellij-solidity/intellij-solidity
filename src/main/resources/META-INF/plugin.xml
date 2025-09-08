@@ -23,7 +23,7 @@
         We've created a new <a href="https://discord.gg/2pARGQ8RMf">Discord</a> community.
         Join to discuss Solidity, the plugin features you'd like to see, and the issues you're experiencing with the plugin.
 
-        <b>v2.4.8</b>
+        <b>v2.4.9</b>
         In this release:
         <ul>
           <li>Support for external formatters (Foundry, Prettier), thank you @Paulalex85!</li>
@@ -36,6 +36,7 @@
           <li>Formatting improvements: continuation indent for chained calls; indentation inside assembly comment blocks; correct indentation of inheritance lists; yours @SerCeMan!</li>
           <li>Platform, build upgrades, and bug fixes yours @SerCeMan!</li>
         </ul>
+        Note, the v2.4.8 was skipped due to an issue with the build tooling.
         <b>v2.4.7</b>
         In this release:
         <ul>
