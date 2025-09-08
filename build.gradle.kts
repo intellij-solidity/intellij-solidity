@@ -45,7 +45,6 @@ tasks.named<Delete>("clean") {
 
 intellijPlatform {
     pluginConfiguration {
-        name = "Intellij-Solidity"
         version = project.version.toString()
     }
 
