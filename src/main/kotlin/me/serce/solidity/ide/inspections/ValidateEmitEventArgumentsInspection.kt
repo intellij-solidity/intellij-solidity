@@ -2,7 +2,6 @@ package me.serce.solidity.ide.inspections
 
 import com.intellij.codeInspection.LocalInspectionTool
 import com.intellij.codeInspection.ProblemsHolder
-import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiElementVisitor
 import me.serce.solidity.ide.hints.NO_VALIDATION_TAG
 import me.serce.solidity.ide.hints.comments
@@ -18,7 +17,7 @@ class ValidateEmitEventArgumentsInspection : LocalInspectionTool() {
   override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
     return object : SolVisitor() {
       override fun visitEmitStatement(o: SolEmitStatement) {
-        fun PsiElement.getDefs(): List<SolEventDefinition>? {
+        fun getDefs(): List<SolEventDefinition>? {
           return (o.parent?.children?.firstOrNull() as? SolEmitStatement)?.let {
             (it.lastChild as? SolFunctionCallExpression)?.let {
               SolResolver.resolveVarLiteralReference(it)
@@ -26,13 +25,13 @@ class ValidateEmitEventArgumentsInspection : LocalInspectionTool() {
           }?.filterIsInstance<SolEventDefinition>()
         }
 
-        fun PsiElement.getParameters(): List<SolExpression>? {
+        fun getParameters(): List<SolExpression>? {
           return (o.parent?.children?.firstOrNull() as? SolEmitStatement)?.let {
             (it.lastChild as? SolFunctionCallExpression)?.functionCallArguments?.expressionList
           }
         }
 
-        val args = o.getParameters()
+        val args = getParameters()
 
         if (args?.size == 0) {
           holder.registerProblem(o, "No arguments")
@@ -40,7 +39,7 @@ class ValidateEmitEventArgumentsInspection : LocalInspectionTool() {
           return
         }
 
-        o.getDefs()?.let {
+        getDefs()?.let {
           if (it.isEmpty()) {
             holder.registerProblem(o.parent?.firstChild?.lastChild?.firstChild
               ?: o, "Can't find the event in that contract")
@@ -52,7 +51,6 @@ class ValidateEmitEventArgumentsInspection : LocalInspectionTool() {
           if (f.isNotEmpty()) {
             var wrongNumberOfArgs = ""
             var wrongTypes = ""
-            var wrongElement = (o.parent?.firstChild?.lastChild?.firstChild ?: o) as SolElement
             if (f.none { ref ->
                 val expParameters = ref.parseParameters()
                 val expArgs = expParameters.size
@@ -68,7 +66,6 @@ class ValidateEmitEventArgumentsInspection : LocalInspectionTool() {
                       expType == SolUnknown || actType == SolUnknown || expType.isAssignableFrom(actType).also {
                         if (!it) {
                           wrongTypes = "Argument of type '$actType' is not assignable to parameter of type '${expType}'"
-                          wrongElement = argtype.value
                         }
                       }
                     } == true

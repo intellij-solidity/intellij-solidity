@@ -477,7 +477,7 @@ data class SolFunctionType(val ref: SolFunctionDefinition): SolType {
   }
 
   override fun getMembers(project: Project): List<SolMember> {
-    return getReferenceTypeMembers(project, Usage.CALLABLE)
+    return getReferenceTypeMembers(project)
   }
 
 
@@ -491,13 +491,13 @@ data class SolVariableType(val ref: SolStateVariableDeclaration): SolType {
   }
 
   override fun getMembers(project: Project): List<SolMember> {
-    return getReferenceTypeMembers(project, Usage.VARIABLE)
+    return getReferenceTypeMembers(project)
   }
 
   override fun toString(): String = "variable(${ref.name})"
 }
 
-private fun getReferenceTypeMembers(project: Project, usage: Usage) =
+private fun getReferenceTypeMembers(project: Project) =
     getSdkMembers(SolInternalTypeFactory.of(project).functionType).map {
       it.getName()?.let { name -> if (it is SolCallable && name.startsWith("__")) changeName(it, name.substring(2)) else it }
         ?: it

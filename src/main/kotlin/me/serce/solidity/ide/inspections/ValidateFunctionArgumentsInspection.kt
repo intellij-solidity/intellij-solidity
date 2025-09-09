@@ -34,7 +34,6 @@ class ValidateFunctionArgumentsInspection : LocalInspectionTool() {
             if (funDefs.isNotEmpty()) {
               var wrongNumberOfArgs = ""
               var wrongTypes = ""
-              var wrongElement = element as SolElement
               if (funDefs.none { ref ->
                   var parameters = ref.parameters
                   val expArgs = parameters.size
@@ -54,7 +53,6 @@ class ValidateFunctionArgumentsInspection : LocalInspectionTool() {
                         expType == SolUnknown || actType == SolUnknown || expType.isAssignableFrom(actType).also {
                           if (!it) {
                             wrongTypes = "Argument of type '$actType' is not assignable to parameter of type '${expType}'"
-                            wrongElement = argtype.value
                           }
                         }
                       } == true

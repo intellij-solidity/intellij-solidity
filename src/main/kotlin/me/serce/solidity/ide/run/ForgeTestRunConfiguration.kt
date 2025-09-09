@@ -54,5 +54,5 @@ class ForgeTestRunConfiguration(
     element.addContent(wdEle)
   }
 
-  override fun suggestedName(): String = "Forge Test${testName?.let { " - $it" } ?: ""}"
+  override fun suggestedName(): String = "Forge Test${if (testName.isNotEmpty()) " - $testName" else ""}"
 }
