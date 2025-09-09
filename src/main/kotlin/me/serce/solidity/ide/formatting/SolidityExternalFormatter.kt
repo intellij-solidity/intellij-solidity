@@ -9,6 +9,7 @@ import com.intellij.formatting.service.AsyncDocumentFormattingService
 import com.intellij.formatting.service.AsyncFormattingRequest
 import com.intellij.formatting.service.FormattingService.Feature
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.psi.PsiFile
 import com.intellij.util.SystemProperties
@@ -36,9 +37,9 @@ class SolidityExternalFormatter : AsyncDocumentFormattingService() {
     val foundryExePath = resolveForgeExecutable(settings, SystemInfo.isWindows)
 
     return try {
+      val projectPath = project.guessProjectDir()?.canonicalPath
       val cmd = GeneralCommandLine()
         .withParentEnvironmentType(GeneralCommandLine.ParentEnvironmentType.CONSOLE)
-        .withWorkDirectory(project.basePath)
         .withExePath(foundryExePath)
         .withParameters(buildList {
           add("fmt")
@@ -51,6 +52,9 @@ class SolidityExternalFormatter : AsyncDocumentFormattingService() {
           }
         })
         .withCharset(StandardCharsets.UTF_8)
+      if (projectPath != null && Paths.get(projectPath).toFile().exists()) {
+        cmd.withWorkDirectory(projectPath)
+      }
 
       val handler = OSProcessHandler(cmd)
       handler.processInput.use { outputStream ->
@@ -103,7 +107,8 @@ class SolidityExternalFormatter : AsyncDocumentFormattingService() {
     return l.startsWith("warning:")
   }
 
-  private fun removeWarning(stderr: String): String {
+  @VisibleForTesting
+  fun removeWarning(stderr: String): String {
     val lines = stderr.lineSequence().toList()
     val errors = lines.filter { !isWarning(it) }
     return when {
