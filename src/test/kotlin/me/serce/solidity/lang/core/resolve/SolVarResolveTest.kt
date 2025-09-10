@@ -177,6 +177,30 @@ class SolVarResolveTest : SolResolveTestBase() {
         }
   """)
 
+  fun testResolveStateInheritanceInAnotherFile() =testResolveBetweenFiles(
+    InlineFile(
+      code = """
+        contract C {
+            uint256 abc;
+                  //x
+        }
+    """,
+      name = "c.sol"
+    ),
+    InlineFile(
+      code = """
+        import "./c.sol";
+        contract A is C {
+            function A() {
+                abc = 1;
+                //^
+            }
+        }
+    """,
+      name = "a.sol"
+    )
+  )
+
   fun testResolveSuper() = checkByCode("""
         contract B {
             var b;
