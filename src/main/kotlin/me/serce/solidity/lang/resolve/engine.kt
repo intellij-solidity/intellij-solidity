@@ -571,8 +571,8 @@ object SolResolver {
       .flatMap { resolveContractMembers(it) }
   }
 
-  fun resolveUsingForElement(element: SolTypeName): SolCallableElement? {
-    val identifiers = (element as SolUserDefinedTypeNameImplMixin).findIdentifiers()
+  fun resolveUsingForElement(element: SolUserDefinedTypeNameElement): SolCallableElement? {
+    val identifiers = element.findIdentifiers()
     val lexicalFinding = lexicalDeclarations(identifiers.first()).filterIsInstance<SolCallableElement>()
       .filter { element -> element.name == identifiers.first().text }.firstOrNull()
     return if (identifiers.size > 1 && lexicalFinding is SolContractDefinition) {

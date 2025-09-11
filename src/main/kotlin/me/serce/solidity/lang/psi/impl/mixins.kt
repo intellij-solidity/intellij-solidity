@@ -614,9 +614,11 @@ abstract class SolUsingForMixin(node: ASTNode) : SolElementImpl(node), SolUsingF
       if (type != null) {
         list = list.subList(0, list.lastIndex)
       }
-      return list.mapNotNull {
-        SolResolver.resolveUsingForElement(it)
-      }
+      return list
+        .filterIsInstance<SolUserDefinedTypeName>()
+        .mapNotNull {
+          SolResolver.resolveUsingForElement(it)
+        }
     }
 }
 
