@@ -11,7 +11,6 @@ import com.intellij.util.Processors
 import me.serce.solidity.lang.core.SolidityFile
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.psi.impl.SolNewExpressionElement
-import me.serce.solidity.lang.psi.impl.SolUserDefinedTypeNameImplMixin
 import me.serce.solidity.lang.psi.parentOfType
 import me.serce.solidity.lang.resolve.ref.SolFunctionCallReference
 import me.serce.solidity.lang.resolve.ref.SolReference
