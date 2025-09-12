@@ -308,6 +308,7 @@ object SolResolver {
       when {
         names.size > 2 -> {
           val indexNameWithoutAliases = names.indexOf(names.find { name ->
+            //TODO check if non empty to be able to call first
             val resolved = resolveTypeNameUsingImports(name).first()
             resolved !is SolImportAlias || !isAliasOfFile(resolved)
           })
@@ -448,7 +449,7 @@ object SolResolver {
         lexicalDeclarations(element)
           .filter { it.name == elementToSearch.name }
           .toList().let {
-            if (it.size <= 1 || it.any { it !is SolContractDefinition }) it
+            if (it.size == 1 || it.any { it !is SolContractDefinition }) it
             // resolve by imports to distinguish elements with the same name
             else resolveTypeNameUsingImports(element).toList()
           }

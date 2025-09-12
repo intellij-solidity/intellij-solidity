@@ -451,4 +451,88 @@ class SolAliasEnumResolveTest : SolResolveTestBase() {
       )
     )
   }
+
+    fun testResolveEnumFromAliasWithInheritance() {
+        InlineFile(
+            code = """
+        pragma solidity ^0.8.0;
+    
+        import {Types as Constants} from "./types.sol";
+        
+        contract Parent {
+            function foo() public pure returns (uint256) {
+                return 42;
+            }
+        }
+            """, name = "parent.sol"
+        )
+
+        testResolveBetweenFiles(
+            InlineFile(
+                code = """
+            pragma solidity ^0.8.0;
+
+            interface Types {
+                enum enumB { B1, B2 }
+                    //x
+            }
+            """, name = "types.sol"
+            ), InlineFile(
+                code = """
+            pragma solidity ^0.8.0;
+
+            import "./parent.sol";
+            
+             contract Child is Parent {
+                function foo2() public {
+                    Constants.enumB.B1;
+                             //^
+                }
+            }
+            """, name = "child.sol"
+            )
+        )
+    }
+
+    fun testResolveEnumMemberFromAliasWithInheritance() {
+        InlineFile(
+            code = """
+        pragma solidity ^0.8.0;
+    
+        import {Types as Constants} from "./types.sol";
+        
+        contract Parent {
+            function foo() public pure returns (uint256) {
+                return 42;
+            }
+        }
+    """, name = "parent.sol"
+        )
+
+        testResolveBetweenFiles(
+            InlineFile(
+                code = """
+            pragma solidity ^0.8.0;
+
+            interface Types {
+                enum enumB { B1, B2 }
+                            //x
+            }
+            """, name = "types.sol"
+            ), InlineFile(
+                code = """
+            pragma solidity ^0.8.0;
+
+            import "./parent.sol";
+            
+             contract Child is Parent {
+                function foo2() public {
+                    Constants.enumB.B1;
+                                  //^
+                }
+            }
+            """, name = "child.sol"
+            )
+        )
+    }
 }

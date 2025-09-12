@@ -129,9 +129,9 @@ class SolAliasContractResolveTest : SolResolveTestBase() {
     )
   }
 
-  fun testResolveContractFromAliasWithInheritance() {
-    InlineFile(
-      code = """
+    fun testResolveContractFromAliasWithInheritance() {
+        InlineFile(
+            code = """
         pragma solidity ^0.8.0;
 
         import {Types as Constants} from "./types.sol";
@@ -141,24 +141,21 @@ class SolAliasContractResolveTest : SolResolveTestBase() {
                 return 42;
             }
         }
-    """,
-      name = "parent.sol"
-    )
+    """, name = "parent.sol"
+        )
 
-    testResolveBetweenFiles(
-      InlineFile(
-        code = """
+        testResolveBetweenFiles(
+            InlineFile(
+                code = """
         pragma solidity ^0.8.0;
 
-        library Types {
+        contract Types {
                 //x
             uint256 public constant VALUE = 256;
         }
-    """,
-        name = "types.sol"
-      ),
-      InlineFile(
-        code = """
+    """, name = "types.sol"
+            ), InlineFile(
+                code = """
         pragma solidity ^0.8.0;
 
         import "./parent.sol";
@@ -169,9 +166,8 @@ class SolAliasContractResolveTest : SolResolveTestBase() {
                           //^
             }
         }
-    """,
-        name = "parent.sol"
-      )
-    )
-  }
+    """, name = "child.sol"
+            )
+        )
+    }
 }

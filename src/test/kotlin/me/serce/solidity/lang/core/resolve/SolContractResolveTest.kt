@@ -136,4 +136,30 @@ class SolContractResolveTest : SolResolveTestBase() {
        }
   """)
   )
+
+    fun testResolveContractWithInheritance() = testResolveBetweenFiles(
+        InlineFile(
+            code = """
+        pragma solidity ^0.8.0;
+
+        contract Parent {
+                //x
+            uint256 public constant VALUE = 256;
+        }
+    """, name = "parent.sol"
+        ), InlineFile(
+            code = """
+        pragma solidity ^0.8.0;
+
+        import "./parent.sol";
+        
+        contract Child is Parent {
+            function foo2() public pure returns (uint256) {
+                return Parent.VALUE;
+                          //^
+            }
+        }
+    """, name = "child.sol"
+        )
+    )
 }

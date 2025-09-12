@@ -163,7 +163,7 @@ class SolAliasVarResolveTest : SolResolveTestBase() {
 
         library Types {
             uint256 public constant VALUE = 256;
-                                    //^
+                                    //x
         }
     """,
         name = "types.sol"
@@ -181,7 +181,7 @@ class SolAliasVarResolveTest : SolResolveTestBase() {
             }
         }
     """,
-        name = "parent.sol"
+        name = "child.sol"
       )
     )
   }

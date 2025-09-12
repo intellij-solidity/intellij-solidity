@@ -248,4 +248,47 @@ class SolAliasFunctionResolveTest : SolResolveTestBase() {
       )
     )
   }
+
+    fun testResolveFunctionFromAliasWithInheritance() {
+        InlineFile(
+            code = """
+        pragma solidity ^0.8.0;
+    
+        import {Types as Constants} from "./types.sol";
+        
+        contract Parent {
+            function foo() public pure returns (uint256) {
+                return 42;
+            }
+        }
+    """, name = "parent.sol"
+        )
+
+        testResolveBetweenFiles(
+            InlineFile(
+                code = """
+            pragma solidity ^0.8.0;
+
+            library Types {
+                function doit() public {
+                        //x
+                }
+            }
+            """, name = "types.sol"
+            ), InlineFile(
+                code = """
+            pragma solidity ^0.8.0;
+
+            import "./parent.sol";
+            
+             contract Child is Parent {
+                function foo2() public {
+                    emit Constants.doit();
+                                   //^
+                }
+            }
+            """, name = "child.sol"
+            )
+        )
+    }
 }
