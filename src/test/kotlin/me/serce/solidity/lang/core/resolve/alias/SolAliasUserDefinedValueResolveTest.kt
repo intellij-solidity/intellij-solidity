@@ -90,4 +90,45 @@ class SolAliasUserDefinedValueResolveTest : SolResolveTestBase() {
   """
     )
   )
+
+    fun testResolveCustomTypeFromAliasWithInheritance() {
+        InlineFile(
+            code = """
+        pragma solidity ^0.8.0;
+    
+        import {Types as Constants} from "./types.sol";
+        
+        contract Parent {
+            function foo() public pure returns (uint256) {
+                return 42;
+            }
+        }
+    """, name = "parent.sol"
+        )
+
+        testResolveBetweenFiles(
+            InlineFile(
+                code = """
+            pragma solidity ^0.8.0;
+
+            interface Types {
+                type Decimal18 is uint256;
+                    //x
+            }
+            """, name = "types.sol"
+            ), InlineFile(
+                code = """
+            pragma solidity ^0.8.0;
+
+            import "./parent.sol";
+            
+             contract Child is Parent {
+                function foo2(Constants.Decimal18) public {
+                                            //^
+                }
+            }
+            """, name = "child.sol"
+            )
+        )
+    }
 }

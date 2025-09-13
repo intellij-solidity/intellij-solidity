@@ -303,4 +303,95 @@ class SolAliasStructResolveTest : SolResolveTestBase() {
       )
     )
   }
+
+    fun testResolveStructFromAliasWithInheritance() {
+        InlineFile(
+            code = """
+        pragma solidity ^0.8.0;
+    
+        import {Types as Constants} from "./types.sol";
+        
+        contract Parent {
+            function foo() public pure returns (uint256) {
+                return 42;
+            }
+        }
+    """, name = "parent.sol"
+        )
+
+        testResolveBetweenFiles(
+            InlineFile(
+                code = """
+            pragma solidity ^0.8.0;
+
+            interface Types {
+                struct structA {
+                     //x
+                    address x;
+                    uint256 y;
+                }
+            }
+            """, name = "types.sol"
+            ), InlineFile(
+                code = """
+            pragma solidity ^0.8.0;
+
+            import "./parent.sol";
+            
+            contract Child is Parent {
+                function foo2() public pure returns (Constants.structA memory) {
+                    return Constants.structA(address(0), 2);
+                                    //^
+                }
+            }
+            """, name = "child.sol"
+            )
+        )
+    }
+
+    fun testResolveStructMemberFromAliasWithInheritance() {
+        InlineFile(
+            code = """
+        pragma solidity ^0.8.0;
+    
+        import {Types as Constants} from "./types.sol";
+        
+        contract Parent {
+            function foo() public pure returns (uint256) {
+                return 42;
+            }
+        }
+    """, name = "parent.sol"
+        )
+
+        testResolveBetweenFiles(
+            InlineFile(
+                code = """
+            pragma solidity ^0.8.0;
+
+            interface Types {
+                struct structA {
+                    address x;
+                    uint256 y;
+                          //x
+                }
+            }
+            """, name = "types.sol"
+            ), InlineFile(
+                code = """
+            pragma solidity ^0.8.0;
+
+            import "./parent.sol";
+            
+            contract Child is Parent {
+                Constants.structA prop = Constants.structA(address(0), 1);
+                function foo2() public pure returns (uint256) {
+                    return prop.y;
+                              //^
+                }
+            }
+            """, name = "child.sol"
+            )
+        )
+    }
 }
