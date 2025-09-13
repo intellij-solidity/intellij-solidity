@@ -20,6 +20,9 @@ class SolUserDefinedTypeNameReference(element: SolUserDefinedTypeName) : SolRefe
     val parent = element.parent
     if (parent is SolNewExpressionElement) {
       return SolResolver.resolveNewExpression(parent)
+    } else if (parent is SolUsingForElement) {
+      val resolved = SolResolver.resolveUsingForElement(element)
+      if (resolved != null) return listOf(resolved)
     }
     return SolResolver.resolveTypeNameUsingImports(element)
   }

@@ -565,6 +565,17 @@ object SolResolver {
       .flatMap { resolveContractMembers(it) }
   }
 
+  fun resolveUsingForElement(element: SolUserDefinedTypeNameElement): SolCallableElement? {
+    val identifiers = element.findIdentifiers()
+    val lexicalFinding = lexicalDeclarations(identifiers.first()).filterIsInstance<SolCallableElement>()
+      .filter { element -> element.name == identifiers.first().text }.firstOrNull()
+    return if (identifiers.size > 1 && lexicalFinding is SolContractDefinition) {
+      lexicalFinding.functionDefinitionList.find { function -> function.name == identifiers[1].text }
+    } else {
+      lexicalFinding
+    }
+  }
+
   fun lexicalDeclarations(place: PsiElement, stop: (PsiElement) -> Boolean = { false }): Sequence<SolNamedElement> {
     val visitedScopes = hashSetOf<Pair<PsiElement, PsiElement>>()
     return lexicalDeclarations0(visitedScopes, place, stop)
