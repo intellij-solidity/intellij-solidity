@@ -307,11 +307,10 @@ object SolResolver {
       }
       when {
         names.size > 2 -> {
-          val indexNameWithoutAliases = names.indexOf(names.find { name ->
-            //TODO check if non empty to be able to call first
-            val resolved = resolveTypeNameUsingImports(name).first()
-            resolved !is SolImportAlias || !isAliasOfFile(resolved)
-          })
+            val indexNameWithoutAliases = names.indexOf(names.find { name ->
+                val resolved = resolveTypeNameUsingImports(name).firstOrNull()
+                resolved != null && (resolved !is SolImportAlias || !isAliasOfFile(resolved))
+            })
           if (names.size - indexNameWithoutAliases == 2) {
             resolveTypeNameUsingImports(names[indexNameWithoutAliases])
               .filterIsInstance<SolContractDefinition>()
