@@ -129,8 +129,6 @@ class SolStructResolveTest : SolResolveTestBase() {
     )
   )
 
-
-
   fun testResolveStructFromInterface() = testResolveBetweenFiles(
     InlineFile(
       code = """
@@ -160,4 +158,112 @@ class SolStructResolveTest : SolResolveTestBase() {
        }
   """)
   )
+
+    fun testResolveStructFromInterfaceInFunctionCall() = testResolveBetweenFiles(
+        InlineFile(
+            code = """
+         pragma solidity ^0.8.26;
+         
+         interface InterfaceTest {
+          struct Prop {
+                 //x
+              uint256 prop1;
+              uint256 prop2;
+          }
+         }
+    """,
+            name = "a.sol"
+        ),
+        InlineFile("""
+        pragma solidity ^0.8.26;
+        
+        import {InterfaceTest} from "./a.sol";
+
+        contract C {
+            function f(InterfaceTest.Prop memory a) public {
+                prop.prop1;
+            }
+            
+            function g() public {
+                f(InterfaceTest.Prop({
+                                //^
+                    prop1: 1,
+                    prop2: 2
+                }));
+            }
+       }
+  """)
+    )
+
+    fun testResolveInterfaceInStructFunctionCall() = testResolveBetweenFiles(
+        InlineFile(
+            code = """
+         pragma solidity ^0.8.26;
+         
+         interface InterfaceTest {
+                 //x
+          struct Prop {
+              uint256 prop1;
+              uint256 prop2;
+          }
+         }
+    """,
+            name = "a.sol"
+        ),
+        InlineFile("""
+        pragma solidity ^0.8.26;
+        
+        import {InterfaceTest} from "./a.sol";
+
+        contract C {
+            function f(InterfaceTest.Prop memory a) public {
+                prop.prop1;
+            }
+            
+            function g() public {
+                f(InterfaceTest.Prop({
+                        //^
+                    prop1: 1,
+                    prop2: 2
+                }));
+            }
+       }
+  """)
+    )
+
+    fun testResolveStructMemberFromInterfaceInFunctionCall() = testResolveBetweenFiles(
+        InlineFile(
+            code = """
+         pragma solidity ^0.8.26;
+         
+         interface InterfaceTest {
+          struct Prop {
+              uint256 prop1;
+                     //x
+              uint256 prop2;
+          }
+         }
+    """,
+            name = "a.sol"
+        ),
+        InlineFile("""
+        pragma solidity ^0.8.26;
+        
+        import {InterfaceTest} from "./a.sol";
+
+        contract C {
+            function f(InterfaceTest.Prop memory a) public {
+                prop.prop1;
+            }
+            
+            function g() public {
+                f(InterfaceTest.Prop({
+                    prop1: 1,
+                    //^
+                    prop2: 2
+                }));
+            }
+       }
+  """)
+    )
 }
