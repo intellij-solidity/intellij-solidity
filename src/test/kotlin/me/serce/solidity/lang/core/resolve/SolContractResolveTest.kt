@@ -162,4 +162,60 @@ class SolContractResolveTest : SolResolveTestBase() {
     """, name = "child.sol"
         )
     )
+
+    fun testResolveInheritedContractToOnlyOneReference() {
+        InlineFile(
+            code = """
+        pragma solidity ^0.8.10;
+
+        contract Ownable {
+            modifier onlyOwner() {
+                _;
+            }
+        }
+    """, name = "ownableOfLib.sol"
+        )
+        InlineFile(
+            code = """
+        pragma solidity ^0.8.10;
+
+        import "./ownableOfLib.sol" as ownableOfLib;
+        
+        library someLib {
+        
+        }
+    """, name = "someLib.sol"
+        )
+        testResolveBetweenFiles(
+            InlineFile(
+                code = """
+        pragma solidity ^0.8.10;
+
+        abstract contract Ownable {
+                           //x
+            modifier onlyOwner() {
+                _;
+            }
+        }
+    """, name = "ownable.sol"
+            ),
+            InlineFile(
+                code = """
+        pragma solidity ^0.8.10;
+  
+        import "./ownable.sol";
+        import "./someLib.sol";
+        
+        contract main is Ownable {
+                          //^
+            constructor(){
+            }
+        
+            function foo() public onlyOwner {
+            }
+        }
+      """, name = "main.sol"
+            )
+        )
+    }
 }
