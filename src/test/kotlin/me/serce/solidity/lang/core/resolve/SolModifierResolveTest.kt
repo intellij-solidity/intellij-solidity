@@ -43,7 +43,7 @@ class SolModifierResolveTest : SolResolveTestBase() {
                      //x
                 _;
             }
-            function doit() internal onlySeller constant {
+            function doit() internal onlySeller {
                                       //^
             }
         }

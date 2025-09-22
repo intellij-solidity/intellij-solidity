@@ -24,7 +24,11 @@ class SolUserDefinedTypeNameReference(element: SolUserDefinedTypeName) : SolRefe
       val resolved = SolResolver.resolveUsingForElement(element)
       if (resolved != null) return listOf(resolved)
     }
-    return SolResolver.resolveTypeNameUsingImports(element)
+//    else if (parent is SolInheritanceSpecifier) {
+      return SolResolver.resolveTypeNameUsingImports(element)
+//      return SolResolver.resolveTypeNameUsingImports(element)
+//    }
+//    return SolResolver.resolveTypeNameUsingImports(element)
   }
 
   override fun getVariants() = SolCompleter.completeTypeName(element)
@@ -71,7 +75,8 @@ class SolModifierReference(
   override fun multiResolve(): List<SolNamedElement> {
     val contract = modifierElement.findContract() ?: return emptyList()
     val superNames: List<String> = (contract.collectSupers.map { it.name } + contract.name).filterNotNull()
-    return SolResolver.resolveModifier(modifierElement)
+    return SolResolver.resolveTypeNameUsingImports(modifierElement)
+      .filterIsInstance<SolModifierDefinition>()
       .filter { it.contract.name in superNames }
   }
 
@@ -97,12 +102,13 @@ class SolMemberAccessReference(element: SolMemberAccessExpression) : SolReferenc
           .mapNotNull { it.resolveElement() }
 
         else -> {
-          SolResolver.resolveTypeNameUsingImports(element).toList().let { resolvedNames ->
-            return when (resolvedNames.isNotEmpty()) {
-              true -> resolvedNames
-              else -> SolResolver.resolveMemberAccessWithAliases(firstMemberElement, element)
-            }
-          }
+          SolResolver.resolveTypeNameUsingImports(element).toList()
+//          SolResolver.resolveTypeNameUsingImports(element).toList().let { resolvedNames ->
+//            return when (resolvedNames.isNotEmpty()) {
+//              true -> resolvedNames
+//              else -> SolResolver.resolveMemberAccessWithAliases(firstMemberElement, element)
+//            }
+//          }
         }
       }
     }
@@ -176,6 +182,7 @@ class SolFunctionCallReference(element: SolFunctionCallExpression) : SolReferenc
         regular + casts
       }
       is SolMemberAccessExpression -> {
+//        SolResolver.resolveTypeNameUsingImports(element).filterIsInstance<SolCallable>()
         resolveMemberFunctions(expr)
       }
       else ->
@@ -221,11 +228,14 @@ class SolFunctionCallReference(element: SolFunctionCallExpression) : SolReferenc
       val importPenultimateMember = SolResolver.collectImportDirective(importDirectiveAlias)
         .firstOrNull { it.importAlias != null && it.importAlias!!.text == expression.firstChild.lastChild.text }
       //if true, then it's a file level resolution like fileAlias.element
-      if (importDirectiveAlias.importAlias?.text == expression.firstChild.lastChild.text
-        || importPenultimateMember != null && SolResolver.isAliasOfFile(importPenultimateMember)
-      ) {
-        SolResolver.collectChildrenOfFile(importDirectiveAlias).filter { elem -> elem.getName() == name }
-      } else {
+      if (importDirectiveAlias.importAlias?.text == expression.firstChild.lastChild.text ) {
+        val fileToSearch = importDirectiveAlias.importPath?.reference?.resolve()?.containingFile ?: return emptyList()
+        SolResolver.collectChildrenOfFile(fileToSearch).filter { elem -> elem.getName() == name }
+      } else if ( importPenultimateMember != null && SolResolver.isAliasOfFile(importPenultimateMember)){
+        val fileToSearch = importPenultimateMember.importPath?.reference?.resolve()?.containingFile ?: return emptyList()
+        SolResolver.collectChildrenOfFile(fileToSearch).filter { elem -> elem.getName() == name }
+      }
+      else {
         //looking to resolve member of a contract
         //first need to find the contract name
         val contractToLook = when (expression.firstChild) {
@@ -235,7 +245,8 @@ class SolFunctionCallReference(element: SolFunctionCallExpression) : SolReferenc
         }
 
         //resolve member
-        SolResolver.collectContracts(importDirectiveAlias).filter { contract -> contract.name == contractToLook }.map {
+        val fileToSearch = importDirectiveAlias.importPath?.reference?.resolve()?.containingFile ?: return emptyList()
+        SolResolver.collectContracts(fileToSearch).filter { contract -> contract.name == contractToLook }.map {
           SolResolver.resolveContractMembers(it).filterIsInstance<SolCallable>()
             .filter { member -> member.getName() == name }
         }.flatten()
