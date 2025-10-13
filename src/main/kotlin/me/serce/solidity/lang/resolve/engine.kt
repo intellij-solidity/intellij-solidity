@@ -1,6 +1,8 @@
 package me.serce.solidity.lang.resolve
 
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.RecursionManager
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiNamedElement
@@ -56,22 +58,10 @@ object SolResolver {
             identifiedElements = setOf(findElementFromNames)
             file = foundIdentifier.second.file
           } else {
-            val filesOfScope = foundIdentifier.second.file.virtualFile
-            val scope: GlobalSearchScope? = if (filesOfScope != null) {
-              GlobalSearchScope.filesScope(
-                element.project, setOf(foundIdentifier.second.file.virtualFile)
-              )
-            } else {
-              null
-            }
-            val elements: Collection<SolNamedElement> = StubIndex.getElements(
-              SolNamedElementIndex.KEY,
-              elementFromAlias.nameOrText!!,
-              element.project,
-              scope,
-              SolNamedElement::class.java
-            )
-            identifiedElements = elements.toSet()
+            val filesOfScope = setOf(foundIdentifier.second.file.virtualFile)
+            val elements: Set<SolNamedElement> =
+              searchElementByStub(elementFromAlias.nameOrText!!, filesOfScope, element.project)
+            identifiedElements = elements
             file = foundIdentifier.second.file
           }
         }
@@ -102,18 +92,10 @@ object SolResolver {
             }
             val filesOfScope =
               setOfNotNull(file.virtualFile) + resolvedImportedFilesWithoutFileAliases.mapNotNull { it.file.virtualFile }
-            val scope: GlobalSearchScope? = if (filesOfScope.isNotEmpty()) {
-              GlobalSearchScope.filesScope(
-                element.project, filesOfScope
-              )
-            } else {
-              null
-            }
-            val elements: Collection<SolNamedElement> = StubIndex.getElements(
-              SolNamedElementIndex.KEY, currentIdentifierToFind, element.project, scope, SolNamedElement::class.java
-            )
+            val elements: Set<SolNamedElement> =
+              searchElementByStub(currentIdentifierToFind, filesOfScope, element.project)
             if (elements.isNotEmpty()) {
-              identifiedElements = elements.toSet()
+              identifiedElements = elements
               file = identifiedElements.first().containingFile
             } else if (currentIdentifierToFindIndex == elementIdentifiers.size - 1) {
               return emptySet()
@@ -125,6 +107,21 @@ object SolResolver {
     }
 
     return identifiedElements.filter { it !is SolFunctionDefinition }.toSet()
+  }
+
+  private fun searchElementByStub(
+    identifierToFind: String, filesOfScope: Set<VirtualFile>, project: Project
+  ): Set<SolNamedElement> {
+    val scope: GlobalSearchScope? = if (filesOfScope.isNotEmpty()) {
+      GlobalSearchScope.filesScope(
+        project, filesOfScope
+      )
+    } else {
+      null
+    }
+    return StubIndex.getElements(
+      SolNamedElementIndex.KEY, identifierToFind, project, scope, SolNamedElement::class.java
+    ).toSet()
   }
 
   data class ImportRecord(val file: PsiFile, val names: List<SolNamedElement>)
