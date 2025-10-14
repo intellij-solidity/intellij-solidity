@@ -23,101 +23,108 @@ import me.serce.solidity.wrap
 
 object SolResolver {
   fun resolveTypeNameUsingImports(element: PsiElement): Set<SolNamedElement> {
-    var file: PsiFile? = element.containingFile
+    val file: PsiFile = element.containingFile
     val elementIdentifiers: List<PsiElement> = run {
       when (element) {
-          is SolMemberAccessExpression -> {
-              getIdentifiersFromMemberAccessExpression(element)
-          }
-          is SolFunctionCallElement -> {
-              listOf(element.firstChild)
-          }
-          is SolUserDefinedTypeName -> {
-              element.findIdentifiers()
-          }
-          else -> {
-              listOf(element)
-          }
+        is SolMemberAccessExpression -> {
+          getIdentifiersFromMemberAccessExpression(element)
+        }
+
+        is SolFunctionCallElement -> {
+          listOf(element.firstChild)
+        }
+
+        is SolUserDefinedTypeName -> {
+          element.findIdentifiers()
+        }
+
+        else -> {
+          listOf(element)
+        }
       }
     }
 
-    var currentIdentifierToFindIndex = 0
+    val identifiedElements: Set<SolNamedElement> = resolveElementInFileAndImports(elementIdentifiers, file, emptySet())
+    return identifiedElements.filter { it !is SolFunctionDefinition }.toSet()
+  }
+
+  private fun resolveElementInFileAndImports(
+    elementIdentifiers: List<PsiElement>, file: PsiFile, previouslyIdentifiedElements: Set<SolNamedElement>
+  ): Set<SolNamedElement> {
+    val currentIdentifierToFind = elementIdentifiers.first()
+    val resolvedImportedFiles = collectImports(file)
+    val foundIdentifier: Pair<SolNamedElement, ImportRecord>? =
+      resolvedImportedFiles.firstNotNullOfOrNull { importRecord ->
+        importRecord.names.find {
+          it.name == currentIdentifierToFind.text
+        }?.let { namedElement -> namedElement to importRecord }
+      }
     var identifiedElements: Set<SolNamedElement> = emptySet()
+    var nextFile: PsiFile? = null
 
-    while (currentIdentifierToFindIndex < elementIdentifiers.size && file != null) {
-      val currentIdentifierToFind = elementIdentifiers[currentIdentifierToFindIndex]
-      val resolvedImportedFiles = collectImports(file)
-      val foundIdentifier: Pair<SolNamedElement, ImportRecord>? =
-        resolvedImportedFiles.firstNotNullOfOrNull { importRecord ->
-          importRecord.names.find {
-            it.name == currentIdentifierToFind.text
-          }?.let { namedElement -> namedElement to importRecord }
-        }
-
-      //the identifier is an import alias
-      if (foundIdentifier != null && foundIdentifier.first is SolImportAlias) {
-        //check if import alias of a file like import "xxx.sol" as X
-        if (isAliasOfFile(foundIdentifier.first as SolImportAlias)) {
-          identifiedElements = setOf(foundIdentifier.first)
-        } else {
-          //Alias of an element like import {A as B} from "xxx.sol"
-          //Need to find the name of the element first
-          val elementFromAlias = (foundIdentifier.first.parent as SolImportAliasedPair).userDefinedTypeName
-          val findElementFromNames = foundIdentifier.second.names.find { it.name == elementFromAlias.nameOrText }
-          if (findElementFromNames != null) {
-            identifiedElements = setOf(findElementFromNames)
-          } else {
-            val filesOfScope = setOf(foundIdentifier.second.file.virtualFile)
-            val elements: Set<SolNamedElement> =
-              searchElementByStub(elementFromAlias.nameOrText!!, filesOfScope, element.project)
-            identifiedElements = elements
-          }
-        }
-        file = foundIdentifier.second.file
+    //the identifier is an import alias
+    if (foundIdentifier != null && foundIdentifier.first is SolImportAlias) {
+      //check if import alias of a file like import "xxx.sol" as X
+      if (isAliasOfFile(foundIdentifier.first as SolImportAlias)) {
+        identifiedElements = setOf(foundIdentifier.first)
       } else {
-        var skip = false
-        if (foundIdentifier != null) {
-          val findElementFromNames = foundIdentifier.second.names.find { it.name == currentIdentifierToFind.text }
-          if (findElementFromNames != null) {
-            identifiedElements = setOf(findElementFromNames)
-            file = foundIdentifier.second.file
-            skip = true
-          }
+        //Alias of an element like import {A as B} from "xxx.sol"
+        //Need to find the name of the element first
+        val elementFromAlias = (foundIdentifier.first.parent as SolImportAliasedPair).userDefinedTypeName
+        val findElementFromNames = foundIdentifier.second.names.find { it.name == elementFromAlias.nameOrText }
+        if (findElementFromNames != null) {
+          identifiedElements = setOf(findElementFromNames)
+        } else {
+          val filesOfScope = setOf(foundIdentifier.second.file.virtualFile)
+          val elements: Set<SolNamedElement> =
+            searchElementByStub(elementFromAlias.nameOrText!!, filesOfScope, file.project)
+          identifiedElements = elements
         }
-        if (!skip) {
-          val resolvedFromPreviousIdentifiedElements = identifiedElements.filter { it !is SolImportAlias }.flatMap {
+      }
+      nextFile = foundIdentifier.second.file
+
+    } else {
+      var skip = false
+      if (foundIdentifier != null) {
+        val findElementFromNames = foundIdentifier.second.names.find { it.name == currentIdentifierToFind.text }
+        if (findElementFromNames != null) {
+          identifiedElements = setOf(findElementFromNames)
+          nextFile = foundIdentifier.second.file
+          skip = true
+        }
+      }
+      if (!skip) {
+        val resolvedFromPreviousIdentifiedElements =
+          previouslyIdentifiedElements.filter { it !is SolImportAlias }.flatMap {
             it.childrenOfType<SolNamedElement>()
           }.let {
             it.filter { childElement ->
               childElement.name == currentIdentifierToFind.text
             }
           }
-          if (resolvedFromPreviousIdentifiedElements.isNotEmpty()) {
-            identifiedElements = resolvedFromPreviousIdentifiedElements.toSet()
-            file = identifiedElements.first().containingFile
-          } else {
-            val resolvedImportedFilesWithoutFileAliases = resolvedImportedFiles.filter { importRecord ->
-              importRecord.names.none { it is SolImportAlias && isAliasOfFile(it) }
-            }
-            val filesOfScope =
-              setOfNotNull(file.virtualFile) + resolvedImportedFilesWithoutFileAliases.mapNotNull { it.file.virtualFile }
-            val elements: Set<SolNamedElement> =
-              searchElementByStub(currentIdentifierToFind.text, filesOfScope, element.project)
-            if (elements.isNotEmpty()) {
-              identifiedElements = elements
-              file = identifiedElements.first().containingFile
-            }
-            else if (currentIdentifierToFindIndex == elementIdentifiers.size - 1) {
-              identifiedElements = emptySet()
-              file = null
-            }
+        if (resolvedFromPreviousIdentifiedElements.isNotEmpty()) {
+          identifiedElements = resolvedFromPreviousIdentifiedElements.toSet()
+          nextFile = identifiedElements.first().containingFile
+        } else {
+          val resolvedImportedFilesWithoutFileAliases = resolvedImportedFiles.filter { importRecord ->
+            importRecord.names.none { it is SolImportAlias && isAliasOfFile(it) }
+          }
+          val filesOfScope =
+            setOfNotNull(file.virtualFile) + resolvedImportedFilesWithoutFileAliases.mapNotNull { it.file.virtualFile }
+          val elements: Set<SolNamedElement> =
+            searchElementByStub(currentIdentifierToFind.text, filesOfScope, file.project)
+          if (elements.isNotEmpty()) {
+            identifiedElements = elements
+            nextFile = identifiedElements.first().containingFile
           }
         }
       }
-      currentIdentifierToFindIndex++
     }
-
-    return identifiedElements.filter { it !is SolFunctionDefinition }.toSet()
+    return if (elementIdentifiers.size > 1 && identifiedElements.isNotEmpty() && nextFile != null) {
+      resolveElementInFileAndImports(elementIdentifiers.drop(1), nextFile, identifiedElements)
+    } else {
+      identifiedElements
+    }
   }
 
   private fun getIdentifiersFromMemberAccessExpression(element: SolMemberAccessExpression): List<PsiElement> {
