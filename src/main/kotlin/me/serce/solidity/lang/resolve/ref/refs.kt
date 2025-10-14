@@ -24,11 +24,7 @@ class SolUserDefinedTypeNameReference(element: SolUserDefinedTypeName) : SolRefe
       val resolved = SolResolver.resolveUsingForElement(element)
       if (resolved != null) return listOf(resolved)
     }
-//    else if (parent is SolInheritanceSpecifier) {
-      return SolResolver.resolveTypeNameUsingImports(element)
-//      return SolResolver.resolveTypeNameUsingImports(element)
-//    }
-//    return SolResolver.resolveTypeNameUsingImports(element)
+    return SolResolver.resolveTypeNameUsingImports(element)
   }
 
   override fun getVariants() = SolCompleter.completeTypeName(element)

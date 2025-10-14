@@ -23,7 +23,7 @@ import me.serce.solidity.wrap
 
 object SolResolver {
   fun resolveTypeNameUsingImports(element: PsiElement): Set<SolNamedElement> {
-    var file = element.containingFile
+    var file: PsiFile? = element.containingFile
     val elementIdentifiers = element.text.split('.')
     var currentIdentifierToFindIndex = 0
     var identifiedElements: Set<SolNamedElement> = emptySet()
@@ -93,8 +93,10 @@ object SolResolver {
             if (elements.isNotEmpty()) {
               identifiedElements = elements
               file = identifiedElements.first().containingFile
-            } else if (currentIdentifierToFindIndex == elementIdentifiers.size - 1) {
-              return emptySet()
+            }
+            else if (currentIdentifierToFindIndex == elementIdentifiers.size - 1) {
+              identifiedElements = emptySet()
+              file = null
             }
           }
         }
