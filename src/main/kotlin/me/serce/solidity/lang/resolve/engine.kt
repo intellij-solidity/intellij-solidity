@@ -24,20 +24,33 @@ import me.serce.solidity.wrap
 object SolResolver {
   fun resolveTypeNameUsingImports(element: PsiElement): Set<SolNamedElement> {
     var file: PsiFile? = element.containingFile
-    val elementIdentifiers = element.text.split('.')
+    val elementIdentifiers: List<PsiElement> = run {
+      when (element) {
+          is SolMemberAccessExpression -> {
+              getIdentifiersFromMemberAccessExpression(element)
+          }
+          is SolFunctionCallElement -> {
+              listOf(element.firstChild)
+          }
+          is SolUserDefinedTypeName -> {
+              element.findIdentifiers()
+          }
+          else -> {
+              listOf(element)
+          }
+      }
+    }
+
     var currentIdentifierToFindIndex = 0
     var identifiedElements: Set<SolNamedElement> = emptySet()
 
-    while (currentIdentifierToFindIndex < elementIdentifiers.size) {
-      var currentIdentifierToFind = elementIdentifiers[currentIdentifierToFindIndex]
-      if (currentIdentifierToFind.contains("(") && currentIdentifierToFind.contains(")")) {
-        currentIdentifierToFind = currentIdentifierToFind.substringBefore("(")
-      }
+    while (currentIdentifierToFindIndex < elementIdentifiers.size && file != null) {
+      val currentIdentifierToFind = elementIdentifiers[currentIdentifierToFindIndex]
       val resolvedImportedFiles = collectImports(file)
       val foundIdentifier: Pair<SolNamedElement, ImportRecord>? =
         resolvedImportedFiles.firstNotNullOfOrNull { importRecord ->
           importRecord.names.find {
-            it.name == currentIdentifierToFind
+            it.name == currentIdentifierToFind.text
           }?.let { namedElement -> namedElement to importRecord }
         }
 
@@ -64,7 +77,7 @@ object SolResolver {
       } else {
         var skip = false
         if (foundIdentifier != null) {
-          val findElementFromNames = foundIdentifier.second.names.find { it.name == currentIdentifierToFind }
+          val findElementFromNames = foundIdentifier.second.names.find { it.name == currentIdentifierToFind.text }
           if (findElementFromNames != null) {
             identifiedElements = setOf(findElementFromNames)
             file = foundIdentifier.second.file
@@ -76,7 +89,7 @@ object SolResolver {
             it.childrenOfType<SolNamedElement>()
           }.let {
             it.filter { childElement ->
-              childElement.name == currentIdentifierToFind
+              childElement.name == currentIdentifierToFind.text
             }
           }
           if (resolvedFromPreviousIdentifiedElements.isNotEmpty()) {
@@ -89,7 +102,7 @@ object SolResolver {
             val filesOfScope =
               setOfNotNull(file.virtualFile) + resolvedImportedFilesWithoutFileAliases.mapNotNull { it.file.virtualFile }
             val elements: Set<SolNamedElement> =
-              searchElementByStub(currentIdentifierToFind, filesOfScope, element.project)
+              searchElementByStub(currentIdentifierToFind.text, filesOfScope, element.project)
             if (elements.isNotEmpty()) {
               identifiedElements = elements
               file = identifiedElements.first().containingFile
@@ -105,6 +118,21 @@ object SolResolver {
     }
 
     return identifiedElements.filter { it !is SolFunctionDefinition }.toSet()
+  }
+
+  private fun getIdentifiersFromMemberAccessExpression(element: SolMemberAccessExpression): List<PsiElement> {
+    val identifiers = mutableListOf<PsiElement>()
+    var currentElement: PsiElement = element
+    do {
+      if (currentElement is SolMemberAccessExpression) {
+        identifiers.add(currentElement.identifier!!)
+      } else {
+        identifiers.add(currentElement)
+      }
+      currentElement = currentElement.firstChild
+    } while (currentElement is SolMemberAccessExpression || currentElement is SolPrimaryExpression)
+    //reversed because the identifier starts from the end of the expression
+    return identifiers.reversed()
   }
 
   private fun searchElementByStub(
