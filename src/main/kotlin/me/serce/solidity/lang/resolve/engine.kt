@@ -24,18 +24,16 @@ import me.serce.solidity.wrap
 object SolResolver {
   fun resolveTypeNameUsingImports(element: PsiElement): Set<SolNamedElement> {
     var file = element.containingFile
-
     val elementIdentifiers = element.text.split('.')
-
     var currentIdentifierToFindIndex = 0
     var identifiedElements: Set<SolNamedElement> = emptySet()
 
     while (currentIdentifierToFindIndex < elementIdentifiers.size) {
       var currentIdentifierToFind = elementIdentifiers[currentIdentifierToFindIndex]
-      val resolvedImportedFiles = collectImports(file)
       if (currentIdentifierToFind.contains("(") && currentIdentifierToFind.contains(")")) {
         currentIdentifierToFind = currentIdentifierToFind.substringBefore("(")
       }
+      val resolvedImportedFiles = collectImports(file)
       val foundIdentifier: Pair<SolNamedElement, ImportRecord>? =
         resolvedImportedFiles.firstNotNullOfOrNull { importRecord ->
           importRecord.names.find {
@@ -47,7 +45,6 @@ object SolResolver {
       if (foundIdentifier != null && foundIdentifier.first is SolImportAlias) {
         //check if import alias of a file like import "xxx.sol" as X
         if (isAliasOfFile(foundIdentifier.first as SolImportAlias)) {
-          file = foundIdentifier.second.file
           identifiedElements = setOf(foundIdentifier.first)
         } else {
           //Alias of an element like import {A as B} from "xxx.sol"
@@ -56,15 +53,14 @@ object SolResolver {
           val findElementFromNames = foundIdentifier.second.names.find { it.name == elementFromAlias.nameOrText }
           if (findElementFromNames != null) {
             identifiedElements = setOf(findElementFromNames)
-            file = foundIdentifier.second.file
           } else {
             val filesOfScope = setOf(foundIdentifier.second.file.virtualFile)
             val elements: Set<SolNamedElement> =
               searchElementByStub(elementFromAlias.nameOrText!!, filesOfScope, element.project)
             identifiedElements = elements
-            file = foundIdentifier.second.file
           }
         }
+        file = foundIdentifier.second.file
       } else {
         var skip = false
         if (foundIdentifier != null) {
