@@ -308,7 +308,6 @@ object SolResolver {
 
   //collect all SolContractDefinition recursively from imports
   fun collectContracts(file: PsiFile): Collection<SolContractDefinition> {
-//    val fileOfImport = import.importPath?.reference?.resolve()?.containingFile ?: return emptyList()
     return collectImports(file).flatMap { it.file.childrenOfType<SolContractDefinition>() }+ file.childrenOfType<SolContractDefinition>()
   }
 

@@ -99,12 +99,6 @@ class SolMemberAccessReference(element: SolMemberAccessExpression) : SolReferenc
 
         else -> {
           SolResolver.resolveTypeNameUsingImports(element).toList()
-//          SolResolver.resolveTypeNameUsingImports(element).toList().let { resolvedNames ->
-//            return when (resolvedNames.isNotEmpty()) {
-//              true -> resolvedNames
-//              else -> SolResolver.resolveMemberAccessWithAliases(firstMemberElement, element)
-//            }
-//          }
         }
       }
     }
@@ -178,7 +172,6 @@ class SolFunctionCallReference(element: SolFunctionCallExpression) : SolReferenc
         regular + casts
       }
       is SolMemberAccessExpression -> {
-//        SolResolver.resolveTypeNameUsingImports(element).filterIsInstance<SolCallable>()
         resolveMemberFunctions(expr)
       }
       else ->
