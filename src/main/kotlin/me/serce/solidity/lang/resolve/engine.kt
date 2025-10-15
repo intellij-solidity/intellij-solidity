@@ -24,29 +24,33 @@ import me.serce.solidity.wrap
 
 object SolResolver {
   fun resolveTypeNameUsingImports(element: PsiElement): Set<SolNamedElement> {
-    val file: PsiFile = element.containingFile
-    val elementIdentifiers: List<PsiElement> = run {
-      when (element) {
-        is SolMemberAccessExpression -> {
-          getIdentifiersFromMemberAccessExpression(element)
-        }
+    return CachedValuesManager.getCachedValue(element) {
+      val file: PsiFile = element.containingFile
+      val elementIdentifiers: List<PsiElement> = run {
+        when (element) {
+          is SolMemberAccessExpression -> {
+            getIdentifiersFromMemberAccessExpression(element)
+          }
 
-        is SolFunctionCallElement -> {
-          listOf(element.firstChild)
-        }
+          is SolFunctionCallElement -> {
+            listOf(element.firstChild)
+          }
 
-        is SolUserDefinedTypeName -> {
-          element.findIdentifiers()
-        }
+          is SolUserDefinedTypeName -> {
+            element.findIdentifiers()
+          }
 
-        else -> {
-          listOf(element)
+          else -> {
+            listOf(element)
+          }
         }
       }
-    }
 
-    val identifiedElements: Set<SolNamedElement> = resolveElementInFileAndImports(elementIdentifiers, file, emptySet())
-    return identifiedElements.filter { it !is SolFunctionDefinition }.toSet()
+      val identifiedElements: Set<SolNamedElement> =
+        resolveElementInFileAndImports(elementIdentifiers, file, emptySet())
+      val result = identifiedElements.filter { it !is SolFunctionDefinition }.toSet()
+      CachedValueProvider.Result.create(result, PsiModificationTracker.MODIFICATION_COUNT)
+    }
   }
 
     private fun resolveElementInFileAndImports(
