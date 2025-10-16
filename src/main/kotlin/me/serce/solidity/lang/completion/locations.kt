@@ -44,8 +44,10 @@ fun functionCallArguments(): ElementPattern<PsiElement> =
 fun mapExpression(): ElementPattern<PsiElement> =
   psiElement(SolidityTokenTypes.IDENTIFIER).inside(SolMapExpression::class.java)
 
-fun pathImportExpression(): ElementPattern<PsiElement> =
-  psiElement(SolidityTokenTypes.STRINGLITERAL).inside(SolImportPath::class.java)
+fun pathImportExpression(): ElementPattern<PsiElement> = StandardPatterns.or(
+  psiElement(SolidityTokenTypes.STRINGLITERAL).inside(SolImportPath::class.java),
+  psiElement(SolidityTokenTypes.STRINGLITERAL).afterLeaf(psiElement().withText("from"))
+  )
 
 fun insideContract(): ElementPattern<PsiElement> = psiElement()
   .inside(psiElement(SolPrimaryExpression::class.java))
