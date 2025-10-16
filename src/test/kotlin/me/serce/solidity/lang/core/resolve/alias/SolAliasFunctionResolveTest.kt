@@ -283,8 +283,8 @@ class SolAliasFunctionResolveTest : SolResolveTestBase() {
             
              contract Child is Parent {
                 function foo2() public {
-                    emit Constants.doit();
-                                   //^
+                    Constants.doit();
+                               //^
                 }
             }
             """, name = "child.sol"
