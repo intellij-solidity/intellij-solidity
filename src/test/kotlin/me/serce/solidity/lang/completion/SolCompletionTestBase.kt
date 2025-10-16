@@ -18,6 +18,14 @@ abstract class SolCompletionTestBase : SolTestBase() {
     }
   }
 
+  protected fun checkResultAfterCompletion(
+    @Language("Solidity") before: String, @Language("Solidity") expected: String
+  ) {
+    InlineFile(before).withCaret()
+    myFixture.completeBasic()
+    myFixture.checkResult(expected)
+  }
+
   val elementaryType = hashSetOf(
     "address ",
     "string ",
