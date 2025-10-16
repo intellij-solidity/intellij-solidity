@@ -17,7 +17,7 @@ class SolImportCompletionTest : SolCompletionTestBase() {
             code = """contract test {}""", name = "test.sol"
         )
         checkCompletion(
-            hashSetOf("./test.sol"), """
+            hashSetOf("\"./test.sol\""), """
         import {test} from "./te/*caret*/"
   """
         )
