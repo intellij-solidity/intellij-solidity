@@ -6,9 +6,7 @@ class SolImportCompletionTest : SolCompletionTestBase() {
             code = """contract test {}""", name = "test.sol"
         )
         checkCompletion(
-            hashSetOf("./test.sol"), """
-        import {test} from "./te/*caret*/
-  """
+            hashSetOf("./test.sol"), """import "./te/*caret*/"""
         )
     }
 
@@ -17,9 +15,43 @@ class SolImportCompletionTest : SolCompletionTestBase() {
             code = """contract test {}""", name = "test.sol"
         )
         checkCompletion(
-            hashSetOf("\"./test.sol\""), """
-        import {test} from "./te/*caret*/"
-  """
+            hashSetOf("./test.sol"), """import "./te/*caret*/""""
+        )
+    }
+
+    fun testImportCompletionWithEndQuoteAndSemicolon() {
+        InlineFile(
+            code = """contract test {}""", name = "test.sol"
+        )
+        checkCompletion(
+            hashSetOf("./test.sol"), """import "./te/*caret*/";"""
+        )
+    }
+
+    fun testImportCompletionWithImportAliasPair() {
+        InlineFile(
+            code = """contract test {}""", name = "test.sol"
+        )
+        checkCompletion(
+            hashSetOf("./test.sol"), """import {test} from "./te/*caret*/"""
+        )
+    }
+
+    fun testImportCompletionWithImportAliasPairAndEndQuote() {
+        InlineFile(
+            code = """contract test {}""", name = "test.sol"
+        )
+        checkCompletion(
+            hashSetOf("./test.sol"), """import {test} from "./te/*caret*/""""
+        )
+    }
+
+    fun testImportCompletionWithImportAliasPairAndEndQuoteAndSemicolon() {
+        InlineFile(
+            code = """contract test {}""", name = "test.sol"
+        )
+        checkCompletion(
+            hashSetOf("./test.sol"), """import {test} from "./te/*caret*/";"""
         )
     }
 
@@ -29,17 +61,57 @@ class SolImportCompletionTest : SolCompletionTestBase() {
         )
 
         checkResultAfterCompletion(
-            """import {test} from "./te/*caret*/ """, """import {test} from "./test.sol";"""
+            """import "./te/*caret*/""", """import "./test.sol""""
         )
     }
 
-    fun testImportCompletionAfterCompletionWithEndQuote() {
+    fun testImportCompletionWithEndQuoteAfterCompletion() {
         InlineFile(
             code = """contract test {}""", name = "test.sol"
         )
 
         checkResultAfterCompletion(
-            """import {test} from "./te/*caret*/" """, """import {test} from "./test.sol";"""
+            """import "./te/*caret*/"""", """import "./test.sol""""
+        )
+    }
+
+    fun testImportCompletionWithEndQuoteAndSemicolonAfterCompletion() {
+        InlineFile(
+            code = """contract test {}""", name = "test.sol"
+        )
+
+        checkResultAfterCompletion(
+            """import "./te/*caret*/";""", """import "./test.sol";"""
+        )
+    }
+
+    fun testImportCompletionWithImportAliasPairAfterCompletion() {
+        InlineFile(
+            code = """contract test {}""", name = "test.sol"
+        )
+
+        checkResultAfterCompletion(
+            """import {test} from "./te/*caret*/ """, """import {test} from "./test.sol";"""
+        )
+    }
+
+    fun testImportCompletionWithImportAliasPairAfterCompletionWithEndQuote() {
+        InlineFile(
+            code = """contract test {}""", name = "test.sol"
+        )
+
+        checkResultAfterCompletion(
+            """import {test} from "./te/*caret*/" """, """import {test} from "./test.sol""""
+        )
+    }
+
+    fun testImportCompletionWithImportAliasPairAfterCompletionWithEndQuoteAndSemicolon() {
+        InlineFile(
+            code = """contract test {}""", name = "test.sol"
+        )
+
+        checkResultAfterCompletion(
+            """import {test} from "./te/*caret*/"; """, """import {test} from "./test.sol";"""
         )
     }
 }

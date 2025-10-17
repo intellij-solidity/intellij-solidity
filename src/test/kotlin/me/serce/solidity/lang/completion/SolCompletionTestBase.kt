@@ -23,6 +23,9 @@ abstract class SolCompletionTestBase : SolTestBase() {
   ) {
     InlineFile(before).withCaret()
     myFixture.completeBasic()
+    if (myFixture.lookupElements != null && myFixture.lookupElements!!.size == 1) {
+      myFixture.type('\n')
+    }
     myFixture.checkResult(expected)
   }
 
