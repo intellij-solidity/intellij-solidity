@@ -106,33 +106,53 @@ class SolContextCompletionContributor : CompletionContributor(), DumbAware {
     extend(CompletionType.BASIC, pathImportExpression(),
           object : CompletionProvider<CompletionParameters>() {
             override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext, result: CompletionResultSet) {
-              val text = parameters.originalPosition?.text?.removeQuotes() ?: return
+              val fullText = parameters.originalPosition?.text ?: return
+              val text = fullText.removeQuotes()
               val matcher = CamelHumpMatcher(text)
               val project = parameters.position.project
-              val humpFiles = StubIndex.getInstance().getAllKeys(SolGotoClassIndex.KEY, project)
-              .filter { matcher.prefixMatches(it) }
-              .flatMap { StubIndex.getInstance().getContainingFilesIterator(SolGotoClassIndex.KEY, it, project, GlobalSearchScope.projectScope(project)).asSequence() }
-
+              val humpFiles =
+                StubIndex.getInstance().getAllKeys(SolGotoClassIndex.KEY, project).filter { matcher.prefixMatches(it) }
+                  .flatMap {
+                    StubIndex.getInstance().getContainingFilesIterator(
+                      SolGotoClassIndex.KEY, it, project, GlobalSearchScope.projectScope(project)
+                    ).asSequence()
+                  }
 
               val isDir = File(text).isDirectory || text.endsWith("/")
               var dirText = if (isDir) text
-              else text.lastIndexOf("/").takeIf { it >= 0 }?.let { text.substring(0, it) } ?: text
+              else text.lastIndexOf("/").takeIf { it >= 0 }?.let { text.take(it) } ?: text
               if (!dirText.endsWith("/")) dirText += "/"
               val curFile = parameters.originalFile.virtualFile
               val vPath = SolImportPathReference.findImportFile(curFile, dirText)
-              val elements = (vPath?.children ?: emptyArray())
-                .filter { it.isDirectory || it.extension == SolidityFileType.defaultExtension }
-                .map { LookupElementBuilder.create("\"$dirText${it.name}\"").withIcon(SolidityIcons.FILE_ICON) } +
-               humpFiles
-                 .map {
-                   val rel = if (it.path.contains("node_modules/")) it.path.substringAfter("node_modules/")
-                   else (VfsUtil.findRelativePath(curFile.parent, it, '/')?.let { if (!it.startsWith(".")) "./$it" else it } ?: it.path)
-                   LookupElementBuilder.create("\"$rel").withLookupString("\"${it.name}").withIcon(SolidityIcons.FILE_ICON)
-                 }
+              val elements = (vPath?.children
+                ?: emptyArray()).filter { it.isDirectory || it.extension == SolidityFileType.defaultExtension }.map {
+                LookupElementBuilder.create(it.name).withIcon(SolidityIcons.FILE_ICON)
+                  .withInsertHandler(::handleInsertImportPath)
+              } + humpFiles.map {
+                val rel = if (it.path.contains("node_modules/")) it.path.substringAfter("node_modules/")
+                else (VfsUtil.findRelativePath(curFile.parent, it, '/')
+                  ?.let { if (!it.startsWith(".")) "./$it" else it } ?: it.path)
+                LookupElementBuilder.create("\"$rel").withLookupString("\"${it.name}").withIcon(SolidityIcons.FILE_ICON)
+              }
               result.addAllElements(elements)
             }
           }
         )
+  }
+
+  private fun handleInsertImportPath(context: InsertionContext, item: LookupElement) {
+    val doc = context.document
+    val text = doc.charsSequence
+    val end = context.tailOffset
+    val file = context.file
+    val currentStringLiteral = file.findElementAt(context.startOffset)
+
+    if (currentStringLiteral != null) {
+      val hasQuoteAfter = end < text.length && text[end] == '"'
+      if (!hasQuoteAfter) {
+        doc.insertString(context.tailOffset, "\"")
+      }
+    }
   }
 
   private fun mappingExpression() = ObjectPattern.Capture(object : InitialPatternCondition<SolMapExpression>(SolMapExpression::class.java) {

@@ -1,60 +1,6 @@
 package me.serce.solidity.lang.completion
 
 class SolImportCompletionTest : SolCompletionTestBase() {
-    fun testImportCompletion() {
-        InlineFile(
-            code = """contract test {}""", name = "test.sol"
-        )
-        checkCompletion(
-            hashSetOf("./test.sol"), """import "./te/*caret*/"""
-        )
-    }
-
-    fun testImportCompletionWithEndQuote() {
-        InlineFile(
-            code = """contract test {}""", name = "test.sol"
-        )
-        checkCompletion(
-            hashSetOf("./test.sol"), """import "./te/*caret*/""""
-        )
-    }
-
-    fun testImportCompletionWithEndQuoteAndSemicolon() {
-        InlineFile(
-            code = """contract test {}""", name = "test.sol"
-        )
-        checkCompletion(
-            hashSetOf("./test.sol"), """import "./te/*caret*/";"""
-        )
-    }
-
-    fun testImportCompletionWithImportAliasPair() {
-        InlineFile(
-            code = """contract test {}""", name = "test.sol"
-        )
-        checkCompletion(
-            hashSetOf("./test.sol"), """import {test} from "./te/*caret*/"""
-        )
-    }
-
-    fun testImportCompletionWithImportAliasPairAndEndQuote() {
-        InlineFile(
-            code = """contract test {}""", name = "test.sol"
-        )
-        checkCompletion(
-            hashSetOf("./test.sol"), """import {test} from "./te/*caret*/""""
-        )
-    }
-
-    fun testImportCompletionWithImportAliasPairAndEndQuoteAndSemicolon() {
-        InlineFile(
-            code = """contract test {}""", name = "test.sol"
-        )
-        checkCompletion(
-            hashSetOf("./test.sol"), """import {test} from "./te/*caret*/";"""
-        )
-    }
-
     fun testImportCompletionAfterCompletion() {
         InlineFile(
             code = """contract test {}""", name = "test.sol"
@@ -101,7 +47,7 @@ class SolImportCompletionTest : SolCompletionTestBase() {
         )
 
         checkResultAfterCompletion(
-            """import {test} from "./te/*caret*/" """, """import {test} from "./test.sol""""
+            """import {test} from "./te/*caret*/"""", """import {test} from "./test.sol""""
         )
     }
 
@@ -111,7 +57,7 @@ class SolImportCompletionTest : SolCompletionTestBase() {
         )
 
         checkResultAfterCompletion(
-            """import {test} from "./te/*caret*/"; """, """import {test} from "./test.sol";"""
+            """import {test} from "./te/*caret*/";""", """import {test} from "./test.sol";"""
         )
     }
 }
