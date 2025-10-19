@@ -495,41 +495,6 @@ object SolResolver {
     }
   }
 
-  fun resolveMemberAccessWithAliases(
-    element: PsiElement,
-    elementToFind: SolMemberAccessExpression
-  ): List<SolNamedElement> {
-    return resolveTypeNameUsingImports(element).let { result ->
-      if (result.isEmpty()) {
-        emptyList()
-      } else if (result.any { it !is SolImportAlias }) {
-        resolveMemberAccessWithChildElement(result, elementToFind)
-      } else if (element.parent is SolMemberAccessExpression) {
-        resolveMemberAccessWithAliases(element.parent, elementToFind)
-      } else {
-        emptyList()
-      }
-    }
-  }
-
-  private fun resolveMemberAccessWithChildElement(
-    elements: Set<SolNamedElement>,
-    elementToFind: SolMemberAccessExpression
-  ): List<SolNamedElement> {
-    val childrenElements = elements.filter { it !is SolImportAlias }.flatMap {
-      it.childrenOfType<SolNamedElement>()
-    }.toSet()
-    if (childrenElements.isEmpty()) {
-      return emptyList()
-    }
-    val childrenElementsFiltered = childrenElements.filter { childElement ->
-      childElement.name == elementToFind.identifier!!.text
-    }
-    return childrenElementsFiltered.ifEmpty {
-      resolveMemberAccessWithChildElement(childrenElements, elementToFind)
-    }
-  }
-
   fun resolveContractMembers(contract: SolContractDefinition, skipThis: Boolean = false): List<SolMember> {
     val members = if (!skipThis)
       contract.stateVariableDeclarationList as List<SolMember> + contract.functionDefinitionList +
