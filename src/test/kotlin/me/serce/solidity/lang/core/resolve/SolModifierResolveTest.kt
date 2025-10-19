@@ -135,6 +135,41 @@ class SolModifierResolveTest : SolResolveTestBase() {
         )
     }
 
+    fun testResolveBaseModifierImportedWithAlias() = testResolveBetweenFiles(
+        InlineFile(
+            code = """
+        pragma solidity ^0.8.20;
+
+        abstract contract AccessControl {
+            modifier onlyRole(bytes32 role) {
+                     //x
+                _;
+            }
+        }
+      """, name = "AccessControl.sol"
+        ),
+
+        InlineFile(
+            code = """
+        pragma solidity ^0.8.20;
+
+        import {AccessControl} from "./AccessControl.sol";
+
+        abstract contract AccessControlDefaultAdminRules is AccessControl {
+            bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
+
+            function beginDefaultAdminTransfer(address newAdmin)
+                public
+                onlyRole(DEFAULT_ADMIN_ROLE)
+                //^
+            {
+                newAdmin;
+            }
+        }
+      """, name = "AccessControlDefaultAdminRules.sol"
+        )
+    )
+
   override fun checkByCode(@Language("Solidity") code: String) {
     super.checkByCodeInternal<SolModifierInvocation, SolNamedElement>(code)
   }
