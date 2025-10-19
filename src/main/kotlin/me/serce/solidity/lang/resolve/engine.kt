@@ -71,7 +71,7 @@ object SolResolver {
     ): Pair<Set<SolNamedElement>, PsiFile?> {
         val imports = collectImports(currentFile)
         val foundInImport = imports.firstNotNullOfOrNull { importRecord ->
-            importRecord.names.find { it.name == identifier.text }?.let { it to importRecord }
+            importRecord.names.find { it.name == identifier.text.substringBefore('(') }?.let { it to importRecord }
         }
 
         return when {
@@ -118,7 +118,7 @@ object SolResolver {
     ): Pair<Set<SolNamedElement>, PsiFile?> {
         val resolvedFromPrevious =
             previousElements.filterNot { it is SolImportAlias }.flatMap { it.childrenOfType<SolNamedElement>() }
-                .filter { it.name == identifier.text }
+                .filter { it.name == identifier.text.substringBefore('(') }
 
         if (resolvedFromPrevious.isNotEmpty()) {
             val elements = resolvedFromPrevious.toSet()
@@ -131,7 +131,7 @@ object SolResolver {
         }
         val filesOfScope =
             setOfNotNull(currentFile.virtualFile) + importsWithoutFileAliases.mapNotNull { it.file.virtualFile }
-        val elements = searchElementByStub(identifier.text, filesOfScope, currentFile.project)
+        val elements = searchElementByStub(identifier.text.substringBefore('('), filesOfScope, currentFile.project)
 
         return if (elements.isNotEmpty()) {
             elements to elements.first().containingFile
