@@ -2,6 +2,6 @@
 
 remappings = [
     "forge-std/=lib/forge-std/src/",
-    "@solmate/=lib/solmate/src/",
-    "@openzeppelin/=lib/openzeppelin-contracts/contracts/",
+    "@solmate/=lib/solmate/src",
+    "@openzeppelin=lib/openzeppelin-contracts/contracts/",
 ]
