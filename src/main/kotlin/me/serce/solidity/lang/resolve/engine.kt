@@ -12,7 +12,6 @@ import com.intellij.psi.util.*
 import com.intellij.util.Processors
 import me.serce.solidity.lang.core.SolidityFile
 import me.serce.solidity.lang.psi.*
-import me.serce.solidity.lang.psi.SolImportAlias
 import me.serce.solidity.lang.psi.impl.SolNewExpressionElement
 import me.serce.solidity.lang.psi.parentOfType
 import me.serce.solidity.lang.resolve.ref.SolFunctionCallReference
@@ -26,23 +25,21 @@ object SolResolver {
   fun resolveTypeNameUsingImports(element: PsiElement): Set<SolNamedElement> {
     return CachedValuesManager.getCachedValue(element) {
       val file: PsiFile = element.containingFile
-      val elementIdentifiers: List<PsiElement> = run {
-        when (element) {
-          is SolMemberAccessExpression -> {
-            getIdentifiersFromMemberAccessExpression(element)
-          }
+      val elementIdentifiers: List<PsiElement> = when (element) {
+        is SolMemberAccessExpression -> {
+          getIdentifiersFromMemberAccessExpression(element)
+        }
 
-          is SolFunctionCallElement -> {
-            listOf(element.firstChild)
-          }
+        is SolFunctionCallElement -> {
+          listOf(element.firstChild)
+        }
 
-          is SolUserDefinedTypeName -> {
-            element.findIdentifiers()
-          }
+        is SolUserDefinedTypeName -> {
+          element.findIdentifiers()
+        }
 
-          else -> {
-            listOf(element)
-          }
+        else -> {
+          listOf(element)
         }
       }
 
