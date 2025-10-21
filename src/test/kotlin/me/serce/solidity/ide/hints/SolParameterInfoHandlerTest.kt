@@ -152,7 +152,8 @@ class SolParameterInfoHandlerTest : SolTestBase() {
         }
     """, "string a, int256 b, address c", 0)
 
-  fun testMultipleParameterWithMissingValue() = checkByText("""
+  fun testMultipleParameterWithMissingValue() = checkByText(
+    """
         contract A {
             function a(
                 uint256 x,
@@ -164,9 +165,11 @@ class SolParameterInfoHandlerTest : SolTestBase() {
                 a(12, /*caret*/);
             }
         }
-    """, "uint256 x, uint256 x, uint256 z", 1)
+    """, "uint256 x, uint256 x, uint256 z", 1
+  )
 
-  fun testMultipleParameterWithMissingValue2() = checkByText("""
+  fun testMultipleParameterWithMissingValue2() = checkByText(
+    """
         contract A {
             function a(
                 uint256 x,
@@ -178,7 +181,24 @@ class SolParameterInfoHandlerTest : SolTestBase() {
                 a(12/*caret*/);
             }
         }
-    """, "uint256 x, uint256 x, uint256 z", 0)
+    """, "uint256 x, uint256 x, uint256 z", 0
+  )
+
+  fun testMultipleParameterWithMissingValue3() = checkByText(
+    """
+        contract A {
+            function a(
+                uint256 x,
+                uint256 y,
+                uint256 z
+            ) public {}
+
+            function b() public {
+                a(12, 10,/*caret*/)
+            }
+        }
+    """, "uint256 x, uint256 x, uint256 z", 2
+  )
 
   private fun checkByText(@Language("Solidity") code: String, hint: String, index: Int) {
     checkByText(code, listOf(hint), index)
