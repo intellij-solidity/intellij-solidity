@@ -152,6 +152,34 @@ class SolParameterInfoHandlerTest : SolTestBase() {
         }
     """, "string a, int256 b, address c", 0)
 
+  fun testMultipleParameterWithMissingValue() = checkByText("""
+        contract A {
+            function a(
+                uint256 x,
+                uint256 y,
+                uint256 z
+            ) public {}
+
+            function b() public {
+                a(12, /*caret*/);
+            }
+        }
+    """, "uint256 x, uint256 x, uint256 z", 1)
+
+  fun testMultipleParameterWithMissingValue2() = checkByText("""
+        contract A {
+            function a(
+                uint256 x,
+                uint256 y,
+                uint256 z
+            ) public {}
+
+            function b() public {
+                a(12/*caret*/);
+            }
+        }
+    """, "uint256 x, uint256 x, uint256 z", 0)
+
   private fun checkByText(@Language("Solidity") code: String, hint: String, index: Int) {
     checkByText(code, listOf(hint), index)
   }
