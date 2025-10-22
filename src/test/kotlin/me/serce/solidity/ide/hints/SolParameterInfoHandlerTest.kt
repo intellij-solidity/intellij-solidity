@@ -165,7 +165,7 @@ class SolParameterInfoHandlerTest : SolTestBase() {
                 a(12, /*caret*/);
             }
         }
-    """, "uint256 x, uint256 x, uint256 z", 1
+    """, "uint256 x, uint256 y, uint256 z", 1
   )
 
   fun testMultipleParameterWithMissingValue2() = checkByText(
@@ -181,7 +181,7 @@ class SolParameterInfoHandlerTest : SolTestBase() {
                 a(12/*caret*/);
             }
         }
-    """, "uint256 x, uint256 x, uint256 z", 0
+    """, "uint256 x, uint256 y, uint256 z", 0
   )
 
   fun testMultipleParameterWithMissingValue3() = checkByText(
@@ -197,7 +197,7 @@ class SolParameterInfoHandlerTest : SolTestBase() {
                 a(12, 10,/*caret*/)
             }
         }
-    """, "uint256 x, uint256 x, uint256 z", 2
+    """, "uint256 x, uint256 y, uint256 z", 2
   )
 
   private fun checkByText(@Language("Solidity") code: String, hint: String, index: Int) {
