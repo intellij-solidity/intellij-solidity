@@ -772,3 +772,7 @@ fun SolCallable.canBeApplied(arguments: SolFunctionCallArguments): Boolean {
       })
   }
 }
+
+fun SolCallable.canBeApplied(arguments: List<PsiElement>): Boolean{
+  return true
+}
