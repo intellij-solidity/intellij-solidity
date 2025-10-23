@@ -17,13 +17,13 @@ class GoToImplementationTest : SolTestBase() {
   fun testFindImplementations() = testImplementations("""
       contract A/*caret*/ { }
       contract B is A { }
-  """, setOf("B"), "ctr.sol")
+  """, setOf("B ../../../../../../../src/ctr.sol"), "ctr.sol")
 
   fun testFindMultipleImplementations() = testImplementations("""
       contract A/*caret*/ { }
       contract B is A { }
       contract C is B { }
-  """, setOf("B", "C"), "ctr.sol")
+  """, setOf("B ../../../../../../../src/ctr.sol", "C ../../../../../../../src/ctr.sol"), "ctr.sol")
 
   fun testImportContract() {
     InlineFile(
@@ -39,7 +39,7 @@ class GoToImplementationTest : SolTestBase() {
       """
         contract Ctr/*caret*/ {
         }
-      """.trimIndent(), setOf("Ctr1"), "ctr.sol")
+      """.trimIndent(), setOf("Ctr1 ../../../../../../../src/base1.sol"), "ctr.sol")
   }
 
   fun testImportContractAs() {
@@ -56,7 +56,7 @@ class GoToImplementationTest : SolTestBase() {
       """
         contract Ctr/*caret*/ {
         }
-      """.trimIndent(), setOf("Ctr1"), "ctr2.sol")
+      """.trimIndent(), setOf("Ctr1 ../../../../../../../src/base1.sol"), "ctr2.sol")
   }
 
 
