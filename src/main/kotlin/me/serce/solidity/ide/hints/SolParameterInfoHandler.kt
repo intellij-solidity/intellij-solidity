@@ -33,7 +33,16 @@ class SolParameterInfoHandler : AbstractParameterInfoHandler<PsiElement, SolArgu
         if (!lParenFound && currentElement.text == LPAREN.toString()) {
           lParenFound = true
         } else if (lParenFound && currentElement.text != null && currentElement.text.isNotBlank()) {
-          return currentElement
+          return if (currentElement is SolEmitStatement) {
+            val primaryExpression = currentElement.childrenOfType<SolPrimaryExpression>()
+            if (primaryExpression.isNotEmpty()) {
+              primaryExpression.first()
+            } else {
+              currentElement
+            }
+          } else {
+            currentElement
+          }
         }
       }
     }
@@ -64,7 +73,7 @@ class SolParameterInfoHandler : AbstractParameterInfoHandler<PsiElement, SolArgu
     } else {
       var indexArgument = -1
       var currentOffset = parameterOwner.startOffset
-      var currentElement = parameterOwner
+      var currentElement = parameterOwner.parent as? SolEmitStatement ?: parameterOwner
       while (currentOffset < context.offset) {
         if (indexArgument == -1 && currentElement.text == LPAREN.toString()) {
           indexArgument = 0
@@ -127,12 +136,7 @@ class SolArgumentsDescription(
         }
       } else {
         val currentArguments: List<PsiElement> = getArgumentsFromPsiElement(call)
-        val elementToFind = if (call is SolEmitStatement) {
-          call.childrenOfType<SolPrimaryExpression>().first()
-        } else {
-          call
-        }
-        SolResolver.lexicalDeclarations(call).filter { it.name == elementToFind.text }.filterIsInstance<SolCallable>()
+        SolResolver.lexicalDeclarations(call).filter { it.name == call.text }.filterIsInstance<SolCallable>()
           .map { def ->
             val parameters =
               def.parseParameters().map { "${it.second}${it.first?.let { name -> " $name" } ?: ""}" }.toTypedArray()
