@@ -10,6 +10,7 @@ import com.intellij.psi.util.childrenOfType
 import com.intellij.psi.util.endOffset
 import me.serce.solidity.lang.core.SolidityTokenTypes.*
 import me.serce.solidity.lang.psi.SolCallable
+import me.serce.solidity.lang.psi.SolFunctionCallArguments
 import me.serce.solidity.lang.psi.SolFunctionCallExpression
 import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.resolve.canBeApplied
@@ -100,7 +101,11 @@ class SolArgumentsDescription(
   val arguments: Array<String>
 ) {
 
-  val valid = callable.canBeApplied(callArguments)
+    val valid = if (callArguments.isNotEmpty() && callArguments.first().parent is SolFunctionCallArguments) {
+        callable.canBeApplied(callArguments.first().parent as SolFunctionCallArguments)
+    } else {
+        false
+    }
   val presentText = if (arguments.isEmpty()) "<no parameters>" else arguments.joinToString(", ")
 
   fun getArgumentRange(index: Int): TextRange {
