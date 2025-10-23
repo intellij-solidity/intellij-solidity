@@ -33,7 +33,7 @@ class SolParameterInfoHandler : AbstractParameterInfoHandler<PsiElement, SolArgu
         if (!lParenFound && currentElement.text == LPAREN.toString()) {
           lParenFound = true
         } else if (lParenFound && currentElement.text != null && currentElement.text.isNotBlank()) {
-          return if (currentElement is SolEmitStatement) {
+          return if (currentElement is SolEmitStatement || currentElement is SolRevertStatement) {
             val primaryExpression = currentElement.childrenOfType<SolPrimaryExpression>()
             if (primaryExpression.isNotEmpty()) {
               primaryExpression.first()
@@ -73,7 +73,12 @@ class SolParameterInfoHandler : AbstractParameterInfoHandler<PsiElement, SolArgu
     } else {
       var indexArgument = -1
       var currentOffset = parameterOwner.startOffset
-      var currentElement = parameterOwner.parent as? SolEmitStatement ?: parameterOwner
+      var currentElement =
+        if (parameterOwner.parent is SolEmitStatement || parameterOwner.parent is SolRevertStatement) {
+          parameterOwner.parent
+        } else {
+          parameterOwner
+        }
       while (currentOffset < context.offset) {
         if (indexArgument == -1 && currentElement.text == LPAREN.toString()) {
           indexArgument = 0
