@@ -9,9 +9,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.util.childrenOfType
 import com.intellij.psi.util.endOffset
 import me.serce.solidity.lang.core.SolidityTokenTypes.*
-import me.serce.solidity.lang.psi.SolCallable
-import me.serce.solidity.lang.psi.SolFunctionCallArguments
-import me.serce.solidity.lang.psi.SolFunctionCallExpression
+import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.resolve.canBeApplied
 import me.serce.solidity.lang.resolve.ref.SolFunctionCallReference
@@ -129,7 +127,12 @@ class SolArgumentsDescription(
         }
       } else {
         val currentArguments: List<PsiElement> = getArgumentsFromPsiElement(call)
-        SolResolver.lexicalDeclarations(call).filter { it.name == call.text }.filterIsInstance<SolCallable>()
+        val elementToFind = if (call is SolEmitStatement) {
+          call.childrenOfType<SolPrimaryExpression>().first()
+        } else {
+          call
+        }
+        SolResolver.lexicalDeclarations(call).filter { it.name == elementToFind.text }.filterIsInstance<SolCallable>()
           .map { def ->
             val parameters =
               def.parseParameters().map { "${it.second}${it.first?.let { name -> " $name" } ?: ""}" }.toTypedArray()
