@@ -21,6 +21,37 @@ class SolParameterInfoHandlerTest : SolTestBase() {
         }
     """, "uint256 value, string s", 0)
 
+  fun testEventWithoutSemicolon() = checkByText("""
+        contract A {
+            event SomeEvent(uint value, string s);
+        
+            function main() {
+                emit SomeEvent(/*caret*/)
+            }
+        }
+    """, "uint256 value, string s", 0)
+
+  fun testEvent2ndParam() = checkByText("""
+        contract A {
+            event SomeEvent(uint value, string s);
+        
+            function main() {
+                emit SomeEvent(10,/*caret*/);
+            }
+        }
+    """, "uint256 value, string s", 1)
+
+  fun testEvent2ndParamWithoutSemicolon() = checkByText("""
+        contract A {
+            event SomeEvent(uint value, string s);
+        
+            function main() {
+                emit SomeEvent(10,/*caret*/)
+            }
+        }
+    """, "uint256 value, string s", 1)
+
+
   fun testError() = checkByText("""
         contract A {
             error AnError(uint value, string s);
@@ -31,6 +62,36 @@ class SolParameterInfoHandlerTest : SolTestBase() {
         }
     """, "uint256 value, string s", 0)
 
+  fun testErrorWithoutSemicolon() = checkByText("""
+        contract A {
+            error AnError(uint value, string s);
+        
+            function main() {
+                revert AnError(/*caret*/)
+            }
+        }
+    """, "uint256 value, string s", 0)
+
+  fun testError2ndParam() = checkByText("""
+        contract A {
+            error AnError(uint value, string s);
+        
+            function main() {
+                revert AnError(10,/*caret*/);
+            }
+        }
+    """, "uint256 value, string s", 1)
+
+  fun testError2ndParamWithoutSemicolon() = checkByText("""
+        contract A {
+            error AnError(uint value, string s);
+        
+            function main() {
+                revert AnError(10,/*caret*/)
+            }
+        }
+    """, "uint256 value, string s", 1)
+
   fun testStruct() = checkByText("""
       contract B {
           struct Prop {
@@ -38,9 +99,42 @@ class SolParameterInfoHandlerTest : SolTestBase() {
               uint prop2;
           }
 
-          Prop prop = Prop(0/*caret*/, 1);
+          Prop prop = Prop(0/*caret*/);
       }
     """, "uint256 prop1, uint256 prop2", 0)
+
+  fun testStructWithoutSemicolon() = checkByText("""
+      contract B {
+          struct Prop {
+              uint prop1;
+              uint prop2;
+          }
+
+          Prop prop = Prop(/*caret*/)
+      }
+    """, "uint256 prop1, uint256 prop2", 0)
+
+  fun testStruct2ndParam() = checkByText("""
+      contract B {
+          struct Prop {
+              uint prop1;
+              uint prop2;
+          }
+
+          Prop prop = Prop(0, /*caret*/);
+      }
+    """, "uint256 prop1, uint256 prop2", 1)
+
+  fun testStruct2ndParamWithoutSemicolon() = checkByText("""
+      contract B {
+          struct Prop {
+              uint prop1;
+              uint prop2;
+          }
+
+          Prop prop = Prop(0, /*caret*/)
+      }
+    """, "uint256 prop1, uint256 prop2", 1)
 
   fun testEmptyParameters() = checkByText("""
         contract A {
@@ -57,7 +151,17 @@ class SolParameterInfoHandlerTest : SolTestBase() {
             function foo(uint256 a) {}
 
             function main() {
-                foo(1/*caret*/);
+                foo(/*caret*/);
+            }
+        }
+    """, "uint256 a", 0)
+
+  fun testIntWithoutSemicolon() = checkByText("""
+        contract A {
+            function foo(uint256 a) {}
+
+            function main() {
+                foo(/*caret*/)
             }
         }
     """, "uint256 a", 0)
@@ -69,30 +173,42 @@ class SolParameterInfoHandlerTest : SolTestBase() {
             function foo(string a) {}
 
             function main() {
-                foo(1/*caret*/);
+                foo(/*caret*/);
             }
         }
     """, listOf("uint256 a", "string a"), 0)
 
-  fun testSomeWithOverriden() = checkByText("""
+  fun testSomeWithOverridden() = checkByText("""
         contract Base {
             function foo(uint256 a) {} 
         }
     
-        contract A is Base {
-            function foo(uint256 a) {}
-            
+        contract A is Base {            
             function foo(string a) {}
 
             function main() {
-                foo(1/*caret*/);
+                foo(/*caret*/);
+            }
+        }
+    """, listOf("uint256 a", "string a"), 0)
+
+  fun testSomeWithOverriddenWithoutSemicolon() = checkByText("""
+        contract Base {
+            function foo(uint256 a) {} 
+        }
+    
+        contract A is Base {            
+            function foo(string a) {}
+
+            function main() {
+                foo(/*caret*/)
             }
         }
     """, listOf("uint256 a", "string a"), 0)
 
   fun testLibrary() = checkByText("""
         library Lib {
-            function bar(uint _self, uint _param) {}
+            function bar(uint _self, uint256 _param, uint256 _param2) {}
         }
 
         contract A {
@@ -102,7 +218,21 @@ class SolParameterInfoHandlerTest : SolTestBase() {
                 foo.bar(342/*caret*/);
             }
         }
-    """, "uint256 _param", 0)
+    """, "uint256 _param, uint256 _param2", 0)
+
+  fun testLibrary2ndParam() = checkByText("""
+        library Lib {
+            function bar(uint _self, uint256 _param, uint256 _param2) {}
+        }
+
+        contract A {
+            using Lib for uint;
+
+            function main(uint foo) {
+                foo.bar(342, /*caret*/);
+            }
+        }
+    """, "uint256 _param, uint256 _param2", 1)
 
   fun testOtherContract() = checkByText("""
         contract Test {
@@ -113,10 +243,66 @@ class SolParameterInfoHandlerTest : SolTestBase() {
             Test test;
 
             function main() {
-                test.foo(1/*caret*/);
+                test.foo(/*caret*/);
             }
         }
     """, "uint256 a", 0)
+
+  fun testOtherContractMultiParameters2ndParam() = checkByText("""
+        contract Test {
+            function foo(uint256 a,uint256 b) {}
+        }
+
+        contract A {
+            Test test;
+
+            function main() {
+                test.foo(1,/*caret*/);
+            }
+        }
+    """, "uint256 a, uint256 b", 1)
+
+  fun testOtherContractWithoutSemicolon() = checkByText("""
+        contract Test {
+            function foo(uint256 a) {}
+        }
+
+        contract A {
+            Test test;
+
+            function main() {
+                test.foo(/*caret*/)
+            }
+        }
+    """, "uint256 a", 0)
+
+  fun testOtherContractMultiParametersWithoutSemicolon() = checkByText("""
+        contract Test {
+            function foo(uint256 a,uint256 b) {}
+        }
+
+        contract A {
+            Test test;
+
+            function main() {
+                test.foo(/*caret*/)
+            }
+        }
+    """, "uint256 a, uint256 b", 0)
+
+  fun testOtherContractMultiParametersWithoutSemicolon2ndParam() = checkByText("""
+        contract Test {
+            function foo(uint256 a,uint256 b) {}
+        }
+
+        contract A {
+            Test test;
+
+            function main() {
+                test.foo(1,/*caret*/)
+            }
+        }
+    """, "uint256 a, uint256 b", 1)
 
   fun testLibraryEmpty() = checkByText("""
         library Lib {
