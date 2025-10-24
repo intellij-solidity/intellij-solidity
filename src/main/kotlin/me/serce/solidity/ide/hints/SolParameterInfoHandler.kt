@@ -155,6 +155,12 @@ class SolArgumentsDescription(
                 def.parseParameters().map { "${it.second}${it.first?.let { name -> " $name" } ?: ""}" }.toTypedArray()
               SolArgumentsDescription(def, currentArguments, parameters)
             }.toList()
+        } else if (call is SolMemberAccessExpression) {
+          SolResolver.resolveMemberFunctions(call).map { def ->
+            val parameters =
+              def.parseParameters().map { "${it.second}${it.first?.let { name -> " $name" } ?: ""}" }.toTypedArray()
+            SolArgumentsDescription(def, currentArguments, parameters)
+          }
         } else {
           SolResolver.lexicalDeclarations(call).filter { it.name == call.text }.filterIsInstance<SolCallable>()
             .map { def ->

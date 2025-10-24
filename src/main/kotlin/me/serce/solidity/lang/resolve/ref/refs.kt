@@ -176,7 +176,7 @@ class SolFunctionCallReference(element: SolFunctionCallExpression) : SolReferenc
         regular + casts
       }
       is SolMemberAccessExpression -> {
-        resolveMemberFunctions(expr)
+        SolResolver.resolveMemberFunctions(expr)
       }
       else ->
         emptyList()
@@ -208,45 +208,6 @@ class SolFunctionCallReference(element: SolFunctionCallExpression) : SolReferenc
         }
       }
       .wrap()
-  }
-
-  private fun resolveMemberFunctions(expression: SolMemberAccessExpression): Collection<SolCallable> {
-    val name = expression.identifier?.text
-
-    val importDirectiveAlias = expression.childOfType<SolPrimaryExpression>()
-      .let { it?.varLiteral?.let { varLiteral -> SolResolver.resolveAlias(varLiteral) } }
-
-    return if (importDirectiveAlias != null && name != null) {
-      //need to check if the penultimate member is an alias of file or a contract to know how to resolve the last member
-      val importPenultimateMember = SolResolver.collectImportDirective(importDirectiveAlias)
-        .firstOrNull { it.importAlias != null && it.importAlias!!.text == expression.firstChild.lastChild.text }
-      //if true, then it's a file level resolution like fileAlias.element
-      if (importDirectiveAlias.importAlias?.text == expression.firstChild.lastChild.text
-        || importPenultimateMember != null && SolResolver.isAliasOfFile(importPenultimateMember)
-      ) {
-        SolResolver.collectChildrenOfFile(importDirectiveAlias).filter { elem -> elem.getName() == name }
-      } else {
-        //looking to resolve member of a contract
-        //first need to find the contract name
-        val contractToLook = when (expression.firstChild) {
-          is SolMemberAccessExpression -> expression.firstChild.lastChild.text
-          is SolFunctionCallExpression -> expression.childOfType<SolMemberAccessExpression>()?.lastChild?.text
-          else -> null
-        }
-
-        //resolve member
-        SolResolver.collectContracts(importDirectiveAlias).filter { contract -> contract.name == contractToLook }.map {
-          SolResolver.resolveContractMembers(it).filterIsInstance<SolCallable>()
-            .filter { member -> member.getName() == name }
-        }.flatten()
-      }
-    } else if (name != null) {
-      expression.getMembers()
-        .filterIsInstance<SolCallable>()
-        .filter { it.getName() == name }
-    } else {
-      emptyList()
-    }
   }
 
   override fun multiResolve(): Collection<PsiElement> {

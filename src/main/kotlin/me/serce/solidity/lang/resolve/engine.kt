@@ -497,6 +497,45 @@ object SolResolver {
     return element
   }
 
+  fun resolveMemberFunctions(expression: SolMemberAccessExpression): Collection<SolCallable> {
+    val name = expression.identifier?.text
+
+    val importDirectiveAlias = expression.childOfType<SolPrimaryExpression>()
+      .let { it?.varLiteral?.let { varLiteral -> resolveAlias(varLiteral) } }
+
+    return if (importDirectiveAlias != null && name != null) {
+      //need to check if the penultimate member is an alias of file or a contract to know how to resolve the last member
+      val importPenultimateMember = collectImportDirective(importDirectiveAlias)
+        .firstOrNull { it.importAlias != null && it.importAlias!!.text == expression.firstChild.lastChild.text }
+      //if true, then it's a file level resolution like fileAlias.element
+      if (importDirectiveAlias.importAlias?.text == expression.firstChild.lastChild.text
+        || importPenultimateMember != null && isAliasOfFile(importPenultimateMember)
+      ) {
+        collectChildrenOfFile(importDirectiveAlias).filter { elem -> elem.getName() == name }
+      } else {
+        //looking to resolve member of a contract
+        //first need to find the contract name
+        val contractToLook = when (expression.firstChild) {
+          is SolMemberAccessExpression -> expression.firstChild.lastChild.text
+          is SolFunctionCallExpression -> expression.childOfType<SolMemberAccessExpression>()?.lastChild?.text
+          else -> null
+        }
+
+        //resolve member
+        collectContracts(importDirectiveAlias).filter { contract -> contract.name == contractToLook }.map {
+          resolveContractMembers(it).filterIsInstance<SolCallable>()
+            .filter { member -> member.getName() == name }
+        }.flatten()
+      }
+    } else if (name != null) {
+      expression.getMembers()
+        .filterIsInstance<SolCallable>()
+        .filter { it.getName() == name }
+    } else {
+      emptyList()
+    }
+  }
+
   fun resolveMemberAccess(element: SolMemberAccessExpression): List<SolMember> {
     if (element.parent is SolFunctionCallExpression) {
       val functionCall = element.findParentOrNull<SolFunctionCallElement>()!!
