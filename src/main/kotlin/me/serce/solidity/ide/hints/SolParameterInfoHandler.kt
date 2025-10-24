@@ -21,6 +21,11 @@ class SolParameterInfoHandler : AbstractParameterInfoHandler<PsiElement, SolArgu
     val functionCallParent = element.findParentOrNull<SolFunctionCallExpression>()
     if (functionCallParent != null) {
       return functionCallParent
+    } else if (element.parent.prevSibling is SolAssignmentExpression) {
+      val primaryExpressionChildren = element.parent.prevSibling.childrenOfType<SolPrimaryExpression>()
+      if (primaryExpressionChildren.isNotEmpty()) {
+        return primaryExpressionChildren.last()
+      }
     } else {
       var currentElement = if (element.prevSibling == null) {
         element.parent
@@ -66,9 +71,11 @@ class SolParameterInfoHandler : AbstractParameterInfoHandler<PsiElement, SolArgu
       -1
     } else if (parameterOwner is SolFunctionCallExpression) {
       ParameterInfoUtils.getCurrentParameterIndex(
-        parameterOwner.functionCallArguments.node,
-        context.offset,
-        COMMA
+        parameterOwner.functionCallArguments.node, context.offset, COMMA
+      )
+    } else if (parameterOwner.parent.nextSibling is SolSeqExpression) {
+      ParameterInfoUtils.getCurrentParameterIndex(
+        parameterOwner.parent.nextSibling.node, context.offset, COMMA
       )
     } else {
       var indexArgument = -1
@@ -141,25 +148,38 @@ class SolArgumentsDescription(
         }
       } else {
         val currentArguments: List<PsiElement> = getArgumentsFromPsiElement(call)
-        SolResolver.lexicalDeclarations(call).filter { it.name == call.text }.filterIsInstance<SolCallable>()
-          .map { def ->
-            val parameters =
-              def.parseParameters().map { "${it.second}${it.first?.let { name -> " $name" } ?: ""}" }.toTypedArray()
-            SolArgumentsDescription(def, currentArguments, parameters)
-          }.toList()
+        if (call.parent is SolAssignmentExpression) {
+          SolResolver.resolveTypeNameUsingImports(call).filter { it.name == call.text }
+            .filterIsInstance<SolStructDefinition>().map { def ->
+              val parameters =
+                def.parseParameters().map { "${it.second}${it.first?.let { name -> " $name" } ?: ""}" }.toTypedArray()
+              SolArgumentsDescription(def, currentArguments, parameters)
+            }.toList()
+        } else {
+          SolResolver.lexicalDeclarations(call).filter { it.name == call.text }.filterIsInstance<SolCallable>()
+            .map { def ->
+              val parameters =
+                def.parseParameters().map { "${it.second}${it.first?.let { name -> " $name" } ?: ""}" }.toTypedArray()
+              SolArgumentsDescription(def, currentArguments, parameters)
+            }.toList()
+        }
       }
     }
 
     fun getArgumentsFromPsiElement(element: PsiElement): List<PsiElement> {
       val arguments = mutableListOf<PsiElement>()
-      var currentElement: PsiElement? = element.nextSibling
-      while (currentElement != null && currentElement.text != RPAREN.toString()) {
-        if (currentElement.text != LPAREN.toString() && currentElement.text != COMMA.toString() && currentElement.text.isNotBlank()) {
-          arguments.add(currentElement)
+      if (element.parent.nextSibling != null && element.parent.nextSibling is SolSeqExpression) {
+        return (element.parent.nextSibling as SolSeqExpression).expressionList
+      } else {
+        var currentElement: PsiElement? = element.nextSibling
+        while (currentElement != null && currentElement.text != RPAREN.toString()) {
+          if (currentElement.text != LPAREN.toString() && currentElement.text != COMMA.toString() && currentElement.text.isNotBlank()) {
+            arguments.add(currentElement)
+          }
+          currentElement = currentElement.nextSibling
         }
-        currentElement = currentElement.nextSibling
+        return arguments
       }
-      return arguments
     }
   }
 }
