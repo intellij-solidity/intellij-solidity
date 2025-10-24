@@ -234,6 +234,20 @@ class SolParameterInfoHandlerTest : SolTestBase() {
         }
     """, "uint256 _param, uint256 _param2", 1)
 
+  fun testLibrary2ndParamWithoutSemicolon() = checkByText("""
+        library Lib {
+            function bar(uint _self, uint256 _param, uint256 _param2) {}
+        }
+
+        contract A {
+            using Lib for uint;
+
+            function main(uint foo) {
+                foo.bar(342, /*caret*/)
+            }
+        }
+    """, "uint256 _param, uint256 _param2", 1)
+
   fun testOtherContract() = checkByText("""
         contract Test {
             function foo(uint256 a) {}
