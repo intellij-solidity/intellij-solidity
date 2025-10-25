@@ -1,5 +1,7 @@
 package me.serce.solidity.lang.core.resolve
 
+import com.intellij.psi.PsiElement
+
 class SolStructResolveTest : SolResolveTestBase() {
   fun testStructResolve() = checkByCode("""
       contract B {
@@ -231,7 +233,7 @@ class SolStructResolveTest : SolResolveTestBase() {
   """)
     )
 
-    fun testResolveStructMemberFromInterfaceInFunctionCall() = testResolveBetweenFiles(
+    fun testResolveStructMemberFromInterfaceInFunctionCall() = checkTestResolvePsiElementBetweenFiles(
         InlineFile(
             code = """
          pragma solidity ^0.8.26;
@@ -243,14 +245,11 @@ class SolStructResolveTest : SolResolveTestBase() {
               uint256 prop2;
           }
          }
-    """,
-            name = "a.sol"
-        ),
-        InlineFile("""
+    """, name = "a.sol"
+        ), InlineFile(
+            """
         pragma solidity ^0.8.26;
         
-        import {InterfaceTest} from "./a.sol";
-
         contract C {
             function f(InterfaceTest.Prop memory a) public {
                 prop.prop1;
@@ -264,6 +263,18 @@ class SolStructResolveTest : SolResolveTestBase() {
                 }));
             }
        }
-  """)
+    """
+        )
     )
+
+    fun checkTestResolvePsiElementBetweenFiles(file1: InlineFile, file2: InlineFile) {
+        myFixture.openFileInEditor(file2.psiFile.virtualFile)
+        val (refElement, _) = findElementAndDataInEditor<PsiElement>("^")
+        val resolved = checkNotNull(refElement.reference?.resolve()) {
+            "failed to resolve ${refElement.text}"
+        }
+        myFixture.openFileInEditor(file1.psiFile.virtualFile)
+        val (resElement, _) = findElementAndDataInEditor<PsiElement>("x")
+        assertEquals(resElement, resolved)
+    }
 }
