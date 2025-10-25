@@ -485,13 +485,16 @@ object SolResolver {
 
     return if (importDirectiveAlias != null && name != null) {
       //need to check if the penultimate member is an alias of file or a contract to know how to resolve the last member
-      val importPenultimateMember = collectImportDirective(importDirectiveAlias)
-        .firstOrNull { it.importAlias != null && it.importAlias!!.text == expression.firstChild.lastChild.text }
+      val importPenultimateMember =
+        collectImportDirective(importDirectiveAlias).firstOrNull { it.importAlias != null && it.importAlias!!.text == expression.firstChild.lastChild.text }
       //if true, then it's a file level resolution like fileAlias.element
-      if (importDirectiveAlias.importAlias?.text == expression.firstChild.lastChild.text
-        || importPenultimateMember != null && isAliasOfFile(importPenultimateMember)
-      ) {
-        collectChildrenOfFile(importDirectiveAlias).filter { elem -> elem.getName() == name }
+      if (importDirectiveAlias.importAlias?.text == expression.firstChild.lastChild.text) {
+        val fileToSearch = importDirectiveAlias.importPath?.reference?.resolve()?.containingFile ?: return emptyList()
+        collectChildrenOfFile(fileToSearch).filter { elem -> elem.getName() == name }
+      } else if (importPenultimateMember != null && isAliasOfFile(importPenultimateMember)) {
+        val fileToSearch =
+          importPenultimateMember.importPath?.reference?.resolve()?.containingFile ?: return emptyList()
+        collectChildrenOfFile(fileToSearch).filter { elem -> elem.getName() == name }
       } else {
         //looking to resolve member of a contract
         //first need to find the contract name
@@ -502,15 +505,13 @@ object SolResolver {
         }
 
         //resolve member
-        collectContracts(importDirectiveAlias).filter { contract -> contract.name == contractToLook }.map {
-          resolveContractMembers(it).filterIsInstance<SolCallable>()
-            .filter { member -> member.getName() == name }
+        val fileToSearch = importDirectiveAlias.importPath?.reference?.resolve()?.containingFile ?: return emptyList()
+        collectContracts(fileToSearch).filter { contract -> contract.name == contractToLook }.map {
+          resolveContractMembers(it).filterIsInstance<SolCallable>().filter { member -> member.getName() == name }
         }.flatten()
       }
     } else if (name != null) {
-      expression.getMembers()
-        .filterIsInstance<SolCallable>()
-        .filter { it.getName() == name }
+      expression.getMembers().filterIsInstance<SolCallable>().filter { it.getName() == name }
     } else {
       emptyList()
     }
