@@ -43,7 +43,7 @@ class SolModifierResolveTest : SolResolveTestBase() {
                      //x
                 _;
             }
-            function doit() internal onlySeller constant {
+            function doit() internal onlySeller {
                                       //^
             }
         }
@@ -78,6 +78,97 @@ class SolModifierResolveTest : SolResolveTestBase() {
             }
         }
   """)
+
+    fun testResolveModifierToOnlyOneReference() {
+        InlineFile(
+            code = """
+        pragma solidity ^0.8.10;
+
+        contract Ownable {
+            modifier onlyOwner() {
+                _;
+            }
+        }
+    """, name = "ownableOfLib.sol"
+        )
+        InlineFile(
+            code = """
+        pragma solidity ^0.8.10;
+
+        import "./ownableOfLib.sol" as ownableOfLib;
+        
+        library someLib {
+        
+        }
+    """, name = "someLib.sol"
+        )
+        testResolveBetweenFiles(
+            InlineFile(
+                code = """
+        pragma solidity ^0.8.10;
+
+        abstract contract Ownable {
+            modifier onlyOwner() {
+                        //x
+                _;
+            }
+        }
+    """, name = "ownable.sol"
+            ),
+            InlineFile(
+                code = """
+        pragma solidity ^0.8.10;
+  
+        import "./ownable.sol";
+        import "./someLib.sol";
+        
+        contract main is Ownable {
+            constructor(){
+            }
+        
+            function foo() public onlyOwner {
+                                  //^
+            }
+        }
+      """, name = "main.sol"
+            )
+        )
+    }
+
+    fun testResolveBaseModifierImportedWithAlias() = testResolveBetweenFiles(
+        InlineFile(
+            code = """
+        pragma solidity ^0.8.20;
+
+        abstract contract AccessControl {
+            modifier onlyRole(bytes32 role) {
+                     //x
+                _;
+            }
+        }
+      """, name = "AccessControl.sol"
+        ),
+
+        InlineFile(
+            code = """
+        pragma solidity ^0.8.20;
+
+        import {AccessControl} from "./AccessControl.sol";
+
+        abstract contract AccessControlDefaultAdminRules is AccessControl {
+            bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
+
+            function beginDefaultAdminTransfer(address newAdmin)
+                public
+                onlyRole(DEFAULT_ADMIN_ROLE)
+                //^
+            {
+                newAdmin;
+            }
+        }
+      """, name = "AccessControlDefaultAdminRules.sol"
+        )
+    )
 
   override fun checkByCode(@Language("Solidity") code: String) {
     super.checkByCodeInternal<SolModifierInvocation, SolNamedElement>(code)
