@@ -162,12 +162,19 @@ class SolArgumentsDescription(
             SolArgumentsDescription(def, currentArguments, parameters)
           }
         } else {
-          SolResolver.lexicalDeclarations(call).filter { it.name == call.text }.filterIsInstance<SolCallable>()
-            .map { def ->
-              val parameters =
-                def.parseParameters().map { "${it.second}${it.first?.let { name -> " $name" } ?: ""}" }.toTypedArray()
-              SolArgumentsDescription(def, currentArguments, parameters)
-            }.toList()
+          var elementsFromSearch =
+            SolResolver.lexicalDeclarations(call).filter { it.name == call.text }.filterIsInstance<SolCallable>()
+              .toList()
+          if (elementsFromSearch.isEmpty()) {
+            elementsFromSearch =
+              SolResolver.resolveTypeNameUsingImportsWithFunctions(call).filter { it.name == call.text }
+                .filterIsInstance<SolCallable>().toList()
+          }
+          elementsFromSearch.map { def ->
+            val parameters =
+              def.parseParameters().map { "${it.second}${it.first?.let { name -> " $name" } ?: ""}" }.toTypedArray()
+            SolArgumentsDescription(def, currentArguments, parameters)
+          }.toList()
         }
       }
     }

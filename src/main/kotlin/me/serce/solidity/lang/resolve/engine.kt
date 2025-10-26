@@ -23,6 +23,10 @@ import me.serce.solidity.wrap
 
 object SolResolver {
   fun resolveTypeNameUsingImports(element: PsiElement): Set<SolNamedElement> {
+    return resolveTypeNameUsingImportsWithFunctions(element).filter { it !is SolFunctionDefinition }.toSet()
+  }
+
+  fun resolveTypeNameUsingImportsWithFunctions(element: PsiElement): Set<SolNamedElement> {
     return CachedValuesManager.getCachedValue(element) {
       val file: PsiFile = element.containingFile
       val elementIdentifiers: List<PsiElement> = when (element) {
@@ -45,8 +49,7 @@ object SolResolver {
 
       val identifiedElements: Set<SolNamedElement> =
         resolveElementInFileAndImports(elementIdentifiers, file, emptySet())
-      val result = identifiedElements.filter { it !is SolFunctionDefinition }.toSet()
-      CachedValueProvider.Result.create(result, PsiModificationTracker.MODIFICATION_COUNT)
+      CachedValueProvider.Result.create(identifiedElements, PsiModificationTracker.MODIFICATION_COUNT)
     }
   }
 
