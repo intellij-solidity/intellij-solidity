@@ -462,7 +462,7 @@ class SolParameterInfoHandlerTest : SolTestBase() {
             Test.ContractTest test = new Test.ContractTest();
         
             function main() public  {
-                test.foo(1,10/*caret*/);
+                test.foo(1,/*caret*/);
             }
         }
     """, "uint256 a, uint256 b", 1
@@ -487,7 +487,7 @@ class SolParameterInfoHandlerTest : SolTestBase() {
             Test.ContractTest test = new Test.ContractTest();
         
             function main() public  {
-                test.foo(1,10/*caret*/)
+                test.foo(1,/*caret*/)
             }
         }
     """, "uint256 a, uint256 b", 1
