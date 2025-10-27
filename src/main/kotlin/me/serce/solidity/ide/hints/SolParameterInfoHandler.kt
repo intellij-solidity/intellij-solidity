@@ -171,8 +171,15 @@ class SolArgumentsDescription(
                 .filterIsInstance<SolCallable>().toList()
           }
           elementsFromSearch.map { def ->
-            val parameters =
+            var parameters =
               def.parseParameters().map { "${it.second}${it.first?.let { name -> " $name" } ?: ""}" }.toTypedArray()
+            if (call.prevSibling is PsiElement && call.prevSibling.text == ".") {
+              val functionCallMemberElement = SolResolver.lexicalDeclarations(call.prevSibling.prevSibling).toList()
+                .firstOrNull { it.name == call.prevSibling.prevSibling.text }
+              if (functionCallMemberElement != null && (functionCallMemberElement is SolElementaryTypeName || (functionCallMemberElement.firstChild != null && functionCallMemberElement.firstChild is SolElementaryTypeName))) {
+                parameters = parameters.drop(1).toTypedArray()
+              }
+            }
             SolArgumentsDescription(def, currentArguments, parameters)
           }.toList()
         }
