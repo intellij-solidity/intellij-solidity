@@ -400,6 +400,100 @@ class SolParameterInfoHandlerTest : SolTestBase() {
     """, "uint256 x, uint256 y, uint256 z", 2
   )
 
+  fun testOtherContractInAnotherFileMultiParameters2ndParam() {
+    InlineFile(
+      code = """
+        contract Test {
+            function foo (uint256 a, uint256 b) {}
+        }
+    """, name = "Test.sol"
+    )
+    checkByText(
+      """
+        import "./Test.sol";
+        contract A {
+            Test test;
+
+            function main() {
+                test.foo(1,/*caret*/);
+            }
+        }
+    """, "uint256 a, uint256 b", 1
+    )
+  }
+
+  fun testOtherContractInAnotherFileMultiParameters2ndParamWithoutSemicolon() {
+    InlineFile(
+      code = """
+        contract Test {
+            function foo (uint256 a, uint256 b) {}
+        }
+    """, name = "Test.sol"
+    )
+    checkByText(
+      """
+        import "./Test.sol";
+        contract A {
+            Test test;
+
+            function main() {
+                test.foo(1,/*caret*/)
+            }
+        }
+    """, "uint256 a, uint256 b", 1
+    )
+  }
+
+  fun testOtherContractInAnotherFileWithAliasMultiParameters2ndParam() {
+    InlineFile(
+      code = """
+        pragma solidity ^0.8.10;
+        contract ContractTest {
+            function foo (uint256 a, uint256 b) {}
+        }
+    """, name = "contractTest.sol"
+    )
+    checkByText(
+      """
+        pragma solidity ^0.8.10;
+
+        import "./contractTest.sol" as Test;
+        contract A {
+            Test.ContractTest test = new Test.ContractTest();
+        
+            function main() public  {
+                test.foo(1,10/*caret*/);
+            }
+        }
+    """, "uint256 a, uint256 b", 1
+    )
+  }
+
+  fun testOtherContractInAnotherFileWithAliasMultiParameters2ndParamWithoutSemicolon() {
+    InlineFile(
+      code = """
+        pragma solidity ^0.8.10;
+        contract ContractTest {
+            function foo (uint256 a, uint256 b) {}
+        }
+    """, name = "contractTest.sol"
+    )
+    checkByText(
+      """
+        pragma solidity ^0.8.10;
+
+        import "./contractTest.sol" as Test;
+        contract A {
+            Test.ContractTest test = new Test.ContractTest();
+        
+            function main() public  {
+                test.foo(1,10/*caret*/)
+            }
+        }
+    """, "uint256 a, uint256 b", 1
+    )
+  }
+
   private fun checkByText(@Language("Solidity") code: String, hint: String, index: Int) {
     checkByText(code, listOf(hint), index)
   }
