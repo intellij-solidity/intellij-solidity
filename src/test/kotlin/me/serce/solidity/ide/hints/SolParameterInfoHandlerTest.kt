@@ -494,6 +494,56 @@ class SolParameterInfoHandlerTest : SolTestBase() {
     )
   }
 
+  fun testOtherContractInAnotherFileWithPairAliasMultiParameters2ndParam() {
+    InlineFile(
+      code = """
+        pragma solidity ^0.8.10;
+        contract ContractTest {
+            function foo (uint256 a, uint256 b) {}
+        }
+    """, name = "contractTest.sol"
+    )
+    checkByText(
+      """
+        pragma solidity ^0.8.10;
+
+        import {ContractTest as Test} from "./contractTest.sol";
+        contract A {
+            Test test = new Test();
+        
+            function main() public  {
+                test.foo(1,/*caret*/);
+            }
+        }
+    """, "uint256 a, uint256 b", 1
+    )
+  }
+
+  fun testOtherContractInAnotherFileWithPairAliasMultiParameters2ndParamWithoutSemicolon() {
+    InlineFile(
+      code = """
+        pragma solidity ^0.8.10;
+        contract ContractTest {
+            function foo (uint256 a, uint256 b) {}
+        }
+    """, name = "contractTest.sol"
+    )
+    checkByText(
+      """
+        pragma solidity ^0.8.10;
+
+        import {ContractTest as Test} from "./contractTest.sol";
+        contract A {
+            Test test = new Test();
+        
+            function main() public  {
+                test.foo(1,/*caret*/);
+            }
+        }
+    """, "uint256 a, uint256 b", 1
+    )
+  }
+
   private fun checkByText(@Language("Solidity") code: String, hint: String, index: Int) {
     checkByText(code, listOf(hint), index)
   }
