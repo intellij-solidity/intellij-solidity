@@ -11,6 +11,7 @@ import com.intellij.psi.stubs.StubIndex
 import com.intellij.psi.util.*
 import com.intellij.util.Processors
 import me.serce.solidity.lang.core.SolidityFile
+import me.serce.solidity.lang.core.SolidityTokenTypes
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.psi.impl.SolNewExpressionElement
 import me.serce.solidity.lang.psi.parentOfType
@@ -43,7 +44,21 @@ object SolResolver {
         }
 
         else -> {
-          listOf(element)
+          if (element.prevSibling != null && element.prevSibling.text == ".") {
+            var currentElement = element.prevSibling
+            val list = mutableListOf(element)
+            do {
+              if (currentElement.elementType == SolidityTokenTypes.IDENTIFIER) {
+                list.add(currentElement)
+              } else if (currentElement.elementType != SolidityTokenTypes.DOT) {
+                break
+              }
+              currentElement = currentElement.prevSibling
+            } while (currentElement != null)
+            list.reversed()
+          } else {
+            listOf(element)
+          }
         }
       }
 
@@ -58,12 +73,23 @@ object SolResolver {
   ): Set<SolNamedElement> {
     val currentIdentifier = elementIdentifiers.first()
 
-    val (identifiedElements, nextFile) = resolveCurrentIdentifier(
+    var (identifiedElements, nextFile) = resolveCurrentIdentifier(
       currentIdentifier, previouslyIdentifiedElements, file
     )
+    val contractAccessElement =
+      identifiedElements.find { it is SolStateVariableDeclaration && it.firstChild is SolUserDefinedTypeName }
+    if (contractAccessElement != null && nextFile != null) {
+      val newElement = resolveTypeNameUsingImportsWithFunctions(contractAccessElement.firstChild)
+      if (newElement.isNotEmpty()) {
+        identifiedElements = setOf(newElement.first())
+        nextFile = newElement.first().containingFile
+      }
+    }
 
     return if (elementIdentifiers.size > 1 && identifiedElements.isNotEmpty() && nextFile != null) {
       resolveElementInFileAndImports(elementIdentifiers.drop(1), nextFile, identifiedElements)
+    } else if (elementIdentifiers.size > 1 && identifiedElements.isEmpty() && nextFile == null) {
+      resolveElementInFileAndImports(elementIdentifiers.drop(1), file, previouslyIdentifiedElements)
     } else {
       identifiedElements
     }
