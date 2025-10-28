@@ -13,6 +13,7 @@ import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.resolve.SolResolver
 import me.serce.solidity.lang.resolve.canBeApplied
 import me.serce.solidity.lang.resolve.ref.SolFunctionCallReference
+import me.serce.solidity.lang.types.SolType
 import me.serce.solidity.lang.types.findParentOrNull
 
 class SolParameterInfoHandler : AbstractParameterInfoHandler<PsiElement, SolArgumentsDescription>() {
@@ -142,24 +143,18 @@ class SolArgumentsDescription(
       val ref = call.reference
       return if (ref is SolFunctionCallReference && call is SolFunctionCallExpression) {
         ref.resolveFunctionCall().map { def ->
-          val parameters =
-            def.parseParameters().map { "${it.second}${it.first?.let { name -> " $name" } ?: ""}" }.toTypedArray()
-          SolArgumentsDescription(def, call.functionCallArguments.expressionList, parameters)
+          createSolArgumentsDescriptionFromArguments(def, call.functionCallArguments.expressionList)
         }
       } else {
         val currentArguments: List<PsiElement> = getArgumentsFromPsiElement(call)
         if (call.parent is SolAssignmentExpression) {
           SolResolver.resolveTypeNameUsingImports(call).filter { it.name == call.text }
             .filterIsInstance<SolStructDefinition>().map { def ->
-              val parameters =
-                def.parseParameters().map { "${it.second}${it.first?.let { name -> " $name" } ?: ""}" }.toTypedArray()
-              SolArgumentsDescription(def, currentArguments, parameters)
+              createSolArgumentsDescriptionFromArguments(def, currentArguments)
             }.toList()
         } else if (call is SolMemberAccessExpression) {
           SolResolver.resolveMemberFunctions(call).map { def ->
-            val parameters =
-              def.parseParameters().map { "${it.second}${it.first?.let { name -> " $name" } ?: ""}" }.toTypedArray()
-            SolArgumentsDescription(def, currentArguments, parameters)
+            createSolArgumentsDescriptionFromArguments(def, currentArguments)
           }
         } else {
           var elementsFromSearch =
@@ -171,8 +166,7 @@ class SolArgumentsDescription(
                 .filterIsInstance<SolCallable>().toList()
           }
           elementsFromSearch.map { def ->
-            var parameters =
-              def.parseParameters().map { "${it.second}${it.first?.let { name -> " $name" } ?: ""}" }.toTypedArray()
+            var parameters = def.parseParameters().map { generateArgumentString(it) }.toTypedArray()
             if (call.prevSibling is PsiElement && call.prevSibling.text == ".") {
               val functionCallMemberElement = SolResolver.lexicalDeclarations(call.prevSibling.prevSibling).toList()
                 .firstOrNull { it.name == call.prevSibling.prevSibling.text }
@@ -185,6 +179,16 @@ class SolArgumentsDescription(
         }
       }
     }
+
+    private fun createSolArgumentsDescriptionFromArguments(
+      def: SolCallable, currentArguments: List<PsiElement>
+    ): SolArgumentsDescription {
+      val parameters = def.parseParameters().map { generateArgumentString(it) }.toTypedArray()
+      return SolArgumentsDescription(def, currentArguments, parameters)
+    }
+
+    private fun generateArgumentString(pair: Pair<String?, SolType>): String =
+      "${pair.second}${pair.first?.let { name -> " $name" } ?: ""}"
 
     fun getArgumentsFromPsiElement(element: PsiElement): List<PsiElement> {
       val arguments = mutableListOf<PsiElement>()
