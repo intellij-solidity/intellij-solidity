@@ -11,6 +11,7 @@ import com.intellij.psi.stubs.StubIndex
 import com.intellij.psi.util.*
 import com.intellij.util.Processors
 import me.serce.solidity.lang.core.SolidityFile
+import me.serce.solidity.lang.core.SolidityTokenTypes
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.psi.impl.SolNewExpressionElement
 import me.serce.solidity.lang.psi.parentOfType
@@ -23,31 +24,50 @@ import me.serce.solidity.wrap
 
 object SolResolver {
   fun resolveTypeNameUsingImports(element: PsiElement): Set<SolNamedElement> {
-    return CachedValuesManager.getCachedValue(element) {
-      val file: PsiFile = element.containingFile
-      val elementIdentifiers: List<PsiElement> = when (element) {
-        is SolMemberAccessExpression -> {
-          getIdentifiersFromMemberAccessExpression(element)
+    return resolveTypeNameUsingImportsWithFunctions(element).filter { it !is SolFunctionDefinition }.toSet()
+  }
+
+  fun resolveTypeNameUsingImportsWithFunctions(element: PsiElement): Set<SolNamedElement> {
+    return RecursionManager.doPreventingRecursion(element, true) {
+      CachedValuesManager.getCachedValue(element) {
+        val file: PsiFile = element.containingFile
+        val elementIdentifiers: List<PsiElement> = when (element) {
+          is SolMemberAccessExpression -> {
+            getIdentifiersFromMemberAccessExpression(element)
+          }
+
+          is SolFunctionCallElement -> {
+            listOf(element.firstChild)
+          }
+
+          is SolUserDefinedTypeName -> {
+            element.findIdentifiers()
+          }
+
+          else -> {
+            if (element.prevSibling != null && element.prevSibling.text == ".") {
+              var currentElement = element.prevSibling
+              val list = mutableListOf(element)
+              do {
+                if (currentElement.elementType == SolidityTokenTypes.IDENTIFIER) {
+                  list.add(currentElement)
+                } else if (currentElement.elementType != SolidityTokenTypes.DOT) {
+                  break
+                }
+                currentElement = currentElement.prevSibling
+              } while (currentElement != null)
+              list.reversed()
+            } else {
+              listOf(element)
+            }
+          }
         }
 
-        is SolFunctionCallElement -> {
-          listOf(element.firstChild)
-        }
-
-        is SolUserDefinedTypeName -> {
-          element.findIdentifiers()
-        }
-
-        else -> {
-          listOf(element)
-        }
+        val identifiedElements: Set<SolNamedElement> =
+          resolveElementInFileAndImports(elementIdentifiers, file, emptySet())
+        CachedValueProvider.Result.create(identifiedElements, PsiModificationTracker.MODIFICATION_COUNT)
       }
-
-      val identifiedElements: Set<SolNamedElement> =
-        resolveElementInFileAndImports(elementIdentifiers, file, emptySet())
-      val result = identifiedElements.filter { it !is SolFunctionDefinition }.toSet()
-      CachedValueProvider.Result.create(result, PsiModificationTracker.MODIFICATION_COUNT)
-    }
+    } ?: emptySet()
   }
 
   private fun resolveElementInFileAndImports(
@@ -55,12 +75,23 @@ object SolResolver {
   ): Set<SolNamedElement> {
     val currentIdentifier = elementIdentifiers.first()
 
-    val (identifiedElements, nextFile) = resolveCurrentIdentifier(
+    var (identifiedElements, nextFile) = resolveCurrentIdentifier(
       currentIdentifier, previouslyIdentifiedElements, file
     )
+    val contractAccessElement =
+      identifiedElements.find { it is SolStateVariableDeclaration && it.firstChild is SolUserDefinedTypeName }
+    if (contractAccessElement != null && nextFile != null) {
+      val newElement = resolveTypeNameUsingImportsWithFunctions(contractAccessElement.firstChild)
+      if (newElement.isNotEmpty()) {
+        identifiedElements = setOf(newElement.first())
+        nextFile = newElement.first().containingFile
+      }
+    }
 
     return if (elementIdentifiers.size > 1 && identifiedElements.isNotEmpty() && nextFile != null) {
       resolveElementInFileAndImports(elementIdentifiers.drop(1), nextFile, identifiedElements)
+    } else if (elementIdentifiers.size > 1 && identifiedElements.isEmpty() && nextFile == null) {
+      resolveElementInFileAndImports(elementIdentifiers.drop(1), file, previouslyIdentifiedElements)
     } else {
       identifiedElements
     }
@@ -475,6 +506,46 @@ object SolResolver {
     }
 
     return element
+  }
+
+  fun resolveMemberFunctions(expression: SolMemberAccessExpression): Collection<SolCallable> {
+    val name = expression.identifier?.text
+
+    val importDirectiveAlias = expression.childOfType<SolPrimaryExpression>()
+      .let { it?.varLiteral?.let { varLiteral -> resolveAlias(varLiteral) } }
+
+    return if (importDirectiveAlias != null && name != null) {
+      //need to check if the penultimate member is an alias of file or a contract to know how to resolve the last member
+      val importPenultimateMember =
+        collectImportDirective(importDirectiveAlias).firstOrNull { it.importAlias != null && it.importAlias!!.text == expression.firstChild.lastChild.text }
+      //if true, then it's a file level resolution like fileAlias.element
+      if (importDirectiveAlias.importAlias?.text == expression.firstChild.lastChild.text) {
+        val fileToSearch = importDirectiveAlias.importPath?.reference?.resolve()?.containingFile ?: return emptyList()
+        collectChildrenOfFile(fileToSearch).filter { elem -> elem.getName() == name }
+      } else if (importPenultimateMember != null && isAliasOfFile(importPenultimateMember)) {
+        val fileToSearch =
+          importPenultimateMember.importPath?.reference?.resolve()?.containingFile ?: return emptyList()
+        collectChildrenOfFile(fileToSearch).filter { elem -> elem.getName() == name }
+      } else {
+        //looking to resolve member of a contract
+        //first need to find the contract name
+        val contractToLook = when (expression.firstChild) {
+          is SolMemberAccessExpression -> expression.firstChild.lastChild.text
+          is SolFunctionCallExpression -> expression.childOfType<SolMemberAccessExpression>()?.lastChild?.text
+          else -> null
+        }
+
+        //resolve member
+        val fileToSearch = importDirectiveAlias.importPath?.reference?.resolve()?.containingFile ?: return emptyList()
+        collectContracts(fileToSearch).filter { contract -> contract.name == contractToLook }.map {
+          resolveContractMembers(it).filterIsInstance<SolCallable>().filter { member -> member.getName() == name }
+        }.flatten()
+      }
+    } else if (name != null) {
+      expression.getMembers().filterIsInstance<SolCallable>().filter { it.getName() == name }
+    } else {
+      emptyList()
+    }
   }
 
   fun resolveMemberAccess(element: SolMemberAccessExpression): List<SolMember> {
