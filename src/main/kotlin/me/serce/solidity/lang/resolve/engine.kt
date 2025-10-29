@@ -28,44 +28,46 @@ object SolResolver {
   }
 
   fun resolveTypeNameUsingImportsWithFunctions(element: PsiElement): Set<SolNamedElement> {
-    return CachedValuesManager.getCachedValue(element) {
-      val file: PsiFile = element.containingFile
-      val elementIdentifiers: List<PsiElement> = when (element) {
-        is SolMemberAccessExpression -> {
-          getIdentifiersFromMemberAccessExpression(element)
-        }
+    return RecursionManager.doPreventingRecursion(element, true) {
+      CachedValuesManager.getCachedValue(element) {
+        val file: PsiFile = element.containingFile
+        val elementIdentifiers: List<PsiElement> = when (element) {
+          is SolMemberAccessExpression -> {
+            getIdentifiersFromMemberAccessExpression(element)
+          }
 
-        is SolFunctionCallElement -> {
-          listOf(element.firstChild)
-        }
+          is SolFunctionCallElement -> {
+            listOf(element.firstChild)
+          }
 
-        is SolUserDefinedTypeName -> {
-          element.findIdentifiers()
-        }
+          is SolUserDefinedTypeName -> {
+            element.findIdentifiers()
+          }
 
-        else -> {
-          if (element.prevSibling != null && element.prevSibling.text == ".") {
-            var currentElement = element.prevSibling
-            val list = mutableListOf(element)
-            do {
-              if (currentElement.elementType == SolidityTokenTypes.IDENTIFIER) {
-                list.add(currentElement)
-              } else if (currentElement.elementType != SolidityTokenTypes.DOT) {
-                break
-              }
-              currentElement = currentElement.prevSibling
-            } while (currentElement != null)
-            list.reversed()
-          } else {
-            listOf(element)
+          else -> {
+            if (element.prevSibling != null && element.prevSibling.text == ".") {
+              var currentElement = element.prevSibling
+              val list = mutableListOf(element)
+              do {
+                if (currentElement.elementType == SolidityTokenTypes.IDENTIFIER) {
+                  list.add(currentElement)
+                } else if (currentElement.elementType != SolidityTokenTypes.DOT) {
+                  break
+                }
+                currentElement = currentElement.prevSibling
+              } while (currentElement != null)
+              list.reversed()
+            } else {
+              listOf(element)
+            }
           }
         }
-      }
 
-      val identifiedElements: Set<SolNamedElement> =
-        resolveElementInFileAndImports(elementIdentifiers, file, emptySet())
-      CachedValueProvider.Result.create(identifiedElements, PsiModificationTracker.MODIFICATION_COUNT)
-    }
+        val identifiedElements: Set<SolNamedElement> =
+          resolveElementInFileAndImports(elementIdentifiers, file, emptySet())
+        CachedValueProvider.Result.create(identifiedElements, PsiModificationTracker.MODIFICATION_COUNT)
+      }
+    } ?: emptySet()
   }
 
   private fun resolveElementInFileAndImports(
