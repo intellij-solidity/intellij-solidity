@@ -6,6 +6,7 @@ import com.intellij.lang.parameterInfo.UpdateParameterInfoContext
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
+import com.intellij.psi.tree.IElementType
 import com.intellij.psi.util.childrenOfType
 import com.intellij.psi.util.endOffset
 import me.serce.solidity.lang.core.SolidityTokenTypes.*
@@ -17,43 +18,41 @@ import me.serce.solidity.lang.types.SolType
 import me.serce.solidity.lang.types.findParentOrNull
 
 class SolParameterInfoHandler : AbstractParameterInfoHandler<PsiElement, SolArgumentsDescription>() {
+
   override fun findTargetElement(file: PsiFile, offset: Int): PsiElement? {
     val element = file.findElementAt(offset) ?: return null
-    val functionCallParent = element.findParentOrNull<SolFunctionCallExpression>()
-    if (functionCallParent != null) {
-      return functionCallParent
-    } else if (element.parent.prevSibling is SolAssignmentExpression) {
+
+    element.findParentOrNull<SolFunctionCallExpression>()?.let { return it }
+
+    if (element.parent.prevSibling is SolAssignmentExpression) {
       val primaryExpressionChildren = element.parent.prevSibling.childrenOfType<SolPrimaryExpression>()
       if (primaryExpressionChildren.isNotEmpty()) {
         return primaryExpressionChildren.last()
       }
+    }
+
+    var currentElement = if (element.prevSibling == null) {
+      element.parent
     } else {
-      var currentElement = if (element.prevSibling == null) {
-        element.parent
-      } else {
-        element
-      }
-      var lParenFound = false
-      while (currentElement.prevSibling != null) {
-        currentElement = currentElement.prevSibling
-        if (!lParenFound && currentElement.text == LPAREN.toString()) {
-          lParenFound = true
-        } else if (lParenFound && currentElement.text != null && currentElement.text.isNotBlank()) {
-          return if (currentElement is SolEmitStatement || currentElement is SolRevertStatement) {
-            val primaryExpression = currentElement.childrenOfType<SolPrimaryExpression>()
-            if (primaryExpression.isNotEmpty()) {
-              primaryExpression.first()
-            } else {
-              currentElement
-            }
-          } else {
-            currentElement
-          }
+      element
+    }
+    var lParenFound = false
+    while (currentElement.prevSibling != null) {
+      currentElement = currentElement.prevSibling
+      if (!lParenFound && currentElement.isToken(LPAREN)) {
+        lParenFound = true
+      } else if (lParenFound && currentElement.text != null && currentElement.text.isNotBlank()) {
+        return if (currentElement is SolEmitStatement || currentElement is SolRevertStatement) {
+          currentElement.childrenOfType<SolPrimaryExpression>().firstOrNull() ?: currentElement
+        } else {
+          currentElement
         }
       }
     }
     return null
   }
+
+  private fun PsiElement.isToken(type: IElementType) = node?.elementType == type
 
   override fun calculateParameterInfo(element: PsiElement): Array<SolArgumentsDescription>? {
     val callElement : PsiElement=
