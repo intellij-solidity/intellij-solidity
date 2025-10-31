@@ -5,8 +5,6 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.progress.util.ProgressIndicatorUtils
 import com.intellij.testFramework.fixtures.CodeInsightTestUtil
-import me.serce.solidity.lang.psi.SolContractDefinition
-import me.serce.solidity.lang.types.SolContract
 import me.serce.solidity.utils.SolTestBase
 import org.intellij.lang.annotations.Language
 import org.junit.Assert
@@ -17,13 +15,13 @@ class GoToImplementationTest : SolTestBase() {
   fun testFindImplementations() = testImplementations("""
       contract A/*caret*/ { }
       contract B is A { }
-  """, setOf("B"), "ctr.sol")
+  """, setOf("B ctr.sol"), "ctr.sol")
 
   fun testFindMultipleImplementations() = testImplementations("""
       contract A/*caret*/ { }
       contract B is A { }
       contract C is B { }
-  """, setOf("B", "C"), "ctr.sol")
+  """, setOf("B ctr.sol", "C ctr.sol"), "ctr.sol")
 
   fun testImportContract() {
     InlineFile(
@@ -39,7 +37,7 @@ class GoToImplementationTest : SolTestBase() {
       """
         contract Ctr/*caret*/ {
         }
-      """.trimIndent(), setOf("Ctr1"), "ctr.sol")
+      """.trimIndent(), setOf("Ctr1 base1.sol"), "ctr.sol")
   }
 
   fun testImportContractAs() {
@@ -56,7 +54,7 @@ class GoToImplementationTest : SolTestBase() {
       """
         contract Ctr/*caret*/ {
         }
-      """.trimIndent(), setOf("Ctr1"), "ctr2.sol")
+      """.trimIndent(), setOf("Ctr1 base1.sol"), "ctr2.sol")
   }
 
 
