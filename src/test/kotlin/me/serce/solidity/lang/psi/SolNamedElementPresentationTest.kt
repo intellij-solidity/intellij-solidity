@@ -1,11 +1,12 @@
 package me.serce.solidity.lang.psi
 
+import com.intellij.psi.PsiFile
 import com.intellij.psi.util.PsiTreeUtil
 import me.serce.solidity.utils.SolTestBase
 
 class SolNamedElementPresentationTest : SolTestBase() {
 
-  fun testFunctionPresentationIncludesContract() {
+  fun testFunctionPresentation() {
     val psiFile = InlineFile(
       """
       contract C {
@@ -15,17 +16,10 @@ class SolNamedElementPresentationTest : SolTestBase() {
       "contracts.sol"
     ).psiFile
 
-    val function = PsiTreeUtil.collectElementsOfType(psiFile, SolFunctionDefinition::class.java)
-      .single { it.name == "foo" }
-
-    val presentation = function.presentation
-    val location = presentation?.locationString
-
-    assertNotNull("Expected non-null presentation location for function foo", location)
-    assertEquals("contracts.sol", location)
+    checkFunctionPresentation(psiFile,"foo", "contracts.sol")
   }
 
-  fun testFunctionPresentationIncludesContractFromSubdirectory() {
+  fun testFunctionPresentationFromSubdirectory() {
     val psiFile = myFixture.addFileToProject(
       "nested/contracts.sol",
       """
@@ -35,17 +29,10 @@ class SolNamedElementPresentationTest : SolTestBase() {
       """.trimIndent()
     )
 
-    val function = PsiTreeUtil.collectElementsOfType(psiFile, SolFunctionDefinition::class.java)
-      .single { it.name == "foo" }
-
-    val presentation = function.presentation
-    val location = presentation?.locationString
-
-    assertNotNull("Expected non-null presentation location for function foo", location)
-    assertEquals("nested/contracts.sol", location)
+    checkFunctionPresentation(psiFile,"foo", "nested/contracts.sol")
   }
 
-  fun testFreeFunctionPresentationShowsFilePathOnly() {
+  fun testFreeFunctionPresentation() {
     val psiFile = InlineFile(
       """
       function bar() {}
@@ -53,13 +40,19 @@ class SolNamedElementPresentationTest : SolTestBase() {
       "free.sol"
     ).psiFile
 
-    val function = PsiTreeUtil.collectElementsOfType(psiFile, SolFunctionDefinition::class.java)
-      .single { it.name == "bar" }
-
-    val presentation = function.presentation
-    val location = presentation?.locationString
-
-    assertNotNull("Expected non-null presentation location for function bar", location)
-    assertEquals("free.sol", location)
+      checkFunctionPresentation(psiFile,"bar", "free.sol")
   }
+
+    private fun checkFunctionPresentation(
+        psiFile: PsiFile, elementToSearch: String, expectedLocation: String
+    ) {
+        val function = PsiTreeUtil.collectElementsOfType(psiFile, SolFunctionDefinition::class.java)
+            .single { it.name == elementToSearch }
+
+        val presentation = function.presentation
+        val location = presentation?.locationString
+
+        assertNotNull("Expected non-null presentation location for function bar", location)
+        assertEquals(expectedLocation, location)
+    }
 }
