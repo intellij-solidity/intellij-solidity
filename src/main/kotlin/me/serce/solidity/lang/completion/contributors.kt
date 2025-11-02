@@ -124,9 +124,13 @@ class SolContextCompletionContributor : CompletionContributor(), DumbAware {
               if (!dirText.endsWith("/")) dirText += "/"
               val curFile = parameters.originalFile.virtualFile
               val vPath = SolImportPathReference.findImportFile(curFile, dirText)
+              var prefix = if (result.prefixMatcher.prefix.contains(dirText)) dirText else ""
+              if (result.prefixMatcher.prefix.startsWith("\"")) {
+                prefix = "\"" + prefix
+              }
               val elements = (vPath?.children
                 ?: emptyArray()).filter { it.isDirectory || it.extension == SolidityFileType.defaultExtension }.map {
-                LookupElementBuilder.create(it.name).withIcon(SolidityIcons.FILE_ICON)
+                LookupElementBuilder.create(prefix + it.name).withIcon(SolidityIcons.FILE_ICON)
                   .withInsertHandler(::handleInsertImportPath)
               } + humpFiles.map {
                 val rel = if (it.path.contains("node_modules/")) it.path.substringAfter("node_modules/")
