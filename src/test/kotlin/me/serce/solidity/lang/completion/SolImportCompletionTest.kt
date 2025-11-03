@@ -40,4 +40,25 @@ class SolImportCompletionTest : SolCompletionTestBase() {
             """import {test} from "./te/*caret*/";""", """import {test} from "./test.sol";"""
         )
     }
+
+    fun testImportCompletionWithEndQuoteAfterCompletionSubFiles() {
+        myFixture.configureByFile("lib/lib.sol")
+        myFixture.configureByFile("interfaces/IERC20.sol")
+        myFixture.configureByFile("src/ERC20.sol")
+
+        checkResultAfterCompletion(
+            """import "./interf/*caret*/"""", """import "./interfaces""""
+        )
+    }
+
+    fun testImportCompletionWithEndQuoteAndSemicolonAfterCompletionSubFiles() {
+        myFixture.configureByFile("lib/lib.sol")
+        myFixture.configureByFile("interfaces/IERC20.sol")
+        myFixture.configureByFile("src/ERC20.sol")
+
+        checkResultAfterCompletion(
+            """import "./interf/*caret*/";""", """import "./interfaces";"""
+        )
+    }
+override fun getTestDataPath() = "src/test/resources/fixtures/importCompletion/"
 }
