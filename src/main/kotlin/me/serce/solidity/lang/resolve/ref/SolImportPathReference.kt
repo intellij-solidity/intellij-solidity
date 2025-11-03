@@ -122,7 +122,16 @@ class SolImportPathReference(element: SolImportPathElement) : SolReferenceBase<S
         } //
         .filter { it.size == 2 } //
         // "forge-std/" to "lib/forge-std/src/"
-        .map { it[0].trim() to it[1].trim() }
+        .map {
+          val first = it[0].trim()
+          val secondRaw = it[1].trim()
+          val second = if (secondRaw.endsWith("/")) {
+            secondRaw
+          } else {
+            "$secondRaw/"
+          }
+          first to second
+        }
     }
 
     private fun findEthPMImportFile(file: VirtualFile, path: String): VirtualFile? {

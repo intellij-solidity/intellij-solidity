@@ -6,6 +6,7 @@ import com.intellij.ide.projectView.PresentationData
 import com.intellij.lang.ASTNode
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNameIdentifierOwner
+import com.intellij.psi.presentation.java.SymbolPresentationUtil
 import com.intellij.psi.stubs.IStubElementType
 import com.intellij.psi.stubs.StubElement
 import me.serce.solidity.lang.core.SolidityTokenTypes.IDENTIFIER
@@ -70,5 +71,11 @@ abstract class SolStubbedNamedElementImpl<S> :
 
   override fun getTextOffset(): Int = nameIdentifier?.textOffset ?: super.getTextOffset()
 
-  override fun getPresentation() = PresentationData(name, "", getIcon(0), null)
+  override fun getPresentation(): PresentationData = createPresentation()
+}
+
+private fun SolNamedElement.createPresentation(): PresentationData {
+  val location: String? = containingFile?.let { psiFile -> SymbolPresentationUtil.getFilePathPresentation(psiFile) }
+
+  return PresentationData(name, location, getIcon(0), null)
 }
