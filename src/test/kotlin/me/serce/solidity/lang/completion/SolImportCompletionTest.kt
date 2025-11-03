@@ -41,7 +41,7 @@ class SolImportCompletionTest : SolCompletionTestBase() {
         )
     }
 
-    fun testImportCompletionWithEndQuoteAfterCompletionSubFiles() {
+    fun testImportCompletionWithEndQuoteAfterCompletionSubDirectory() {
         myFixture.configureByFile("lib/lib.sol")
         myFixture.configureByFile("interfaces/IERC20.sol")
         myFixture.configureByFile("src/ERC20.sol")
@@ -51,7 +51,7 @@ class SolImportCompletionTest : SolCompletionTestBase() {
         )
     }
 
-    fun testImportCompletionWithEndQuoteAndSemicolonAfterCompletionSubFiles() {
+    fun testImportCompletionWithEndQuoteAndSemicolonAfterCompletionSubDirectory() {
         myFixture.configureByFile("lib/lib.sol")
         myFixture.configureByFile("interfaces/IERC20.sol")
         myFixture.configureByFile("src/ERC20.sol")
@@ -60,5 +60,26 @@ class SolImportCompletionTest : SolCompletionTestBase() {
             """import "./interf/*caret*/";""", """import "./interfaces";"""
         )
     }
-override fun getTestDataPath() = "src/test/resources/fixtures/importCompletion/"
+
+    fun testImportCompletionWithEndQuoteAfterCompletionSubFile() {
+        myFixture.configureByFile("lib/lib.sol")
+        myFixture.configureByFile("interfaces/IERC20.sol")
+        myFixture.configureByFile("src/ERC20.sol")
+
+        checkResultAfterCompletion(
+            """import "./interfaces/IE/*caret*/"""", """import "./interfaces/IERC20.sol""""
+        )
+    }
+
+    fun testImportCompletionWithEndQuoteAndSemicolonAfterCompletionSubFile() {
+        myFixture.configureByFile("lib/lib.sol")
+        myFixture.configureByFile("interfaces/IERC20.sol")
+        myFixture.configureByFile("src/ERC20.sol")
+
+        checkResultAfterCompletion(
+            """import "./interfaces/IE/*caret*/";""", """import "./interfaces/IERC20.sol";"""
+        )
+    }
+
+    override fun getTestDataPath() = "src/test/resources/fixtures/importCompletion/"
 }
