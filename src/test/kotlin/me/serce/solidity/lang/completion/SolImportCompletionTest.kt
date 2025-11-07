@@ -163,8 +163,10 @@ class SolImportCompletionTest : SolCompletionTestBase() {
 
     fun testImportCompletionWithEndQuoteAndSemicolonAfterCompletionPreviousFile() {
         myFixture.configureByFile("interfaces/IERC20.sol")
-        myFixture.copyFileToProject("interfaces/IERC20.sol", "src/test/resources/fixtures/IERC20.sol")
-
+        myFixture.copyFileToProject("interfaces/IERC20.sol", "test/resources/fixtures/interfaces/IERC20.sol")
+        val vFile = myFixture.findFileInTempDir("test/resources/fixtures/interfaces/IERC20.sol")
+        val exists = vFile != null && vFile.exists()
+        assertTrue(exists)
         checkResultAfterCompletion(
             """import "../inter/*caret*/";""", """import "../interfaces";"""
         )
@@ -172,7 +174,7 @@ class SolImportCompletionTest : SolCompletionTestBase() {
 
     fun testImportCompletionWithEndQuoteAndSemicolonAfterCompletionPreviousFile2() {
         myFixture.configureByFile("interfaces/IERC20.sol")
-        myFixture.copyFileToProject("interfaces/IERC20.sol", "src/test/resources/fixtures/IERC20.sol")
+        myFixture.copyFileToProject("interfaces/IERC20.sol", "test/resources/fixtures/interfaces/IERC20.sol")
 
         checkResultAfterCompletion(
             """import "../interfaces/IE/*caret*/";""", """import "../interfaces/IERC20.sol";"""
@@ -181,7 +183,7 @@ class SolImportCompletionTest : SolCompletionTestBase() {
 
     fun testImportCompletionWithEndQuoteAfterCompletionPreviousFile() {
         myFixture.configureByFile("interfaces/IERC20.sol")
-        myFixture.copyFileToProject("interfaces/IERC20.sol", "src/test/resources/fixtures/IERC20.sol")
+        myFixture.copyFileToProject("interfaces/IERC20.sol", "test/resources/fixtures/interfaces/IERC20.sol")
 
         checkResultAfterCompletion(
             """import "../inter/*caret*/"""", """import "../interfaces""""
@@ -190,7 +192,7 @@ class SolImportCompletionTest : SolCompletionTestBase() {
 
     fun testImportCompletionWithEndQuoteAfterCompletionPreviousFile2() {
         myFixture.configureByFile("interfaces/IERC20.sol")
-        myFixture.copyFileToProject("interfaces/IERC20.sol", "src/test/resources/fixtures/IERC20.sol")
+        myFixture.copyFileToProject("interfaces/IERC20.sol", "test/resources/fixtures/interfaces/IERC20.sol")
 
         checkResultAfterCompletion(
             """import "../interfaces/IE/*caret*/"""", """import "../interfaces/IERC20.sol""""
@@ -199,7 +201,7 @@ class SolImportCompletionTest : SolCompletionTestBase() {
 
     fun testImportCompletionWithEndQuoteAndSemicolonAfterCompletionPreviousFile3() {
         myFixture.configureByFile("interfaces/IERC20.sol")
-        myFixture.copyFileToProject("interfaces/IERC20.sol", "src/test/resources/fixtures/IERC20.sol")
+        myFixture.copyFileToProject("interfaces/IERC20.sol", "test/resources/fixtures/interfaces/IERC20.sol")
 
         checkResultAfterCompletion(
             """import {IERC20} from "../inter/*caret*/";""", """import {IERC20} from "../interfaces";"""
@@ -208,7 +210,7 @@ class SolImportCompletionTest : SolCompletionTestBase() {
 
     fun testImportCompletionWithEndQuoteAndSemicolonAfterCompletionPreviousFile4() {
         myFixture.configureByFile("interfaces/IERC20.sol")
-        myFixture.copyFileToProject("interfaces/IERC20.sol", "src/test/resources/fixtures/IERC20.sol")
+        myFixture.copyFileToProject("interfaces/IERC20.sol", "test/resources/fixtures/interfaces/IERC20.sol")
 
         checkResultAfterCompletion(
             """import {IERC20} from "../interfaces/IE/*caret*/";""", """import {IERC20} from "../interfaces/IERC20.sol";"""
@@ -217,7 +219,7 @@ class SolImportCompletionTest : SolCompletionTestBase() {
 
     fun testImportCompletionWithEndQuoteAfterCompletionPreviousFile3() {
         myFixture.configureByFile("interfaces/IERC20.sol")
-        myFixture.copyFileToProject("interfaces/IERC20.sol", "src/test/resources/fixtures/IERC20.sol")
+        myFixture.copyFileToProject("interfaces/IERC20.sol", "test/resources/fixtures/interfaces/IERC20.sol")
 
         checkResultAfterCompletion(
             """import {IERC20} from "../inter/*caret*/"""", """import {IERC20} from "../interfaces""""
@@ -226,7 +228,7 @@ class SolImportCompletionTest : SolCompletionTestBase() {
 
     fun testImportCompletionWithEndQuoteAfterCompletionPreviousFile4() {
         myFixture.configureByFile("interfaces/IERC20.sol")
-        myFixture.copyFileToProject("interfaces/IERC20.sol", "src/test/resources/fixtures/IERC20.sol")
+        myFixture.copyFileToProject("interfaces/IERC20.sol", "test/resources/fixtures/interfaces/IERC20.sol")
 
         checkResultAfterCompletion(
             """import {IERC20} from "../interfaces/IE/*caret*/"""", """import {IERC20} from "../interfaces/IERC20.sol""""
