@@ -124,7 +124,7 @@ class SolContextCompletionContributor : CompletionContributor(), DumbAware {
               if (!dirText.endsWith("/")) dirText += "/"
               val curFile = parameters.originalFile.virtualFile
               val vPath = SolImportPathReference.findImportFile(curFile, dirText)
-              val knownPrefixes = listOf("\"./", "\"/", "\"", "./", "/")
+              val knownPrefixes = listOf("\"../", "\"./", "\"/", "\"", "../", "./", "/")
               val pathPrefix = knownPrefixes.firstOrNull { result.prefixMatcher.prefix.startsWith(it) } ?: ""
 
               val dirTextWithoutPathPrefix = dirText.dropWhile { it == '.' || it == '/' || it == '"' }
