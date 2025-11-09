@@ -59,5 +59,16 @@ class SolImportParentPathCompletionTest : SolCompletionTestBase() {
         )
     }
 
+    fun testImportCompletionPreservesMultipleParentSegments() {
+        myFixture.configureByFile("interfacesLocal/IERC20Local.sol")
+        myFixture.configureByFile("nested/feature/MultiParentImport.sol")
+        myFixture.completeBasic()
+        val lookupStrings = myFixture.lookupElementStrings
+            ?: error("No lookup elements for import completion")
+        assertTrue(
+            lookupStrings.any { it.contains("../../interfacesLocal/IERC20Local.sol") }
+        )
+    }
+
     override fun getTestDataPath() = "src/test/resources/fixtures/importCompletion/lib/"
 }
