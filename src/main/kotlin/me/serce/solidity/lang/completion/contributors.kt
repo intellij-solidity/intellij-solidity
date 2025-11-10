@@ -110,7 +110,7 @@ class SolContextCompletionContributor : CompletionContributor(), DumbAware {
               val text = fullText.removeQuotes()
               val project = parameters.position.project
               val curFile = parameters.originalFile.virtualFile
-              val knownPrefixes = listOf("\"../", "\"./", "\"/", "\"", "../", "./", "/")
+              val knownPrefixes = listOf('.', '/', '"')
 
               val matcher = CamelHumpMatcher(text)
               val humpFiles = StubIndex.getInstance()
@@ -125,15 +125,13 @@ class SolContextCompletionContributor : CompletionContributor(), DumbAware {
               var dirText = dirPartOf(text)
               val vPath = SolImportPathReference.findImportFile(curFile, dirText)
 
-              val prefix = knownPrefixes.firstOrNull { result.prefixMatcher.prefix.startsWith(it) } ?: ""
-              val dirNoPrefix = dirText.dropWhile { it == '.' || it == '/' || it == '"' }
-              val resultPrefixMatcherContainDir = result.prefixMatcher.prefix.contains(dirNoPrefix)
-              var path = if (resultPrefixMatcherContainDir) dirNoPrefix else ""
+              val prefix = result.prefixMatcher.prefix.takeWhile { knownPrefixes.contains(it) }
+              val dirNoPrefix = dirText.dropWhile { knownPrefixes.contains(it) }
 
               val fileChildren = vPath?.children.orEmpty()
                 .filter { it.isDirectory || it.extension == SolidityFileType.defaultExtension }
                 .map {
-                  LookupElementBuilder.create(prefix + path + it.name)
+                  LookupElementBuilder.create(prefix + dirNoPrefix + it.name)
                     .withIcon(SolidityIcons.FILE_ICON)
                     .withInsertHandler(::handleInsertImportPath)
                 }
