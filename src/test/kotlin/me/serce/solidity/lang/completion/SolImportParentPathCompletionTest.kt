@@ -1,10 +1,10 @@
 package me.serce.solidity.lang.completion
 
 class SolImportParentPathCompletionTest : SolCompletionTestBase() {
-    fun testImportCompletionWithEndQuoteAndSemicolonAfterCompletionPreviousFile() {
+    fun testImportCompletionPreviousFileWithEndQuoteAndSemicolon() {
         myFixture.configureByFile("interfacesLocal/IERC20Local.sol")
-        myFixture.configureByFile("useCases/CompleteFolderWithEndQuote.sol")
-        val after = myFixture.configureByFile("useCases/CompleteFolderWithEndQuote_after.sol")
+        myFixture.configureByFile("useCases/CompleteFolderWithEndQuoteAndSemicolon.sol")
+        val after = myFixture.configureByFile("useCases/CompleteFolderWithEndQuoteAndSemicolon_after.sol")
 
         checkResultAfterCompletion(after)
     }
