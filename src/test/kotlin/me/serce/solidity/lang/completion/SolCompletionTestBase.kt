@@ -1,5 +1,6 @@
 package me.serce.solidity.lang.completion
 
+import com.intellij.psi.PsiFile
 import me.serce.solidity.utils.SolTestBase
 import org.intellij.lang.annotations.Language
 
@@ -16,6 +17,25 @@ abstract class SolCompletionTestBase : SolTestBase() {
     } else {
       assertTrue("$completions doesn't contain all $required", completions.containsAll(required))
     }
+  }
+
+  protected fun checkResultAfterCompletion(
+    @Language("Solidity") before: String, @Language("Solidity") expected: String
+  ) {
+    InlineFile(before).withCaret()
+    myFixture.completeBasic()
+    if (myFixture.lookupElements != null && myFixture.lookupElements!!.size == 1) {
+      myFixture.type('\n')
+    }
+    myFixture.checkResult(expected)
+  }
+
+  protected fun checkResultAfterCompletion(expected: PsiFile) {
+    myFixture.completeBasic()
+    if (myFixture.lookupElements != null && myFixture.lookupElements!!.size == 1) {
+      myFixture.type('\n')
+    }
+    myFixture.checkResult(expected.text)
   }
 
   val elementaryType = hashSetOf(
