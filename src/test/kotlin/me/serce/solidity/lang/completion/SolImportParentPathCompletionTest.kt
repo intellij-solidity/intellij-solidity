@@ -56,6 +56,25 @@ class SolImportParentPathCompletionTest : SolCompletionTestBase() {
         "nested/feature/CompleteFileMultiParentImportOnNamedImportWithSemicolon_after.sol"
     )
 
+    fun testImportCompletionFolderMultiParentImportWithSemicolon() = checkCompletionParentDir(
+        "nested/feature/CompleteFolderMultiParentImportWithSemicolon.sol",
+        "nested/feature/CompleteFolderMultiParentImportWithSemicolon_after.sol"
+    )
+
+    fun testImportCompletionFolderMultiParentImport() = checkCompletionParentDir(
+        "nested/feature/CompleteFolderMultiParentImport.sol", "nested/feature/CompleteFolderMultiParentImport_after.sol"
+    )
+
+    fun testImportCompletionFolderMultiParentImportOnNamedImport() = checkCompletionParentDir(
+        "nested/feature/CompleteFolderMultiParentImportOnNamedImport.sol",
+        "nested/feature/CompleteFolderMultiParentImportOnNamedImport_after.sol"
+    )
+
+    fun testImportCompletionFolderMultiParentImportOnNamedImportWithSemicolon() = checkCompletionParentDir(
+        "nested/feature/CompleteFolderMultiParentImportOnNamedImportWithSemicolon.sol",
+        "nested/feature/CompleteFolderMultiParentImportOnNamedImportWithSemicolon_after.sol"
+    )
+
     fun checkCompletionParentDir(beforePath: String, afterPath: String) {
         myFixture.configureByFile("interfacesLocal/IERC20Local.sol")
         val after = myFixture.configureByFile(afterPath)
