@@ -17,18 +17,20 @@ class SolImportParentPathCompletionTest : SolCompletionTestBase() {
         checkResultAfterCompletion(after)
     }
 
-    fun testImportCompletionWithEndQuoteAfterCompletionPreviousFile() {
-        myFixture.configureByFile("../interfaces/IERC20.sol")
-        checkResultAfterCompletion(
-            """import "../inter/*caret*/"""", """import "../interfaces""""
-        )
+    fun testImportCompletionPreviousFolderWithEndQuote() {
+        myFixture.configureByFile("interfacesLocal/IERC20Local.sol")
+        myFixture.configureByFile("useCases/CompleteFolderWithEndQuote.sol")
+        val after = myFixture.configureByFile("useCases/CompleteFolderWithEndQuote_after.sol")
+
+        checkResultAfterCompletion(after)
     }
 
-    fun testImportCompletionWithEndQuoteAfterCompletionPreviousFile2() {
-        myFixture.configureByFile("../interfaces/IERC20.sol")
-        checkResultAfterCompletion(
-            """import "../interfaces/IE/*caret*/"""", """import "../interfaces/IERC20.sol""""
-        )
+    fun testImportCompletionPreviousFileWithEndQuote() {
+        myFixture.configureByFile("interfacesLocal/IERC20Local.sol")
+        myFixture.configureByFile("useCases/CompleteFileWithEndQuote.sol")
+        val after = myFixture.configureByFile("useCases/CompleteFileWithEndQuote_after.sol")
+
+        checkResultAfterCompletion(after)
     }
 
     fun testImportCompletionWithEndQuoteAndSemicolonAfterCompletionPreviousFile3() {
