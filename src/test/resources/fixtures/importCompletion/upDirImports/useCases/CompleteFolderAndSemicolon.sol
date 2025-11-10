@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.26;
 
-import "../inter<caret>"
+import "../inter<caret>";
 
-contract CompleteFolderWithEndQuote {}
+contract CompleteFolderAndSemicolon {}

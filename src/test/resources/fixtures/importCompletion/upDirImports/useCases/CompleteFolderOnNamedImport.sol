@@ -3,4 +3,4 @@ pragma solidity ^0.8.26;
 
 import {IERC20Local} from "../inter<caret>"
 
-contract CompleteFolderOnNamedImportWithEndQuote {}
+contract CompleteFolderOnNamedImport {}

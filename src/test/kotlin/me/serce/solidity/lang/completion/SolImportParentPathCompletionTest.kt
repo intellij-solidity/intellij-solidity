@@ -1,42 +1,42 @@
 package me.serce.solidity.lang.completion
 
 class SolImportParentPathCompletionTest : SolCompletionTestBase() {
-    fun testImportCompletionPreviousFolderWithEndQuoteAndSemicolon() = checkCompletionParentDir(
-        "useCases/CompleteFolderWithEndQuoteAndSemicolon.sol",
-        "useCases/CompleteFolderWithEndQuoteAndSemicolon_after.sol"
+    fun testImportCompletionPreviousFolderAndSemicolon() = checkCompletionParentDir(
+        "useCases/CompleteFolderAndSemicolon.sol",
+        "useCases/CompleteFolderAndSemicolon_after.sol"
     )
 
 
-    fun testImportCompletionPreviousFileWithEndQuoteAndSemicolon() = checkCompletionParentDir(
-        "useCases/CompleteFileWithEndQuoteAndSemicolon.sol", "useCases/CompleteFileWithEndQuoteAndSemicolon_after.sol"
+    fun testImportCompletionPreviousFileAndSemicolon() = checkCompletionParentDir(
+        "useCases/CompleteFileAndSemicolon.sol", "useCases/CompleteFileAndSemicolon_after.sol"
     )
 
 
-    fun testImportCompletionPreviousFolderWithEndQuote() = checkCompletionParentDir(
-        "useCases/CompleteFolderWithEndQuote.sol", "useCases/CompleteFolderWithEndQuote_after.sol"
+    fun testImportCompletionPreviousFolder() = checkCompletionParentDir(
+        "useCases/CompleteFolder.sol", "useCases/CompleteFolder_after.sol"
     )
 
-    fun testImportCompletionPreviousFileWithEndQuote() = checkCompletionParentDir(
-        "useCases/CompleteFileWithEndQuote.sol", "useCases/CompleteFileWithEndQuote_after.sol"
+    fun testImportCompletionPreviousFile() = checkCompletionParentDir(
+        "useCases/CompleteFile.sol", "useCases/CompleteFile_after.sol"
     )
 
-    fun testImportCompletionPreviousFolderOnNamedImportWithEndQuoteAndSemicolon() = checkCompletionParentDir(
-        "useCases/CompleteFolderOnNamedImportWithEndQuoteAndSemicolon.sol",
-        "useCases/CompleteFolderOnNamedImportWithEndQuoteAndSemicolon_after.sol"
+    fun testImportCompletionPreviousFolderOnNamedImportAndSemicolon() = checkCompletionParentDir(
+        "useCases/CompleteFolderOnNamedImportAndSemicolon.sol",
+        "useCases/CompleteFolderOnNamedImportAndSemicolon_after.sol"
     )
 
-    fun testImportCompletionPreviousFileOnNamedImportWithEndQuoteAndSemicolon() = checkCompletionParentDir(
-        "useCases/CompleteFileOnNamedImportWithEndQuoteAndSemicolon.sol",
-        "useCases/CompleteFileOnNamedImportWithEndQuoteAndSemicolon_after.sol"
+    fun testImportCompletionPreviousFileOnNamedImportAndSemicolon() = checkCompletionParentDir(
+        "useCases/CompleteFileOnNamedImportAndSemicolon.sol",
+        "useCases/CompleteFileOnNamedImportAndSemicolon_after.sol"
     )
 
-    fun testImportCompletionPreviousFolderOnNamedImportWithEndQuote() = checkCompletionParentDir(
-        "useCases/CompleteFolderOnNamedImportWithEndQuote.sol",
-        "useCases/CompleteFolderOnNamedImportWithEndQuote_after.sol"
+    fun testImportCompletionPreviousFolderOnNamedImport() = checkCompletionParentDir(
+        "useCases/CompleteFolderOnNamedImport.sol",
+        "useCases/CompleteFolderOnNamedImport_after.sol"
     )
 
-    fun testImportCompletionPreviousFileOnNamedImportWithEndQuote() = checkCompletionParentDir(
-        "useCases/CompleteFileOnNamedImportWithEndQuote.sol", "useCases/CompleteFileOnNamedImportWithEndQuote_after.sol"
+    fun testImportCompletionPreviousFileOnNamedImport() = checkCompletionParentDir(
+        "useCases/CompleteFileOnNamedImport.sol", "useCases/CompleteFileOnNamedImport_after.sol"
     )
 
     fun testImportCompletionPreservesMultipleParentSegments() {
