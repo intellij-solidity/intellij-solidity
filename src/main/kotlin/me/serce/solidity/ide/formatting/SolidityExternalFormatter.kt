@@ -46,9 +46,9 @@ class SolidityExternalFormatter : AsyncDocumentFormattingService() {
           add("-")
           add("--raw")
 
-          if (settings.configPath.isNotBlank()) {
+          if (settings.formatterFoundryConfigPath.isNotBlank()) {
             add("--root")
-            add(settings.configPath)
+            add(settings.formatterFoundryConfigPath)
           }
         })
         .withCharset(StandardCharsets.UTF_8)
@@ -93,7 +93,7 @@ class SolidityExternalFormatter : AsyncDocumentFormattingService() {
 
   @VisibleForTesting
   fun resolveForgeExecutable(settings: SoliditySettings, isWindows: Boolean): String {
-    val settingsPath = settings.executablePath.trim()
+    val settingsPath = settings.formatterFoundryExecutablePath.trim()
     if (settingsPath.isNotEmpty()) {
       return settingsPath
     }
