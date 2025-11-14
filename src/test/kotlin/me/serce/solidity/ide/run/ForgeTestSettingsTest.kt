@@ -55,11 +55,18 @@ class ForgeTestSettingsTest : BasePlatformTestCase() {
     }
 
     fun testExecuteFoundryTestGutterWithAutomaticPath() =
-        checkPathWithForgeTestCommandLineState(ConfigurationMode.AUTOMATIC)
+        checkPathWithForgeTestCommandLineState(ConfigurationMode.AUTOMATIC, false)
 
-    fun testExecuteFoundryTestGutterWithManualPath() = checkPathWithForgeTestCommandLineState(ConfigurationMode.MANUAL)
+    fun testExecuteFoundryTestGutterWithManualPath() =
+        checkPathWithForgeTestCommandLineState(ConfigurationMode.MANUAL, false)
 
-    private fun checkPathWithForgeTestCommandLineState(configurationMode: ConfigurationMode) {
+    fun testExecuteFoundryTestGutterWithAutomaticPathWindows() =
+        checkPathWithForgeTestCommandLineState(ConfigurationMode.AUTOMATIC, true)
+
+    fun testExecuteFoundryTestGutterWithManualPathWindows() =
+        checkPathWithForgeTestCommandLineState(ConfigurationMode.MANUAL, true)
+
+    private fun checkPathWithForgeTestCommandLineState(configurationMode: ConfigurationMode, isWindows: Boolean) {
         val forge = TestExecutable.Builder(
             "forge", TestExecutable.Workdir.UnderDir(Paths.get(myFixture.tempDirPath)), testRootDisposable
         ).exitCode(0).build()
@@ -86,9 +93,9 @@ class ForgeTestSettingsTest : BasePlatformTestCase() {
 
         val processHandler = commandLineState.startProcess()
 
-        val resolved = resolveForgeExecutable(settings.testFoundryExecutablePath, false)
+        val resolved = resolveForgeExecutable(settings.testFoundryExecutablePath, isWindows)
         val expected = if (configurationMode == ConfigurationMode.AUTOMATIC) {
-            System.getProperty("user.home") + "/.foundry/bin/forge"
+            System.getProperty("user.home") + "/.foundry/bin/forge" + if (isWindows) ".exe" else ""
         } else {
             resolved
         }
