@@ -1,0 +1,111 @@
+package me.serce.solidity.ide.run
+
+import com.intellij.execution.RunManager
+import com.intellij.execution.executors.DefaultRunExecutor
+import com.intellij.execution.runners.ExecutionEnvironmentBuilder
+import com.intellij.testFramework.fixtures.BasePlatformTestCase
+import me.serce.solidity.resolveForgeExecutable
+import me.serce.solidity.settings.ConfigurationMode
+import me.serce.solidity.settings.SoliditySettings
+import me.serce.solidity.settings.SoliditySettingsState
+import me.serce.solidity.testutil.TestExecutable
+import java.nio.file.Paths
+
+class ForgeTestSettingsTest : BasePlatformTestCase() {
+
+    private lateinit var originalSettings: SoliditySettingsState
+
+    override fun setUp() {
+        super.setUp()
+        val settings = SoliditySettings.getInstance(project)
+        originalSettings = SoliditySettingsState().also { it.copyFrom(settings.state) }
+        project.basePath
+    }
+
+    override fun tearDown() = try {
+        val settings = SoliditySettings.getInstance(project)
+        settings.loadState(originalSettings)
+    } finally {
+        super.tearDown()
+    }
+
+    fun testResolveForgeExecutableMac() {
+        withUserHome("TEST_HOME") {
+            val settings = SoliditySettings()
+            settings.testFoundryExecutablePath = ""
+
+            val resolved = resolveForgeExecutable(settings.testFoundryExecutablePath, false)
+
+            val expected = "TEST_HOME/.foundry/bin/forge"
+            assertEquals(expected, resolved)
+        }
+    }
+
+    fun testResolveForgeExecutableWindows() {
+        withUserHome("TEST_HOME") {
+            val settings = SoliditySettings()
+            settings.formatterFoundryExecutablePath = ""
+
+            val resolved = resolveForgeExecutable(settings.testFoundryExecutablePath, true)
+
+            // Ideally, this test would verify the win separator, but the Paths.get behaviour isn't mockable.
+            val expected = "TEST_HOME/.foundry/bin/forge.exe"
+            assertEquals(expected, resolved)
+        }
+    }
+
+    fun testExecuteFoundryTestGutterWithAutomaticPath() =
+        checkPathWithForgeTestCommandLineState(ConfigurationMode.AUTOMATIC)
+
+    fun testExecuteFoundryTestGutterWithManualPath() = checkPathWithForgeTestCommandLineState(ConfigurationMode.MANUAL)
+
+    private fun checkPathWithForgeTestCommandLineState(configurationMode: ConfigurationMode) {
+        val forge = TestExecutable.Builder(
+            "forge", TestExecutable.Workdir.UnderDir(Paths.get(myFixture.tempDirPath)), testRootDisposable
+        ).exitCode(0).build()
+
+        val settings = SoliditySettings.getInstance(project).apply {
+            testFoundryConfigurationMode = configurationMode
+            testFoundryExecutablePath = forge.path
+            testFoundryConfigPath = myFixture.tempDirPath
+        }
+
+        val configurationType = ForgeTestRunConfigurationType()
+        val factory = ForgeTestRunConfigurationFactory(configurationType)
+        val configuration = ForgeTestRunConfiguration(project, factory, "Test Configuration")
+
+        configuration.workingDirectory = myFixture.tempDirPath
+        configuration.testName = "testIncrement"
+        configuration.contractName = "CounterTest"
+
+        val executor = DefaultRunExecutor.getRunExecutorInstance()
+        val configurationSettings = RunManager.getInstance(project).createConfiguration(configuration, factory)
+        val env = ExecutionEnvironmentBuilder.create(executor, configurationSettings).build()
+
+        val commandLineState = ForgeTestCommandLineState(configuration, env)
+
+        val processHandler = commandLineState.startProcess()
+
+        val resolved = resolveForgeExecutable(settings.testFoundryExecutablePath, false)
+        val expected = if (configurationMode == ConfigurationMode.AUTOMATIC) {
+            System.getProperty("user.home") + "/.foundry/bin/forge"
+        } else {
+            resolved
+        }
+        assertEquals(expected, processHandler.toString().split(" ").first())
+    }
+
+    private fun withUserHome(fakeHome: String, block: () -> Unit) {
+        val old = System.getProperty("user.home")
+        try {
+            System.setProperty("user.home", fakeHome)
+            block()
+        } finally {
+            if (old == null) {
+                System.clearProperty("user.home")
+            } else {
+                System.setProperty("user.home", old)
+            }
+        }
+    }
+}

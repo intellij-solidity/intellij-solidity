@@ -18,7 +18,7 @@ class ForgeTestCommandLineState(
   }
 
   @Throws(ExecutionException::class)
-  override fun startProcess(): ProcessHandler {
+  public override fun startProcess(): ProcessHandler {
     val cmd = GeneralCommandLine()
       .withWorkDirectory(configuration.workingDirectory)
       .withExePath("$USER_HOME/.foundry/bin/forge")

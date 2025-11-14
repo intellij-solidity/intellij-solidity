@@ -6,6 +6,7 @@ import com.intellij.notification.Notifications
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import com.intellij.util.messages.MessageBusConnection
+import me.serce.solidity.resolveForgeExecutable
 import me.serce.solidity.settings.ConfigurationMode
 import me.serce.solidity.settings.FormatterType
 import me.serce.solidity.settings.SoliditySettings
@@ -38,8 +39,7 @@ class SolidityExternalFormatterTest : BasePlatformTestCase() {
       val settings = SoliditySettings()
       settings.formatterFoundryExecutablePath = ""
 
-      val formatter = SolidityExternalFormatter()
-      val resolved = formatter.resolveForgeExecutable(settings, false)
+      val resolved = resolveForgeExecutable(settings.formatterFoundryExecutablePath, false)
 
       val expected = "TEST_HOME/.foundry/bin/forge"
       assertEquals(expected, resolved)
@@ -51,8 +51,7 @@ class SolidityExternalFormatterTest : BasePlatformTestCase() {
       val settings = SoliditySettings()
       settings.formatterFoundryExecutablePath = ""
 
-      val formatter = SolidityExternalFormatter()
-      val resolved = formatter.resolveForgeExecutable(settings, true)
+      val resolved = resolveForgeExecutable(settings.formatterFoundryExecutablePath, true)
 
       // Ideally, this test would verify the win separator, but the Paths.get behaviour isn't mockable.
       val expected = "TEST_HOME/.foundry/bin/forge.exe"
