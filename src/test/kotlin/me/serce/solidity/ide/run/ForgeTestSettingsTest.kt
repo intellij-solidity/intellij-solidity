@@ -73,7 +73,7 @@ class ForgeTestSettingsTest : BasePlatformTestCase() {
 
         val settings = SoliditySettings.getInstance(project).apply {
             testFoundryConfigurationMode = configurationMode
-            testFoundryExecutablePath = forge.path
+            testFoundryExecutablePath = if (configurationMode == ConfigurationMode.AUTOMATIC) "" else forge.path
             testFoundryConfigPath = myFixture.tempDirPath
         }
 
@@ -91,15 +91,10 @@ class ForgeTestSettingsTest : BasePlatformTestCase() {
 
         val commandLineState = ForgeTestCommandLineState(configuration, env)
 
-        val processHandler = commandLineState.startProcess()
+        val generatedCommandLine = commandLineState.generateCommandLine(isWindows)
 
         val resolved = resolveForgeExecutable(settings.testFoundryExecutablePath, isWindows)
-        val expected = if (configurationMode == ConfigurationMode.AUTOMATIC) {
-            System.getProperty("user.home") + "/.foundry/bin/forge" + if (isWindows) ".exe" else ""
-        } else {
-            resolved
-        }
-        assertEquals(expected, processHandler.toString().split(" ").first())
+        assertEquals(resolved, generatedCommandLine.toString().split(" ").first())
     }
 
     private fun withUserHome(fakeHome: String, block: () -> Unit) {
