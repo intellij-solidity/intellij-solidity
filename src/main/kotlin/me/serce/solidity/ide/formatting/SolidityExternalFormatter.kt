@@ -12,8 +12,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.psi.PsiFile
-import com.intellij.util.SystemProperties
 import me.serce.solidity.lang.core.SolidityFile
+import me.serce.solidity.resolveForgeExecutable
 import me.serce.solidity.settings.FormatterType
 import me.serce.solidity.settings.SoliditySettings
 import org.jetbrains.annotations.VisibleForTesting
@@ -34,7 +34,7 @@ class SolidityExternalFormatter : AsyncDocumentFormattingService() {
     }
 
     val psiFile: PsiFile = request.context.containingFile
-    val foundryExePath = resolveForgeExecutable(settings, SystemInfo.isWindows)
+    val foundryExePath = resolveForgeExecutable(settings.formatterFoundryExecutablePath, SystemInfo.isWindows)
 
     return try {
       val projectPath = project.guessProjectDir()?.canonicalPath
@@ -46,9 +46,9 @@ class SolidityExternalFormatter : AsyncDocumentFormattingService() {
           add("-")
           add("--raw")
 
-          if (settings.configPath.isNotBlank()) {
+          if (settings.formatterFoundryConfigPath.isNotBlank()) {
             add("--root")
-            add(settings.configPath)
+            add(settings.formatterFoundryConfigPath)
           }
         })
         .withCharset(StandardCharsets.UTF_8)
@@ -89,17 +89,6 @@ class SolidityExternalFormatter : AsyncDocumentFormattingService() {
       request.onError("Solidity", e.message ?: "Unknown error")
       null
     }
-  }
-
-  @VisibleForTesting
-  fun resolveForgeExecutable(settings: SoliditySettings, isWindows: Boolean): String {
-    val settingsPath = settings.executablePath.trim()
-    if (settingsPath.isNotEmpty()) {
-      return settingsPath
-    }
-    val home = SystemProperties.getUserHome()
-    val execName = if (isWindows) "forge.exe" else "forge"
-    return Paths.get(home, ".foundry", "bin", execName).toString()
   }
 
   private fun isWarning(line: String): Boolean {

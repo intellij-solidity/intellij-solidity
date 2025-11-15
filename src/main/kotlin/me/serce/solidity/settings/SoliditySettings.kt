@@ -9,10 +9,10 @@ import java.io.File
 class SoliditySettings :
   SimplePersistentStateComponent<SoliditySettingsState>(SoliditySettingsState()) {
 
-  var configurationMode: ConfigurationMode
-    get() = state.configurationMode
+  var formatterConfigurationMode: ConfigurationMode
+    get() = state.formatterConfigurationMode
     set(value) {
-      state.configurationMode = value
+      state.formatterConfigurationMode = value
     }
 
   var formatterType: FormatterType
@@ -21,21 +21,44 @@ class SoliditySettings :
       state.formatterType = value
     }
 
-  var executablePath: String
-    get() = state.executablePath ?: ""
+  var formatterFoundryExecutablePath: String
+    get() = state.formatterFoundryExecutablePath ?: ""
     set(value) {
-      state.executablePath = value
+      state.formatterFoundryExecutablePath = value
     }
 
-  var configPath: String
-    get() = state.configPath ?: ""
+  var formatterFoundryConfigPath: String
+    get() = state.formatterFoundryConfigPath ?: ""
     set(value) {
       val file = File(value)
       if (file.isFile) {
-        state.configPath = file.parentFile.path
+        state.formatterFoundryConfigPath = file.parentFile.path
         return
       }
-      state.configPath = value
+      state.formatterFoundryConfigPath = value
+    }
+
+  var testFoundryConfigurationMode: ConfigurationMode
+    get() = state.testFoundryConfigurationMode
+    set(value) {
+      state.testFoundryConfigurationMode = value
+    }
+
+  var testFoundryExecutablePath: String
+    get() = state.testFoundryExecutablePath ?: ""
+    set(value) {
+      state.testFoundryExecutablePath = value
+    }
+
+  var testFoundryConfigPath: String
+    get() = state.testFoundryConfigPath ?: ""
+    set(value) {
+      val file = File(value)
+      if (file.isFile) {
+        state.testFoundryConfigPath = file.parentFile.path
+        return
+      }
+      state.testFoundryConfigPath = value
     }
 
   companion object {
