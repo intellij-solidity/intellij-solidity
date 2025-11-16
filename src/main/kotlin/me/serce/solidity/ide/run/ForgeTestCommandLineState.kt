@@ -30,10 +30,13 @@ class ForgeTestCommandLineState(
         val settings = SoliditySettings.getInstance(configuration.project)
         val foundryExePath = resolveForgeExecutable(settings.testFoundryExecutablePath, isWindows)
         val cmd = GeneralCommandLine()
-            .withWorkDirectory(configuration.workingDirectory)
             .withExePath(foundryExePath)
             .withParameters("test")
             .withParameters("-vvvv")
+        settings.testFoundryConfigPath.takeIf { it.isNotBlank() }?.let { workDir ->
+            cmd.addParameter("--root")
+            cmd.addParameter(workDir)
+        }
         configuration.testName.takeIf { it.isNotBlank() }?.let { testName ->
             cmd.addParameter("--match-test")
             cmd.addParameter(testName)

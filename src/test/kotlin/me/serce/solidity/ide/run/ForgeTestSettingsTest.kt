@@ -55,18 +55,33 @@ class ForgeTestSettingsTest : BasePlatformTestCase() {
     }
 
     fun testExecuteFoundryTestGutterWithAutomaticPath() =
-        checkPathWithForgeTestCommandLineState(ConfigurationMode.AUTOMATIC, false)
+        checkPathWithForgeTestCommandLineState(ConfigurationMode.AUTOMATIC, false, "")
 
     fun testExecuteFoundryTestGutterWithManualPath() =
-        checkPathWithForgeTestCommandLineState(ConfigurationMode.MANUAL, false)
+        checkPathWithForgeTestCommandLineState(ConfigurationMode.MANUAL, false, "")
 
     fun testExecuteFoundryTestGutterWithAutomaticPathWindows() =
-        checkPathWithForgeTestCommandLineState(ConfigurationMode.AUTOMATIC, true)
+        checkPathWithForgeTestCommandLineState(ConfigurationMode.AUTOMATIC, true, "")
 
     fun testExecuteFoundryTestGutterWithManualPathWindows() =
-        checkPathWithForgeTestCommandLineState(ConfigurationMode.MANUAL, true)
+        checkPathWithForgeTestCommandLineState(ConfigurationMode.MANUAL, true, "")
 
-    private fun checkPathWithForgeTestCommandLineState(configurationMode: ConfigurationMode, isWindows: Boolean) {
+    fun testExecuteFoundryTestGutterWithAutomaticPathAndConfigPath() =
+        checkPathWithForgeTestCommandLineState(ConfigurationMode.AUTOMATIC, false, "not/blank/path")
+
+    fun testExecuteFoundryTestGutterWithManualPathAndConfigPath() =
+        checkPathWithForgeTestCommandLineState(ConfigurationMode.MANUAL, false, "not/blank/path")
+
+    fun testExecuteFoundryTestGutterWithAutomaticPathWindowsAndConfigPath() =
+        checkPathWithForgeTestCommandLineState(ConfigurationMode.AUTOMATIC, true, "not/blank/path")
+
+    fun testExecuteFoundryTestGutterWithManualPathWindowsAndConfigPath() =
+        checkPathWithForgeTestCommandLineState(ConfigurationMode.MANUAL, true, "not/blank/path")
+
+
+    private fun checkPathWithForgeTestCommandLineState(
+        configurationMode: ConfigurationMode, isWindows: Boolean, configPath: String
+    ) {
         val forge = TestExecutable.Builder(
             "forge", TestExecutable.Workdir.UnderDir(Paths.get(myFixture.tempDirPath)), testRootDisposable
         ).exitCode(0).build()
@@ -74,14 +89,14 @@ class ForgeTestSettingsTest : BasePlatformTestCase() {
         val settings = SoliditySettings.getInstance(project).apply {
             testFoundryConfigurationMode = configurationMode
             testFoundryExecutablePath = if (configurationMode == ConfigurationMode.AUTOMATIC) "" else forge.path
-            testFoundryConfigPath = myFixture.tempDirPath
+            testFoundryConfigPath = configPath
         }
 
         val configurationType = ForgeTestRunConfigurationType()
         val factory = ForgeTestRunConfigurationFactory(configurationType)
         val configuration = ForgeTestRunConfiguration(project, factory, "Test Configuration")
 
-        configuration.workingDirectory = myFixture.tempDirPath
+//        configuration.workingDirectory = myFixture.tempDirPath
         configuration.testName = "testIncrement"
         configuration.contractName = "CounterTest"
 
@@ -95,6 +110,14 @@ class ForgeTestSettingsTest : BasePlatformTestCase() {
 
         val resolved = resolveForgeExecutable(settings.testFoundryExecutablePath, isWindows)
         assertEquals(resolved, generatedCommandLine.toString().split(" ").first())
+        assertTrue(
+            if (configPath.isBlank()) {
+                !generatedCommandLine.toString().contains("--root")
+            } else {
+                generatedCommandLine.parametersList.parameters.contains("--root")
+                    .and(generatedCommandLine.parametersList.parameters.contains(configPath))
+            }
+        )
     }
 
     private fun withUserHome(fakeHome: String, block: () -> Unit) {

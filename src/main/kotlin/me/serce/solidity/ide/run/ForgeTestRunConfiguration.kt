@@ -1,13 +1,13 @@
 package me.serce.solidity.ide.run
 
 import com.intellij.execution.Executor
-import com.intellij.execution.configurations.*
+import com.intellij.execution.configurations.LocatableConfigurationBase
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.InvalidDataException
-import com.intellij.openapi.util.JDOMExternalizerUtil
 import com.intellij.openapi.util.WriteExternalException
 import com.intellij.util.xmlb.Constants
+import me.serce.solidity.settings.SoliditySettings
 import org.jdom.Element
 
 class ForgeTestRunConfiguration(
@@ -16,10 +16,14 @@ class ForgeTestRunConfiguration(
   name: String
 ) : LocatableConfigurationBase<ForgeTestCommandLineState>(project, factory, name) {
 
+  val settings = SoliditySettings.getInstance(project)
   var contractName: String = ""
   var testName: String = ""
-  var workingDirectory: String = project.basePath ?: ""
-
+//  var workingDirectory: String = if (settings.testFoundryConfigPath.isNotBlank()) {
+//    settings.testFoundryConfigPath
+//  } else {
+//    project.basePath ?: ""
+//  }
   override fun getConfigurationEditor() = ForgeTestRunConfigurationEditor()
 
   override fun getState(executor: Executor, environment: ExecutionEnvironment) =
@@ -30,7 +34,7 @@ class ForgeTestRunConfiguration(
     super.readExternal(element)
     testName = element.getChild("testName")?.getAttributeValue(Constants.VALUE) ?: ""
     contractName = element.getChild("contractName")?.getAttributeValue(Constants.VALUE) ?: ""
-    workingDirectory = element.getChild("workingDirectory")?.getAttributeValue(Constants.VALUE) ?: ""
+//    workingDirectory = element.getChild("workingDirectory")?.getAttributeValue(Constants.VALUE) ?: ""
   }
 
   @Throws(WriteExternalException::class)
@@ -50,7 +54,7 @@ class ForgeTestRunConfiguration(
     }
 
     val wdEle = Element("workingDirectory")
-    wdEle.setAttribute(Constants.VALUE, workingDirectory)
+//    wdEle.setAttribute(Constants.VALUE, workingDirectory)
     element.addContent(wdEle)
   }
 
