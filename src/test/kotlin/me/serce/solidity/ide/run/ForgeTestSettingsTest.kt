@@ -88,7 +88,7 @@ class ForgeTestSettingsTest : BasePlatformTestCase() {
 
         val settings = SoliditySettings.getInstance(project).apply {
             testFoundryConfigurationMode = configurationMode
-            testFoundryExecutablePath = if (configurationMode == ConfigurationMode.AUTOMATIC) "" else forge.path
+            testFoundryExecutablePath = forge.path
             testFoundryConfigPath = configPath
         }
 
@@ -108,13 +108,19 @@ class ForgeTestSettingsTest : BasePlatformTestCase() {
 
         val generatedCommandLine = commandLineState.generateCommandLine(isWindows)
 
-        val resolved = resolveForgeExecutable(settings.testFoundryExecutablePath, isWindows)
+        val resolved = resolveForgeExecutable(
+            if (settings.testFoundryConfigurationMode == ConfigurationMode.AUTOMATIC) ""
+            else settings.testFoundryExecutablePath, isWindows
+        )
         assertEquals(resolved, generatedCommandLine.toString().split(" ").first())
         assertTrue(
-            if (configPath.isBlank()) {
+            if (settings.testFoundryConfigurationMode == ConfigurationMode.AUTOMATIC) {
                 !generatedCommandLine.toString().contains("--root")
-            } else {
+            } else if (!configPath.isBlank()) {
                 generatedCommandLine.parametersList.parameters.contains("--root")
+                    .and(generatedCommandLine.parametersList.parameters.contains(configPath))
+            } else {
+                !generatedCommandLine.parametersList.parameters.contains("--root")
                     .and(generatedCommandLine.parametersList.parameters.contains(configPath))
             }
         )
