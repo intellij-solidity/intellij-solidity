@@ -47,6 +47,19 @@ class SolidityExternalFormatterTest : BasePlatformTestCase() {
     }
   }
 
+  fun testResolveForgeExecutableAutomaticModeButNotEmptyPath() {
+    withUserHome("TEST_HOME") {
+      val settings = SoliditySettings()
+      settings.formatterFoundryExecutablePath = "custom/forge"
+      settings.formatterConfigurationMode = ConfigurationMode.AUTOMATIC
+
+      val resolved = resolveForgeExecutable(settings.formatterFoundryExecutablePath, settings.formatterConfigurationMode,false)
+
+      val expected = "TEST_HOME/.foundry/bin/forge"
+      assertEquals(expected, resolved)
+    }
+  }
+
   fun testResolveForgeExecutableWindows() {
     withUserHome("TEST_HOME") {
       val settings = SoliditySettings()
