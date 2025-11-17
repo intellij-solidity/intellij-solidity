@@ -74,6 +74,20 @@ class SolidityExternalFormatterTest : BasePlatformTestCase() {
     }
   }
 
+  fun testResolveForgeExecutableWindowsAutomaticModeButNotEmptyPath() {
+    withUserHome("TEST_HOME") {
+      val settings = SoliditySettings()
+      settings.formatterFoundryExecutablePath = "custom/forge"
+      settings.formatterConfigurationMode = ConfigurationMode.AUTOMATIC
+
+      val resolved = resolveForgeExecutable(settings.formatterFoundryExecutablePath,settings.formatterConfigurationMode, true)
+
+      // Ideally, this test would verify the win separator, but the Paths.get behaviour isn't mockable.
+      val expected = "TEST_HOME/.foundry/bin/forge.exe"
+      assertEquals(expected, resolved)
+    }
+  }
+
   private fun reformat() {
     ReformatCodeProcessor(project, myFixture.file, null, false).run()
   }
