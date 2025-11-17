@@ -38,8 +38,9 @@ class SolidityExternalFormatterTest : BasePlatformTestCase() {
     withUserHome("TEST_HOME") {
       val settings = SoliditySettings()
       settings.formatterFoundryExecutablePath = ""
+      settings.formatterConfigurationMode = ConfigurationMode.AUTOMATIC
 
-      val resolved = resolveForgeExecutable(settings.formatterFoundryExecutablePath, false)
+      val resolved = resolveForgeExecutable(settings.formatterFoundryExecutablePath, settings.formatterConfigurationMode,false)
 
       val expected = "TEST_HOME/.foundry/bin/forge"
       assertEquals(expected, resolved)
@@ -50,8 +51,9 @@ class SolidityExternalFormatterTest : BasePlatformTestCase() {
     withUserHome("TEST_HOME") {
       val settings = SoliditySettings()
       settings.formatterFoundryExecutablePath = ""
+      settings.formatterConfigurationMode = ConfigurationMode.AUTOMATIC
 
-      val resolved = resolveForgeExecutable(settings.formatterFoundryExecutablePath, true)
+      val resolved = resolveForgeExecutable(settings.formatterFoundryExecutablePath,settings.formatterConfigurationMode, true)
 
       // Ideally, this test would verify the win separator, but the Paths.get behaviour isn't mockable.
       val expected = "TEST_HOME/.foundry/bin/forge.exe"

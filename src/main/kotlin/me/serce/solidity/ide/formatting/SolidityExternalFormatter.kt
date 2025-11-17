@@ -34,7 +34,11 @@ class SolidityExternalFormatter : AsyncDocumentFormattingService() {
     }
 
     val psiFile: PsiFile = request.context.containingFile
-    val foundryExePath = resolveForgeExecutable(settings.formatterFoundryExecutablePath, SystemInfo.isWindows)
+    val foundryExePath = resolveForgeExecutable(
+      settings.formatterFoundryExecutablePath,
+      settings.formatterConfigurationMode,
+      SystemInfo.isWindows
+    )
 
     return try {
       val projectPath = project.guessProjectDir()?.canonicalPath

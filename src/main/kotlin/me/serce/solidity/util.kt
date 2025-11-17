@@ -4,6 +4,7 @@ import com.intellij.openapi.util.Computable
 import com.intellij.openapi.util.RecursionManager
 import com.intellij.openapi.util.io.StreamUtil
 import com.intellij.util.SystemProperties
+import me.serce.solidity.settings.ConfigurationMode
 import java.io.InputStreamReader
 import java.nio.file.Paths
 
@@ -47,9 +48,11 @@ fun String.removeQuotes(): String {
   return removeSurrounding("\"").removeSurrounding("'")
 }
 
-fun resolveForgeExecutable(executablePathSettings: String, isWindows: Boolean): String {
+fun resolveForgeExecutable(
+  executablePathSettings: String, configurationModeSettings: ConfigurationMode, isWindows: Boolean
+): String {
   val settingsPath = executablePathSettings.trim()
-  if (settingsPath.isNotEmpty()) {
+  if (settingsPath.isNotEmpty() && configurationModeSettings == ConfigurationMode.MANUAL) {
     return settingsPath
   }
   val home = SystemProperties.getUserHome()

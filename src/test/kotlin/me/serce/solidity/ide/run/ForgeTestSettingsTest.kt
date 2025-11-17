@@ -33,8 +33,10 @@ class ForgeTestSettingsTest : BasePlatformTestCase() {
         withUserHome("TEST_HOME") {
             val settings = SoliditySettings()
             settings.testFoundryExecutablePath = ""
+            settings.testFoundryConfigurationMode = ConfigurationMode.AUTOMATIC
 
-            val resolved = resolveForgeExecutable(settings.testFoundryExecutablePath, false)
+            val resolved =
+                resolveForgeExecutable(settings.testFoundryExecutablePath, settings.testFoundryConfigurationMode, false)
 
             val expected = "TEST_HOME/.foundry/bin/forge"
             assertEquals(expected, resolved)
@@ -45,8 +47,10 @@ class ForgeTestSettingsTest : BasePlatformTestCase() {
         withUserHome("TEST_HOME") {
             val settings = SoliditySettings()
             settings.formatterFoundryExecutablePath = ""
+            settings.testFoundryConfigurationMode = ConfigurationMode.AUTOMATIC
 
-            val resolved = resolveForgeExecutable(settings.testFoundryExecutablePath, true)
+            val resolved =
+                resolveForgeExecutable(settings.testFoundryExecutablePath, settings.testFoundryConfigurationMode, true)
 
             // Ideally, this test would verify the win separator, but the Paths.get behaviour isn't mockable.
             val expected = "TEST_HOME/.foundry/bin/forge.exe"
@@ -109,8 +113,7 @@ class ForgeTestSettingsTest : BasePlatformTestCase() {
         val generatedCommandLine = commandLineState.generateCommandLine(isWindows)
 
         val resolved = resolveForgeExecutable(
-            if (settings.testFoundryConfigurationMode == ConfigurationMode.AUTOMATIC) ""
-            else settings.testFoundryExecutablePath, isWindows
+            settings.testFoundryExecutablePath, settings.testFoundryConfigurationMode, isWindows
         )
         assertEquals(resolved, generatedCommandLine.toString().split(" ").first())
         assertTrue(

@@ -13,6 +13,7 @@ import com.intellij.execution.testframework.sm.SMTestRunnerConnectionUtil
 import com.intellij.execution.testframework.sm.runner.SMTRunnerConsoleProperties
 import com.intellij.openapi.util.SystemInfo
 import me.serce.solidity.resolveForgeExecutable
+import me.serce.solidity.settings.ConfigurationMode
 import me.serce.solidity.settings.SoliditySettings
 
 class ForgeTestCommandLineState(
@@ -28,15 +29,16 @@ class ForgeTestCommandLineState(
 
     fun generateCommandLine(isWindows: Boolean = SystemInfo.isWindows): GeneralCommandLine {
         val settings = SoliditySettings.getInstance(configuration.project)
-        val foundryExePath = resolveForgeExecutable(settings.testFoundryExecutablePath, isWindows)
+        val foundryExePath = resolveForgeExecutable(settings.testFoundryExecutablePath,settings.testFoundryConfigurationMode, isWindows)
         val cmd = GeneralCommandLine()
             .withExePath(foundryExePath)
             .withParameters("test")
             .withParameters("-vvvv")
-        settings.testFoundryConfigPath.takeIf { it.isNotBlank() }?.let { workDir ->
-            cmd.addParameter("--root")
-            cmd.addParameter(workDir)
-        }
+        settings.testFoundryConfigPath.takeIf { it.isNotBlank() && settings.testFoundryConfigurationMode == ConfigurationMode.MANUAL }
+            ?.let { workDir ->
+                cmd.addParameter("--root")
+                cmd.addParameter(workDir)
+            }
         configuration.testName.takeIf { it.isNotBlank() }?.let { testName ->
             cmd.addParameter("--match-test")
             cmd.addParameter(testName)
