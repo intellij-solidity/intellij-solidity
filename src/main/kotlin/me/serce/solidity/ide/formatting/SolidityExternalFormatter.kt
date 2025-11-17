@@ -42,24 +42,7 @@ class SolidityExternalFormatter : AsyncDocumentFormattingService() {
 
     return try {
       val projectPath = project.guessProjectDir()?.canonicalPath
-      val cmd = GeneralCommandLine()
-        .withParentEnvironmentType(GeneralCommandLine.ParentEnvironmentType.CONSOLE)
-        .withExePath(foundryExePath)
-        .withParameters(buildList {
-          add("fmt")
-          add("-")
-          add("--raw")
-
-          if (settings.formatterFoundryConfigPath.isNotBlank()) {
-            add("--root")
-            add(settings.formatterFoundryConfigPath)
-          }
-        })
-        .withCharset(StandardCharsets.UTF_8)
-      if (projectPath != null && Paths.get(projectPath).toFile().exists()) {
-        cmd.withWorkDirectory(projectPath)
-      }
-
+      val cmd = generateCmd(foundryExePath, projectPath, settings)
       val handler = OSProcessHandler(cmd)
       handler.processInput.use { outputStream ->
         outputStream.write(psiFile.text.toByteArray())
@@ -93,6 +76,25 @@ class SolidityExternalFormatter : AsyncDocumentFormattingService() {
       request.onError("Solidity", e.message ?: "Unknown error")
       null
     }
+  }
+
+  fun generateCmd(foundryExePath: String, projectPath: String?, settings: SoliditySettings): GeneralCommandLine {
+    val cmd = GeneralCommandLine()
+      .withParentEnvironmentType(GeneralCommandLine.ParentEnvironmentType.CONSOLE)
+      .withExePath(foundryExePath).withParameters(buildList {
+        add("fmt")
+        add("-")
+        add("--raw")
+
+        if (settings.formatterFoundryConfigPath.isNotBlank()) {
+          add("--root")
+          add(settings.formatterFoundryConfigPath)
+        }
+      }).withCharset(StandardCharsets.UTF_8)
+    if (projectPath != null && Paths.get(projectPath).toFile().exists()) {
+      cmd.withWorkDirectory(projectPath)
+    }
+    return cmd
   }
 
   private fun isWarning(line: String): Boolean {

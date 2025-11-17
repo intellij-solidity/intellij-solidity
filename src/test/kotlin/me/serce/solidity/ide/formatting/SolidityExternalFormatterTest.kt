@@ -116,7 +116,35 @@ class SolidityExternalFormatterTest : BasePlatformTestCase() {
     val args = forge.readCapturedArgs()
     assertEquals(args.firstOrNull(), "fmt")
     assertTrue(args.contains("--raw"))
+    assertTrue(args.contains("--root"))
     assertEquals(before, forge.readCapturedStdin())
+  }
+
+  fun testAutomaticConfigurationWithManualFieldsDefined() {
+    val forge = TestExecutable.Builder(
+      "forge",
+      TestExecutable.Workdir.UnderDir(Paths.get(myFixture.tempDirPath)),
+      testRootDisposable
+    )
+      .build()
+
+    val settings= SoliditySettings.getInstance(project).apply {
+      formatterType = FormatterType.FOUNDRY
+      formatterConfigurationMode = ConfigurationMode.AUTOMATIC
+      formatterFoundryExecutablePath = forge.path
+      formatterFoundryConfigPath = myFixture.tempDirPath
+    }
+
+    val formatter = SolidityExternalFormatter()
+    val cmd = formatter.generateCmd(
+      foundryExePath = forge.path,
+      projectPath = project.basePath,
+      settings = settings
+    )
+
+    assertEquals(cmd.parametersList.parameters.first(), "fmt")
+    assertTrue(cmd.parametersList.parameters.contains("--raw"))
+    assertFalse(cmd.parametersList.parameters.contains("--root"))
   }
 
   fun testReportsOnlyErrorsAndFiltersWarnings() {
