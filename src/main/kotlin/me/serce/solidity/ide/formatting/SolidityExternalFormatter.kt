@@ -14,6 +14,7 @@ import com.intellij.openapi.util.SystemInfo
 import com.intellij.psi.PsiFile
 import me.serce.solidity.lang.core.SolidityFile
 import me.serce.solidity.resolveForgeExecutable
+import me.serce.solidity.settings.ConfigurationMode
 import me.serce.solidity.settings.FormatterType
 import me.serce.solidity.settings.SoliditySettings
 import org.jetbrains.annotations.VisibleForTesting
@@ -86,7 +87,7 @@ class SolidityExternalFormatter : AsyncDocumentFormattingService() {
         add("-")
         add("--raw")
 
-        if (settings.formatterFoundryConfigPath.isNotBlank()) {
+        if (settings.formatterFoundryConfigPath.isNotBlank() && settings.formatterConfigurationMode == ConfigurationMode.MANUAL) {
           add("--root")
           add(settings.formatterFoundryConfigPath)
         }
