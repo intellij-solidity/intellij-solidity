@@ -10,6 +10,7 @@ import com.intellij.psi.util.childrenOfType
 import me.serce.solidity.ide.colors.SolColor
 import me.serce.solidity.ide.hints.startOffset
 import me.serce.solidity.lang.psi.*
+import me.serce.solidity.lang.psi.SolParameterList
 import me.serce.solidity.lang.psi.impl.SolErrorDefMixin
 import me.serce.solidity.lang.resolve.SolResolver
 import kotlin.collections.forEach
@@ -81,6 +82,15 @@ class SolidityAnnotator : Annotator {
           }
         }
 
+        val listParameters: List<String> =
+          element.childrenOfType<SolParameterList>().first().parameterDefList.mapNotNull { it.identifier?.text }
+        if (listParameters.isNotEmpty()) {
+          element.block?.let { block ->
+            searchForFunctionParameterInBlock(holder, block, listParameters)
+          }
+        }
+      }
+      is SolConstructorDefinition -> {
         val listParameters: List<String> =
           element.childrenOfType<SolParameterList>().first().parameterDefList.mapNotNull { it.identifier?.text }
         if (listParameters.isNotEmpty()) {
