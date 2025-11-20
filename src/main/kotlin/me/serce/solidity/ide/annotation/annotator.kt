@@ -22,6 +22,11 @@ class SolidityAnnotator : Annotator {
   private fun highlight(element: SolElement, holder: AnnotationHolder) {
     fun keyword() = applyColor(holder, element, SolColor.KEYWORD)
     when (element) {
+      is SolParameterDef -> element.identifier?.let {
+        applyColor(
+          holder, element.identifier!!, SolColor.FUNCTION_PARAMETER
+        )
+      }
       is SolImportDirective -> element.node.children().find { it.text == "from" }
         ?.let { applyColor(holder, it.textRange, SolColor.KEYWORD) }
       is SolNumberType -> applyColor(holder, element, SolColor.TYPE)
