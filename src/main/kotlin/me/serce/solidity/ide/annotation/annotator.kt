@@ -6,11 +6,13 @@ import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.lang.tree.util.children
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
+import com.intellij.psi.util.childrenOfType
 import me.serce.solidity.ide.colors.SolColor
 import me.serce.solidity.ide.hints.startOffset
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.psi.impl.SolErrorDefMixin
 import me.serce.solidity.lang.resolve.SolResolver
+import kotlin.collections.forEach
 
 class SolidityAnnotator : Annotator {
   override fun annotate(element: PsiElement, holder: AnnotationHolder) {
@@ -78,6 +80,14 @@ class SolidityAnnotator : Annotator {
             applyColor(holder, firstChildNode.textRange, SolColor.RECEIVE_FALLBACK_DECLARATION)
           }
         }
+
+        val listParameters: List<String> =
+          element.childrenOfType<SolParameterList>().first().parameterDefList.mapNotNull { it.identifier?.text }
+        if (listParameters.isNotEmpty()) {
+          element.block?.let { block ->
+            searchForFunctionParameterInBlock(holder, block, listParameters)
+          }
+        }
       }
       is SolModifierDefinition -> element.identifier?.let { applyColor(holder, it, SolColor.FUNCTION_DECLARATION) }
       is SolModifierInvocation -> applyColor(holder, element.varLiteral.identifier, SolColor.FUNCTION_CALL)
@@ -110,6 +120,18 @@ class SolidityAnnotator : Annotator {
       is SolYulLeave, is SolYulBreak, is SolYulContinue, is SolYulDefault -> keyword()
       is SolLayoutAt -> keyword()
       is SolMutationModifier -> keyword() // transient
+    }
+  }
+
+  private fun searchForFunctionParameterInBlock(
+    holder: AnnotationHolder, element: PsiElement, listParameters: List<String>
+  ) {
+    element.children.forEach {
+      if (listParameters.contains(it.text)) {
+        applyColor(holder, it, SolColor.FUNCTION_PARAMETER)
+      } else {
+        searchForFunctionParameterInBlock(holder, it, listParameters)
+      }
     }
   }
 
