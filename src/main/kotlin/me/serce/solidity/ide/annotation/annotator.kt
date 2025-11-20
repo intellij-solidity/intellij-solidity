@@ -3,6 +3,7 @@ package me.serce.solidity.ide.annotation
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.Annotator
 import com.intellij.lang.annotation.HighlightSeverity
+import com.intellij.lang.tree.util.children
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
 import me.serce.solidity.ide.colors.SolColor
@@ -21,6 +22,8 @@ class SolidityAnnotator : Annotator {
   private fun highlight(element: SolElement, holder: AnnotationHolder) {
     fun keyword() = applyColor(holder, element, SolColor.KEYWORD)
     when (element) {
+      is SolImportDirective -> element.node.children().find { it.text == "from" }
+        ?.let { applyColor(holder, it.textRange, SolColor.KEYWORD) }
       is SolNumberType -> applyColor(holder, element, SolColor.TYPE)
       is SolElementaryTypeName -> applyColor(holder, element, SolColor.TYPE)
       is SolStateMutabilitySpecifier -> if (element.text == "payable") keyword()
