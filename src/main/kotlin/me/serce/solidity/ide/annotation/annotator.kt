@@ -82,23 +82,9 @@ class SolidityAnnotator : Annotator {
           }
         }
 
-        val listParameters: List<String> =
-          element.childrenOfType<SolParameterList>().first().parameterDefList.mapNotNull { it.identifier?.text }
-        if (listParameters.isNotEmpty()) {
-          element.block?.let { block ->
-            searchForFunctionParameterInBlock(holder, block, listParameters)
-          }
-        }
+        applyColorToParametersInBlock(element, holder)
       }
-      is SolConstructorDefinition -> {
-        val listParameters: List<String> =
-          element.childrenOfType<SolParameterList>().first().parameterDefList.mapNotNull { it.identifier?.text }
-        if (listParameters.isNotEmpty()) {
-          element.block?.let { block ->
-            searchForFunctionParameterInBlock(holder, block, listParameters)
-          }
-        }
-      }
+      is SolConstructorDefinition -> applyColorToParametersInBlock(element, holder)
       is SolModifierDefinition -> element.identifier?.let { applyColor(holder, it, SolColor.FUNCTION_DECLARATION) }
       is SolModifierInvocation -> applyColor(holder, element.varLiteral.identifier, SolColor.FUNCTION_CALL)
       is SolUserDefinedTypeName -> {
@@ -130,6 +116,16 @@ class SolidityAnnotator : Annotator {
       is SolYulLeave, is SolYulBreak, is SolYulContinue, is SolYulDefault -> keyword()
       is SolLayoutAt -> keyword()
       is SolMutationModifier -> keyword() // transient
+    }
+  }
+
+  private fun applyColorToParametersInBlock(element: PsiElement, holder: AnnotationHolder) {
+    val listParameters: List<String> =
+      element.childrenOfType<SolParameterList>().first().parameterDefList.mapNotNull { it.identifier?.text }
+    if (listParameters.isNotEmpty()) {
+      element.childrenOfType<SolBlock>().firstOrNull()?.let { block ->
+        searchForFunctionParameterInBlock(holder, block, listParameters)
+      }
     }
   }
 
