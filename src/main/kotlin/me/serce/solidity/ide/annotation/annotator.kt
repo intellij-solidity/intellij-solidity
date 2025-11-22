@@ -6,7 +6,6 @@ import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.lang.tree.util.children
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
-import com.intellij.psi.util.childrenOfType
 import me.serce.solidity.ide.colors.SolColor
 import me.serce.solidity.ide.hints.startOffset
 import me.serce.solidity.lang.psi.*
@@ -79,10 +78,7 @@ class SolidityAnnotator : Annotator {
             applyColor(holder, firstChildNode.textRange, SolColor.RECEIVE_FALLBACK_DECLARATION)
           }
         }
-
-        applyColorToParametersInBlock(element, holder)
       }
-      is SolConstructorDefinition -> applyColorToParametersInBlock(element, holder)
       is SolModifierDefinition -> element.identifier?.let { applyColor(holder, it, SolColor.FUNCTION_DECLARATION) }
       is SolModifierInvocation -> applyColor(holder, element.varLiteral.identifier, SolColor.FUNCTION_CALL)
       is SolUserDefinedTypeName -> {
@@ -117,6 +113,8 @@ class SolidityAnnotator : Annotator {
       is SolVarLiteral -> {
         if (isContractVariable(element)) {
           applyColor(holder, element, SolColor.STATE_VARIABLE)
+        } else if (isFunctionParameter(element)) {
+          applyColor(holder, element, SolColor.FUNCTION_PARAMETER)
         }
       }
     }
@@ -126,26 +124,8 @@ class SolidityAnnotator : Annotator {
     return element.reference?.resolve() is SolStateVarElement
   }
 
-  private fun applyColorToParametersInBlock(element: PsiElement, holder: AnnotationHolder) {
-    val listParameters: List<String> =
-      element.childrenOfType<SolParameterList>().first().parameterDefList.mapNotNull { it.identifier?.text }
-    if (listParameters.isNotEmpty()) {
-      element.childrenOfType<SolBlock>().firstOrNull()?.let { block ->
-        searchForFunctionParameterInBlock(holder, block, listParameters)
-      }
-    }
-  }
-
-  private fun searchForFunctionParameterInBlock(
-    holder: AnnotationHolder, element: PsiElement, listParameters: List<String>
-  ) {
-    element.children.forEach {
-      if (listParameters.contains(it.text)) {
-        applyColor(holder, it, SolColor.FUNCTION_PARAMETER)
-      } else {
-        searchForFunctionParameterInBlock(holder, it, listParameters)
-      }
-    }
+  private fun isFunctionParameter(element: SolVarLiteral): Boolean {
+    return element.reference?.resolve() is SolParameterDef
   }
 
   private fun applyColor(holder: AnnotationHolder, element: PsiElement, color: SolColor) {
