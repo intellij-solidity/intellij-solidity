@@ -10,10 +10,8 @@ import com.intellij.psi.util.childrenOfType
 import me.serce.solidity.ide.colors.SolColor
 import me.serce.solidity.ide.hints.startOffset
 import me.serce.solidity.lang.psi.*
-import me.serce.solidity.lang.psi.SolParameterList
 import me.serce.solidity.lang.psi.impl.SolErrorDefMixin
 import me.serce.solidity.lang.resolve.SolResolver
-import kotlin.collections.forEach
 
 class SolidityAnnotator : Annotator {
   override fun annotate(element: PsiElement, holder: AnnotationHolder) {
@@ -116,7 +114,16 @@ class SolidityAnnotator : Annotator {
       is SolYulLeave, is SolYulBreak, is SolYulContinue, is SolYulDefault -> keyword()
       is SolLayoutAt -> keyword()
       is SolMutationModifier -> keyword() // transient
+      is SolVarLiteral -> {
+        if (isContractVariable(element)) {
+          applyColor(holder, element, SolColor.STATE_VARIABLE)
+        }
+      }
     }
+  }
+
+  private fun isContractVariable(element: SolVarLiteral): Boolean {
+    return element.reference?.resolve() is SolStateVarElement
   }
 
   private fun applyColorToParametersInBlock(element: PsiElement, holder: AnnotationHolder) {
