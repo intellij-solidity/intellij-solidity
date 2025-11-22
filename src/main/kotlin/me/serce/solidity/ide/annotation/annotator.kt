@@ -115,6 +115,8 @@ class SolidityAnnotator : Annotator {
           applyColor(holder, element, SolColor.STATE_VARIABLE)
         } else if (isFunctionParameter(element)) {
           applyColor(holder, element, SolColor.FUNCTION_PARAMETER)
+        } else if (element.text == "this") {
+          applyColor(holder, element, SolColor.KEYWORD)
         }
       }
     }
