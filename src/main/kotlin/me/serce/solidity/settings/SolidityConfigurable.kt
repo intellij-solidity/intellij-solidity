@@ -30,9 +30,11 @@ class SolidityConfigurable(internal val project: Project) : BoundSearchableConfi
   lateinit var intellijSolidityFormatter: JRadioButton
   private lateinit var foundryFormatter: JRadioButton
   private lateinit var disabledFormatter: JRadioButton
+  private lateinit var foundryFormatterAutomaticConfiguration: JRadioButton
+  private lateinit var foundryFormatterManualConfiguration: JRadioButton
 
-  private lateinit var foundryAutomaticConfiguration: JRadioButton
-  private lateinit var foundryManualConfiguration: JRadioButton
+  private lateinit var foundryTestAutomaticConfiguration: JRadioButton
+  private lateinit var foundryTestManualConfiguration: JRadioButton
 
   override fun createPanel(): DialogPanel {
     val settings: SoliditySettings = SoliditySettings.getInstance(project)
@@ -74,10 +76,10 @@ class SolidityConfigurable(internal val project: Project) : BoundSearchableConfi
         }
         buttonsGroup {
           row {
-            foundryAutomaticConfiguration = radioButton(
+            foundryFormatterAutomaticConfiguration = radioButton(
               "Automatic Foundry configuration"
             ).bindSelected(
-              ConfigurationModeProperty(
+              FormatterConfigurationModeProperty(
                 settings, ConfigurationMode.AUTOMATIC
               )
             ).component
@@ -90,10 +92,10 @@ class SolidityConfigurable(internal val project: Project) : BoundSearchableConfi
             cell(helpLabel)
           }
           row {
-            foundryManualConfiguration = radioButton(
+            foundryFormatterManualConfiguration = radioButton(
               "Manual Foundry configuration"
             ).bindSelected(
-              ConfigurationModeProperty(
+              FormatterConfigurationModeProperty(
                 settings, ConfigurationMode.MANUAL
               )
             ).component
@@ -103,7 +105,7 @@ class SolidityConfigurable(internal val project: Project) : BoundSearchableConfi
         panel {
           row("Forge executable") {
             textFieldWithBrowseButton("Forge executable") { fileChosen(it) }.bindText(
-              settings::executablePath
+              settings::formatterFoundryExecutablePath
             )
           }
 
@@ -111,9 +113,54 @@ class SolidityConfigurable(internal val project: Project) : BoundSearchableConfi
             textFieldWithBrowseButton(
               "Path of foundry.toml",
               project,
-            ) { fileChosen(it) }.bindText(settings::configPath).validationOnInput(validateFoundryTomlConfigDir())
+            ) { fileChosen(it) }.bindText(settings::formatterFoundryConfigPath).validationOnInput(validateFoundryTomlConfigDir())
           }
-        }.visibleIf(foundryManualConfiguration.selected.and(foundryFormatter.selected))
+        }.visibleIf(foundryFormatterManualConfiguration.selected.and(foundryFormatter.selected))
+      }.expanded = true
+
+      collapsibleGroup("Foundry Test Configuration") {
+        buttonsGroup {
+          row {
+            foundryTestAutomaticConfiguration = radioButton(
+              "Automatic Foundry configuration"
+            ).bindSelected(
+              TestConfigurationModeProperty(
+                settings, ConfigurationMode.AUTOMATIC
+              )
+            ).component
+
+            val detectAutomaticallyHelpText =
+              ApplicationNamesInfo.getInstance().fullProductName + " will use the forge executable installed at " + "USER_HOME/.foundry/bin/forge and the foundry.toml configuration file located in the same " + "folder as the current file or any of its parent folders."
+
+            val helpLabel = ContextHelpLabel.create(detectAutomaticallyHelpText)
+            helpLabel.border = JBUI.Borders.emptyLeft(UIUtil.DEFAULT_HGAP)
+            cell(helpLabel)
+          }
+          row {
+            foundryTestManualConfiguration = radioButton(
+              "Manual Foundry configuration"
+            ).bindSelected(
+              TestConfigurationModeProperty(
+                settings, ConfigurationMode.MANUAL
+              )
+            ).component
+          }
+        }
+
+        panel {
+          row("Forge executable") {
+            textFieldWithBrowseButton("Forge executable") { fileChosen(it) }.bindText(
+              settings::testFoundryExecutablePath
+            )
+          }
+
+          row("Path of foundry.toml") {
+            textFieldWithBrowseButton(
+              "Path of foundry.toml",
+              project,
+            ) { fileChosen(it) }.bindText(settings::testFoundryConfigPath).validationOnInput(validateFoundryTomlConfigDir())
+          }
+        }.visibleIf(foundryTestManualConfiguration.selected)
       }.expanded = true
     }
   }
@@ -130,15 +177,28 @@ class SolidityConfigurable(internal val project: Project) : BoundSearchableConfi
     }
   }
 
-  private class ConfigurationModeProperty(
+  private class FormatterConfigurationModeProperty(
     private val settings: SoliditySettings,
     private val mode: ConfigurationMode,
   ) : MutableProperty<Boolean> {
-    override fun get(): Boolean = settings.configurationMode == mode
+    override fun get(): Boolean = settings.formatterConfigurationMode == mode
 
     override fun set(value: Boolean) {
       if (value) {
-        settings.configurationMode = mode
+        settings.formatterConfigurationMode = mode
+      }
+    }
+  }
+
+  private class TestConfigurationModeProperty(
+    private val settings: SoliditySettings,
+    private val mode: ConfigurationMode,
+  ) : MutableProperty<Boolean> {
+    override fun get(): Boolean = settings.testFoundryConfigurationMode == mode
+
+    override fun set(value: Boolean) {
+      if (value) {
+        settings.testFoundryConfigurationMode = mode
       }
     }
   }
