@@ -39,8 +39,9 @@ class SolidityAnnotator : Annotator {
           "msg", "block", "abi" -> applyColor(holder, element.expression.firstChild, SolColor.GLOBAL)
         }
 
-        if (element.reference?.resolve() is SolFunctionDefinition) {
-          applyColor(holder, element.referenceNameElement, SolColor.FUNCTION_CALL)
+        when (element.reference?.resolve()) {
+          is SolFunctionDefinition -> applyColor(holder, element.referenceNameElement, SolColor.FUNCTION_CALL)
+          is SolStateVariableDeclaration -> applyColor(holder, element.referenceNameElement, SolColor.STATE_VARIABLE)
         }
       }
       is SolErrorDefMixin -> {
