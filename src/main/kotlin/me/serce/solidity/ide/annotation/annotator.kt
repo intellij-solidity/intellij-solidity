@@ -124,6 +124,10 @@ class SolidityAnnotator : Annotator {
       is SolYulFunctionCall -> applyColor(holder, element.firstChild, SolColor.FUNCTION_CALL)
       is SolLayoutAt -> keyword()
       is SolMutationModifier -> keyword() // transient
+      is SolPragmaDirective -> {
+        element.node.children().find { it.text == "solidity" }
+          ?.let { applyColor(holder, it.textRange, SolColor.KEYWORD) }
+      }
       is SolVarLiteral, is SolYulPath -> {
         if (additionalKeywordList().contains(element.text)) {
           applyColor(holder, element, SolColor.KEYWORD)
@@ -149,7 +153,7 @@ class SolidityAnnotator : Annotator {
   }
 
   private fun additionalKeywordList(): List<String> {
-    return listOf("this", "require", "assert","super")
+    return listOf("this", "require", "assert", "super")
   }
 
   private fun globalKeywordList(): List<String> {
