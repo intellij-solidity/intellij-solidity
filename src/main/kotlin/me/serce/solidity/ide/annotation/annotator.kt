@@ -120,9 +120,10 @@ class SolidityAnnotator : Annotator {
       is SolYulVariableDeclaration, is SolYulSwitchStatement, is SolYulSwitchCase ->
         applyColor(holder, element.firstChild, SolColor.KEYWORD)
       is SolYulLeave, is SolYulBreak, is SolYulContinue, is SolYulDefault -> keyword()
+      is SolYulFunctionCall -> applyColor(holder, element.firstChild, SolColor.FUNCTION_CALL)
       is SolLayoutAt -> keyword()
       is SolMutationModifier -> keyword() // transient
-      is SolVarLiteral -> {
+      is SolVarLiteral, is SolYulPath -> {
         if (additionalKeywordList().contains(element.text)) {
           applyColor(holder, element, SolColor.KEYWORD)
         } else if (globalKeywordList().contains(element.text)) {
