@@ -46,6 +46,8 @@ class SolidityAnnotator : Annotator {
           is SolVariableDeclaration -> if (elementRef.parent is SolStructDefinition) {
             element.identifier?.let { applyColor(holder, it, SolColor.STRUCT_MEMBER) }
           }
+          is SolEnumValue -> applyColor(holder, element.referenceNameElement, SolColor.ENUM_VALUE)
+          is SolEnumDefinition -> applyColor(holder, element.referenceNameElement, SolColor.ENUM_NAME)
         }
       }
       is SolErrorDefMixin -> {
