@@ -76,6 +76,11 @@ class SolidityAnnotator : Annotator {
           applyColor(holder, element.identifier, SolColor.STATE_VARIABLE)
         }
       }
+      is SolVariableDeclaration -> {
+        if (isStorageElement(element) && element.identifier != null) {
+          applyColor(holder, element.identifier!!, SolColor.STATE_VARIABLE)
+        }
+      }
       is SolFunctionDefinition -> {
         val identifier = element.identifier
         if (identifier !== null) {
@@ -144,6 +149,9 @@ class SolidityAnnotator : Annotator {
             is SolParameterDef -> handleParameterDef(elementRef, element, holder)
             is SolErrorDefinition -> applyColor(holder, element, SolColor.ERROR_NAME)
             is SolEventDefinition -> applyColor(holder, element, SolColor.EVENT_NAME)
+            is SolVariableDeclaration -> if (isStorageElement(elementRef)) {
+              applyColor(holder, element, SolColor.STATE_VARIABLE)
+            }
             else -> {
 
             }
@@ -153,8 +161,12 @@ class SolidityAnnotator : Annotator {
     }
   }
 
+  private fun isStorageElement(element: PsiElement): Boolean {
+    return element.firstChild.childrenOfType<SolStorageLocationSpecifier>().firstOrNull()?.text == "storage"
+  }
+
   private fun handleParameterDef(parameterDef: SolParameterDef, element: PsiElement, holder: AnnotationHolder) {
-    if (parameterDef.firstChild.childrenOfType<SolStorageLocationSpecifier>().firstOrNull()?.text == "storage") {
+    if (isStorageElement(parameterDef)) {
       applyColor(
         holder, element, SolColor.STATE_VARIABLE
       )
