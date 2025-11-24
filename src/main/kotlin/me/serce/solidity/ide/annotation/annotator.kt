@@ -6,6 +6,7 @@ import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.lang.tree.util.children
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
+import com.intellij.psi.util.childrenOfType
 import me.serce.solidity.ide.colors.SolColor
 import me.serce.solidity.ide.hints.startOffset
 import me.serce.solidity.lang.psi.*
@@ -22,10 +23,10 @@ class SolidityAnnotator : Annotator {
   private fun highlight(element: SolElement, holder: AnnotationHolder) {
     fun keyword() = applyColor(holder, element, SolColor.KEYWORD)
     when (element) {
-      is SolParameterDef -> element.identifier?.let {
-        applyColor(
-          holder, element.identifier!!, SolColor.FUNCTION_PARAMETER
-        )
+      is SolParameterDef -> {
+        element.identifier?.let {
+          handleParameterDef(element, element.identifier!!, holder)
+        }
       }
       is SolImportDirective -> element.node.children().find { it.text == "from" }
         ?.let { applyColor(holder, it.textRange, SolColor.KEYWORD) }
@@ -136,11 +137,11 @@ class SolidityAnnotator : Annotator {
         } else if (element.text == "keccak256") {
           applyColor(holder, element, SolColor.GLOBAL_FUNCTION_CALL)
         } else {
-          when (element.reference?.resolve()) {
+          when (val elementRef = element.reference?.resolve()) {
             is SolContractDefinition -> applyColor(holder, element, SolColor.CONTRACT_NAME)
             is SolFunctionDefinition -> applyColor(holder, element, SolColor.FUNCTION_CALL)
             is SolStateVarElement -> applyColor(holder, element, SolColor.STATE_VARIABLE)
-            is SolParameterDef -> applyColor(holder, element, SolColor.FUNCTION_PARAMETER)
+            is SolParameterDef -> handleParameterDef(elementRef, element, holder)
             is SolErrorDefinition -> applyColor(holder, element, SolColor.ERROR_NAME)
             is SolEventDefinition -> applyColor(holder, element, SolColor.EVENT_NAME)
             else -> {
@@ -149,6 +150,18 @@ class SolidityAnnotator : Annotator {
           }
         }
       }
+    }
+  }
+
+  private fun handleParameterDef(parameterDef: SolParameterDef, element: PsiElement, holder: AnnotationHolder) {
+    if (parameterDef.firstChild.childrenOfType<SolStorageLocationSpecifier>().firstOrNull()?.text == "storage") {
+      applyColor(
+        holder, element, SolColor.STATE_VARIABLE
+      )
+    } else {
+      applyColor(
+        holder, element, SolColor.FUNCTION_PARAMETER
+      )
     }
   }
 
