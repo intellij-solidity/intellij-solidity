@@ -1,5 +1,6 @@
 package me.serce.solidity.ide.colors
 
+import com.intellij.openapi.editor.XmlHighlighterColors
 import com.intellij.openapi.editor.colors.TextAttributesKey
 import com.intellij.openapi.options.colors.AttributesDescriptor
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors as Defaults
@@ -20,8 +21,10 @@ enum class SolColor(humanName: String, default: TextAttributesKey) {
   GLOBAL("Identifiers//Global", Defaults.GLOBAL_VARIABLE),
   CONSTANT("Identifiers//Constant", Defaults.STATIC_FIELD),
   STATE_VARIABLE("Identifiers//State variable", Defaults.INSTANCE_FIELD),
+  STRUCT_MEMBER("Identifiers//Struct member", XmlHighlighterColors.XML_CUSTOM_TAG_NAME),
 
   FUNCTION_DECLARATION("Functions//Function declaration", Defaults.FUNCTION_DECLARATION),
+  FUNCTION_PARAMETER("Functions//Function parameter", Defaults.PARAMETER),
   RECEIVE_FALLBACK_DECLARATION("Functions//Receive/Fallback declaration", Defaults.STATIC_METHOD),
   FUNCTION_CALL("Functions//Function call", Defaults.FUNCTION_CALL),
   GLOBAL_FUNCTION_CALL("Functions//Global function call", Defaults.GLOBAL_VARIABLE),

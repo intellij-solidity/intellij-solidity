@@ -3,8 +3,10 @@ package me.serce.solidity.ide.annotation
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.Annotator
 import com.intellij.lang.annotation.HighlightSeverity
+import com.intellij.lang.tree.util.children
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
+import com.intellij.psi.util.childrenOfType
 import me.serce.solidity.ide.colors.SolColor
 import me.serce.solidity.ide.hints.startOffset
 import me.serce.solidity.lang.psi.*
@@ -21,13 +23,32 @@ class SolidityAnnotator : Annotator {
   private fun highlight(element: SolElement, holder: AnnotationHolder) {
     fun keyword() = applyColor(holder, element, SolColor.KEYWORD)
     when (element) {
+      is SolParameterDef -> {
+        element.identifier?.let {
+          handleParameterDef(element, element.identifier!!, holder)
+        }
+      }
+      is SolImportDirective -> element.node.children().find { it.text == "from" }
+        ?.let { applyColor(holder, it.textRange, SolColor.KEYWORD) }
       is SolNumberType -> applyColor(holder, element, SolColor.TYPE)
       is SolElementaryTypeName -> applyColor(holder, element, SolColor.TYPE)
       is SolStateMutabilitySpecifier -> if (element.text == "payable") keyword()
       is SolEnumValue -> applyColor(holder, element, SolColor.ENUM_VALUE)
-      is SolMemberAccessExpression -> when(element.expression.firstChild.text) {
-        "super" -> applyColor(holder, element.expression.firstChild, SolColor.KEYWORD)
-        "msg", "block", "abi" -> applyColor(holder, element.expression.firstChild, SolColor.GLOBAL)
+      is SolMemberAccessExpression -> {
+        when (element.expression.firstChild.text) {
+          "super" -> applyColor(holder, element.expression.firstChild, SolColor.KEYWORD)
+          "msg", "block", "abi" -> applyColor(holder, element.expression.firstChild, SolColor.GLOBAL)
+        }
+
+        when (val elementRef: SolElement? = element.reference?.resolve()) {
+          is SolFunctionDefinition -> applyColor(holder, element.referenceNameElement, SolColor.FUNCTION_CALL)
+          is SolStateVariableDeclaration -> applyColor(holder, element.referenceNameElement, SolColor.STATE_VARIABLE)
+          is SolVariableDeclaration -> if (elementRef.parent is SolStructDefinition) {
+            element.identifier?.let { applyColor(holder, it, SolColor.STRUCT_MEMBER) }
+          }
+          is SolEnumValue -> applyColor(holder, element.referenceNameElement, SolColor.ENUM_VALUE)
+          is SolEnumDefinition -> applyColor(holder, element.referenceNameElement, SolColor.ENUM_NAME)
+        }
       }
       is SolErrorDefMixin -> {
         applyColor(holder, element.identifier, SolColor.KEYWORD)
@@ -60,6 +81,11 @@ class SolidityAnnotator : Annotator {
           applyColor(holder, element.identifier, SolColor.STATE_VARIABLE)
         }
       }
+      is SolVariableDeclaration -> {
+        if (isStorageElement(element) && element.identifier != null) {
+          applyColor(holder, element.identifier!!, SolColor.STATE_VARIABLE)
+        }
+      }
       is SolFunctionDefinition -> {
         val identifier = element.identifier
         if (identifier !== null) {
@@ -81,18 +107,24 @@ class SolidityAnnotator : Annotator {
           is SolUserDefinedValueTypeDefinition -> applyColor(holder, element, SolColor.USER_DEFINED_VALUE_TYPE)
         }
       }
-      is SolFunctionCallElement -> when(element.firstChild.text) {
-        "keccak256" -> applyColor(holder, element.firstChild, SolColor.GLOBAL_FUNCTION_CALL)
-        "require" -> applyColor(holder, element.firstChild, SolColor.KEYWORD)
-        "assert" -> applyColor(holder, element.firstChild, SolColor.KEYWORD)
-        else -> when(SolResolver.resolveTypeNameUsingImports(element).firstOrNull()) {
-          is SolErrorDefinition -> applyColor(holder, element.referenceNameElement, SolColor.ERROR_NAME)
-          is SolEventDefinition -> applyColor(holder, element.referenceNameElement, SolColor.EVENT_NAME)
-          else -> element.firstChild.let {
-            if (it is SolPrimaryExpression && SolResolver.resolveTypeNameUsingImports(element.firstChild).filterIsInstance<SolStructDefinition>().isNotEmpty()) {
-              applyColor(holder, element.referenceNameElement, SolColor.STRUCT_NAME)
-            } else {
-              applyColor(holder, element.referenceNameElement, SolColor.FUNCTION_CALL)
+      is SolFunctionCallElement -> {
+        when (element.firstChild.text) {
+          "keccak256" -> applyColor(holder, element.firstChild, SolColor.GLOBAL_FUNCTION_CALL)
+          "require" -> applyColor(holder, element.firstChild, SolColor.KEYWORD)
+          "assert" -> applyColor(holder, element.firstChild, SolColor.KEYWORD)
+          else -> when (SolResolver.resolveTypeNameUsingImports(element).firstOrNull()) {
+            is SolErrorDefinition -> applyColor(holder, element.referenceNameElement, SolColor.ERROR_NAME)
+            is SolEventDefinition -> applyColor(holder, element.referenceNameElement, SolColor.EVENT_NAME)
+            else -> element.firstChild.let {
+              if (it is SolPrimaryExpression && SolResolver.resolveTypeNameUsingImports(element.firstChild)
+                  .filterIsInstance<SolStructDefinition>().isNotEmpty()
+              ) {
+                applyColor(holder, element.referenceNameElement, SolColor.STRUCT_NAME)
+              } else if (element.referenceNameElement.reference?.resolve() is SolContractDefinition) {
+                applyColor(holder, element.referenceNameElement, SolColor.CONTRACT_NAME)
+              } else {
+                applyColor(holder, element.referenceNameElement, SolColor.FUNCTION_CALL)
+              }
             }
           }
         }
@@ -100,9 +132,62 @@ class SolidityAnnotator : Annotator {
       is SolYulVariableDeclaration, is SolYulSwitchStatement, is SolYulSwitchCase ->
         applyColor(holder, element.firstChild, SolColor.KEYWORD)
       is SolYulLeave, is SolYulBreak, is SolYulContinue, is SolYulDefault -> keyword()
+      is SolYulFunctionCall -> applyColor(holder, element.firstChild, SolColor.FUNCTION_CALL)
       is SolLayoutAt -> keyword()
       is SolMutationModifier -> keyword() // transient
+      is SolPragmaDirective -> {
+        element.node.children().find { it.text == "solidity" }
+          ?.let { applyColor(holder, it.textRange, SolColor.KEYWORD) }
+      }
+      is SolVarLiteral, is SolYulPath -> {
+        if (additionalKeywordList().contains(element.text)) {
+          applyColor(holder, element, SolColor.KEYWORD)
+        } else if (globalKeywordList().contains(element.text)) {
+          applyColor(holder, element, SolColor.GLOBAL)
+        } else if (element.text == "keccak256") {
+          applyColor(holder, element, SolColor.GLOBAL_FUNCTION_CALL)
+        } else {
+          when (val elementRef = element.reference?.resolve()) {
+            is SolContractDefinition -> applyColor(holder, element, SolColor.CONTRACT_NAME)
+            is SolFunctionDefinition -> applyColor(holder, element, SolColor.FUNCTION_CALL)
+            is SolStateVarElement -> applyColor(holder, element, SolColor.STATE_VARIABLE)
+            is SolParameterDef -> handleParameterDef(elementRef, element, holder)
+            is SolErrorDefinition -> applyColor(holder, element, SolColor.ERROR_NAME)
+            is SolEventDefinition -> applyColor(holder, element, SolColor.EVENT_NAME)
+            is SolVariableDeclaration -> if (isStorageElement(elementRef)) {
+              applyColor(holder, element, SolColor.STATE_VARIABLE)
+            }
+            else -> {
+
+            }
+          }
+        }
+      }
     }
+  }
+
+  private fun isStorageElement(element: PsiElement): Boolean {
+    return element.firstChild.childrenOfType<SolStorageLocationSpecifier>().firstOrNull()?.text == "storage"
+  }
+
+  private fun handleParameterDef(parameterDef: SolParameterDef, element: PsiElement, holder: AnnotationHolder) {
+    if (isStorageElement(parameterDef)) {
+      applyColor(
+        holder, element, SolColor.STATE_VARIABLE
+      )
+    } else {
+      applyColor(
+        holder, element, SolColor.FUNCTION_PARAMETER
+      )
+    }
+  }
+
+  private fun additionalKeywordList(): List<String> {
+    return listOf("this", "require", "assert", "super")
+  }
+
+  private fun globalKeywordList(): List<String> {
+    return listOf("msg", "block", "abi")
   }
 
   private fun applyColor(holder: AnnotationHolder, element: PsiElement, color: SolColor) {
