@@ -3,6 +3,17 @@ package me.serce.solidity.ide.typing
 import me.serce.solidity.utils.SolTestBase
 
 class SolBlockCommentEnterHandlerTest : SolTestBase() {
+  fun testNonSolidityFilesAreNotAffected() = checkByText(
+    "/*<caret>",
+    """
+      /*
+      <caret>
+    """.trimIndent(),
+    fileName = "main.notsol"
+  ) {
+    myFixture.type('\n')
+  }
+
   fun testBlockCommentContinuation() = checkByText(
     "/*<caret>",
     """
@@ -53,6 +64,17 @@ class SolBlockCommentEnterHandlerTest : SolTestBase() {
     myFixture.type('\n')
   }
 
+  fun testBlockCommentContinuationFromSingleLine() = checkByText(
+    "/*<caret>*/",
+    """
+      /*
+       * <caret>
+       */
+    """.trimIndent()
+  ) {
+    myFixture.type('\n')
+  }
+
   fun testBlockCommentEnterWithinTheComment() = checkByText(
     """
       /*
@@ -80,6 +102,22 @@ class SolBlockCommentEnterHandlerTest : SolTestBase() {
        * foo
        * <caret>
        */
+    """.trimIndent()
+  ) {
+    myFixture.type('\n')
+  }
+
+  fun testBlockCommentEnterAfterTheComment() = checkByText(
+    """
+      /*
+       * 
+       *//<caret>
+    """.trimIndent(),
+    """
+      /*
+       * 
+       *//
+      <caret>
     """.trimIndent()
   ) {
     myFixture.type('\n')
