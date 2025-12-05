@@ -82,6 +82,69 @@ class ForgeTestSettingsTest : BasePlatformTestCase() {
     fun testExecuteFoundryTestGutterWithManualPathWindowsAndConfigPath() =
         checkPathWithForgeTestCommandLineState(ConfigurationMode.MANUAL, true, "not/blank/path")
 
+    fun testExecuteFoundryTestGutterWithAutomaticPathAndWorkingDirectory() =
+        checkPathWithForgeTestCommandLineState(
+            ConfigurationMode.AUTOMATIC,
+            false,
+            "",
+            workingDirectory = "not/blank/working/dir"
+        )
+
+    fun testExecuteFoundryTestGutterWithManualPathAndWorkingDirectory() =
+        checkPathWithForgeTestCommandLineState(
+            ConfigurationMode.MANUAL,
+            false,
+            "",
+            workingDirectory = "not/blank/working/dir"
+        )
+
+    fun testExecuteFoundryTestGutterWithAutomaticPathWindowsAndWorkingDirectory() =
+        checkPathWithForgeTestCommandLineState(
+            ConfigurationMode.AUTOMATIC,
+            true,
+            "",
+            workingDirectory = "not/blank/working/dir"
+        )
+
+    fun testExecuteFoundryTestGutterWithManualPathWindowsAndWorkingDirectory() =
+        checkPathWithForgeTestCommandLineState(
+            ConfigurationMode.MANUAL,
+            true,
+            "",
+            workingDirectory = "not/blank/working/dir"
+        )
+
+    fun testExecuteFoundryTestGutterWithAutomaticPathConfigPathAndWorkingDirectory() =
+        checkPathWithForgeTestCommandLineState(
+            ConfigurationMode.AUTOMATIC,
+            false,
+            configPath = "not/blank/path",
+            workingDirectory = "not/blank/working/dir"
+        )
+
+    fun testExecuteFoundryTestGutterWithManualPathConfigPathAndWorkingDirectory() =
+        checkPathWithForgeTestCommandLineState(
+            ConfigurationMode.MANUAL,
+            false,
+            configPath = "not/blank/path",
+            workingDirectory = "not/blank/working/dir"
+        )
+
+    fun testExecuteFoundryTestGutterWithAutomaticPathWindowsConfigPathAndWorkingDirectory() =
+        checkPathWithForgeTestCommandLineState(
+            ConfigurationMode.AUTOMATIC,
+            true,
+            configPath = "not/blank/path",
+            workingDirectory = "not/blank/working/dir"
+        )
+
+    fun testExecuteFoundryTestGutterWithManualPathWindowsConfigPathAndWorkingDirectory() =
+        checkPathWithForgeTestCommandLineState(
+            ConfigurationMode.MANUAL,
+            true,
+            configPath = "not/blank/path",
+            workingDirectory = "not/blank/working/dir"
+        )
 
     private fun checkPathWithForgeTestCommandLineState(
         configurationMode: ConfigurationMode, isWindows: Boolean, configPath: String, workingDirectory: String = ""
@@ -117,7 +180,10 @@ class ForgeTestSettingsTest : BasePlatformTestCase() {
         )
         assertEquals(resolved, generatedCommandLine.toString().split(" ").first())
         assertTrue(
-            if (settings.testFoundryConfigurationMode == ConfigurationMode.AUTOMATIC) {
+            if (configuration.workingDirectory.isNotBlank()) {
+                generatedCommandLine.parametersList.parameters.contains("--root")
+                    .and(generatedCommandLine.parametersList.parameters.contains(workingDirectory))
+            } else if (settings.testFoundryConfigurationMode == ConfigurationMode.AUTOMATIC) {
                 !generatedCommandLine.toString().contains("--root")
             } else if (!configPath.isBlank()) {
                 generatedCommandLine.parametersList.parameters.contains("--root")
