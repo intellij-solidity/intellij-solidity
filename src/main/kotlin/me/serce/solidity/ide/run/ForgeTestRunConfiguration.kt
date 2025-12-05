@@ -19,11 +19,9 @@ class ForgeTestRunConfiguration(
   val settings = SoliditySettings.getInstance(project)
   var contractName: String = ""
   var testName: String = ""
-//  var workingDirectory: String = if (settings.testFoundryConfigPath.isNotBlank()) {
-//    settings.testFoundryConfigPath
-//  } else {
-//    project.basePath ?: ""
-//  }
+  var workingDirectory: String = settings.testFoundryConfigPath.ifBlank {
+      project.basePath ?: ""
+  }
   override fun getConfigurationEditor() = ForgeTestRunConfigurationEditor()
 
   override fun getState(executor: Executor, environment: ExecutionEnvironment) =
@@ -34,7 +32,7 @@ class ForgeTestRunConfiguration(
     super.readExternal(element)
     testName = element.getChild("testName")?.getAttributeValue(Constants.VALUE) ?: ""
     contractName = element.getChild("contractName")?.getAttributeValue(Constants.VALUE) ?: ""
-//    workingDirectory = element.getChild("workingDirectory")?.getAttributeValue(Constants.VALUE) ?: ""
+    workingDirectory = element.getChild("workingDirectory")?.getAttributeValue(Constants.VALUE) ?: ""
   }
 
   @Throws(WriteExternalException::class)
@@ -54,7 +52,7 @@ class ForgeTestRunConfiguration(
     }
 
     val wdEle = Element("workingDirectory")
-//    wdEle.setAttribute(Constants.VALUE, workingDirectory)
+    wdEle.setAttribute(Constants.VALUE, workingDirectory)
     element.addContent(wdEle)
   }
 

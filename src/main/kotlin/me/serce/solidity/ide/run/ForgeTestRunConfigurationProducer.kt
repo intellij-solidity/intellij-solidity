@@ -54,7 +54,7 @@ class ForgeTestRunConfigurationProducer : LazyRunConfigurationProducer<ForgeTest
           configuration.name = "${element.contract?.name}.${element.name}"
           configuration.testName = element.name ?: ""
           configuration.contractName = element.contract?.name ?: ""
-//          configuration.workingDirectory = project.basePath ?: ""
+          configuration.workingDirectory = project.basePath ?: ""
           sourceElement.set(element)
           return true
         }
@@ -63,7 +63,7 @@ class ForgeTestRunConfigurationProducer : LazyRunConfigurationProducer<ForgeTest
       is SolContractDefinition -> {
         configuration.name = element.name ?: ""
         configuration.contractName = element.name ?: ""
-//        configuration.workingDirectory = project.basePath ?: ""
+        configuration.workingDirectory = project.basePath ?: ""
         sourceElement.set(element)
         return true
       }
@@ -74,7 +74,7 @@ class ForgeTestRunConfigurationProducer : LazyRunConfigurationProducer<ForgeTest
 
   fun runTest(project: Project, fullTestName: String) {
     val configuration = ForgeTestRunConfiguration(project, configurationFactory, "Forge Test - $fullTestName")
-//    configuration.workingDirectory = project.basePath ?: ""
+    configuration.workingDirectory = project.basePath ?: ""
 
     testNameRegex.matchEntire(fullTestName)?.let { m ->
       configuration.contractName = m.destructured.component1()

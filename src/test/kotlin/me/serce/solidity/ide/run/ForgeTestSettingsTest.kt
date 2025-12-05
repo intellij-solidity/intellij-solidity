@@ -84,7 +84,7 @@ class ForgeTestSettingsTest : BasePlatformTestCase() {
 
 
     private fun checkPathWithForgeTestCommandLineState(
-        configurationMode: ConfigurationMode, isWindows: Boolean, configPath: String
+        configurationMode: ConfigurationMode, isWindows: Boolean, configPath: String, workingDirectory: String = ""
     ) {
         val forge = TestExecutable.Builder(
             "forge", TestExecutable.Workdir.UnderDir(Paths.get(myFixture.tempDirPath)), testRootDisposable
@@ -100,7 +100,7 @@ class ForgeTestSettingsTest : BasePlatformTestCase() {
         val factory = ForgeTestRunConfigurationFactory(configurationType)
         val configuration = ForgeTestRunConfiguration(project, factory, "Test Configuration")
 
-//        configuration.workingDirectory = myFixture.tempDirPath
+        configuration.workingDirectory = workingDirectory
         configuration.testName = "testIncrement"
         configuration.contractName = "CounterTest"
 

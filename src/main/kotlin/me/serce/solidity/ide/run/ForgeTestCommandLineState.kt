@@ -34,11 +34,14 @@ class ForgeTestCommandLineState(
             .withExePath(foundryExePath)
             .withParameters("test")
             .withParameters("-vvvv")
-        settings.testFoundryConfigPath.takeIf { it.isNotBlank() && settings.testFoundryConfigurationMode == ConfigurationMode.MANUAL }
-            ?.let { workDir ->
-                cmd.addParameter("--root")
-                cmd.addParameter(workDir)
+        val rootPath = configuration.workingDirectory.takeIf { it.isNotBlank() }
+            ?: settings.testFoundryConfigPath.takeIf {
+                it.isNotBlank() && settings.testFoundryConfigurationMode == ConfigurationMode.MANUAL
             }
+        rootPath?.let {
+            cmd.addParameter("--root")
+            cmd.addParameter(it)
+        }
         configuration.testName.takeIf { it.isNotBlank() }?.let { testName ->
             cmd.addParameter("--match-test")
             cmd.addParameter(testName)
