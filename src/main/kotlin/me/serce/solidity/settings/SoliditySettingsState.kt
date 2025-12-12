@@ -19,4 +19,8 @@ class SoliditySettingsState : BaseState() {
   var executablePath by string()
   var configPath by string()
 
+  var testFoundryConfigurationMode by enum(ConfigurationMode.AUTOMATIC)
+  var testFoundryExecutablePath by string()
+  var testFoundryConfigPath by string()
+
 }

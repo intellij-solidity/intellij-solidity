@@ -9,7 +9,7 @@ import java.io.File
 class SoliditySettings :
   SimplePersistentStateComponent<SoliditySettingsState>(SoliditySettingsState()) {
 
-  var configurationMode: ConfigurationMode
+  var formatterConfigurationMode: ConfigurationMode
     get() = state.configurationMode
     set(value) {
       state.configurationMode = value
@@ -21,13 +21,13 @@ class SoliditySettings :
       state.formatterType = value
     }
 
-  var executablePath: String
+  var formatterFoundryExecutablePath: String
     get() = state.executablePath ?: ""
     set(value) {
       state.executablePath = value
     }
 
-  var configPath: String
+  var formatterFoundryConfigPath: String
     get() = state.configPath ?: ""
     set(value) {
       val file = File(value)
@@ -36,6 +36,29 @@ class SoliditySettings :
         return
       }
       state.configPath = value
+    }
+
+  var testFoundryConfigurationMode: ConfigurationMode
+    get() = state.testFoundryConfigurationMode
+    set(value) {
+      state.testFoundryConfigurationMode = value
+    }
+
+  var testFoundryExecutablePath: String
+    get() = state.testFoundryExecutablePath ?: ""
+    set(value) {
+      state.testFoundryExecutablePath = value
+    }
+
+  var testFoundryConfigPath: String
+    get() = state.testFoundryConfigPath ?: ""
+    set(value) {
+      val file = File(value)
+      if (file.isFile) {
+        state.testFoundryConfigPath = file.parentFile.path
+        return
+      }
+      state.testFoundryConfigPath = value
     }
 
   companion object {

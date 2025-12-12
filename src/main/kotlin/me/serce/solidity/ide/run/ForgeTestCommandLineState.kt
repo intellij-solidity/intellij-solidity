@@ -1,39 +1,57 @@
 package me.serce.solidity.ide.run
 
-import com.intellij.execution.*
+import com.intellij.execution.DefaultExecutionResult
+import com.intellij.execution.ExecutionException
+import com.intellij.execution.ExecutionResult
+import com.intellij.execution.Executor
 import com.intellij.execution.configurations.CommandLineState
 import com.intellij.execution.configurations.GeneralCommandLine
-import com.intellij.execution.process.*
+import com.intellij.execution.process.ProcessHandler
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.execution.runners.ProgramRunner
 import com.intellij.execution.testframework.sm.SMTestRunnerConnectionUtil
 import com.intellij.execution.testframework.sm.runner.SMTRunnerConsoleProperties
+import com.intellij.openapi.util.SystemInfo
+import me.serce.solidity.resolveForgeExecutable
+import me.serce.solidity.settings.ConfigurationMode
+import me.serce.solidity.settings.SoliditySettings
 
 class ForgeTestCommandLineState(
   private val configuration: ForgeTestRunConfiguration,
-  environment: ExecutionEnvironment
+  environment: ExecutionEnvironment,
 ) : CommandLineState(environment) {
-  companion object {
-    private val USER_HOME = System.getProperty("user.home")
-  }
 
   @Throws(ExecutionException::class)
-  override fun startProcess(): ProcessHandler {
-    val cmd = GeneralCommandLine()
-      .withWorkDirectory(configuration.workingDirectory)
-      .withExePath("$USER_HOME/.foundry/bin/forge")
-      .withParameters("test")
-      .withParameters("-vvvv")
-    configuration.testName.takeIf { it.isNotBlank() }?.let { testName ->
-      cmd.addParameter("--match-test")
-      cmd.addParameter(testName)
-    }
-    configuration.contractName.takeIf { it.isNotBlank() }?.let { contractName ->
-      cmd.addParameter("--match-contract")
-      cmd.addParameter(contractName)
-    }
+  public override fun startProcess(): ProcessHandler {
+    val cmd = generateCommandLine()
     return ForgeTestTransformingProcessHandler(cmd)
   }
+
+    fun generateCommandLine(isWindows: Boolean = SystemInfo.isWindows): GeneralCommandLine {
+        val settings = SoliditySettings.getInstance(configuration.project)
+        val foundryExePath =
+            resolveForgeExecutable(settings.testFoundryExecutablePath, settings.testFoundryConfigurationMode, isWindows)
+        val cmd = GeneralCommandLine()
+            .withExePath(foundryExePath)
+            .withParameters("test")
+            .withParameters("-vvvv")
+
+        if (configuration.workingDirectory.isNotBlank()) {
+            cmd.withWorkDirectory(configuration.workingDirectory)
+        } else if (settings.testFoundryConfigPath.isNotBlank() && settings.testFoundryConfigurationMode == ConfigurationMode.MANUAL) {
+            cmd.addParameter("--root")
+            cmd.addParameter(settings.testFoundryConfigPath)
+        }
+        configuration.testName.takeIf { it.isNotBlank() }?.let { testName ->
+            cmd.addParameter("--match-test")
+            cmd.addParameter(testName)
+        }
+        configuration.contractName.takeIf { it.isNotBlank() }?.let { contractName ->
+            cmd.addParameter("--match-contract")
+            cmd.addParameter(contractName)
+        }
+        return cmd
+    }
 
   @Throws(ExecutionException::class)
   override fun execute(executor: Executor, runner: ProgramRunner<*>): ExecutionResult {

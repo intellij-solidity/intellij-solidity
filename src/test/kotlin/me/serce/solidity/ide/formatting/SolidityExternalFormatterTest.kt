@@ -6,6 +6,7 @@ import com.intellij.notification.Notifications
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import com.intellij.util.messages.MessageBusConnection
+import me.serce.solidity.resolveForgeExecutable
 import me.serce.solidity.settings.ConfigurationMode
 import me.serce.solidity.settings.FormatterType
 import me.serce.solidity.settings.SoliditySettings
@@ -36,10 +37,23 @@ class SolidityExternalFormatterTest : BasePlatformTestCase() {
   fun testResolveForgeExecutableMac() {
     withUserHome("TEST_HOME") {
       val settings = SoliditySettings()
-      settings.executablePath = ""
+      settings.formatterFoundryExecutablePath = ""
+      settings.formatterConfigurationMode = ConfigurationMode.AUTOMATIC
 
-      val formatter = SolidityExternalFormatter()
-      val resolved = formatter.resolveForgeExecutable(settings, false)
+      val resolved = resolveForgeExecutable(settings.formatterFoundryExecutablePath, settings.formatterConfigurationMode,false)
+
+      val expected = "TEST_HOME/.foundry/bin/forge"
+      assertEquals(expected, resolved)
+    }
+  }
+
+  fun testResolveForgeExecutableAutomaticModeButNotEmptyPath() {
+    withUserHome("TEST_HOME") {
+      val settings = SoliditySettings()
+      settings.formatterFoundryExecutablePath = "custom/forge"
+      settings.formatterConfigurationMode = ConfigurationMode.AUTOMATIC
+
+      val resolved = resolveForgeExecutable(settings.formatterFoundryExecutablePath, settings.formatterConfigurationMode,false)
 
       val expected = "TEST_HOME/.foundry/bin/forge"
       assertEquals(expected, resolved)
@@ -49,10 +63,24 @@ class SolidityExternalFormatterTest : BasePlatformTestCase() {
   fun testResolveForgeExecutableWindows() {
     withUserHome("TEST_HOME") {
       val settings = SoliditySettings()
-      settings.executablePath = ""
+      settings.formatterFoundryExecutablePath = ""
+      settings.formatterConfigurationMode = ConfigurationMode.AUTOMATIC
 
-      val formatter = SolidityExternalFormatter()
-      val resolved = formatter.resolveForgeExecutable(settings, true)
+      val resolved = resolveForgeExecutable(settings.formatterFoundryExecutablePath,settings.formatterConfigurationMode, true)
+
+      // Ideally, this test would verify the win separator, but the Paths.get behaviour isn't mockable.
+      val expected = "TEST_HOME/.foundry/bin/forge.exe"
+      assertEquals(expected, resolved)
+    }
+  }
+
+  fun testResolveForgeExecutableWindowsAutomaticModeButNotEmptyPath() {
+    withUserHome("TEST_HOME") {
+      val settings = SoliditySettings()
+      settings.formatterFoundryExecutablePath = "custom/forge"
+      settings.formatterConfigurationMode = ConfigurationMode.AUTOMATIC
+
+      val resolved = resolveForgeExecutable(settings.formatterFoundryExecutablePath,settings.formatterConfigurationMode, true)
 
       // Ideally, this test would verify the win separator, but the Paths.get behaviour isn't mockable.
       val expected = "TEST_HOME/.foundry/bin/forge.exe"
@@ -74,9 +102,9 @@ class SolidityExternalFormatterTest : BasePlatformTestCase() {
 
     SoliditySettings.getInstance(project).apply {
       formatterType = FormatterType.FOUNDRY
-      configurationMode = ConfigurationMode.MANUAL
-      executablePath = forge.path
-      configPath = myFixture.tempDirPath
+      formatterConfigurationMode = ConfigurationMode.MANUAL
+      formatterFoundryExecutablePath = forge.path
+      formatterFoundryConfigPath = myFixture.tempDirPath
     }
 
     val before = "contract C { }"
@@ -88,7 +116,35 @@ class SolidityExternalFormatterTest : BasePlatformTestCase() {
     val args = forge.readCapturedArgs()
     assertEquals(args.firstOrNull(), "fmt")
     assertTrue(args.contains("--raw"))
+    assertTrue(args.contains("--root"))
     assertEquals(before, forge.readCapturedStdin())
+  }
+
+  fun testAutomaticConfigurationWithManualFieldsDefined() {
+    val forge = TestExecutable.Builder(
+      "forge",
+      TestExecutable.Workdir.UnderDir(Paths.get(myFixture.tempDirPath)),
+      testRootDisposable
+    )
+      .build()
+
+    val settings= SoliditySettings.getInstance(project).apply {
+      formatterType = FormatterType.FOUNDRY
+      formatterConfigurationMode = ConfigurationMode.AUTOMATIC
+      formatterFoundryExecutablePath = forge.path
+      formatterFoundryConfigPath = myFixture.tempDirPath
+    }
+
+    val formatter = SolidityExternalFormatter()
+    val cmd = formatter.generateCmd(
+      foundryExePath = forge.path,
+      projectPath = project.basePath,
+      settings = settings
+    )
+
+    assertEquals(cmd.parametersList.parameters.first(), "fmt")
+    assertTrue(cmd.parametersList.parameters.contains("--raw"))
+    assertFalse(cmd.parametersList.parameters.contains("--root"))
   }
 
   fun testReportsOnlyErrorsAndFiltersWarnings() {
@@ -113,9 +169,9 @@ class SolidityExternalFormatterTest : BasePlatformTestCase() {
 
     val settings = SoliditySettings.getInstance(project).apply {
       formatterType = FormatterType.FOUNDRY
-      configurationMode = ConfigurationMode.MANUAL
-      executablePath = forge.path
-      configPath = myFixture.tempDirPath
+      formatterConfigurationMode = ConfigurationMode.MANUAL
+      formatterFoundryExecutablePath = forge.path
+      formatterFoundryConfigPath = myFixture.tempDirPath
     }
 
     val before = "contract D{}"
@@ -129,7 +185,7 @@ class SolidityExternalFormatterTest : BasePlatformTestCase() {
     val rootIdx = args.indexOf("--root")
     assertTrue("--root should be present", rootIdx >= 0)
     val rootVal = args.getOrNull(rootIdx + 1)
-    assertEquals(settings.configPath, rootVal)
+    assertEquals(settings.formatterFoundryConfigPath, rootVal)
 
     // TODO: find a way to capture the stderr in the notifications content using test apis
     // assertTrue(content.contains("error: bad syntax"))
@@ -146,9 +202,9 @@ class SolidityExternalFormatterTest : BasePlatformTestCase() {
 
     val settings = SoliditySettings.getInstance(project).apply {
       formatterType = FormatterType.FOUNDRY
-      configurationMode = ConfigurationMode.MANUAL
-      executablePath = forge.path
-      configPath = myFixture.tempDirPath
+      formatterConfigurationMode = ConfigurationMode.MANUAL
+      formatterFoundryExecutablePath = forge.path
+      formatterFoundryConfigPath = myFixture.tempDirPath
     }
 
     myFixture.configureByText("E.sol", "contract E {}")
@@ -156,7 +212,7 @@ class SolidityExternalFormatterTest : BasePlatformTestCase() {
 
     val args = forge.readCapturedArgs()
     val idx = args.indexOf("--root")
-    assertEquals(settings.configPath, args.getOrNull(idx + 1))
+    assertEquals(settings.formatterFoundryConfigPath, args.getOrNull(idx + 1))
   }
 
   fun testUsesDefaultForgePathWhenNotConfigured() {
@@ -173,9 +229,9 @@ class SolidityExternalFormatterTest : BasePlatformTestCase() {
 
       SoliditySettings.getInstance(project).apply {
         formatterType = FormatterType.FOUNDRY
-        configurationMode = ConfigurationMode.MANUAL
-        executablePath = ""
-        configPath = ""
+        formatterConfigurationMode = ConfigurationMode.MANUAL
+        formatterFoundryExecutablePath = ""
+        formatterFoundryConfigPath = ""
       }
 
       val before = "contract F {}"
@@ -201,9 +257,9 @@ class SolidityExternalFormatterTest : BasePlatformTestCase() {
       .build()
     SoliditySettings.getInstance(project).apply {
       formatterType = FormatterType.DISABLED
-      configurationMode = ConfigurationMode.MANUAL
-      executablePath = forge.path
-      configPath = myFixture.tempDirPath
+      formatterConfigurationMode = ConfigurationMode.MANUAL
+      formatterFoundryExecutablePath = forge.path
+      formatterFoundryConfigPath = myFixture.tempDirPath
     }
 
     myFixture.configureByText("NoExternal.sol", "contract X{  }")

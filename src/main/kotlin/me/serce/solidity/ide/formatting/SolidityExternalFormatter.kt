@@ -12,8 +12,9 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.guessProjectDir
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.psi.PsiFile
-import com.intellij.util.SystemProperties
 import me.serce.solidity.lang.core.SolidityFile
+import me.serce.solidity.resolveForgeExecutable
+import me.serce.solidity.settings.ConfigurationMode
 import me.serce.solidity.settings.FormatterType
 import me.serce.solidity.settings.SoliditySettings
 import org.jetbrains.annotations.VisibleForTesting
@@ -34,28 +35,15 @@ class SolidityExternalFormatter : AsyncDocumentFormattingService() {
     }
 
     val psiFile: PsiFile = request.context.containingFile
-    val foundryExePath = resolveForgeExecutable(settings, SystemInfo.isWindows)
+    val foundryExePath = resolveForgeExecutable(
+      settings.formatterFoundryExecutablePath,
+      settings.formatterConfigurationMode,
+      SystemInfo.isWindows
+    )
 
     return try {
       val projectPath = project.guessProjectDir()?.canonicalPath
-      val cmd = GeneralCommandLine()
-        .withParentEnvironmentType(GeneralCommandLine.ParentEnvironmentType.CONSOLE)
-        .withExePath(foundryExePath)
-        .withParameters(buildList {
-          add("fmt")
-          add("-")
-          add("--raw")
-
-          if (settings.configPath.isNotBlank()) {
-            add("--root")
-            add(settings.configPath)
-          }
-        })
-        .withCharset(StandardCharsets.UTF_8)
-      if (projectPath != null && Paths.get(projectPath).toFile().exists()) {
-        cmd.withWorkDirectory(projectPath)
-      }
-
+      val cmd = generateCmd(foundryExePath, projectPath, settings)
       val handler = OSProcessHandler(cmd)
       handler.processInput.use { outputStream ->
         outputStream.write(psiFile.text.toByteArray())
@@ -91,15 +79,23 @@ class SolidityExternalFormatter : AsyncDocumentFormattingService() {
     }
   }
 
-  @VisibleForTesting
-  fun resolveForgeExecutable(settings: SoliditySettings, isWindows: Boolean): String {
-    val settingsPath = settings.executablePath.trim()
-    if (settingsPath.isNotEmpty()) {
-      return settingsPath
+  fun generateCmd(foundryExePath: String, projectPath: String?, settings: SoliditySettings): GeneralCommandLine {
+    val cmd = GeneralCommandLine()
+      .withParentEnvironmentType(GeneralCommandLine.ParentEnvironmentType.CONSOLE)
+      .withExePath(foundryExePath).withParameters(buildList {
+        add("fmt")
+        add("-")
+        add("--raw")
+
+        if (settings.formatterFoundryConfigPath.isNotBlank() && settings.formatterConfigurationMode == ConfigurationMode.MANUAL) {
+          add("--root")
+          add(settings.formatterFoundryConfigPath)
+        }
+      }).withCharset(StandardCharsets.UTF_8)
+    if (projectPath != null && Paths.get(projectPath).toFile().exists()) {
+      cmd.withWorkDirectory(projectPath)
     }
-    val home = SystemProperties.getUserHome()
-    val execName = if (isWindows) "forge.exe" else "forge"
-    return Paths.get(home, ".foundry", "bin", execName).toString()
+    return cmd
   }
 
   private fun isWarning(line: String): Boolean {

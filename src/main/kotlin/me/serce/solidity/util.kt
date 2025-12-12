@@ -3,7 +3,10 @@ package me.serce.solidity
 import com.intellij.openapi.util.Computable
 import com.intellij.openapi.util.RecursionManager
 import com.intellij.openapi.util.io.StreamUtil
+import com.intellij.util.SystemProperties
+import me.serce.solidity.settings.ConfigurationMode
 import java.io.InputStreamReader
+import java.nio.file.Paths
 
 fun <T> recursionGuard(key: Any, memoize: Boolean = true, block: Computable<T>): T? =
   RecursionManager.doPreventingRecursion(key, memoize, block)
@@ -43,4 +46,16 @@ fun <T> nullIfError(action: () -> T): T? {
 }
 fun String.removeQuotes(): String {
   return removeSurrounding("\"").removeSurrounding("'")
+}
+
+fun resolveForgeExecutable(
+  executablePathSettings: String, configurationModeSettings: ConfigurationMode, isWindows: Boolean
+): String {
+  val settingsPath = executablePathSettings.trim()
+  if (settingsPath.isNotEmpty() && configurationModeSettings == ConfigurationMode.MANUAL) {
+    return settingsPath
+  }
+  val home = SystemProperties.getUserHome()
+  val execName = if (isWindows) "forge.exe" else "forge"
+  return Paths.get(home, ".foundry", "bin", execName).toString()
 }
