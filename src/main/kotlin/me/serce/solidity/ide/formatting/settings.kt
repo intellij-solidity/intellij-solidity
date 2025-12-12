@@ -14,6 +14,8 @@ import org.jdom.Element
 import javax.swing.JCheckBox
 
 class SolCodeStyleSettingsProvider : CodeStyleSettingsProvider() {
+  override fun getLanguage(): Language = SolidityLanguage
+
   override fun createCustomSettings(settings: CodeStyleSettings) = SolCodeStyleSettings(true, settings)
 
   override fun getConfigurableDisplayName() = SolidityLanguage.displayName
