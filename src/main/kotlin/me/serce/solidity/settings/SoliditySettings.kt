@@ -10,9 +10,9 @@ class SoliditySettings :
   SimplePersistentStateComponent<SoliditySettingsState>(SoliditySettingsState()) {
 
   var formatterConfigurationMode: ConfigurationMode
-    get() = state.formatterConfigurationMode
+    get() = state.configurationMode
     set(value) {
-      state.formatterConfigurationMode = value
+      state.configurationMode = value
     }
 
   var formatterType: FormatterType
@@ -22,20 +22,20 @@ class SoliditySettings :
     }
 
   var formatterFoundryExecutablePath: String
-    get() = state.formatterFoundryExecutablePath ?: ""
+    get() = state.executablePath ?: ""
     set(value) {
-      state.formatterFoundryExecutablePath = value
+      state.executablePath = value
     }
 
   var formatterFoundryConfigPath: String
-    get() = state.formatterFoundryConfigPath ?: ""
+    get() = state.configPath ?: ""
     set(value) {
       val file = File(value)
       if (file.isFile) {
-        state.formatterFoundryConfigPath = file.parentFile.path
+        state.configPath = file.parentFile.path
         return
       }
-      state.formatterFoundryConfigPath = value
+      state.configPath = value
     }
 
   var testFoundryConfigurationMode: ConfigurationMode
