@@ -181,7 +181,7 @@ class ForgeTestSettingsTest : BasePlatformTestCase() {
         assertEquals(resolved, generatedCommandLine.toString().split(" ").first())
         assertTrue(
             if (configuration.workingDirectory.isNotBlank()) {
-                generatedCommandLine.parametersList.parameters.contains("--root")
+                !generatedCommandLine.parametersList.parameters.contains("--root")
                     .and(generatedCommandLine.parametersList.parameters.contains(workingDirectory))
             } else if (settings.testFoundryConfigurationMode == ConfigurationMode.AUTOMATIC) {
                 !generatedCommandLine.toString().contains("--root")
