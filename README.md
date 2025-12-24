@@ -49,4 +49,5 @@ If you are only starting your way as an Intellij-Plugin developer, feel free to 
 
 For development documentation, see [DEVELOPING](DEVELOPING.md).
 
-### Powered by [![JetBrains logo.](https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.svg)](https://jb.gg/OpenSource)
+## Powered by 
+[![JetBrains logo.](https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.svg)](https://jb.gg/OpenSource)
