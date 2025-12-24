@@ -48,3 +48,6 @@ Contributions are always welcome!
 If you are only starting your way as an Intellij-Plugin developer, feel free to contact [us](https://gitter.im/intellij-solidity/intellij-solidity), and we'll help you with the IDE setup and guide you through the code so that you will be able to make your first contribution and fix that annoying bug that drives you nuts! And then if you are keen, you may dive deeper into the wonderful world of lexers, parsers, types, refactorings and code analysers.
 
 For development documentation, see [DEVELOPING](DEVELOPING.md).
+
+## Powered by 
+[![JetBrains logo.](https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.svg)](https://jb.gg/OpenSource)
