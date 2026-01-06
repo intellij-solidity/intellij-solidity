@@ -13,6 +13,7 @@ plugins {
     kotlin("jvm") version "1.9.25"
     id("org.jetbrains.grammarkit") version "2022.3.2.2"
     id("org.jetbrains.intellij.platform") version "2.7.0"
+    id("me.champeau.jmh") version "0.7.2"
     id("net.researchgate.release") version "3.0.2"
 }
 
@@ -81,6 +82,26 @@ configurations {
     create("parser")
     getByName("runtimeClasspath").exclude(group = "org.slf4j")
     getByName("implementation").exclude(group = "org.slf4j")
+    matching { it.name == "jmhImplementation" }.configureEach {
+        extendsFrom(getByName("testImplementation"))
+    }
+    matching { it.name == "jmhRuntimeClasspath" }.configureEach {
+        extendsFrom(
+            getByName("runtimeClasspath"),
+            getByName("testRuntimeClasspath"),
+            getByName("compileClasspath"),
+            getByName("intellijPlatformClasspath"),
+            getByName("intellijPlatformComposedJar"),
+        )
+    }
+    matching { it.name == "jmhCompileClasspath" }.configureEach {
+        extendsFrom(
+            getByName("compileClasspath"),
+            getByName("testCompileClasspath"),
+            getByName("intellijPlatformClasspath"),
+            getByName("intellijPlatformComposedJar"),
+        )
+    }
 }
 
 dependencies {
@@ -92,6 +113,8 @@ dependencies {
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.opentest4j:opentest4j:1.3.0")
+    jmhImplementation("org.openjdk.jmh:jmh-core:1.37")
+    jmhAnnotationProcessor("org.openjdk.jmh:jmh-generator-annprocess:1.37")
 
     intellijPlatform {
         intellijIdeaUltimate("2024.2.6")
@@ -115,6 +138,21 @@ val codegen = tasks.register("codegen") {
 
 tasks.named("compileKotlin") {
     dependsOn(codegen)
+}
+
+tasks.named<me.champeau.jmh.JmhBytecodeGeneratorTask>("jmhRunBytecodeGenerator") {
+    runtimeClasspath.from(
+        configurations.getByName("intellijPlatformClasspath"),
+        configurations.getByName("compileClasspath"),
+    )
+    classesDirsToProcess.setFrom(sourceSets.named("jmh").get().output.classesDirs)
+}
+
+tasks.named<me.champeau.jmh.JMHTask>("jmh") {
+    jmhClasspath.from(
+        configurations.getByName("intellijPlatformClasspath"),
+        configurations.getByName("compileClasspath"),
+    )
 }
 
 tasks.named<org.jetbrains.grammarkit.tasks.GenerateLexerTask>("generateLexer") {
