@@ -123,6 +123,28 @@ class SolFunctionResolveTest : SolResolveTestBase() {
     }
   }
 
+  fun testResolveImportedFreeFunction() = testResolveBetweenFiles(
+    InlineFile(
+      code = """
+        function foo() public {}
+             //x
+      """,
+      name = "lib.sol"
+    ),
+    InlineFile(
+      code = """
+        import "./lib.sol";
+        contract A {
+            function bar() public {
+                foo();
+                //^
+            }
+        }
+      """,
+      name = "a.sol"
+    )
+  )
+
   fun testResolveContractConstructor() = checkByCode("""
         contract A {
                //x
