@@ -12,7 +12,7 @@ To run all benchmarks, use the following Gradle command from the project root:
 ./gradlew jmh
 ```
 
-To run a specific benchmark:
+To run a specific benchmark (same flags):
 
 ```bash
 ./gradlew jmh -Pjmh.includes='SolidityParserBenchmark'

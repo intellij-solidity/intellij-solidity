@@ -103,10 +103,13 @@ These guidelines are crucial for maintaining a robust and adaptable lexer/parser
             - `folding/` – folding test fixtures
             - `import/` – import test fixtures
             - `refactoring/` – refactoring test fixtures
+    - `src/jmh/` – JMH benchmarks
+        - `README.md` – how to run benchmarks
+        - `kotlin/me/serce/solidity/lang/benchmark/` – benchmark sources
 
-## Agent workflow
+## Knowledge Accumulation
 
-If you are corrected or notice a significant and important piece of information 
+If you are corrected, or you discover a significant and important piece of information that is missing from AGENTS.md (this file), ensure you add it.
 
 ### Codex-specific instructions
 
