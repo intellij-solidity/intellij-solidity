@@ -1,3 +1,4 @@
+import me.champeau.jmh.JmhParameters
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatform
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
@@ -89,6 +90,7 @@ configurations {
         extendsFrom(
             getByName("runtimeClasspath"),
             getByName("testRuntimeClasspath"),
+            getByName("testCompileClasspath"),
             getByName("compileClasspath"),
             getByName("intellijPlatformClasspath"),
             getByName("intellijPlatformComposedJar"),
@@ -153,6 +155,27 @@ tasks.named<me.champeau.jmh.JMHTask>("jmh") {
         configurations.getByName("intellijPlatformClasspath"),
         configurations.getByName("compileClasspath"),
     )
+    jvmArgs.addAll(
+        listOf(
+            "--add-opens", "java.desktop/sun.awt=ALL-UNNAMED",
+            "--add-opens", "java.desktop/java.awt=ALL-UNNAMED",
+            "--add-opens", "java.base/java.lang=ALL-UNNAMED",
+            "-Djava.awt.headless=true",
+            "-Didea.is.unit.test=true",
+            "-Dide.ui.headless=true",
+        )
+    )
+}
+
+// Allow CLI overrides like: -Pjmh.includes=FooBenchmark
+extensions.configure<JmhParameters>("jmh") {
+    fun parseList(raw: String?): List<String> =
+        raw?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() }.orEmpty()
+
+    val includesProp = providers.gradleProperty("jmh.includes").orNull
+    if (!includesProp.isNullOrBlank()) {
+        includes.set(parseList(includesProp))
+    }
 }
 
 tasks.named<org.jetbrains.grammarkit.tasks.GenerateLexerTask>("generateLexer") {

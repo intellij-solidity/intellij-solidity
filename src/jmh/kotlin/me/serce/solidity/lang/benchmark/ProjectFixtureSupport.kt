@@ -36,6 +36,54 @@ object ProjectFixtureSupport {
 
   fun prepareOpenZeppelinFixture(): Path = prepareExternalRepo("openzeppelin")
 
+  fun generateSyntheticProject(
+    fileCount: Int,
+    importFanout: Int,
+    statementCount: Int,
+    includeRootImport: Boolean,
+    includeInheritance: Boolean,
+  ): Path {
+    val baseDir = Files.createTempDirectory("solidity-synthetic-bench")
+    val contractsDir = baseDir.resolve("contracts")
+    Files.createDirectories(contractsDir)
+
+    for (i in 0 until fileCount) {
+      val imports = mutableListOf<Int>()
+      if (includeRootImport && i != 0) {
+        imports.add(0)
+      }
+      if (i == 0) {
+        imports.addAll((1 until minOf(fileCount, importFanout + 1)))
+      } else {
+        imports.addAll((1..importFanout).mapNotNull { offset ->
+          val next = i + offset
+          if (next < fileCount) next else null
+        })
+      }
+      val importLines = imports.distinct().joinToString("\n") { "import \"contracts/File$it.sol\";" }
+      val statements = buildString {
+        repeat(statementCount) { idx ->
+          append("x = x + $idx;")
+          append('\n')
+        }
+      }
+      val inheritance = if (includeInheritance && i != 0) "is C0 " else ""
+      val content = """
+        pragma solidity ^0.8.0;
+        $importLines
+        contract C$i $inheritance{
+          uint256 x;
+          function f() public {
+            $statements
+          }
+        }
+      """.trimIndent()
+      Files.writeString(contractsDir.resolve("File$i.sol"), content)
+    }
+
+    return baseDir
+  }
+
   fun loadSoliditySources(contractsRoot: Path): List<SolSourceFile> {
     if (!Files.isDirectory(contractsRoot)) {
       throw IOException("Contracts directory does not exist: $contractsRoot")
