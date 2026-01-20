@@ -705,3 +705,16 @@ YulBoolean ::= YulTrue | YulFalse
 YulLiteral ::= YulDecimalNumber | YulStringLiteral | YulHexNumber | YulBoolean | YulHexStringLiteral
 // note the parsing order YulPath will match anything
 YulExpression ::= YulFunctionCall | YulLiteral | YulPath
+
+// Standalone Yul
+// The rules are marked unused by the IJ inspections because they're used directly by YulParser
+//noinspection BnfUnusedRule
+private YulObjectStringLiteral ::= stringLiteral
+//noinspection BnfUnusedRule
+private YulObjectHexLiteral ::= hexLiteral
+//noinspection BnfUnusedRule
+YulObject ::= 'object' YulObjectStringLiteral YulLBrace YulObjectCode (YulObject | YulObjectData)* YulRBrace { pin=1 }
+//noinspection BnfUnusedRule
+YulObjectCode ::= 'code' YulBlock { pin=1 }
+//noinspection BnfUnusedRule
+YulObjectData ::= 'data' YulObjectStringLiteral (YulObjectHexLiteral | YulObjectStringLiteral) { pin=1 }
