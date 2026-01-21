@@ -81,15 +81,25 @@
                   implementationClass="me.serce.solidity.lang.SolidityFileType"
                   extensions="sol"
                   fieldName="INSTANCE"/>
+        <fileType name="Yul file"
+                  language="Yul"
+                  implementationClass="me.serce.solidity.lang.YulFileType"
+                  extensions="yul"
+                  fieldName="INSTANCE"/>
         <projectService serviceImplementation="me.serce.solidity.lang.types.SolInternalTypeFactory"/>
 
         <lang.parserDefinition language="Solidity"
                                implementationClass="me.serce.solidity.lang.core.SolidityParserDefinition"/>
+        <lang.parserDefinition language="Yul"
+                               implementationClass="me.serce.solidity.lang.core.YulParserDefinition"/>
 
         <lang.syntaxHighlighterFactory language="Solidity"
                                        implementationClass="me.serce.solidity.ide.SolHighlighterFactory"/>
+        <lang.syntaxHighlighterFactory language="Yul"
+                                       implementationClass="me.serce.solidity.ide.SolHighlighterFactory"/>
 
         <annotator language="Solidity" implementationClass="me.serce.solidity.ide.annotation.SolidityAnnotator"/>
+        <annotator language="Yul" implementationClass="me.serce.solidity.ide.annotation.SolidityAnnotator"/>
 
         <renamePsiElementProcessor implementation="me.serce.solidity.ide.refactoring.RenameContractProcessor"/>
         <renamePsiElementProcessor implementation="me.serce.solidity.ide.refactoring.RenameConstructorProcessor"/>
@@ -101,15 +111,18 @@
 
         <!-- Commenter -->
         <lang.commenter language="Solidity" implementationClass="me.serce.solidity.ide.SolCommenter"/>
+        <lang.commenter language="Yul" implementationClass="me.serce.solidity.ide.SolCommenter"/>
 
         <!-- Block comment typing support -->
         <enterHandlerDelegate implementation="me.serce.solidity.ide.typing.SolBlockCommentEnterHandler"/>
 
         <!-- Brace Matcher -->
         <lang.braceMatcher language="Solidity" implementationClass="me.serce.solidity.ide.SolBraceMatcher"/>
+        <lang.braceMatcher language="Yul" implementationClass="me.serce.solidity.ide.SolBraceMatcher"/>
 
         <!-- Quote Handlers -->
         <lang.quoteHandler language="Solidity" implementationClass="me.serce.solidity.ide.SolQuoteTokenHandler"/>
+        <lang.quoteHandler language="Yul" implementationClass="me.serce.solidity.ide.SolQuoteTokenHandler"/>
 
         <lang.documentationProvider language="Solidity" implementationClass="me.serce.solidity.ide.hints.SolDocumentationProvider"/>
 

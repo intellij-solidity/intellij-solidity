@@ -15,8 +15,8 @@ import me.serce.solidity.lang.psi.*
 import javax.swing.Icon
 
 class SolPsiStructureViewFactory : PsiStructureViewFactory {
-  override fun getStructureViewBuilder(psiFile: PsiFile): StructureViewBuilder {
-    val solFile = psiFile as SolidityFile
+  override fun getStructureViewBuilder(psiFile: PsiFile): StructureViewBuilder? {
+    val solFile = psiFile as? SolidityFile ?: return null
     return object : TreeBasedStructureViewBuilder() {
       override fun createStructureViewModel(editor: Editor?): StructureViewModel {
         return SolStructureViewModel(editor, solFile)
