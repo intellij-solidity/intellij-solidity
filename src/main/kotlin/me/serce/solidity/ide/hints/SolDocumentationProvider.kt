@@ -159,13 +159,13 @@ class SolDocumentationProvider : AbstractDocumentationProvider() {
     element.comments().find { it.elementType == SolidityTokenTypes.NAT_SPEC_TAG && it.text == "@inheritdoc" }?.let {
       it.siblings().firstOrNull { it.elementType == SolidityTokenTypes.COMMENT }?.let {
         val ref = it.text.trimStart().split("\\s".toRegex(), limit = 2)[0]
-        SolFunctionResolver.collectOverriden(function, element.parentOfType(false)).find { it.contract?.identifier?.text == ref }?.let {
+        SolFunctionResolver.collectOverridden(function, element.parentOfType(false)).find { it.contract?.identifier?.text == ref }?.let {
           return findTargetElement(it)
         }
       }
     }
 
-    val base = SolFunctionResolver.collectOverriden(function).takeIf { it.size == 1 }?.first() ?: return emptyList()
+    val base = SolFunctionResolver.collectOverridden(function).takeIf { it.size == 1 }?.first() ?: return emptyList()
     if (function.parameters.mapNotNull { it.identifier?.text } != base.parameters.mapNotNull { it.identifier?.text }) return emptyList()
     return findTargetElement(base)
   }

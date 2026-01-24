@@ -41,7 +41,7 @@ class SolLineMarkerProvider : LineMarkerProvider {
         is SolFunctionDefinition -> {
           val identifier = el.identifier
           if (identifier != null) {
-            val overridden = SolFunctionResolver.collectOverriden(el)
+            val overridden = SolFunctionResolver.collectOverridden(el)
             if (!overridden.isEmpty()) {
               val info = NavigationGutterIconBuilder
                 .create(AllIcons.Gutter.OverridingMethod)
@@ -52,11 +52,11 @@ class SolLineMarkerProvider : LineMarkerProvider {
                 .createLineMarkerInfo(identifier)
               result.add(info)
             }
-            val overrides = SolFunctionResolver.collectOverrides(el)
-            if (!overrides.isEmpty()) {
+
+            if (SolFunctionResolver.hasOverrides(el)) {
               val info = NavigationGutterIconBuilder
                 .create(AllIcons.Gutter.OverridenMethod)
-                .setTargets(overrides)
+                .setTargets(SolFunctionResolver.collectOverrides(el))
                 .setPopupTitle("Is Overridden")
                 .setTooltipText("Is overridden in subcontracts")
                 .setCellRenderer { FunctionCellRenderer(el.containingFile) }
