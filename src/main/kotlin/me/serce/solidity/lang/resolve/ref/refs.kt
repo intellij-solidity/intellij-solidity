@@ -181,7 +181,7 @@ class SolFunctionCallReference(element: SolFunctionCallExpression) : SolReferenc
   }
 
   private fun removeOverrides(callables: Collection<SolCallable>): Collection<SolCallable> {
-    val test = callables.filterIsInstance<SolFunctionDefinition>().flatMap { SolFunctionResolver.collectOverriden(it) }.toSet()
+    val test = callables.filterIsInstance<SolFunctionDefinition>().flatMap { SolFunctionResolver.collectOverridden(it) }.toSet()
     return callables
       .filter {
         when (it) {

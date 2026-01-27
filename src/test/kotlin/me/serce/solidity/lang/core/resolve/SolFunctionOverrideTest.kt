@@ -38,7 +38,7 @@ class SolFunctionOverrideTest : SolResolveTestBase() {
     val (overridden, _) = findElementAndDataInEditor<SolFunctionDefinition>("X")
     val (overrides, _) = findElementAndDataInEditor<SolFunctionDefinition>("Y")
 
-    val overriddenList = SolFunctionResolver.collectOverriden(func)
+    val overriddenList = SolFunctionResolver.collectOverridden(func)
     assert(overriddenList.size == 1)
     assert(overriddenList.firstOrNull() == overridden)
 

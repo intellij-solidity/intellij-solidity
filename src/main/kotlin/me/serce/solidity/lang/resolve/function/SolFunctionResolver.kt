@@ -1,6 +1,7 @@
 package me.serce.solidity.lang.resolve.function
 
 import me.serce.solidity.ide.navigation.findAllImplementations
+import me.serce.solidity.ide.navigation.findImplementations
 import me.serce.solidity.lang.psi.SolContractDefinition
 import me.serce.solidity.lang.psi.SolFunctionDefElement
 import me.serce.solidity.lang.psi.SolFunctionDefinition
@@ -10,7 +11,7 @@ import me.serce.solidity.lang.types.SolContract
 import me.serce.solidity.lang.types.getSolType
 
 object SolFunctionResolver {
-  fun collectOverriden(func: SolFunctionDefElement, contract: SolContractDefinition? = func.parentOfType()): Collection<SolFunctionDefinition> {
+  fun collectOverridden(func: SolFunctionDefElement, contract: SolContractDefinition? = func.parentOfType()): Collection<SolFunctionDefinition> {
     contract ?: return emptyList()
     val parents = try {
       SolContract(contract).linearizeParents().map { it.ref }
@@ -27,6 +28,11 @@ object SolFunctionResolver {
     return contract.findAllImplementations()
       .flatMap { it.functionDefinitionList }
       .filter { signatureEquals(func, it) }
+  }
+
+  fun hasOverrides(func: SolFunctionDefinition): Boolean {
+    val contract = func.parentOfType<SolContractDefinition>() ?: return false
+    return contract.findImplementations().flatMap { it.functionDefinitionList }.any { signatureEquals(func, it) }
   }
 
   private fun signatureEquals(f1: SolFunctionDefElement, f2: SolFunctionDefElement): Boolean {
