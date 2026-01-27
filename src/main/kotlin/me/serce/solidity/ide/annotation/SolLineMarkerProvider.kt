@@ -26,6 +26,9 @@ class SolLineMarkerProvider : LineMarkerProvider {
         is SolContractDefinition -> {
           val identifier = el.identifier
           if (identifier != null) {
+            //TODO: this solution used here and for function overrides doesn't work properly if the contract/function
+            // used is way deeper in the inheritance tree. It's accepted temporarily because it's the source of
+            // performance flaw blocking the UI.
             val targets = el.findImplementations()
             if (targets.findFirst() != null) {
               val info = NavigationGutterIconBuilder
