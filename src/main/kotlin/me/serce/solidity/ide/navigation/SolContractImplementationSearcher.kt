@@ -11,13 +11,10 @@ import com.intellij.psi.search.GlobalSearchScope.FilesScope
 import com.intellij.psi.search.GlobalSearchScope.allScope
 import com.intellij.psi.search.searches.DefinitionsScopedSearch.SearchParameters
 import com.intellij.psi.search.searches.ReferencesSearch
+import com.intellij.psi.util.CachedValueProvider
+import com.intellij.psi.util.CachedValuesManager
 import com.intellij.psi.util.childrenOfType
-import com.intellij.util.ArrayQuery
-import com.intellij.util.CollectionQuery
-import com.intellij.util.EmptyQuery
-import com.intellij.util.FilteredQuery
-import com.intellij.util.Processor
-import com.intellij.util.Query
+import com.intellij.util.*
 import me.serce.solidity.lang.SolidityFileType
 import me.serce.solidity.lang.psi.SolContractDefinition
 import me.serce.solidity.lang.psi.SolImportAliasedPair
@@ -38,27 +35,34 @@ class SolContractImplementationSearcher : QueryExecutorBase<PsiElement, SearchPa
   }
 }
 
+
 fun SolContractDefinition.findAllImplementations(): HashSet<SolContractDefinition> {
-  val implementations = HashSet<SolContractDefinition>()
-  val implQueue = ArrayDeque<SolContractDefinition>(MAX_IMPLEMENTATIONS)
-  implQueue.add(this)
-  // Run the implementation resolution under an empty progress to avoid the noisy
-  // "Must be executed under progress indicator" error, see https://github.com/intellij-solidity/intellij-solidity/issues/295
-  // TODO: would it be worth using a real progress here?
-  // TODO: would resolution from EDT only be called in tests? If not, it might trigger a warning again. If yes, then
-  //    need to find a way to run tests from a non dispatcher thread.
-  val application = ApplicationManager.getApplication() as ApplicationEx
-  if (application.isDispatchThread) {
-    findAllImplementationsInAction(implQueue, implementations)
-  } else {
-    ProgressManager.getInstance().runProcess({
-      application.runReadAction {
-        findAllImplementationsInAction(implQueue, implementations)
-      }
-    }, EmptyProgressIndicator())
+  return CachedValuesManager.getCachedValue(this) {
+    val implementations = HashSet<SolContractDefinition>()
+    val implQueue = ArrayDeque<SolContractDefinition>(MAX_IMPLEMENTATIONS)
+    implQueue.add(this)
+    // Run the implementation resolution under an empty progress to avoid the noisy
+    // "Must be executed under progress indicator" error, see https://github.com/intellij-solidity/intellij-solidity/issues/295
+    // TODO: would it be worth using a real progress here?
+    // TODO: would resolution from EDT only be called in tests? If not, it might trigger a warning again. If yes, then
+    //    need to find a way to run tests from a non dispatcher thread.
+    val application = ApplicationManager.getApplication() as ApplicationEx
+    if (application.isDispatchThread) {
+      findAllImplementationsInAction(implQueue, implementations)
+    } else {
+      ProgressManager.getInstance().runProcess({
+        application.runReadAction {
+          findAllImplementationsInAction(implQueue, implementations)
+        }
+      }, EmptyProgressIndicator())
+    }
+    implementations.remove(this)
+    CachedValueProvider.Result.create(
+      implementations,
+      implementations.mapNotNull { it.containingFile } + this.containingFile
+
+    )
   }
-  implementations.remove(this)
-  return implementations
 }
 
 private fun findAllImplementationsInAction(
