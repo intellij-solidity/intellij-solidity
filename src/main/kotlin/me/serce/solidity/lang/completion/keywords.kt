@@ -6,7 +6,7 @@ import com.intellij.openapi.editor.EditorModificationUtil
 import com.intellij.openapi.project.DumbAware
 import com.intellij.util.ProcessingContext
 
-const val KEYWORD_PRIORITY = 10.0
+const val KEYWORD_PRIORITY = -1.0
 
 val KEYWORD_TYPE = arrayOf(
   "address ",
