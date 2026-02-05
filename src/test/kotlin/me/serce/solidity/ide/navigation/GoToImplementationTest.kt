@@ -59,6 +59,38 @@ class GoToImplementationTest : SolTestBase() {
 
 
 
+  fun testFindFunctionImplementations() = testImplementations("""
+      interface A {
+          function foo/*caret*/() external;
+      }
+      contract B is A {
+          function foo() external {}
+      }
+  """, setOf("foo ctr.sol"), "ctr.sol")
+
+  fun testFindFunctionMultipleImplementations() = testImplementations("""
+      interface A {
+          function foo/*caret*/() external;
+      }
+      contract B is A {
+          function foo() external {}
+      }
+      contract C is A {
+          function foo() external {}
+      }
+  """, setOf("foo ctr.sol"), "ctr.sol")
+
+  fun testFindFunctionImplementationsDeep() = testImplementations("""
+      interface A {
+          function foo/*caret*/() external;
+      }
+      contract B is A {
+      }
+      contract C is B {
+          function foo() external {}
+      }
+  """, setOf("foo ctr.sol"), "ctr.sol")
+
   private fun testImplementations(@Language("Solidity") code: String, options: Set<String>, filename: String) {
     InlineFile(code, name=filename).withCaret()
     val actual = doGoToImplementation()

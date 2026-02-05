@@ -17,8 +17,10 @@ import com.intellij.psi.util.childrenOfType
 import com.intellij.util.*
 import me.serce.solidity.lang.SolidityFileType
 import me.serce.solidity.lang.psi.SolContractDefinition
+import me.serce.solidity.lang.psi.SolFunctionDefinition
 import me.serce.solidity.lang.psi.SolImportAliasedPair
 import me.serce.solidity.lang.psi.SolInheritanceSpecifier
+import me.serce.solidity.lang.resolve.function.SolFunctionResolver
 import java.util.*
 
 private const val MAX_IMPLEMENTATIONS = 250
@@ -26,12 +28,14 @@ private const val MAX_IMPLEMENTATIONS = 250
 class SolContractImplementationSearcher : QueryExecutorBase<PsiElement, SearchParameters>(true) {
 
   override fun processQuery(queryParameters: SearchParameters, consumer: Processor<in PsiElement>) {
-    val contract = queryParameters.element
-    if (contract !is SolContractDefinition) {
-      return
+    when (val element = queryParameters.element) {
+      is SolContractDefinition -> {
+        element.findAllImplementations().forEach { consumer.process(it) }
+      }
+      is SolFunctionDefinition -> {
+        SolFunctionResolver.collectOverrides(element).forEach { consumer.process(it) }
+      }
     }
-    val implementations = contract.findAllImplementations()
-    implementations.forEach { consumer.process(it) }
   }
 }
 
