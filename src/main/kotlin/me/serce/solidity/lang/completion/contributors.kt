@@ -123,7 +123,7 @@ class SolContextCompletionContributor : CompletionContributor(), DumbAware {
                 }
 
               var dirText = dirPartOf(text)
-              val vPath = SolImportPathReference.findImportFile(curFile, dirText)
+              val vPath = SolImportPathReference.findImportFile(project, curFile, dirText)
 
               val prefix = result.prefixMatcher.prefix.takeWhile { knownPrefixes.contains(it) }
               val dirNoPrefix = dirText.dropWhile { knownPrefixes.contains(it) }

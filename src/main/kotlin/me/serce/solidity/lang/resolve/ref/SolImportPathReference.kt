@@ -1,17 +1,13 @@
 package me.serce.solidity.lang.resolve.ref
 
-import com.fasterxml.jackson.databind.node.TextNode
-import com.fasterxml.jackson.dataformat.toml.TomlMapper
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.openapi.vfs.readText
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiManager
 import com.intellij.psi.impl.source.tree.LeafElement
 import me.serce.solidity.ide.inspections.fixes.ImportFileAction
 import me.serce.solidity.lang.core.SolidityFile
 import me.serce.solidity.lang.psi.impl.SolImportPathElement
-import java.io.IOException
-import java.nio.file.Paths
 
 class SolImportPathReference(element: SolImportPathElement) : SolReferenceBase<SolImportPathElement>(element) {
   override fun singleResolve(): PsiElement? {
@@ -20,15 +16,12 @@ class SolImportPathReference(element: SolImportPathElement) : SolReferenceBase<S
       return null
     }
     val path = importText.substring(1, importText.length - 1)
-    return findImportFile(element.containingFile.originalFile.virtualFile, path)
+    return findImportFile(element.project, element.containingFile.originalFile.virtualFile, path)
       ?.let { PsiManager.getInstance(element.project).findFile(it) }
   }
 
   companion object {
-
-    private val tomlMapper by lazy { TomlMapper() }
-
-    fun findImportFile(file: VirtualFile, path: String): VirtualFile? {
+    fun findImportFile(project: Project, file: VirtualFile, path: String): VirtualFile? {
       val directFile = file.findFileByRelativePath("../$path")
       return if (directFile != null) {
         directFile
@@ -41,7 +34,7 @@ class SolImportPathReference(element: SolImportPathElement) : SolReferenceBase<S
         if (ethPmFile != null) {
           return ethPmFile
         }
-        findFoundryImportFile(file, path)
+        findFoundryImportFile(project, file, path)
       }
     }
 
@@ -54,84 +47,8 @@ class SolImportPathReference(element: SolImportPathElement) : SolReferenceBase<S
       }
     }
 
-    // apply foundry remappings to import path
-    private fun applyRemappings(remappings: ArrayList<Pair<String, String>>, path: String): String {
-      var output = path
-      remappings.forEach { (prefix, target) ->
-        if (path.contains(prefix)) {
-          output = path.replace(prefix, target)
-          return output
-        }
-      }
-      return output
-    }
-
-    private fun foundryDefaultFallback(file: VirtualFile, path: String): VirtualFile? {
-      val count = Paths.get(path).nameCount
-      if (count < 2) {
-        return null
-      }
-      val libName = Paths.get(path).subpath(0, 1).toString()
-      val libFile = Paths.get(path).subpath(1, count).toString()
-      val test = file.findFileByRelativePath("lib/$libName/src/$libFile")
-      return test
-    }
-
-    // default lib located at: forge-std/Test.sol => lib/forge-std/src/Test.sol
-    private fun findFoundryImportFile(file: VirtualFile, path: String): VirtualFile? {
-      val testRemappingFile = file.findFileByRelativePath("remappings.txt")
-      val remappings = arrayListOf<Pair<String, String>>()
-      if (testRemappingFile != null) {
-        val mappingsContents =
-          testRemappingFile.contentsToByteArray().toString(Charsets.UTF_8).split("[\r\n]+".toRegex())
-        mappingsContents.forEach { mapping ->
-          val splitMapping = mapping.split("=")
-          if (splitMapping.size == 2) {
-            remappings.add(Pair(splitMapping[0].trim(), splitMapping[1].trim()))
-          }
-        }
-      }
-
-      remappings += remappingsFromFoundryConfigFile(file)
-
-      val remappedPath = applyRemappings(remappings, path)
-      val testRemappedPath = file.findFileByRelativePath(remappedPath)
-      val testFoundryFallback = foundryDefaultFallback(file, path)
-
-      return when {
-        testRemappedPath != null -> testRemappedPath
-        testFoundryFallback != null -> testFoundryFallback
-        file.parent != null -> findFoundryImportFile(file.parent, path)
-        else -> null
-      }
-    }
-
-    private fun remappingsFromFoundryConfigFile(file: VirtualFile): List<Pair<String, String>> {
-      val foundryConfigFile = file.findFileByRelativePath("foundry.toml") ?: return emptyList()
-      val data = try {
-        tomlMapper.readTree(foundryConfigFile.readText())
-      } catch (e: IOException) {
-        null
-      }
-      val remappings = data?.get("profile")?.get("default")?.get("remappings") ?: return emptyList()
-      return remappings //
-        .filterIsInstance<TextNode>() //
-        .map { //
-          // each is e.g. "forge-std/=lib/forge-std/src/"
-          it.textValue().trim('"').split("=") //
-        } //
-        .filter { it.size == 2 } //
-        // "forge-std/" to "lib/forge-std/src/"
-        .map {
-          val first = it[0].trim()
-          val secondRaw = it[1].trim()
-          val second = if (secondRaw.endsWith("/")) {
-            secondRaw
-          } else {
-            "$secondRaw/"
-          }
-          first to second
-        }
+    private fun findFoundryImportFile(project: Project, file: VirtualFile, path: String): VirtualFile? {
+      return SolImportConfigService.getInstance(project).resolve(path, file)
     }
 
     private fun findEthPMImportFile(file: VirtualFile, path: String): VirtualFile? {

@@ -1,7 +1,6 @@
 package me.serce.solidity.ide.inspections.fixes
 
 import com.intellij.codeInsight.hint.QuestionAction
-import com.intellij.ide.util.DefaultPsiElementCellRenderer
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.CommandProcessor
 import com.intellij.openapi.editor.Editor
@@ -9,17 +8,14 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.PopupStep
 import com.intellij.openapi.ui.popup.util.BaseListPopupStep
 import com.intellij.openapi.util.RecursionManager
-import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
-import com.intellij.psi.util.CachedValueProvider
-import com.intellij.psi.util.CachedValuesManager
-import com.intellij.psi.util.PsiModificationTracker
 import com.intellij.ui.popup.list.ListPopupImpl
 import com.intellij.ui.popup.list.PopupListElementRenderer
 import me.serce.solidity.ide.formatting.SolImportOptimizer
+import me.serce.solidity.lang.resolve.ref.SolImportConfigService
 import me.serce.solidity.lang.psi.SolContractDefinition
 import me.serce.solidity.lang.psi.SolImportDirective
 import me.serce.solidity.lang.psi.SolPragmaDirective
@@ -56,7 +52,8 @@ class ImportFileAction(
   }
 
   private fun chooseFileToImport() {
-    val step = object : BaseListPopupStep<PsiFile>("File to import", suggestions.toMutableList()) {
+    val files = suggestions.map { it.virtualFile }.distinct()
+    val step = object : BaseListPopupStep<VirtualFile>("File to import", files.toMutableList()) {
       override fun isAutoSelectionEnabled(): Boolean {
         return false
       }
@@ -65,40 +62,43 @@ class ImportFileAction(
         return true
       }
 
-      override fun onChosen(selectedValue: PsiFile?, finalChoice: Boolean): PopupStep<*>? {
+      override fun onChosen(selectedValue: VirtualFile?, finalChoice: Boolean): PopupStep<*>? {
         if (selectedValue == null) {
           return PopupStep.FINAL_CHOICE
         }
 
         return doFinalStep {
           PsiDocumentManager.getInstance(project).commitAllDocuments()
-          addImport(project, file, selectedValue)
+          val psi = PsiManager.getInstance(project).findFile(selectedValue)
+          if (psi == null) {
+            return@doFinalStep
+          }
+          addImport(project, file, psi)
         }
       }
 
-      override fun hasSubstep(selectedValue: PsiFile?): Boolean {
+      override fun hasSubstep(selectedValue: VirtualFile?): Boolean {
         return true
       }
 
-      override fun getTextFor(value: PsiFile): String {
+      override fun getTextFor(value: VirtualFile): String {
         return value.name
       }
 
-      override fun getIconFor(aValue: PsiFile): Icon? {
-        return aValue.getIcon(0)
+      override fun getIconFor(aValue: VirtualFile): Icon? {
+        return aValue.fileType.icon
       }
     }
 
     val popup = object : ListPopupImpl(project, step) {
-      override fun getListElementRenderer(): ListCellRenderer<PsiFile> {
+      override fun getListElementRenderer(): ListCellRenderer<VirtualFile> {
         @Suppress("UNCHECKED_CAST")
-        val baseRenderer = super.getListElementRenderer() as PopupListElementRenderer<PsiFile>
-        val psiRenderer = DefaultPsiElementCellRenderer()
+        val baseRenderer = super.getListElementRenderer() as PopupListElementRenderer<VirtualFile>
         return ListCellRenderer { list, value, index, isSelected, cellHasFocus ->
           val panel = JPanel(BorderLayout())
           baseRenderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
           panel.add(baseRenderer.nextStepLabel, BorderLayout.EAST)
-          panel.add(psiRenderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus))
+          panel.add(baseRenderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus))
           panel
         }
       }
@@ -159,25 +159,6 @@ class ImportFileAction(
       return factory.createImportDirective(content, false)
     }
 
-    fun readRemappingsFile(project: Project): Map<String, String> {
-      val psiManager = PsiManager.getInstance(project)
-      val file = LocalFileSystem.getInstance().findFileByIoFile(File(project.basePath + "/remappings.txt"))
-      val psiFile: PsiFile? = file?.let { psiManager.findFile(it) }
-      if (psiFile == null) {
-        return emptyMap()
-      }
-      return CachedValuesManager.getCachedValue(psiFile) {
-        val content = psiFile.text
-        val remappingsMap = content.lines()
-          .filter { it.isNotBlank() }
-          .associate {
-            val (a, b) = it.split("=")
-            b.trim() to a.trim()
-          }
-        CachedValueProvider.Result.create(remappingsMap, PsiModificationTracker.MODIFICATION_COUNT)
-      }
-    }
-
     fun buildImportPath(project: Project, source: VirtualFile, destination: VirtualFile): String {
       return Paths.get(source.path).parent.relativize(Paths.get(destination.path)).toString().let { importPath ->
         val separator = File.separator
@@ -189,7 +170,7 @@ class ImportFileAction(
             }
 
             importPath.contains("lib$separator") -> {
-              val mapping = readRemappingsFile(project);
+              val mapping = SolImportConfigService.getInstance(project).reverseRemappings(source)
               mapping.keys.firstOrNull { importPath.contains(it) }
                 ?.let { importPath.substring(importPath.indexOf(it)).replaceFirst(it, mapping[it]!!) }
                 ?: importPath
