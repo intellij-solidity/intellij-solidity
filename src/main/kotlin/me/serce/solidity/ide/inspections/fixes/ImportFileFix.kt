@@ -10,7 +10,6 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import me.serce.solidity.ide.inspections.fixes.ImportFileAction.Companion.buildImportPath
 import me.serce.solidity.lang.psi.SolReferenceElement
-import me.serce.solidity.lang.psi.SolUserDefinedTypeName
 import me.serce.solidity.lang.resolve.SolResolver
 
 class ImportFileFix(element: SolReferenceElement) : LocalQuickFixOnPsiElement(element), HintAction, LocalQuickFix {
@@ -21,7 +20,7 @@ class ImportFileFix(element: SolReferenceElement) : LocalQuickFixOnPsiElement(el
   override fun showHint(editor: Editor): Boolean {
     val element = startElement as? SolReferenceElement
     if (element != null) {
-      val suggestions = SolResolver.resolveTypeName(element).map { it.containingFile }.toSet()
+      val suggestions = resolveSuggestions(element)
       val fixText: String? = when {
           suggestions.size == 1 -> {
             val importPath = buildImportPath(element.project, element.containingFile.virtualFile, suggestions.first().virtualFile)
@@ -61,19 +60,30 @@ class ImportFileFix(element: SolReferenceElement) : LocalQuickFixOnPsiElement(el
   override fun getText(): String = familyName
 
   override fun invoke(project: Project, file: PsiFile, element: PsiElement, endElement: PsiElement) {
-    val suggestions = SolResolver.resolveTypeName(element as SolReferenceElement).map { it.containingFile }.toSet()
-    if (suggestions.size == 1) {
-      ImportFileAction.addImport(project, file, suggestions.first())
+    val referenceElement = element as? SolReferenceElement
+    if (referenceElement == null) {
+      return
     }
+    applyImportFix(referenceElement, null)
   }
 
   override fun invoke(project: Project, editor: Editor?, file: PsiFile?) {
-    val element = startElement as? SolUserDefinedTypeName
-    if (element != null) {
-      val suggestions = SolResolver.resolveTypeName(element as SolReferenceElement).map { it.containingFile }.toSet()
-      if (suggestions.size == 1) {
-        ImportFileAction.addImport(project, element.containingFile, suggestions.first())
-      }
+    val referenceElement = startElement as? SolReferenceElement
+    if (referenceElement == null) {
+      return
+    }
+    applyImportFix(referenceElement, editor)
+  }
+
+  private fun resolveSuggestions(element: SolReferenceElement): Set<PsiFile> {
+    return SolResolver.resolveTypeName(element).map { it.containingFile }.toSet()
+  }
+
+  private fun applyImportFix(element: SolReferenceElement, editor: Editor?) {
+    val suggestions = resolveSuggestions(element)
+    when {
+      suggestions.size == 1 -> ImportFileAction.addImport(element.project, element.containingFile, suggestions.first())
+      suggestions.size > 1 && editor != null -> ImportFileAction(editor, element.containingFile, suggestions).execute()
     }
   }
 }
