@@ -1,8 +1,6 @@
 package me.serce.solidity.ide.inspections.fixes
 
-import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.psi.PsiDocumentManager
-import java.io.File
 import me.serce.solidity.utils.SolTestBase
 import org.junit.Assert.assertEquals
 
@@ -14,11 +12,7 @@ class ImportFileActionTest : SolTestBase() {
       "installed_contracts/github.com/owner/repo/contracts/C.sol",
       "contract C {}",
     )
-    val remapIo = File(project.basePath!!, "remappings.txt").apply {
-      parentFile.mkdirs()
-      writeText("@oz=lib/openzeppelin")
-    }
-    LocalFileSystem.getInstance().refreshAndFindFileByIoFile(remapIo)
+    myFixture.addFileToProject("remappings.txt", "@oz=lib/openzeppelin")
     val remapped = myFixture.addFileToProject(
       "lib/openzeppelin/token/ERC20.sol",
       "contract ERC20 {}",
@@ -41,6 +35,29 @@ class ImportFileActionTest : SolTestBase() {
     check("github.com/owner/repo/C.sol", installed)
     check("@oz/token/ERC20.sol", remapped)
     check("./Util.sol", sibling)
+  }
+
+  fun testExecuteAddsImportUsingFoundryTomlRemapping() {
+    myFixture.addFileToProject(
+      "foundry.toml",
+      """
+      [profile.default]
+      remappings = ["@oz/=lib/openzeppelin/"]
+      """.trimIndent()
+    )
+    val remapped = myFixture.addFileToProject(
+      "lib/openzeppelin/token/ERC20.sol",
+      "contract ERC20 {}",
+    )
+
+    val sourceFile = myFixture.addFileToProject("contracts/MainToml.sol", "contract Main {}")
+    myFixture.configureFromExistingVirtualFile(sourceFile.virtualFile)
+    val source = myFixture.file
+    val action = ImportFileAction(myFixture.editor, source, setOf(remapped))
+    action.execute()
+    PsiDocumentManager.getInstance(project).commitAllDocuments()
+
+    assertEquals("import \"@oz/token/ERC20.sol\";contract Main {}", source.text.trim())
   }
 
 }
