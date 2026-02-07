@@ -2,9 +2,13 @@ package me.serce.solidity.lang.completion
 
 import com.intellij.codeInsight.completion.InsertionContext
 import com.intellij.codeInsight.completion.PrioritizedLookupElement
+import com.intellij.codeInsight.completion.impl.CamelHumpMatcher
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.codeInsight.lookup.LookupElementPresentation
+import com.intellij.openapi.project.DumbService
+import com.intellij.openapi.application.runReadAction
+import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.stubs.StubIndex
@@ -55,18 +59,23 @@ object SolCompleter {
       .toTypedArray()
   }
 
-  fun completeTypeName(element: PsiElement): Array<out LookupElement> {
+  fun completeTypeName(
+    element: PsiElement,
+    prefix: String = "",
+    invocationCount: Int = 1
+  ): Array<out LookupElement> {
+    if (!shouldCompleteGlobalTypes(prefix, invocationCount)) {
+      return emptyArray()
+    }
+    // Use CamelHump matching ("FB" -> "FooBar") to match the behaviour of IJ idea
+    val matcher = if (prefix.isBlank()) null else CamelHumpMatcher(prefix)
     val project = element.project
-    val allTypeNames = StubIndex.getInstance().getAllKeys(
-      SolGotoClassIndex.KEY,
-      project
-    )
-    return allTypeNames
-      .flatMap {
-        StubIndex.getElements(SolGotoClassIndex.KEY, it, project, GlobalSearchScope.projectScope(project), SolNamedElement::class.java)
-      }
-      .filterIsInstance<SolContractDefinition>()
-      .map { ContractLookupElement(it) }
+    return SolContractNamesCache.getInstance(project)
+      .allNames()
+      .asSequence()
+      .filter { matcher == null || matcher.prefixMatches(it) }
+      .map { ContractLookupElement(project, it) }
+      .toList()
       .toTypedArray()
   }
 
@@ -81,7 +90,11 @@ object SolCompleter {
       .toTypedArray()
   }
 
-  fun completeLiteral(element: PsiElement): Sequence<LookupElement> {
+  fun completeLiteral(
+    element: PsiElement,
+    prefix: String = "",
+    invocationCount: Int = 1
+  ): Sequence<LookupElement> {
     val lexicalDeclarations = SolResolver.lexicalDeclarations(element).mapNotNull {
       when (it) {
         is SolFunctionDefinition -> it.toFunctionLookup()
@@ -90,7 +103,15 @@ object SolCompleter {
       }
     }.associateBy { it.lookupString }
     val keys = lexicalDeclarations.keys
-    return lexicalDeclarations.values.asSequence() + completeTypeName(element).filterNot { keys.contains(it.lookupString) }
+    return lexicalDeclarations.values.asSequence() +
+      completeTypeName(element, prefix, invocationCount).asSequence().filterNot { keys.contains(it.lookupString) }
+  }
+
+  private fun shouldCompleteGlobalTypes(prefix: String, invocationCount: Int): Boolean {
+    val minGlobalTypePrefixLength = 2
+    // Keep autopopup cheap by showing project-wide types only on explicit completion,
+    // or after a small typed prefix.
+    return invocationCount >= 1 || prefix.length >= minGlobalTypePrefixLength
   }
 
   fun completeMemberAccess(element: SolMemberAccessExpression): Array<out LookupElement> {
@@ -124,20 +145,50 @@ object SolCompleter {
 
 }
 
-class ContractLookupElement(private val contract: SolContractDefinition) : LookupElement() {
-  // read the lookup string on the contract lookup element construction to avoid the exception
-  // when #getLookupString is called without a read action when the UI is painted.
-  private val contractName: String = contract.name ?: ""
+class ContractLookupElement(
+  private val project: Project,
+  private val contractName: String,
+  private val sourceFileName: String? = null
+) : LookupElement() {
+  constructor(contract: SolContractDefinition) : this(
+    contract.project,
+    contract.name ?: "",
+    contract.containingFile.name
+  )
 
   override fun getLookupString(): String = contractName
 
   override fun renderElement(presentation: LookupElementPresentation) {
-    presentation.icon = contract.icon
+    presentation.icon = SolidityIcons.CONTRACT
     presentation.itemText = contractName
-    presentation.typeText = "from ${contract.containingFile.name}"
+    sourceFileName?.let {
+      presentation.typeText = "from $it"
+    }
   }
 
   override fun handleInsert(context: InsertionContext) {
+    // Stub index access is not safe/reliable during dumb mode:
+    // https://plugins.jetbrains.com/docs/intellij/indexing-and-psi-stubs.html#dumb-mode
+    if (DumbService.isDumb(project)) {
+      return
+    }
+    val contract = runReadAction {
+      val candidates = StubIndex.getElements(
+        SolGotoClassIndex.KEY,
+        contractName,
+        project,
+        GlobalSearchScope.projectScope(project),
+        SolNamedElement::class.java
+      ).filterIsInstance<SolContractDefinition>()
+      val inCurrentFile = candidates.firstOrNull { it.containingFile == context.file }
+      if (inCurrentFile != null) {
+        return@runReadAction inCurrentFile
+      }
+      if (candidates.size == 1) {
+        return@runReadAction candidates.first()
+      }
+      null
+    } ?: return
     if (!ImportFileAction.isImportedAlready(context.file, contract.containingFile)) {
       ImportFileAction.addContractImport(contract, context.file)
     }
