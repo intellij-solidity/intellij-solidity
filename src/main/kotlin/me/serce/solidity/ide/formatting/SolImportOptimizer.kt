@@ -19,10 +19,14 @@ class SolImportOptimizer : ImportOptimizer {
         return processFile(file, true)
     }
 
-    fun processFile(file: PsiFile, fullOptimization: Boolean): Runnable {
-        val list = file.descendantsOfType<SolImportDirective>().toList().takeIf { fullOptimization || it.size > 1 } ?: return Runnable {}
-        return if (fullOptimization) processFull(file, list) else processLight(file, list)
+  fun processFile(file: PsiFile, fullOptimization: Boolean): Runnable {
+    val list = file.descendantsOfType<SolImportDirective>().toList().takeIf { it.isNotEmpty() }
+    return when {
+      list == null || !fullOptimization && list.size <= 1 -> Runnable {}
+      fullOptimization -> processFull(file, list)
+      else -> processLight(file, list)
     }
+  }
 
   private fun processFull(file: PsiFile, list: List<SolImportDirective>): Runnable {
     val addSpecificSymbols = CodeStyle.getSettings(file).solidityCustomSettings.specificSymbolImports
@@ -75,4 +79,3 @@ class SolImportOptimizer : ImportOptimizer {
         }
     }
 }
-

@@ -27,4 +27,23 @@ class SolImportOptimizerTest : SolTestBase() {
       """, "OptimizeImports"
     )
   }
+
+  fun testOptimiseImportsWithoutImports() {
+    checkEditorAction(
+      """
+          pragma solidity ^0.8.26;
+
+          contract C {
+            function a() external {}
+          }
+      """, //
+      """
+          pragma solidity ^0.8.26;
+
+          contract C {
+            function a() external {}
+          }
+      """, "OptimizeImports"
+    )
+  }
 }
