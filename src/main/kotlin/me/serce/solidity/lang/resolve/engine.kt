@@ -9,7 +9,6 @@ import com.intellij.psi.PsiNamedElement
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.stubs.StubIndex
 import com.intellij.psi.util.*
-import com.intellij.util.Processors
 import me.serce.solidity.lang.core.SolidityFile
 import me.serce.solidity.lang.core.SolidityTokenTypes
 import me.serce.solidity.lang.psi.*
@@ -213,39 +212,48 @@ object SolResolver {
     SolConstantVariableDeclaration::class.java,
     SolEnumDefinition::class.java,
     SolErrorDefinition::class.java,
+    SolFunctionDefinition::class.java,
     SolStructDefinition::class.java,
     SolUserDefinedValueTypeDefinition::class.java,
   )
 
   fun collectUsedElements(o: SolImportDirective): List<String> {
     val containingFile = o.containingFile
+    val importedVFiles = collectImports(o).asSequence().mapNotNull { it.file.virtualFile }.toSet()
 
-    val importedNames = collectImportedNames(containingFile)
-
-    val pathes = collectImports(o).map { it.file }
-    val importScope = GlobalSearchScope.filesScope(o.project, pathes.map { it.virtualFile })
-
-    val imported = pathes.flatMap {
-      CachedValuesManager.getCachedValue(it) {
-        val allKeys = HashSet<String>()
-        val scope = GlobalSearchScope.fileScope(it)
-        StubIndex.getInstance().processAllKeys(SolNamedElementIndex.KEY, Processors.cancelableCollectProcessor(allKeys), scope)
-        CachedValueProvider.Result.create(allKeys.filter { StubIndex.getElements(SolNamedElementIndex.KEY, it, scope.project!!, scope, SolNamedElement::class.java).isNotEmpty() }.toSet(), PsiModificationTracker.MODIFICATION_COUNT)
-      }
+    // Be conservative when import targets are unresolved and avoid false "unused import" positives.
+    if (importedVFiles.isEmpty()) {
+      return listOf(o.text)
     }
 
-    fun PsiElement.outerIdentifier() = (this as? SolUserDefinedTypeName)?.findIdentifiers()?.takeIf { it.size == 2 }?.firstOrNull()?.nameOrText ?: ""
-    val targetNames = importedNames.flatMap {
-      ((it.target.outerContract()?.let { listOf(it) } ?: emptyList()) + it.target + it.ref ).mapNotNull { it.name } + it.ref.outerIdentifier()
-    }.toSet()
-    val used = imported.intersect(targetNames)
-      .filter {
-        StubIndex.getElements(SolNamedElementIndex.KEY, it, o.project, importScope, SolNamedElement::class.java)
-          .all { e -> exportElements.any { it.isAssignableFrom(e.javaClass) } }
-      }
+    val importedNames = collectImportedNames(containingFile)
+    fun PsiElement.outerIdentifier() = (this as? SolUserDefinedTypeName)?.findIdentifiers()?.takeIf { it.size == 2 }?.firstOrNull()?.nameOrText
+    fun SolNamedElement.isExportedImportElement(): Boolean {
+      val exported = outerContract() ?: this
+      return exportElements.any { it.isAssignableFrom(exported.javaClass) }
+    }
 
-    val specificNames = o.importAliasedPairList.flatMap { ((getSolType(it.userDefinedTypeName) as? SolContract)?.let { resolveContractNestedNames(it.ref) } ?: emptyList()) +  it.userDefinedTypeName }.mapNotNull { it.name }.toSet()
-    return used.takeIf { specificNames.isEmpty() } ?: used.filter { it in specificNames }
+    val used = importedNames.asSequence()
+      .filter { importedName -> importedName.target.containingFile.virtualFile?.let(importedVFiles::contains) == true }
+      .filter { it.target.isExportedImportElement() }
+      .flatMap { imported ->
+        sequenceOf(
+          imported.target.outerContract()?.name,
+          imported.target.name,
+          imported.ref.name,
+          imported.ref.outerIdentifier()
+        ).filterNotNull()
+      }
+      .toSet()
+
+    val specificNames = o.importAliasedPairList.asSequence().flatMap { aliasedPair ->
+      sequenceOf(
+        aliasedPair.importAlias?.name,
+        aliasedPair.userDefinedTypeName.name
+      ).filterNotNull()
+    }.toSet()
+
+    return (used.takeIf { specificNames.isEmpty() } ?: used.filter { it in specificNames }).toList()
   }
 
   fun collectImportedNames(root: PsiFile): Set<ImportedName> {
@@ -741,16 +749,6 @@ object SolResolver {
 
   fun resolveNewExpression(parentNew: SolNewExpressionElement): Collection<PsiElement> {
     return parentNew.reference.multiResolve()
-  }
-
-  private fun resolveContractNestedNames(contract: SolContractDefinition, skipThis: Boolean = false): List<SolNamedElement> {
-    val members = if (!skipThis) {
-      contract.structDefinitionList + contract.enumDefinitionList + contract.errorDefinitionList + contract.userDefinedValueTypeDefinitionList
-    } else emptyList()
-    return members + contract.supers
-      .map { resolveTypeName(it).firstOrNull() }
-      .filterIsInstance<SolContractDefinition>()
-      .flatMap { resolveContractNestedNames(it) }
   }
 
 }
