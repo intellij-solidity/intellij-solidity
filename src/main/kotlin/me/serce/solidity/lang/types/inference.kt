@@ -61,13 +61,34 @@ fun getSolType(type: SolTypeName?): SolType {
       val sizeExpr = type.expression
       when {
         sizeExpr == null -> SolDynamicArray(getSolType(type.typeName))
-        sizeExpr is SolPrimaryExpression && sizeExpr.firstChild is SolNumberLiteral ->
-          SolStaticArray(getSolType(type.typeName), Integer.parseInt(sizeExpr.firstChild.text))
+        sizeExpr is SolPrimaryExpression ->
+          tryParseStaticArraySize(sizeExpr)?.let { SolStaticArray(getSolType(type.typeName), it) } ?: SolUnknown
         else -> SolUnknown
       }
     }
     is SolFunctionTypeName -> SolFunctionTypeType(type)
     else -> SolUnknown
+  }
+}
+
+private fun tryParseStaticArraySize(sizeExpr: SolPrimaryExpression): Int? {
+  val numberLiteral = sizeExpr.numberLiteral
+  val decimal = numberLiteral?.decimalNumber?.text
+  if (decimal != null) {
+    return decimal.tryParseIntLiteral()
+  }
+  val hex = numberLiteral?.hexNumber?.text
+  if (hex != null) {
+    return hex.tryParseIntLiteral()
+  }
+  return null
+}
+
+private fun String.tryParseIntLiteral(): Int? {
+  val normalized = this.filterNot { it == '_' }
+  return when {
+    normalized.startsWith("0x", ignoreCase = true) -> normalized.drop(2).toIntOrNull(16)
+    else -> normalized.toIntOrNull()
   }
 }
 
@@ -260,4 +281,3 @@ val SolExpression.type: SolType
       }
     } ?: SolUnknown
   }
-

@@ -232,6 +232,9 @@ class SolExpressionTypeProviderTest : SolTestBase() {
     val cases = listOf(
       ("d" to "int[]") to "int256[]",
       ("d" to "int[5]") to "int256[5]",
+      ("d" to "int[65_535]") to "int256[65535]",
+      ("d" to "int[0xFF_FF]") to "int256[65535]",
+      ("d" to "int[1e2]") to "<unknown>",
       ("d[0]" to "int256[]") to "int256",
       ("d" to "mapping(int8 => A)") to "mapping(int8 => A)",
       ("d[1]" to "mapping(int8 => A)") to "A"
