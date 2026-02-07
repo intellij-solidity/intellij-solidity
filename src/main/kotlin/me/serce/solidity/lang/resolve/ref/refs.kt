@@ -66,7 +66,7 @@ class SolModifierReference(
   private val modifierElement: SolModifierInvocationElement
 ) : SolReferenceBase<SolReferenceElement>(element), SolReference {
 
-  override fun calculateDefaultRangeInElement() = element.referenceNameElement.parentRelativeRange
+  override fun calculateDefaultRangeInElement() = modifierElement.referenceNameElement.rangeRelativeTo(element)
 
   override fun multiResolve(): List<SolNamedElement> {
     val contract = modifierElement.findContract() ?: return emptyList()

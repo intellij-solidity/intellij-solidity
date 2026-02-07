@@ -1,7 +1,9 @@
 package me.serce.solidity.lang.core.resolve
 
+import me.serce.solidity.lang.psi.SolConstructorDefinition
 import me.serce.solidity.lang.psi.SolModifierInvocation
 import me.serce.solidity.lang.psi.SolNamedElement
+import me.serce.solidity.lang.psi.childOfType
 import org.intellij.lang.annotations.Language
 
 class SolModifierResolveTest : SolResolveTestBase() {
@@ -172,5 +174,26 @@ class SolModifierResolveTest : SolResolveTestBase() {
 
   override fun checkByCode(@Language("Solidity") code: String) {
     super.checkByCodeInternal<SolModifierInvocation, SolNamedElement>(code)
+  }
+
+  fun testConstructorModifierReferenceRangeIsNameOnly() {
+    val file = InlineFile(
+      """
+      contract B {
+          modifier onlySeller() {
+              _;
+          }
+
+          constructor() onlySeller {}
+      }
+      """
+    ).psiFile
+
+    val constructor = checkNotNull(file.childOfType<SolConstructorDefinition>())
+    val ranges = constructor.references.map { it.rangeInElement }
+    assertEquals(1, ranges.size)
+    val range = ranges.single()
+    assertTrue(range.endOffset <= constructor.textLength)
+    assertEquals("onlySeller", constructor.text.substring(range.startOffset, range.endOffset))
   }
 }

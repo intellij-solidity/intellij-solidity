@@ -39,9 +39,8 @@ class SolContextCompletionContributor : CompletionContributor(), DumbAware {
         override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext, result: CompletionResultSet) {
           val position = parameters.originalPosition
           if (position != null) {
-            SolCompleter.completeLiteral(position)
-              .forEach(result::addElement)
-            SolCompleter.completeTypeName(position)
+            // Pass matcher prefix + invocation count so global type completion can stay cheap on autopopup.
+            SolCompleter.completeLiteral(position, result.prefixMatcher.prefix, parameters.invocationCount)
               .forEach(result::addElement)
           }
         }
@@ -53,7 +52,8 @@ class SolContextCompletionContributor : CompletionContributor(), DumbAware {
         override fun addCompletions(parameters: CompletionParameters, context: ProcessingContext, result: CompletionResultSet) {
           val position = parameters.originalPosition
           if (position != null) {
-            SolCompleter.completeLiteral(position)
+            // Pass matcher prefix + invocation count so global type completion can stay cheap on autopopup.
+            SolCompleter.completeLiteral(position, result.prefixMatcher.prefix, parameters.invocationCount)
               .forEach(result::addElement)
           }
         }
