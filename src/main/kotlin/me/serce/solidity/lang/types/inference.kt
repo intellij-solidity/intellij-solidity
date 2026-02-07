@@ -72,11 +72,15 @@ fun getSolType(type: SolTypeName?): SolType {
 }
 
 private fun tryParseStaticArraySize(sizeExpr: SolPrimaryExpression): Int? {
-  val numberLiteral = sizeExpr.numberLiteral ?: return null
-  val decimal = numberLiteral.decimalNumber?.text
-  if (decimal != null) return decimal.tryParseIntLiteral()
-  val hex = numberLiteral.hexNumber?.text
-  if (hex != null) return hex.tryParseIntLiteral()
+  val numberLiteral = sizeExpr.numberLiteral
+  val decimal = numberLiteral?.decimalNumber?.text
+  if (decimal != null) {
+    return decimal.tryParseIntLiteral()
+  }
+  val hex = numberLiteral?.hexNumber?.text
+  if (hex != null) {
+    return hex.tryParseIntLiteral()
+  }
   return null
 }
 
