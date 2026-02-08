@@ -23,6 +23,22 @@
         We've created a new <a href="https://discord.gg/2pARGQ8RMf">Discord</a> community.
         Join to discuss Solidity, the plugin features you'd like to see, and the issues you're experiencing with the plugin.
 
+        <b>v2.4.11</b>
+        In this release:
+        <ul>
+          <li>Fixed auto-import quick fix for local literal references, yours @SerCeMan!</li>
+          <li>Fixed no-such-element errors during import optimization, yours @SerCeMan!</li>
+          <li>Fixed int parsing during type inference, yours @SerCeMan!</li>
+          <li>Cached Foundry config across resolve/completion/import actions to improve performance, yours @SerCeMan!</li>
+          <li>Optimized type completion index usage, yours @SerCeMan!</li>
+          <li>Optimized unused import usage detection, yours @SerCeMan!</li>
+          <li>Added support for finding function implementations in "Go to Implementation", thank you @olexiyb!</li>
+          <li>Reduced keyword completion priority, thank you @Paulalex85!</li>
+          <li>Improved performance when typing, thank you @Paulalex85!</li>
+          <li>Added support for standalone Yul files, yours @SerCeMan!</li>
+          <li>Added benchmarking infrastructure, yours @SerCeMan!</li>
+          <li>Fixed plugin logo, thank you @Paulalex85!</li>
+        </ul>
         <b>v2.4.10</b>
         In this release:
         <ul>
@@ -38,19 +54,6 @@
           <li>Added external formatter tests, yours @SerCeMan!</li>
           <li>Resolve elements with alias and inheritance chains, thank you @Paulalex85!</li>
           <li>Resolve functions in <code>using for</code>, thank you @Paulalex85!</li>
-          <li>Platform, build upgrades, and bug fixes yours @SerCeMan!</li>
-        </ul>
-        <b>v2.4.9</b>
-        In this release:
-        <ul>
-          <li>Support for external formatters (Foundry, Prettier), thank you @Paulalex85!</li>
-          <li>Performance fixed for reference resolution, yours @SerCeMan!</li>
-          <li>Highlighting for the "transient" and "layout at" keywords, thank you @mbolotov!</li>
-          <li>Fixed non-contract resolving through imports, yours @SerCeMan!</li>
-          <li>Parser fixes to allowed empty hex strings, yours @SerCeMan!</li>
-          <li>Added missing keywords in auto-completion, thank you @Paulalex85!</li>
-          <li>Fix indentation for paste inside blocks and function signatures, thank you @ruinmi!</li>
-          <li>Formatting improvements: continuation indent for chained calls; indentation inside assembly comment blocks; correct indentation of inheritance lists; yours @SerCeMan!</li>
           <li>Platform, build upgrades, and bug fixes yours @SerCeMan!</li>
         </ul>
       </p>
