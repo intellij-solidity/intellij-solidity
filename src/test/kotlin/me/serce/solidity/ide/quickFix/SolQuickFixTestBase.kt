@@ -9,9 +9,10 @@ abstract class SolQuickFixTestBase : SolTestBase() {
     InlineFile(code)
     val errors = myFixture.doHighlighting(HighlightSeverity.WARNING)
     assertEquals(1, errors.size)
-    for (quickFixActionRange in errors[0].quickFixActionRanges!!) {
-      quickFixActionRange.first.action.invoke(myFixture.project, myFixture.editor, myFixture.file)
-    }
+    val quickFixes = myFixture.getAllQuickFixes()
+    val quickFix = quickFixes.firstOrNull { it.text.contains("Import", ignoreCase = true) } ?: quickFixes.firstOrNull()
+    assertNotNull("Expected at least one quick fix", quickFix)
+    quickFix!!.invoke(myFixture.project, myFixture.editor, myFixture.file)
     myFixture.checkResult(expected)
   }
 

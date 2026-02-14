@@ -1,0 +1,5 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="com.intellij">
+        <spellchecker.support language="Solidity" implementationClass="me.serce.solidity.ide.SolSpellcheckingStrategy"/>
+    </extensions>
+</idea-plugin>

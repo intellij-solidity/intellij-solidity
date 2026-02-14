@@ -106,8 +106,8 @@ class GoToImplementationTest : SolTestBase() {
     val future = ApplicationManager.getApplication().executeOnPooledThread(Callable {
       runReadAction {
         @Suppress("UnstableApiUsage") data.targets.map { GotoTargetHandler.computePresentation(it, data.hasDifferentNames()) }
-          // Copied from `com.intellij.codeInsight.navigation.GotoTargetHandler.GotoData.getComparingObject`
-          .map { listOfNotNull(it.presentableText, it.containerText, it.locationText).joinToString(" ") }
+          // Compare stable parts only: locationText changed in newer platform versions (e.g. adds test project label).
+          .map { listOfNotNull(it.presentableText, it.containerText).joinToString(" ") }
       }
     })
     return ProgressIndicatorUtils.awaitWithCheckCanceled(future).map { it.trim() }.toSet()

@@ -3,30 +3,32 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPlatform
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
-val kotlin_version: String by project
 val sentry_version: String by project
 
 plugins {
     java
     idea
     jacoco
-    kotlin("jvm") version "1.9.25"
+    kotlin("jvm") version "2.2.0"
     id("org.jetbrains.grammarkit") version "2022.3.2.2"
     id("org.jetbrains.intellij.platform") version "2.7.0"
     id("me.champeau.jmh") version "0.7.2"
     id("net.researchgate.release") version "3.0.2"
 }
 
-val jvmTarget = "17"
+val targetJvm = "21"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions.jvmTarget = jvmTarget
+    compilerOptions {
+        jvmTarget.set(JvmTarget.fromTarget(targetJvm))
+    }
 }
 
 idea {
@@ -54,7 +56,9 @@ intellijPlatform {
         // disable the intellij-solidity plugin name warning
         freeArgs.addAll(listOf("-mute", "TemplateWordInPluginName"))
         ides {
-            ide(IntelliJPlatformType.IntellijIdeaUltimate, "2024.2.6")
+            create(IntelliJPlatformType.IntellijIdeaUltimate, "2025.2.6.1") {
+                useInstaller = false
+            }
         }
     }
 }
@@ -107,11 +111,11 @@ configurations {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlin_version")
     implementation("io.sentry:sentry:$sentry_version")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-toml:2.13.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.6")
+    implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.6") {
+        exclude(group = "org.jetbrains.kotlin")
+    }
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.opentest4j:opentest4j:1.3.0")
@@ -119,7 +123,10 @@ dependencies {
     jmhAnnotationProcessor("org.openjdk.jmh:jmh-generator-annprocess:1.37")
 
     intellijPlatform {
-        intellijIdeaUltimate("2024.2.6")
+        intellijIdeaUltimate("2025.2.6.1") {
+            useInstaller = false
+        }
+        bundledModule("intellij.spellchecker")
         bundledPlugins("JavaScript")
         testFramework(TestFrameworkType.Platform)
     }

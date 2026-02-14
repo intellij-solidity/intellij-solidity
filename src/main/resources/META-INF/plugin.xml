@@ -62,10 +62,10 @@
 
     <!--
         See https://plugins.jetbrains.com/docs/intellij/build-number-ranges.html
-        See https://youtrack.jetbrains.com/articles/IDEA-A-2100662423/IntelliJ-IDEA-2024.2.6-242.26775.15-build-Release-Notes
-        242.26775.15 is IntelliJ IDEA 2024.2.6
+        See https://youtrack.jetbrains.com/articles/IDEA-A-2100662603/IntelliJ-IDEA-2025.2.6.1-252.28539.33-build-Release-Notes
+        252.28539.33 is IntelliJ IDEA 2025.2.6.1
     -->
-    <idea-version since-build="242.26775.15"/>
+    <idea-version since-build="252.28539.33"/>
 
     <!-- See https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html for the full list of modules -->
     <depends>com.intellij.modules.lang</depends>
@@ -75,6 +75,7 @@
         in order to include JavaScript.
     -->
     <depends>com.intellij.modules.platform</depends>
+    <depends optional="true" config-file="spellchecker.xml">intellij.spellchecker</depends>
     <!-- The dependency is necessary because JavaScript-aware IDEs exclude node_modules by default. -->
     <depends optional="true" config-file="javascriptPlugin.xml">JavaScript</depends>
 
@@ -183,8 +184,6 @@
         <customFoldingProvider implementation="me.serce.solidity.ide.VisualStudioCustomFoldingProvider"/>
 
         <lang.findUsagesProvider language="Solidity" implementationClass="me.serce.solidity.ide.SolFindUsagesProvider"/>
-
-        <spellchecker.support language="Solidity" implementationClass="me.serce.solidity.ide.SolSpellcheckingStrategy"/>
 
         <!-- Code style -->
 
