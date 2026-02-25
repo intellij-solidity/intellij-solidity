@@ -166,13 +166,36 @@ object SolResolver {
     }
     val filesOfScope =
       setOfNotNull(currentFile.virtualFile) + importsWithoutFileAliases.mapNotNull { it.file.virtualFile }
-    val elements = searchElementByStub(identifier, filesOfScope, currentFile.project)
+    val elements = preferElementsFromDirectImports(
+      searchElementByStub(identifier, filesOfScope, currentFile.project),
+      currentFile
+    )
 
     return if (elements.isNotEmpty()) {
       elements to elements.first().containingFile
     } else {
       emptySet<SolNamedElement>() to null
     }
+  }
+
+  // When stub search returns multiple elements with the same name from different files,
+  // prefer those defined in files that the current file directly imports. This prevents
+  // the import optimizer from adding redundant transitive imports (#453).
+  private fun preferElementsFromDirectImports(
+    elements: Set<SolNamedElement>,
+    currentFile: PsiFile
+  ): Set<SolNamedElement> {
+    if (elements.size <= 1) {
+      return elements
+    }
+
+    val directImportFiles = currentFile.childrenOfType<SolImportDirective>()
+      .mapNotNull { it.importPath?.reference?.resolve()?.containingFile?.virtualFile }
+      .toSet()
+    val directMatches = elements.filterTo(mutableSetOf()) { named ->
+      named.containingFile.virtualFile?.let(directImportFiles::contains) == true
+    }
+    return directMatches.takeIf { it.isNotEmpty() } ?: elements
   }
 
   private fun getIdentifiersFromMemberAccessExpression(element: SolMemberAccessExpression): List<PsiElement> {
