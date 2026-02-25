@@ -47,6 +47,31 @@ class SolImportResolveFoundryTest : SolResolveTestBase() {
         assertEquals("Token.sol", resolved.containingFile.name)
     }
 
+    fun testImportPathResolveRemappingsWithTrailingSlash() {
+        myFixture.addFileToProject(
+            "node_modules/@chainlink/contracts/src/Token.sol",
+            "contract Token {}"
+        )
+        myFixture.addFileToProject(
+            "remappings.txt",
+            "@chainlink/contracts/=node_modules/@chainlink/contracts/"
+        )
+        val usage = myFixture.addFileToProject(
+            "contracts/ImportChainlink.sol",
+            """
+            import "@chainlink/contracts/src/Token.sol";
+                   //^
+            contract ImportUsage {}
+            """.trimIndent()
+        )
+        myFixture.configureFromExistingVirtualFile(usage.virtualFile)
+        val (refElement, _) = findElementAndDataInEditor<SolNamedElement>()
+        val resolved = checkNotNull(refElement.reference?.resolve()) {
+            "Failed to resolve import with trailing slash in remappings.txt"
+        }
+        assertEquals("Token.sol", resolved.containingFile.name)
+    }
+
     fun testImportPathResolveFoundryFoundryFileNoError() {
         testcases.forEach { (_, contractFile) ->
             myFixture.configureByText("foundry.toml", "")
