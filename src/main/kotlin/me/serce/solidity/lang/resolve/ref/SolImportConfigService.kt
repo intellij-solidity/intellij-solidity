@@ -124,7 +124,10 @@ class SolImportConfigService(val project: Project) {
     return mappingsContents.mapNotNull { mapping ->
       val splitMapping = mapping.split("=", limit = 2)
       if (splitMapping.size == 2) {
-        Pair(splitMapping[0].trim(), splitMapping[1].trim())
+        val prefix = splitMapping[0].trim()
+        val targetRaw = splitMapping[1].trim()
+        val target = if (targetRaw.endsWith("/")) targetRaw else "$targetRaw/"
+        Pair(prefix, target)
       } else {
         null
       }
