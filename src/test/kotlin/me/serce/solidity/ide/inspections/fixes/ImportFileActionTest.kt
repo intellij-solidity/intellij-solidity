@@ -19,18 +19,6 @@ class ImportFileActionTest : SolTestBase() {
     )
     val sibling = myFixture.addFileToProject("contracts/Util.sol", "contract Util {}")
 
-    var idx = 0
-    fun check(expected: String, to: com.intellij.psi.PsiFile) {
-      val sourceFile = myFixture.addFileToProject("contracts/Main${++idx}.sol", "contract Main {}")
-      myFixture.configureFromExistingVirtualFile(sourceFile.virtualFile)
-      val source = myFixture.file
-      val action = ImportFileAction(myFixture.editor, source, setOf(to))
-      action.execute()
-      PsiDocumentManager.getInstance(project).commitAllDocuments()
-      val expectedText = "import \"$expected\";contract Main {}"
-      assertEquals(expectedText, source.text.trim())
-    }
-
     check("lib/Lib.sol", nodeModule)
     check("github.com/owner/repo/C.sol", installed)
     check("@oz/token/ERC20.sol", remapped)
@@ -58,6 +46,30 @@ class ImportFileActionTest : SolTestBase() {
     PsiDocumentManager.getInstance(project).commitAllDocuments()
 
     assertEquals("import \"@oz/token/ERC20.sol\";contract Main {}", source.text.trim())
+  }
+
+  fun testBuildImportPathWithCustomRemappingTarget() {
+    myFixture.addFileToProject(
+      "remappings.txt",
+      "@deps/=dependencies/@deps/"
+    )
+    val customDep = myFixture.addFileToProject(
+      "dependencies/@deps/token/ERC20.sol",
+      "contract ERC20 {}"
+    )
+    check("@deps/token/ERC20.sol", customDep)
+  }
+
+  private var idx = 0
+  private fun check(expected: String, to: com.intellij.psi.PsiFile) {
+    val sourceFile = myFixture.addFileToProject("contracts/Main${++idx}.sol", "contract Main {}")
+    myFixture.configureFromExistingVirtualFile(sourceFile.virtualFile)
+    val source = myFixture.file
+    val action = ImportFileAction(myFixture.editor, source, setOf(to))
+    action.execute()
+    PsiDocumentManager.getInstance(project).commitAllDocuments()
+    val expectedText = "import \"$expected\";contract Main {}"
+    assertEquals(expectedText, source.text.trim())
   }
 
 }

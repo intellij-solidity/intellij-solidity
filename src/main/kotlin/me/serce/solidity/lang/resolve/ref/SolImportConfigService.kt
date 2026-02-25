@@ -186,8 +186,13 @@ class SolImportConfigService(val project: Project) {
       val trimmedPrefix = prefix.trim()
       val trimmedTarget = target.trim()
       if (trimmedPrefix.isNotEmpty() && trimmedTarget.isNotEmpty()) {
-        reverse.putIfAbsent(trimmedTarget, trimmedPrefix)
-        reverse.putIfAbsent(trimmedTarget.trimEnd('/'), trimmedPrefix)
+        // Ensure trailing-slash consistency: if the target ends with '/',
+        // the prefix value must also end with '/' so that replaceFirst
+        // produces a correct path (e.g. "lib/oz/" -> "@oz/" not "@oz").
+        val normalizedPrefix = if (trimmedTarget.endsWith("/") && !trimmedPrefix.endsWith("/"))
+          "$trimmedPrefix/" else trimmedPrefix
+        reverse.putIfAbsent(trimmedTarget, normalizedPrefix)
+        reverse.putIfAbsent(trimmedTarget.trimEnd('/'), normalizedPrefix)
       }
     }
     return reverse
