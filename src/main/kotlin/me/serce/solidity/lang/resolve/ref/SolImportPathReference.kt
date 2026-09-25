@@ -15,13 +15,23 @@ class SolImportPathReference(element: SolImportPathElement) : SolReferenceBase<S
     if (importText.length < 2) {
       return null
     }
+    val containingFile = element.containingFile?.originalFile?.virtualFile
+    if (containingFile == null || !containingFile.isValid) {
+      return null
+    }
     val path = importText.substring(1, importText.length - 1)
-    return findImportFile(element.project, element.containingFile.originalFile.virtualFile, path)
-      ?.let { PsiManager.getInstance(element.project).findFile(it) }
+    val target = findImportFile(element.project, containingFile, path)
+    if (target == null || !target.isValid) {
+      return null
+    }
+    return PsiManager.getInstance(element.project).findFile(target)
   }
 
   companion object {
     fun findImportFile(project: Project, file: VirtualFile, path: String): VirtualFile? {
+      if (!file.isValid) {
+        return null
+      }
       val directFile = file.findFileByRelativePath("../$path")
       return if (directFile != null) {
         directFile
@@ -39,6 +49,9 @@ class SolImportPathReference(element: SolImportPathElement) : SolReferenceBase<S
     }
 
     private fun findNpmImportFile(file: VirtualFile, path: String): VirtualFile? {
+      if (!file.isValid) {
+        return null
+      }
       val test = file.findFileByRelativePath("node_modules/$path")
       return when {
         test != null -> test
@@ -52,6 +65,9 @@ class SolImportPathReference(element: SolImportPathElement) : SolReferenceBase<S
     }
 
     private fun findEthPMImportFile(file: VirtualFile, path: String): VirtualFile? {
+      if (!file.isValid) {
+        return null
+      }
       val test = file.findFileByRelativePath(
         "installed_contracts/" + path.replaceFirst("/", "/contracts/")
       )

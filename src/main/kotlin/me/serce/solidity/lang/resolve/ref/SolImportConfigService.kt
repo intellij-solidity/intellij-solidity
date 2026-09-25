@@ -28,11 +28,17 @@ class SolImportConfigService(val project: Project) {
   private val tomlMapper by lazy { TomlMapper() }
 
   fun resolve(path: String, fromFile: VirtualFile): VirtualFile? {
+    if (!fromFile.isValid) {
+      return null
+    }
     var current: VirtualFile? = when {
         fromFile.isDirectory -> fromFile
         else -> fromFile.parent
     }
     while (current != null) {
+      if (!current.isValid) {
+        return null
+      }
       val config = when {
         hasFoundryConfig(current) -> getOrLoadConfig(current)
         else -> emptyConfig
@@ -55,6 +61,9 @@ class SolImportConfigService(val project: Project) {
   }
 
   fun reverseRemappings(fromFile: VirtualFile): Map<String, String> {
+    if (!fromFile.isValid) {
+      return emptyMap()
+    }
     val fromDir = when {
       fromFile.isDirectory -> fromFile
       else -> fromFile.parent ?: return emptyMap()
@@ -98,8 +107,14 @@ class SolImportConfigService(val project: Project) {
   }
 
   private fun findFoundryRoot(fromDir: VirtualFile): VirtualFile? {
+    if (!fromDir.isValid) {
+      return null
+    }
     var current: VirtualFile? = fromDir
     while (current != null) {
+      if (!current.isValid) {
+        return null
+      }
       if (hasFoundryConfig(current)) {
         return current
       }
@@ -109,6 +124,9 @@ class SolImportConfigService(val project: Project) {
   }
 
   private fun hasFoundryConfig(dir: VirtualFile): Boolean {
+    if (!dir.isValid) {
+      return false
+    }
     return dir.findChild("remappings.txt") != null || dir.findChild("foundry.toml") != null
   }
 
