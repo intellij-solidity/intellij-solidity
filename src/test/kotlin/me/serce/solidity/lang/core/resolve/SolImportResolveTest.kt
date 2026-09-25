@@ -1,7 +1,10 @@
 package me.serce.solidity.lang.core.resolve
 
+import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.psi.PsiNamedElement
 import me.serce.solidity.lang.psi.SolNamedElement
+import me.serce.solidity.lang.resolve.ref.SolImportConfigService
+import me.serce.solidity.lang.resolve.ref.SolImportPathReference
 
 class SolImportResolveTest : SolResolveTestBase() {
   fun testImportPathResolve() = testResolveToAnotherFile(
@@ -141,6 +144,80 @@ class SolImportResolveTest : SolResolveTestBase() {
       "Failed to resolve ${constRef.text}"
     }
     assertEquals("STR_CONST", constResolved.name)
+  }
+
+  fun testImportPathResolveAfterTargetFileDeleted() {
+    val target = myFixture.addFileToProject("contracts/Ownable.sol", "contract Ownable {}")
+    val usage = myFixture.addFileToProject(
+      "contracts/Usage.sol",
+      """
+          import "./Ownable.sol";
+                  //^
+          contract Usage {}
+      """.trimIndent()
+    )
+    myFixture.configureFromExistingVirtualFile(usage.virtualFile)
+
+    val (beforeRef) = findElementAndDataInEditor<SolNamedElement>("^")
+    assertNotNull(beforeRef.reference?.resolve())
+
+    WriteCommandAction.runWriteCommandAction(project) {
+      target.virtualFile.delete(this)
+    }
+
+    val (afterRef) = findElementAndDataInEditor<SolNamedElement>("^")
+    assertNull(afterRef.reference?.resolve())
+  }
+
+  fun testImportPathResolveWithInvalidVirtualFile() {
+    val file = myFixture.addFileToProject("contracts/Ownable.sol", "contract Ownable {}").virtualFile
+    WriteCommandAction.runWriteCommandAction(project) {
+      file.delete(this)
+    }
+
+    assertFalse(file.isValid)
+    assertNull(SolImportPathReference.findImportFile(project, file, "./Ownable.sol"))
+  }
+
+  fun testImportPathResolveWithInvalidContainingFile() {
+    val usage = myFixture.addFileToProject(
+      "contracts/Usage.sol",
+      """
+          import "./Ownable.sol";
+                  //^
+          contract Usage {}
+      """.trimIndent()
+    )
+    myFixture.configureFromExistingVirtualFile(usage.virtualFile)
+    val (refElement) = findElementAndDataInEditor<SolNamedElement>("^")
+    val reference = refElement.reference as SolImportPathReference
+
+    WriteCommandAction.runWriteCommandAction(project) {
+      usage.virtualFile.delete(this)
+    }
+
+    assertFalse(usage.virtualFile.isValid)
+    assertNull(reference.singleResolve())
+  }
+
+  fun testImportConfigResolveWithInvalidFile() {
+    val file = myFixture.addFileToProject("contracts/Ownable.sol", "contract Ownable {}").virtualFile
+    WriteCommandAction.runWriteCommandAction(project) {
+      file.delete(this)
+    }
+
+    assertFalse(file.isValid)
+    assertNull(SolImportConfigService.getInstance(project).resolve("Ownable.sol", file))
+  }
+
+  fun testImportConfigReverseRemappingsWithInvalidFile() {
+    val file = myFixture.addFileToProject("contracts/Ownable.sol", "contract Ownable {}").virtualFile
+    WriteCommandAction.runWriteCommandAction(project) {
+      file.delete(this)
+    }
+
+    assertFalse(file.isValid)
+    assertTrue(SolImportConfigService.getInstance(project).reverseRemappings(file).isEmpty())
   }
 
   override fun getTestDataPath() = "src/test/resources/fixtures/import/"

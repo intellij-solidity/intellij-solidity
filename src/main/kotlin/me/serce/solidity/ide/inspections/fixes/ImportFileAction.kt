@@ -63,7 +63,7 @@ class ImportFileAction(
       }
 
       override fun onChosen(selectedValue: VirtualFile?, finalChoice: Boolean): PopupStep<*>? {
-        if (selectedValue == null) {
+        if (selectedValue == null || !selectedValue.isValid) {
           return PopupStep.FINAL_CHOICE
         }
 

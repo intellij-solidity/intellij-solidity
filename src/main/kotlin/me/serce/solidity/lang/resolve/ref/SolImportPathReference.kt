@@ -15,34 +15,34 @@ class SolImportPathReference(element: SolImportPathElement) : SolReferenceBase<S
     if (importText.length < 2) {
       return null
     }
+    val containingFile = element.containingFile?.originalFile?.virtualFile
+    if (containingFile == null || !containingFile.isValid) {
+      return null
+    }
     val path = importText.substring(1, importText.length - 1)
-    return findImportFile(element.project, element.containingFile.originalFile.virtualFile, path)
+    return findImportFile(element.project, containingFile, path)
       ?.let { PsiManager.getInstance(element.project).findFile(it) }
   }
 
   companion object {
     fun findImportFile(project: Project, file: VirtualFile, path: String): VirtualFile? {
-      val directFile = file.findFileByRelativePath("../$path")
-      return if (directFile != null) {
-        directFile
-      } else {
-        val npmFile = findNpmImportFile(file, path)
-        if (npmFile != null) {
-          return npmFile
-        }
-        val ethPmFile = findEthPMImportFile(file, path)
-        if (ethPmFile != null) {
-          return ethPmFile
-        }
-        findFoundryImportFile(project, file, path)
+      if (!file.isValid) {
+        return null
       }
+      val directFile = file.findFileByRelativePath("../$path")
+      val resolved = directFile
+        ?: findNpmImportFile(file, path)
+        ?: findEthPMImportFile(file, path)
+        ?: findFoundryImportFile(project, file, path)
+      return resolved?.takeIf { it.isValid }
     }
 
     private fun findNpmImportFile(file: VirtualFile, path: String): VirtualFile? {
       val test = file.findFileByRelativePath("node_modules/$path")
+      val parent = file.parent
       return when {
         test != null -> test
-        file.parent != null -> findNpmImportFile(file.parent, path)
+        parent != null && parent.isValid -> findNpmImportFile(parent, path)
         else -> null
       }
     }
@@ -55,9 +55,10 @@ class SolImportPathReference(element: SolImportPathElement) : SolReferenceBase<S
       val test = file.findFileByRelativePath(
         "installed_contracts/" + path.replaceFirst("/", "/contracts/")
       )
+      val parent = file.parent
       return when {
         test != null -> test
-        file.parent != null -> findEthPMImportFile(file.parent, path)
+        parent != null && parent.isValid -> findEthPMImportFile(parent, path)
         else -> null
       }
     }
