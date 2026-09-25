@@ -3,6 +3,7 @@ package me.serce.solidity.lang.core.resolve
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.psi.PsiNamedElement
 import me.serce.solidity.lang.psi.SolNamedElement
+import me.serce.solidity.lang.resolve.ref.SolImportConfigService
 import me.serce.solidity.lang.resolve.ref.SolImportPathReference
 
 class SolImportResolveTest : SolResolveTestBase() {
@@ -176,6 +177,47 @@ class SolImportResolveTest : SolResolveTestBase() {
 
     assertFalse(file.isValid)
     assertNull(SolImportPathReference.findImportFile(project, file, "./Ownable.sol"))
+  }
+
+  fun testImportPathResolveWithInvalidContainingFile() {
+    val usage = myFixture.addFileToProject(
+      "contracts/Usage.sol",
+      """
+          import "./Ownable.sol";
+                  //^
+          contract Usage {}
+      """.trimIndent()
+    )
+    myFixture.configureFromExistingVirtualFile(usage.virtualFile)
+    val (refElement) = findElementAndDataInEditor<SolNamedElement>("^")
+    val reference = refElement.reference as SolImportPathReference
+
+    WriteCommandAction.runWriteCommandAction(project) {
+      usage.virtualFile.delete(this)
+    }
+
+    assertFalse(usage.virtualFile.isValid)
+    assertNull(reference.singleResolve())
+  }
+
+  fun testImportConfigResolveWithInvalidFile() {
+    val file = myFixture.addFileToProject("contracts/Ownable.sol", "contract Ownable {}").virtualFile
+    WriteCommandAction.runWriteCommandAction(project) {
+      file.delete(this)
+    }
+
+    assertFalse(file.isValid)
+    assertNull(SolImportConfigService.getInstance(project).resolve("Ownable.sol", file))
+  }
+
+  fun testImportConfigReverseRemappingsWithInvalidFile() {
+    val file = myFixture.addFileToProject("contracts/Ownable.sol", "contract Ownable {}").virtualFile
+    WriteCommandAction.runWriteCommandAction(project) {
+      file.delete(this)
+    }
+
+    assertFalse(file.isValid)
+    assertTrue(SolImportConfigService.getInstance(project).reverseRemappings(file).isEmpty())
   }
 
   override fun getTestDataPath() = "src/test/resources/fixtures/import/"
