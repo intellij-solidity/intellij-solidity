@@ -62,7 +62,6 @@ class SolImportConfigService(val project: Project) {
     if (!fromFile.isValid) return null
     var current: VirtualFile? = if (fromFile.isDirectory) fromFile else fromFile.parent
     while (current != null) {
-      if (!current.isValid) return null
       if (hasFoundryConfig(current)) {
         val remappedPath = applyRemappings(getOrLoadConfig(current).remappings, path)
         if (remappedPath != path) {

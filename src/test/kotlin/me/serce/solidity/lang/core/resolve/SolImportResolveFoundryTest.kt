@@ -3,6 +3,7 @@ package me.serce.solidity.lang.core.resolve
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.command.WriteCommandAction
 import me.serce.solidity.lang.psi.SolNamedElement
+import me.serce.solidity.lang.resolve.ref.SolImportConfigService
 import me.serce.solidity.lang.resolve.ref.SolImportPathReference
 
 class SolImportResolveFoundryTest : SolResolveTestBase() {
@@ -226,6 +227,37 @@ class SolImportResolveFoundryTest : SolResolveTestBase() {
             SolImportPathReference.findImportFile(project, usage.virtualFile, "util/Test.sol")
         ) { "Failed to resolve dependency fallback" }
         assertTrue(resolved.path.replace("\\", "/").endsWith("dependencies/util/src/Test.sol"))
+    }
+
+    fun testRemappingResolveWithInvalidFile() {
+        val file = myFixture.addFileToProject("contracts/Invalid.sol", "contract Invalid {}").virtualFile
+        WriteCommandAction.runWriteCommandAction(project) {
+            file.delete(this)
+        }
+
+        assertFalse(file.isValid)
+        assertNull(SolImportConfigService.getInstance(project).resolveRemapping("@openzeppelin/X.sol", file))
+    }
+
+    fun testRemappingResolveFromDirectory() {
+        myFixture.addFileToProject("remappings.txt", "foo/=lib/foo/src/")
+        val dir = myFixture.tempDirFixture.findOrCreateDir("lib")
+        assertNull(SolImportConfigService.getInstance(project).resolveRemapping("@openzeppelin/X.sol", dir))
+    }
+
+    fun testRemappingResolveWithNonMatchingRemapping() {
+        myFixture.addFileToProject("remappings.txt", "foo/=lib/foo/src/")
+        val usage = myFixture.addFileToProject("contracts/Usage.sol", "contract Usage {}")
+        assertNull(SolImportConfigService.getInstance(project).resolveRemapping("@openzeppelin/X.sol", usage.virtualFile))
+    }
+
+    fun testRemappingResolveWhenRemappedTargetMissing() {
+        myFixture.addFileToProject("remappings.txt", "@openzeppelin/=lib/openzeppelin-contracts/")
+        val usage = myFixture.addFileToProject("contracts/Usage.sol", "contract Usage {}")
+        assertNull(
+            SolImportConfigService.getInstance(project)
+                .resolveRemapping("@openzeppelin/contracts/Missing.sol", usage.virtualFile)
+        )
     }
 
     override fun getTestDataPath() = "src/test/resources/fixtures/importRemappings/"
