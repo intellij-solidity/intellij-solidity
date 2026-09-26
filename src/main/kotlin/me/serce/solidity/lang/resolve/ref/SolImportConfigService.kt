@@ -58,6 +58,21 @@ class SolImportConfigService(val project: Project) {
     return null
   }
 
+  fun resolveRemapping(path: String, fromFile: VirtualFile): VirtualFile? {
+    if (!fromFile.isValid) return null
+    var current: VirtualFile? = if (fromFile.isDirectory) fromFile else fromFile.parent
+    while (current != null) {
+      if (hasFoundryConfig(current)) {
+        val remappedPath = applyRemappings(getOrLoadConfig(current).remappings, path)
+        if (remappedPath != path) {
+          current.findFileByRelativePath(remappedPath)?.let { return it }
+        }
+      }
+      current = current.parent
+    }
+    return null
+  }
+
   fun reverseRemappings(fromFile: VirtualFile): Map<String, String> {
     if (!fromFile.isValid) {
       return emptyMap()
@@ -206,7 +221,10 @@ class SolImportConfigService(val project: Project) {
     }
     val libName = segments.first()
     val libFile = segments.drop(1).joinToString("/")
-    return foundryRoot.findFileByRelativePath("lib/$libName/src/$libFile")
+    for (base in listOf("lib", "dependencies")) {
+      foundryRoot.findFileByRelativePath("$base/$libName/src/$libFile")?.let { return it }
+    }
+    return null
   }
 
   companion object {

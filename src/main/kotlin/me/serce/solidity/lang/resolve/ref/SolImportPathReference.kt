@@ -31,10 +31,15 @@ class SolImportPathReference(element: SolImportPathElement) : SolReferenceBase<S
       }
       val directFile = file.findFileByRelativePath("../$path")
       val resolved = directFile
+        ?: findFoundryRemapping(project, file, path)
         ?: findNpmImportFile(file, path)
         ?: findEthPMImportFile(file, path)
         ?: findFoundryImportFile(project, file, path)
       return resolved?.takeIf { it.isValid }
+    }
+
+    private fun findFoundryRemapping(project: Project, file: VirtualFile, path: String): VirtualFile? {
+      return SolImportConfigService.getInstance(project).resolveRemapping(path, file)
     }
 
     private fun findNpmImportFile(file: VirtualFile, path: String): VirtualFile? {
