@@ -326,6 +326,10 @@ class SolInternalTypeFactory(project: Project) {
           */
           function keccak256(bytes memory input) returns (bytes32);
           /**
+          * compute the ERC-7201 storage namespace base slot from its identifier
+          */
+          function erc7201(string memory id) returns (uint);
+          /**
           * compute the SHA-256 hash of the input
           */
           function sha3(bytes memory input) returns (bytes32);
