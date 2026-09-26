@@ -172,17 +172,7 @@ class SolImportConfigService(val project: Project) {
         it.textValue().trim('"').split("=", limit = 2)
       }
       .filter { it.size == 2 }
-      .map {
-        val first = it[0].trim()
-        val secondRaw = it[1].trim()
-        // normalize target for import path concatenation
-        val second = if (secondRaw.endsWith("/")) {
-          secondRaw
-        } else {
-          "$secondRaw/"
-        }
-        first to second
-      }
+      .map { it[0].trim() to it[1].trim() }
   }
 
   // apply foundry remappings to import path
@@ -197,7 +187,7 @@ class SolImportConfigService(val project: Project) {
       ?.value
       ?: return path
     val (prefix, target) = match
-    return target + path.removePrefix(prefix)
+    return joinRemappingTarget(target, path.removePrefix(prefix))
   }
 
   private fun buildReverseRemappings(remappings: List<Pair<String, String>>): Map<String, String> {
@@ -233,4 +223,16 @@ class SolImportConfigService(val project: Project) {
     @JvmStatic
     fun getInstance(project: Project): SolImportConfigService = project.service()
   }
+}
+
+// Joins a remapping target with the remaining import path, so that exactly one
+// slash separates them. Remapping targets and prefixes come from user-authored
+// files (remappings.txt / foundry.toml) and are not guaranteed to end with a
+// slash, so a plain string concatenation can drop or duplicate the separator.
+internal fun joinRemappingTarget(target: String, rest: String): String = when {
+  rest.isEmpty() -> target
+  target.isEmpty() -> rest
+  target.endsWith("/") -> target + rest.removePrefix("/")
+  rest.startsWith("/") -> target + rest
+  else -> "$target/$rest"
 }
