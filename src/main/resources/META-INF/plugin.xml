@@ -261,6 +261,12 @@
                                  level="WEAK WARNING"
                                  implementationClass="me.serce.solidity.ide.inspections.UnusedElementInspection"/>
 
+        <localInspection language="Solidity" groupName="Solidity"
+                         displayName="Invalid address checksum"
+                         enabledByDefault="true"
+                         level="ERROR"
+                         implementationClass="me.serce.solidity.ide.inspections.AddressChecksumInspection"/>
+
         <!-- Forge Test Runner -->
         <configurationType implementation="me.serce.solidity.ide.run.ForgeTestRunConfigurationType"/>
         <runConfigurationProducer
