@@ -8,6 +8,7 @@ import com.intellij.psi.util.parentOfType
 import me.serce.solidity.lang.psi.SolDeclarationItem
 import me.serce.solidity.lang.psi.SolFunctionCallArguments
 import me.serce.solidity.lang.psi.SolFunctionCallElement
+import me.serce.solidity.lang.psi.SolMapExpression
 import me.serce.solidity.lang.types.inferDeclType
 
 class SolParameterInlayHintProvider : InlayParameterHintsProvider {
@@ -55,13 +56,14 @@ enum class HintType() {
 }
 
 fun provideArgumentNameHints(element: SolFunctionCallElement): List<InlayInfo> {
+  val args = element.functionCallArguments.expressionList
+  // Named arguments already show their parameter names in the source.
+  if (args.firstOrNull() is SolMapExpression) return emptyList()
+
   val params = element.resolveDefinitions().takeIf { it?.size == 1 }?.get(0)?.parseParameters() ?: return emptyList()
   // if (expressionList.none { it.isUnclearExpression() }) return emptyList()
-  val args = element.functionCallArguments.expressionList
 
   return params.zip(args).map { InlayInfo(it.first.let { it.first ?: it.second.toString() }, it.second.startOffset) }
 
 
 }
-
-
