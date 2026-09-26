@@ -11,7 +11,7 @@ object SolidityIcons {
   val ERROR: Icon = IconLoader.getIcon("/icons/Error.png", SolidityIcons::class.java)
   val CONTRACT: Icon = IconLoader.getIcon("/icons/Contract.png", SolidityIcons::class.java)
   val INTERFACE: Icon = IconLoader.getIcon("/icons/Interface.png", SolidityIcons::class.java)
-  val LIBRARY: Icon = IconLoader.getIcon("/icons/Library.png", SolidityIcons::class.java)
+  val LIBRARY: Icon = IconLoader.getIcon("/icons/Library.svg", SolidityIcons::class.java)
   val STRUCT: Icon = IconLoader.getIcon("/icons/StructDeclaration.png", SolidityIcons::class.java)
 
   val FUNCTION: Icon = IconLoader.getIcon("/icons/PublicFunction.png", SolidityIcons::class.java) // todo new icon?
