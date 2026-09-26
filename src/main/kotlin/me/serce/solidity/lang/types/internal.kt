@@ -222,6 +222,10 @@ class SolInternalTypeFactory(project: Project) {
             */
              uint number;
             /**
+            * current beacon chain slot number (EVM >= Amsterdam)
+            */
+             uint64 slotnum;
+            /**
             * current block timestamp as seconds since unix epoch
             */
              uint timestamp;

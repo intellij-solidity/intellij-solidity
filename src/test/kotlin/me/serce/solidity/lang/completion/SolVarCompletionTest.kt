@@ -43,7 +43,7 @@ class SolVarCompletionTest : SolCompletionTestBase() {
         }
   """)
 
-  fun testBlockCompletionTest() = checkCompletion(hashSetOf("coinbase", "difficulty"), """
+  fun testBlockCompletionTest() = checkCompletion(hashSetOf("coinbase", "difficulty", "slotnum"), """
         contract B {
 
             function doit() {
