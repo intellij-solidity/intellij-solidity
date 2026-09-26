@@ -260,6 +260,38 @@ class SolImportResolveFoundryTest : SolResolveTestBase() {
         )
     }
 
+    fun testRemappingsFileWithTargetWithoutTrailingSlash() {
+        myFixture.addFileToProject("node_modules/@chainlink/contracts/src/Token.sol", "contract Token {}")
+        myFixture.addFileToProject("remappings.txt", "@chainlink/contracts/=node_modules/@chainlink/contracts")
+        val usage = myFixture.addFileToProject("contracts/Usage.sol", "contract Usage {}")
+
+        val resolved = checkNotNull(
+            SolImportPathReference.findImportFile(
+                project, usage.virtualFile, "@chainlink/contracts/src/Token.sol"
+            )
+        ) { "Failed to resolve a remapping whose target has no trailing slash" }
+        assertTrue(resolved.path.replace("\\", "/").endsWith("node_modules/@chainlink/contracts/src/Token.sol"))
+    }
+
+    fun testFoundryTomlWithTargetWithoutTrailingSlash() {
+        myFixture.addFileToProject("node_modules/@chainlink/contracts/src/Token.sol", "contract Token {}")
+        myFixture.addFileToProject(
+            "foundry.toml",
+            """
+            [profile.default]
+            remappings = ["@chainlink/contracts/=node_modules/@chainlink/contracts"]
+            """.trimIndent()
+        )
+        val usage = myFixture.addFileToProject("contracts/Usage.sol", "contract Usage {}")
+
+        val resolved = checkNotNull(
+            SolImportPathReference.findImportFile(
+                project, usage.virtualFile, "@chainlink/contracts/src/Token.sol"
+            )
+        ) { "Failed to resolve a foundry remapping whose target has no trailing slash" }
+        assertTrue(resolved.path.replace("\\", "/").endsWith("node_modules/@chainlink/contracts/src/Token.sol"))
+    }
+
     override fun getTestDataPath() = "src/test/resources/fixtures/importRemappings/"
 
     private fun testImportPathResolveWithConfig(configFileName: String) {
