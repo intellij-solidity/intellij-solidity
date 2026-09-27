@@ -23,7 +23,8 @@ class SolInternalTypeFactory(project: Project) {
     ).associateBy { it.toString() }
   }
 
-  fun byName(name: String): SolType? = registry[name]
+  fun byName(name: String): SolType? =
+    if (name == internalise("Error")) SolErrorType else registry[name]
 
   val stringType: SolContract by lazy {
      contract("""
@@ -317,6 +318,10 @@ class SolInternalTypeFactory(project: Project) {
           * reverts if the condition is not met - to be used for errors in inputs or external components. Also provides an error message.
           */
           function require(bool condition, string message);
+          /**
+          * reverts with a custom error if the condition is not met.
+          */
+          function require(bool condition, ${internalise("Error")} customError);
           /**
           * abort execution and revert state changes
           */

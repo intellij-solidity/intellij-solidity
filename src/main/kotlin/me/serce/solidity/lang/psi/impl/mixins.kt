@@ -587,7 +587,7 @@ abstract class SolErrorDefMixin : SolStubbedNamedElementImpl<SolErrorDefStub>, S
   }
 
   override fun parseType(): SolType {
-    return SolUnknown
+    return SolErrorType
   }
 
   override fun resolveElement() = this
