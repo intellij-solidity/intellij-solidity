@@ -144,7 +144,7 @@ class SolFunctionCallReference(element: SolFunctionCallExpression) : SolReferenc
   }
 
   fun resolveFunctionCall(): Collection<SolCallable> {
-    if (element.parent is SolRevertStatement) {
+    if (element.parent is SolRevertStatement || isRequireErrorArgument()) {
       val errors = SolResolver.resolveTypeNameUsingImports(element).filterIsInstance<SolErrorDefinition>()
       if (errors.isNotEmpty()) {
         return errors
@@ -178,6 +178,14 @@ class SolFunctionCallReference(element: SolFunctionCallExpression) : SolReferenc
         emptyList()
     }
     return removeOverrides(resolved.groupBy { it.callablePriority }.entries.minByOrNull { it.key }?.value ?: emptyList())
+  }
+
+  private fun isRequireErrorArgument(): Boolean {
+    val arguments = element.parent as? SolFunctionCallArguments ?: return false
+    val invocation = arguments.parent as? SolFunctionInvocation ?: return false
+    val requireCall = invocation.parent as? SolFunctionCallExpression ?: return false
+    return requireCall.functionCallArguments.expressionList.getOrNull(1) == element &&
+      (requireCall.expression as? SolPrimaryExpression)?.varLiteral?.name == "require"
   }
 
   private fun removeOverrides(callables: Collection<SolCallable>): Collection<SolCallable> {

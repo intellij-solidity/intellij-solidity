@@ -57,6 +57,12 @@ object SolUnknown : SolPrimitiveType {
   override fun toString() = "<unknown>"
 }
 
+object SolErrorType : SolPrimitiveType {
+  override fun isAssignableFrom(other: SolType): Boolean = other == this
+
+  override fun toString() = "error"
+}
+
 object SolBoolean : SolPrimitiveType {
   override fun isAssignableFrom(other: SolType): Boolean =
     other == SolBoolean
