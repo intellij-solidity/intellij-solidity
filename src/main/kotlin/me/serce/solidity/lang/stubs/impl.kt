@@ -4,6 +4,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.StubBuilder
 import com.intellij.psi.stubs.*
 import com.intellij.psi.tree.IStubFileElementType
+import com.intellij.psi.util.childrenOfType
 import me.serce.solidity.lang.SolidityLanguage
 import me.serce.solidity.lang.core.SolidityFile
 import me.serce.solidity.lang.psi.*
@@ -14,7 +15,7 @@ class SolidityFileStub(file: SolidityFile?) : PsiFileStubImpl<SolidityFile>(file
 
   object Type : IStubFileElementType<SolidityFileStub>(SolidityLanguage) {
     // bump version every time stub tree changes
-    override fun getStubVersion() = 20
+    override fun getStubVersion() = 21
 
     override fun getBuilder(): StubBuilder = object : DefaultStubBuilder() {
       override fun createStubForFile(file: PsiFile) = SolidityFileStub(file as SolidityFile)
@@ -219,21 +220,23 @@ class SolConstantVariableDeclStub(
 class SolContractOrLibDefStub(
   parent: StubElement<*>?,
   elementType: IStubElementType<*, *>,
-  override val name: String?
+  override val name: String?,
+  val superNames: List<String>
 ) : StubBase<SolContractDefinition>(parent, elementType), SolNamedStub {
 
   object Type : SolStubElementType<SolContractOrLibDefStub, SolContractDefinition>("CONTRACT_DEFINITION") {
     override fun deserialize(dataStream: StubInputStream, parentStub: StubElement<*>?) =
-      SolContractOrLibDefStub(parentStub, this, dataStream.readNameAsString())
+      SolContractOrLibDefStub(parentStub, this, dataStream.readNameAsString(), dataStream.readSuperNames())
 
     override fun serialize(stub: SolContractOrLibDefStub, dataStream: StubOutputStream) = with(dataStream) {
       writeName(stub.name)
+      writeSuperNames(stub.superNames)
     }
 
     override fun createPsi(stub: SolContractOrLibDefStub) = SolContractDefinitionImpl(stub, this)
 
     override fun createStub(psi: SolContractDefinition, parentStub: StubElement<*>?) =
-      SolContractOrLibDefStub(parentStub, this, psi.name)
+      SolContractOrLibDefStub(parentStub, this, psi.name, psi.indexedSuperNames())
 
     override fun indexStub(stub: SolContractOrLibDefStub, sink: IndexSink) = sink.indexContractDef(stub)
   }
@@ -357,3 +360,32 @@ class SolImportAliasDefStub(
 
 
 private fun StubInputStream.readNameAsString(): String? = readName()?.string
+
+/**
+ * Names of the contracts this contract inherits from, as they should be indexed in [SolInheritanceIndex].
+ *
+ * Import aliases are resolved locally (aliases are file-scoped in Solidity) so that a contract inheriting
+ * through an alias (e.g. `import {A as B} from "./a.sol"; contract C is B {}`) is indexed under the original
+ * name `A`. This keeps the reverse lookup by contract name working without a project-wide reference search.
+ */
+private fun SolContractDefinition.indexedSuperNames(): List<String> {
+  val aliases = containingFile.childrenOfType<SolImportDirective>()
+    .flatMap { it.importAliasedPairList }
+    .mapNotNull { pair ->
+      val alias = pair.importAlias?.name ?: return@mapNotNull null
+      val original = pair.userDefinedTypeName.name ?: return@mapNotNull null
+      alias to original
+    }
+    .toMap()
+  return inheritanceSpecifierList
+    .mapNotNull { it.userDefinedTypeName?.name }
+    .map { aliases[it] ?: it }
+    .distinct()
+}
+
+private fun StubOutputStream.writeSuperNames(names: List<String>) {
+  writeUTFFast(names.joinToString(" "))
+}
+
+private fun StubInputStream.readSuperNames(): List<String> =
+  readUTFFast().takeIf { it.isNotEmpty() }?.split(" ") ?: emptyList()
