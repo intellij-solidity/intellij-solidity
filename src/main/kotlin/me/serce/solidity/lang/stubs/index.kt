@@ -2,6 +2,7 @@ package me.serce.solidity.lang.stubs
 
 import com.intellij.psi.stubs.StringStubIndexExtension
 import com.intellij.psi.stubs.StubIndexKey
+import me.serce.solidity.lang.psi.SolContractDefinition
 import me.serce.solidity.lang.psi.SolNamedElement
 import me.serce.solidity.lang.psi.impl.SolImportPathElement
 
@@ -66,4 +67,18 @@ class SolImportIndex : StringStubIndexExtension<SolImportPathElement>() {
 
   override fun getVersion(): Int = SolidityFileStub.Type.stubVersion
   override fun getKey(): StubIndexKey<String, SolImportPathElement> = KEY
+}
+
+/**
+ * Maps the names of inherited contracts to the contracts that inherit from them.
+ *
+ * This is the reverse index that powers "find implementations" without scanning every reference in the project.
+ */
+class SolInheritanceIndex : StringStubIndexExtension<SolContractDefinition>() {
+  companion object {
+    val KEY: StubIndexKey<String, SolContractDefinition> = StubIndexKey.createIndexKey(SolInheritanceIndex::class.java.canonicalName)
+  }
+
+  override fun getVersion(): Int = SolidityFileStub.Type.stubVersion
+  override fun getKey(): StubIndexKey<String, SolContractDefinition> = KEY
 }

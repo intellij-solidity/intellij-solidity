@@ -48,4 +48,50 @@ class SolLineMarkerProviderTest : SolTestBase() {
     }
     assertTrue(functionGutters.isEmpty())
   }
+
+  fun testOverriddenGutterForDeeplyInheritedOverride() {
+    InlineFile(
+      """
+          contract A {
+              function foo() public {}
+          }
+
+          contract B is A {
+          }
+
+          contract C is B {
+              function foo() public override {}
+          }
+          /*caret*/
+      """,
+      name = "A.sol"
+    ).withCaret()
+
+    val gutters = myFixture.findAllGutters()
+    val overriddenGutter = gutters.find { it.tooltipText == "Is overridden in subcontracts" }
+    assertNotNull(overriddenGutter)
+    assertEquals(AllIcons.Gutter.OverridenMethod, overriddenGutter?.icon)
+  }
+
+  fun testContractGutterForDeeplyInheritedImplementation() {
+    InlineFile(
+      """
+          contract A {
+          }
+
+          contract B is A {
+          }
+
+          contract C is B {
+          }
+          /*caret*/
+      """,
+      name = "A.sol"
+    ).withCaret()
+
+    val gutters = myFixture.findAllGutters()
+    val implementationGutter = gutters.find { it.tooltipText == "Has implementations" }
+    assertNotNull(implementationGutter)
+    assertEquals(AllIcons.Gutter.OverridenMethod, implementationGutter?.icon)
+  }
 }
