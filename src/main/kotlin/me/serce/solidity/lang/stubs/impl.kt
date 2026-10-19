@@ -378,8 +378,13 @@ private fun SolContractDefinition.indexedSuperNames(): List<String> {
     }
     .toMap()
   return inheritanceSpecifierList
-    .mapNotNull { it.userDefinedTypeName?.name }
-    .map { aliases[it] ?: it }
+    .mapNotNull { specifier ->
+      val typeName = specifier.userDefinedTypeName ?: return@mapNotNull null
+      val name = typeName.name ?: return@mapNotNull null
+      // Only unqualified names can refer to a file-scoped import alias. A qualified name such as
+      // `NS.Base` must keep its last segment (`Base`) even if another import renames `Other` to `Base`.
+      if (typeName.findIdentifiers().size == 1) aliases[name] ?: name else name
+    }
     .distinct()
 }
 
