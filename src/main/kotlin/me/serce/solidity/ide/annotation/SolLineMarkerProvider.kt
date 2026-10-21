@@ -9,7 +9,6 @@ import com.intellij.openapi.util.Iconable
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import me.serce.solidity.ide.navigation.findAllImplementations
-import me.serce.solidity.ide.navigation.findImplementations
 import me.serce.solidity.lang.psi.SolContractDefinition
 import me.serce.solidity.lang.psi.SolFunctionDefinition
 import me.serce.solidity.lang.resolve.function.SolFunctionResolver
@@ -26,14 +25,11 @@ class SolLineMarkerProvider : LineMarkerProvider {
         is SolContractDefinition -> {
           val identifier = el.identifier
           if (identifier != null) {
-            //TODO: this solution used here and for function overrides doesn't work properly if the contract/function
-            // used is way deeper in the inheritance tree. It's accepted temporarily because it's the source of
-            // performance flaw blocking the UI.
-            val targets = el.findImplementations()
-            if (targets.findFirst() != null) {
+            val implementations = el.findAllImplementations()
+            if (implementations.isNotEmpty()) {
               val info = NavigationGutterIconBuilder
                 .create(AllIcons.Gutter.OverridenMethod)
-                .setTargets(el.findAllImplementations())
+                .setTargets(implementations)
                 .setPopupTitle("Go To Implementation")
                 .setTooltipText("Has implementations")
                 .createLineMarkerInfo(identifier)

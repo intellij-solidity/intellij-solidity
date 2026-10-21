@@ -5,6 +5,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.progress.util.ProgressIndicatorUtils
 import com.intellij.testFramework.fixtures.CodeInsightTestUtil
+import me.serce.solidity.lang.psi.SolContractDefinition
 import me.serce.solidity.utils.SolTestBase
 import org.intellij.lang.annotations.Language
 import org.junit.Assert
@@ -90,6 +91,33 @@ class GoToImplementationTest : SolTestBase() {
           function foo() external {}
       }
   """, setOf("foo ctr.sol"), "ctr.sol")
+
+  fun testQualifiedBaseIsNotRewrittenByUnrelatedImportAlias() {
+    InlineFile(
+      """
+        contract Base {}
+               //^
+      """, "base.sol"
+    )
+    val base = findElementInEditor<SolContractDefinition>("^")
+
+    InlineFile("contract Other {}", "other.sol")
+
+    InlineFile(
+      """
+        import {Other as Base} from "./other.sol";
+        import * as NS from "./base.sol";
+        contract Child is NS.Base {}
+               //x
+      """, "child.sol"
+    )
+    val child = findElementInEditor<SolContractDefinition>("x")
+
+    assertEquals(
+      setOf(child),
+      base.findImplementations().findAll().toSet()
+    )
+  }
 
   private fun testImplementations(@Language("Solidity") code: String, options: Set<String>, filename: String) {
     InlineFile(code, name=filename).withCaret()

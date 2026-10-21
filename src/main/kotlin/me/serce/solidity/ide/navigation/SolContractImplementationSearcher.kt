@@ -7,20 +7,20 @@ import com.intellij.openapi.progress.EmptyProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.util.Condition
 import com.intellij.psi.PsiElement
+import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.GlobalSearchScope.FilesScope
 import com.intellij.psi.search.GlobalSearchScope.allScope
 import com.intellij.psi.search.searches.DefinitionsScopedSearch.SearchParameters
-import com.intellij.psi.search.searches.ReferencesSearch
+import com.intellij.psi.stubs.StubIndex
 import com.intellij.psi.util.CachedValueProvider
 import com.intellij.psi.util.CachedValuesManager
-import com.intellij.psi.util.childrenOfType
+import com.intellij.psi.util.PsiModificationTracker
 import com.intellij.util.*
 import me.serce.solidity.lang.SolidityFileType
 import me.serce.solidity.lang.psi.SolContractDefinition
 import me.serce.solidity.lang.psi.SolFunctionDefinition
-import me.serce.solidity.lang.psi.SolImportAliasedPair
-import me.serce.solidity.lang.psi.SolInheritanceSpecifier
 import me.serce.solidity.lang.resolve.function.SolFunctionResolver
+import me.serce.solidity.lang.stubs.SolInheritanceIndex
 import java.util.*
 
 private const val MAX_IMPLEMENTATIONS = 250
@@ -63,8 +63,9 @@ fun SolContractDefinition.findAllImplementations(): HashSet<SolContractDefinitio
     implementations.remove(this)
     CachedValueProvider.Result.create(
       implementations,
-      implementations.mapNotNull { it.containingFile } + this.containingFile
-
+      // The result is index-backed now, so it stays cheap to recompute and we can invalidate on any PSI
+      // change instead of relying on the (incomplete) set of files that currently contain implementations.
+      PsiModificationTracker.MODIFICATION_COUNT
     )
   }
 }
@@ -87,6 +88,7 @@ private fun findAllImplementationsInAction(
 fun <U> Query<U>.filterQuery(condition: Condition<U>): Query<U> = FilteredQuery(this, condition)
 
 fun SolContractDefinition.findImplementations(): Query<SolContractDefinition> {
+  val contractName = name ?: return EmptyQuery()
   val virtualFile = containingFile.virtualFile
   val resolveScope = when {
     // When the file for which we're performing search for usages is a part of the sources/libs in the current project
@@ -94,37 +96,17 @@ fun SolContractDefinition.findImplementations(): Query<SolContractDefinition> {
     // However, if the project doesn't store solidity files in its source folder, we perform a global search.
     else -> allScope(project)
   }
-  val solOnlyScope = useScope.intersectWith(FilesScope.getScopeRestrictedByFileTypes(resolveScope, SolidityFileType))
-  // Reference search can find two types of references:
-  return ReferencesSearch.search(this, solOnlyScope)
-    .flatMapping {
-      when (val element = it.element.parent) {
-        // 1. A contract is directly referenced in the inheritance specifier.
-        //    In this case, we simply include the contract definition in the list of results.
-        is SolInheritanceSpecifier -> {
-          when (val parent = element.parent) {
-            is SolContractDefinition -> ArrayQuery(parent)
-            else -> EmptyQuery()
-          }
-        }
-        // 2. A contract is referenced in the import alias.
-        //    Because we want all referenced through aliases to be resolvable directly, we can't
-        //    rely on the reference search to find the references to a particular alias. So, instead
-        //    we search through all contract definition in the file containing the alias.
-        // TODO: consider whether we could to either allow resolving references to aliases which
-        //   should also allow renaming. Or, alternatively, add a separate index for faster search.
-        is SolImportAliasedPair -> {
-          val containingFile = element.containingFile
-          val alias = element.importAlias
-          // TODO: get inheritanceSpecifierList in order to consider constructor calls as well.
-          val results = containingFile
-            .childrenOfType<SolContractDefinition>()
-            .filter {
-              it.inheritanceSpecifierList.map { it.userDefinedTypeName.name }.contains(alias?.name)
-            }
-          CollectionQuery(results)
-        }
-        else -> EmptyQuery()
-      }
+  val solOnlyScope = useScope
+    .intersectWith(FilesScope.getScopeRestrictedByFileTypes(resolveScope, SolidityFileType)) as? GlobalSearchScope
+  // Look contracts up by the name of the contract they inherit from, then keep only those whose inheritance
+  // actually resolves to this contract. This replaces a project-wide reference search and keeps the line
+  // markers and "go to implementation" fast regardless of project size.
+  val candidates = StubIndex.getElements(
+    SolInheritanceIndex.KEY, contractName, project, solOnlyScope, SolContractDefinition::class.java
+  )
+  return CollectionQuery(
+    candidates.filter { candidate ->
+      candidate.supers.any { superType -> superType.reference?.multiResolve()?.contains(this) == true }
     }
+  )
 }

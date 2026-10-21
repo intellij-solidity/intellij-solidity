@@ -15,6 +15,7 @@ fun IndexSink.indexUserDefinedValueTypeDef(stub: SolUserDefinedValueTypeDefStub)
 fun IndexSink.indexContractDef(stub: SolContractOrLibDefStub) {
   indexNamedStub(stub)
   indexGotoClass(stub)
+  stub.superNames.forEach { occurrence(SolInheritanceIndex.KEY, it) }
 }
 
 fun IndexSink.indexStructDef(stub: SolStructDefStub) {
