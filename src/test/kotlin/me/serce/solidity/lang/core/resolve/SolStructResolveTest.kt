@@ -1,5 +1,7 @@
 package me.serce.solidity.lang.core.resolve
 
+import com.intellij.psi.PsiElement
+
 class SolStructResolveTest : SolResolveTestBase() {
   fun testStructResolve() = checkByCode("""
       contract B {
@@ -129,8 +131,6 @@ class SolStructResolveTest : SolResolveTestBase() {
     )
   )
 
-
-
   fun testResolveStructFromInterface() = testResolveBetweenFiles(
     InlineFile(
       code = """
@@ -160,4 +160,121 @@ class SolStructResolveTest : SolResolveTestBase() {
        }
   """)
   )
+
+    fun testResolveStructFromInterfaceInFunctionCall() = testResolveBetweenFiles(
+        InlineFile(
+            code = """
+         pragma solidity ^0.8.26;
+         
+         interface InterfaceTest {
+          struct Prop {
+                 //x
+              uint256 prop1;
+              uint256 prop2;
+          }
+         }
+    """,
+            name = "a.sol"
+        ),
+        InlineFile("""
+        pragma solidity ^0.8.26;
+        
+        import {InterfaceTest} from "./a.sol";
+
+        contract C {
+            function f(InterfaceTest.Prop memory a) public {
+                prop.prop1;
+            }
+            
+            function g() public {
+                f(InterfaceTest.Prop({
+                                //^
+                    prop1: 1,
+                    prop2: 2
+                }));
+            }
+       }
+  """)
+    )
+
+    fun testResolveInterfaceInStructFunctionCall() = testResolveBetweenFiles(
+        InlineFile(
+            code = """
+         pragma solidity ^0.8.26;
+         
+         interface InterfaceTest {
+                 //x
+          struct Prop {
+              uint256 prop1;
+              uint256 prop2;
+          }
+         }
+    """,
+            name = "a.sol"
+        ),
+        InlineFile("""
+        pragma solidity ^0.8.26;
+        
+        import {InterfaceTest} from "./a.sol";
+
+        contract C {
+            function f(InterfaceTest.Prop memory a) public {
+                prop.prop1;
+            }
+            
+            function g() public {
+                f(InterfaceTest.Prop({
+                        //^
+                    prop1: 1,
+                    prop2: 2
+                }));
+            }
+       }
+  """)
+    )
+
+    fun testResolveStructMemberFromInterfaceInFunctionCall() = checkTestResolvePsiElementBetweenFiles(
+        InlineFile(
+            code = """
+         pragma solidity ^0.8.26;
+         
+         interface InterfaceTest {
+          struct Prop {
+              uint256 prop1;
+                     //x
+              uint256 prop2;
+          }
+         }
+    """, name = "a.sol"
+        ), InlineFile(
+            """
+        pragma solidity ^0.8.26;
+        
+        contract C {
+            function f(InterfaceTest.Prop memory a) public {
+                prop.prop1;
+            }
+            
+            function g() public {
+                f(InterfaceTest.Prop({
+                    prop1: 1,
+                    //^
+                    prop2: 2
+                }));
+            }
+       }
+    """
+        )
+    )
+
+    fun checkTestResolvePsiElementBetweenFiles(file1: InlineFile, file2: InlineFile) {
+        myFixture.openFileInEditor(file2.psiFile.virtualFile)
+        val (refElement, _) = findElementAndDataInEditor<PsiElement>("^")
+        val resolved = checkNotNull(refElement.reference?.resolve()) {
+            "failed to resolve ${refElement.text}"
+        }
+        myFixture.openFileInEditor(file1.psiFile.virtualFile)
+        val (resElement, _) = findElementAndDataInEditor<PsiElement>("x")
+        assertEquals(resElement, resolved)
+    }
 }
