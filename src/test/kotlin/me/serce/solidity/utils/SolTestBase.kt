@@ -6,6 +6,8 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.testFramework.PsiTestUtil
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
+import me.serce.solidity.settings.FormatterType
+import me.serce.solidity.settings.SoliditySettings
 import org.intellij.lang.annotations.Language
 
 abstract class SolTestBase : SolLightPlatformCodeInsightFixtureTestCase() {
@@ -118,6 +120,14 @@ abstract class SolTestBase : SolLightPlatformCodeInsightFixtureTestCase() {
     action()
     PsiTestUtil.checkPsiStructureWithCommit(myFixture.file, PsiTestUtil::checkPsiMatchesTextIgnoringNonCode)
     myFixture.checkResult(replaceCaretMarker(after))
+  }
+
+  /** Runs [block] with the given Solidity formatter setting, restoring the previous one afterwards. */
+  protected fun withFormatter(type: FormatterType, block: () -> Unit) {
+    val settings = SoliditySettings.getInstance(project)
+    val old = settings.formatterType
+    settings.formatterType = type
+    try { block() } finally { settings.formatterType = old }
   }
 
   protected fun checkResult(@Language("Solidity") text: String) {
