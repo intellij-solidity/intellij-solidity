@@ -1,8 +1,6 @@
 package me.serce.solidity.ide.inspections
 
 import me.serce.solidity.settings.FormatterType
-import me.serce.solidity.settings.SoliditySettings
-import org.intellij.lang.annotations.Language
 
 class MissingOverrideInspectionTest : SolInspectionsTestBase(MissingOverrideInspection()) {
 
@@ -122,11 +120,7 @@ class MissingOverrideInspectionTest : SolInspectionsTestBase(MissingOverrideInsp
     """
   )
 
-  fun testFixWithoutIdeFormatter() {
-    val settings = SoliditySettings.getInstance(project)
-    val old = settings.formatterType
-    settings.formatterType = FormatterType.DISABLED
-    try {
+  fun testFixWithoutIdeFormatter() = withFormatter(FormatterType.DISABLED) {
       checkFix(
         "Add override(B, A)",
         """
@@ -140,15 +134,5 @@ class MissingOverrideInspectionTest : SolInspectionsTestBase(MissingOverrideInsp
         contract C is A, B { function f() public view override(B, A) {} }
         """
       )
-    } finally {
-      settings.formatterType = old
-    }
-  }
-
-  private fun checkFix(fixName: String, @Language("Solidity") before: String, @Language("Solidity") after: String) {
-    myFixture.configureByText("main.sol", before.trimIndent())
-    enableInspection()
-    applyQuickFix(fixName)
-    myFixture.checkResult(after.trimIndent())
   }
 }

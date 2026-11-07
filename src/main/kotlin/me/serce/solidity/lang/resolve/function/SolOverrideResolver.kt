@@ -1,5 +1,6 @@
 package me.serce.solidity.lang.resolve.function
 
+import com.intellij.psi.PsiElement
 import me.serce.solidity.ide.navigation.findAllImplementations
 import me.serce.solidity.lang.psi.*
 import me.serce.solidity.lang.psi.impl.LinearizationImpossibleException
@@ -45,44 +46,50 @@ object SolOverrideResolver {
     return true
   }
 
+  /** The base contracts a member overrides (see [visibleDeclaringBases]) and its declaration in each of them. */
+  data class Overrides(val bases: List<SolContractDefinition>, val declarations: List<SolNamedElement>) {
+    fun isEmpty() = declarations.isEmpty()
+  }
+
   /**
    * Bases of [contract] that declare a member with the same signature as [member] and are reachable along at
    * least one inheritance path without another declaring contract in between. Ordered most derived first.
    */
   fun visibleDeclaringBases(contract: SolContractDefinition, member: SolNamedElement): List<SolContractDefinition> {
     val order = linearizedParents(contract) ?: return emptyList()
-    val result = LinkedHashSet<SolContractDefinition>()
+    val found = HashSet<SolContractDefinition>()
     val visited = HashSet<SolContractDefinition>()
     fun walk(c: SolContractDefinition) {
       for (p in SolContract(c).getParents().map { it.ref }) {
-        if (overridableMembers(p).any { participates(it) && sameSignature(it, member) }) {
-          result += p
-        } else if (visited.add(p)) {
-          walk(p)
-        }
+        if (!visited.add(p)) continue
+        if (declarationIn(p, member) != null) found += p else walk(p)
       }
     }
     walk(contract)
-    return result.sortedBy { order.indexOf(it).let { i -> if (i < 0) Int.MAX_VALUE else i } }
+    // the linearization is already ordered most derived first
+    return order.filter { it in found }
+  }
+
+  /** What [member] directly overrides; empty when it doesn't take part in overriding. */
+  fun overrides(member: SolNamedElement): Overrides {
+    val contract = containingContract(member)
+    if (contract == null || !participates(member)) return Overrides(emptyList(), emptyList())
+    val bases = visibleDeclaringBases(contract, member)
+    return Overrides(bases, bases.mapNotNull { declarationIn(it, member) })
   }
 
   /** Base declarations that [member] directly overrides. */
-  fun directlyOverridden(member: SolNamedElement): List<SolNamedElement> {
-    if (!participates(member)) return emptyList()
-    val contract = containingContract(member) ?: return emptyList()
-    return visibleDeclaringBases(contract, member).mapNotNull { base ->
-      overridableMembers(base).firstOrNull { participates(it) && sameSignature(it, member) }
-    }
+  fun directlyOverridden(member: SolNamedElement): List<SolNamedElement> = overrides(member).declarations
+
+  /** Whether a member of a derived contract overrides [decl] (directly or indirectly). Uses the inheritance index. */
+  fun isOverriddenInDerived(decl: SolNamedElement): Boolean {
+    if (!participates(decl)) return false
+    val contract = containingContract(decl) ?: return false
+    return contract.findAllImplementations().any { declarationIn(it, decl) != null }
   }
 
-  /** Members of derived contracts that override [decl] (directly or indirectly). Uses the inheritance index. */
-  fun overridesInDerived(decl: SolNamedElement): List<SolNamedElement> {
-    if (!participates(decl)) return emptyList()
-    val contract = containingContract(decl) ?: return emptyList()
-    return contract.findAllImplementations()
-      .flatMap { overridableMembers(it) }
-      .filter { participates(it) && sameSignature(it, decl) }
-  }
+  private fun declarationIn(contract: SolContractDefinition, member: SolNamedElement): SolNamedElement? =
+    overridableMembers(contract).firstOrNull { participates(it) && sameSignature(it, member) }
 
   fun isVirtual(decl: SolNamedElement): Boolean =
     virtualSpecifier(decl) != null || containingContract(decl)?.contractType == ContractType.INTERFACE
@@ -104,13 +111,29 @@ object SolOverrideResolver {
     else -> null
   }
 
-  /** "Contract.member" label used in messages. */
-  fun label(member: SolNamedElement): String {
-    val name = (member as? SolFunctionDefinition)?.specialFunction?.name?.lowercase() ?: member.name
-    return "${containingContract(member)?.name}.$name"
+  /** Member name; `receive`/`fallback` for the special functions. */
+  fun displayName(member: SolNamedElement): String? =
+    (member as? SolFunctionDefinition)?.specialFunction?.name?.lowercase() ?: member.name
+
+  /** Source text of the member's parameter list, e.g. `(uint256 x)`; null for a modifier without one. */
+  fun parametersText(member: SolNamedElement): String? = when (member) {
+    is SolFunctionDefinition -> member.parameterListList.firstOrNull()?.text
+    is SolModifierDefinition -> member.parameterList?.text
+    else -> null
   }
 
-  private fun linearizedParents(contract: SolContractDefinition): List<SolContractDefinition>? = try {
+  /** Name identifier, or the `receive`/`fallback` keyword; where problems about the member are reported. */
+  fun nameElement(member: SolNamedElement): PsiElement? = when (member) {
+    is SolFunctionDefinition -> member.identifier ?: member.firstChild
+    is SolModifierDefinition -> member.identifier
+    else -> null
+  }
+
+  /** "Contract.member" label used in messages. */
+  fun label(member: SolNamedElement): String = "${containingContract(member)?.name}.${displayName(member)}"
+
+  /** Linearized parents, most derived first; null when linearization is impossible. */
+  fun linearizedParents(contract: SolContractDefinition): List<SolContractDefinition>? = try {
     SolContract(contract).linearizeParents().map { it.ref }
   } catch (e: LinearizationImpossibleException) {
     null

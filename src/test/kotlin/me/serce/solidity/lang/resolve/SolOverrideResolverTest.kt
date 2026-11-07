@@ -125,6 +125,6 @@ class SolOverrideResolverTest : SolTestBase() {
       contract A { function f() public {} }
       contract B is A { function f() public {} }
     """)
-    assertEquals(listOf("B.f"), SolOverrideResolver.overridesInDerived(c.getValue("A").member("f")).map { SolOverrideResolver.label(it) })
+    assertTrue(SolOverrideResolver.isOverriddenInDerived(c.getValue("A").member("f")))
   }
 }

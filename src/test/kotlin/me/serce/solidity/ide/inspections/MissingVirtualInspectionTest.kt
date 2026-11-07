@@ -1,8 +1,6 @@
 package me.serce.solidity.ide.inspections
 
 import me.serce.solidity.settings.FormatterType
-import me.serce.solidity.settings.SoliditySettings
-import org.intellij.lang.annotations.Language
 
 class MissingVirtualInspectionTest : SolInspectionsTestBase(MissingVirtualInspection()) {
 
@@ -143,19 +141,5 @@ class MissingVirtualInspectionTest : SolInspectionsTestBase(MissingVirtualInspec
       contract C is B { function f() public override {} }
       """
     )
-  }
-
-  private fun withFormatter(type: FormatterType, block: () -> Unit) {
-    val settings = SoliditySettings.getInstance(project)
-    val old = settings.formatterType
-    settings.formatterType = type
-    try { block() } finally { settings.formatterType = old }
-  }
-
-  private fun checkFix(fixName: String, @Language("Solidity") before: String, @Language("Solidity") after: String) {
-    myFixture.configureByText("main.sol", before.trimIndent())
-    enableInspection()
-    applyQuickFix(fixName)
-    myFixture.checkResult(after.trimIndent())
   }
 }

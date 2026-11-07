@@ -7,21 +7,21 @@ import me.serce.solidity.lang.psi.SolNamedElement
 import me.serce.solidity.lang.psi.Visibility
 import me.serce.solidity.lang.resolve.function.SolOverrideResolver
 
-/** Renders the source of a member that overrides [base]; formatting is left to the code style manager. */
+/** Renders the unindented source of a member that overrides [base]; the caller indents it. */
 object SolOverrideStubRenderer {
 
   fun render(base: SolNamedElement, overrideBases: List<String>): String {
     val override = SolSpecifierEditor.overrideText(overrideBases)
     return when (base) {
-      is SolModifierDefinition -> "modifier ${base.name}${base.parameterList?.text ?: ""} $override {\n_;\n}"
+      is SolModifierDefinition -> "modifier ${base.name}${SolOverrideResolver.parametersText(base) ?: ""} $override {\n_;\n}"
       is SolFunctionDefinition -> renderFunction(base, override)
       else -> error("Unsupported member: $base")
     }
   }
 
   private fun renderFunction(f: SolFunctionDefinition, override: String): String {
-    val head = f.specialFunction?.name?.lowercase() ?: "function ${f.name}"
-    val parts = mutableListOf(head + f.parameterListList.first().text)
+    val head = if (f.specialFunction != null) SolOverrideResolver.displayName(f) else "function ${f.name}"
+    val parts = mutableListOf(head + SolOverrideResolver.parametersText(f))
     parts += f.functionVisibilitySpecifierList.mapNotNull { it.visibilitySpecifier?.text }
     parts += f.stateMutabilitySpecifierList.map { it.text }
     parts += override

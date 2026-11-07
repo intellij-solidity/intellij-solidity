@@ -17,9 +17,9 @@ import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
 import com.intellij.psi.SmartPointerManager
 import com.intellij.psi.codeStyle.CodeStyleManager
-import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.ui.SimpleColoredComponent
 import com.intellij.ui.SimpleTextAttributes
+import me.serce.solidity.ide.formatting.SolidityFormattingRestriction
 import me.serce.solidity.ide.inspections.fixes.AddVirtualFix
 import me.serce.solidity.ide.inspections.fixes.SolSpecifierEditor
 import me.serce.solidity.lang.SolidityFileType
@@ -28,11 +28,8 @@ import me.serce.solidity.lang.psi.ContractType
 import me.serce.solidity.lang.psi.SolContractDefinition
 import me.serce.solidity.lang.psi.SolFunctionDefinition
 import me.serce.solidity.lang.psi.SolNamedElement
-import me.serce.solidity.lang.psi.impl.LinearizationImpossibleException
+import me.serce.solidity.lang.psi.parentOfType
 import me.serce.solidity.lang.resolve.function.SolOverrideResolver
-import me.serce.solidity.lang.types.SolContract
-import me.serce.solidity.settings.FormatterType
-import me.serce.solidity.settings.SoliditySettings
 import javax.swing.JTree
 
 /** Shared logic of Code | Override Methods (Ctrl+O) and Code | Implement Methods (Ctrl+I) for Solidity. */
@@ -49,8 +46,7 @@ abstract class SolOverrideImplementHandler : LanguageCodeInsightActionHandler {
 
   override fun isValidFor(editor: Editor, file: PsiFile): Boolean {
     // available whenever the contract inherits something, so an empty result can be explained with a hint
-    val contract = contractAt(editor, file) ?: return false
-    return SolContract(contract).getParents().isNotEmpty()
+    return contractAt(editor, file)?.supers?.isNotEmpty() == true
   }
 
   override fun invoke(project: Project, editor: Editor, file: PsiFile) {
@@ -68,22 +64,18 @@ abstract class SolOverrideImplementHandler : LanguageCodeInsightActionHandler {
   }
 
   /** The contract whose body contains the caret; libraries can't inherit, so they are excluded. */
-  fun contractAt(editor: Editor, file: PsiFile): SolContractDefinition? {
+  internal fun contractAt(editor: Editor, file: PsiFile): SolContractDefinition? {
     val offset = editor.caretModel.offset
     val element = file.findElementAt(offset) ?: file.findElementAt(offset - 1) ?: return null
-    val contract = PsiTreeUtil.getParentOfType(element, SolContractDefinition::class.java, false) ?: return null
+    val contract = element.parentOfType<SolContractDefinition>(strict = false) ?: return null
     if (contract.contractType == ContractType.LIBRARY) return null
     val lbrace = contract.node.findChildByType(SolidityTokenTypes.LBRACE) ?: return null
     return if (offset >= lbrace.textRange.endOffset) contract else null
   }
 
   /** Most derived base declaration per signature, not yet redefined in [contract], filtered by [accept]. */
-  fun candidates(contract: SolContractDefinition): List<SolNamedElement> {
-    val parents = try {
-      SolContract(contract).linearizeParents().map { it.ref }
-    } catch (e: LinearizationImpossibleException) {
-      return emptyList()
-    }
+  internal fun candidates(contract: SolContractDefinition): List<SolNamedElement> {
+    val parents = SolOverrideResolver.linearizedParents(contract) ?: return emptyList()
     val own = SolOverrideResolver.overridableMembers(contract)
     val mostDerived = mutableListOf<SolNamedElement>()
     for (parent in parents) {
@@ -107,7 +99,7 @@ abstract class SolOverrideImplementHandler : LanguageCodeInsightActionHandler {
     return chooser.selectedElements?.map { it.member }
   }
 
-  fun insert(editor: Editor, contract: SolContractDefinition, members: List<SolNamedElement>) {
+  private fun insert(editor: Editor, contract: SolContractDefinition, members: List<SolNamedElement>) {
     val project = contract.project
     // bases that must become virtual; pointers survive the reparse caused by inserting the stubs
     val pointerManager = SmartPointerManager.getInstance(project)
@@ -147,7 +139,7 @@ abstract class SolOverrideImplementHandler : LanguageCodeInsightActionHandler {
     document.insertString(offset, inserted)
     psiDocumentManager.commitDocument(document)
     val marker = document.createRangeMarker(offset, offset + inserted.length)
-    if (SoliditySettings.getInstance(project).formatterType == FormatterType.INTELLIJ_SOLIDITY) {
+    if (SolidityFormattingRestriction.isIdeFormatterActive(project)) {
       val file = psiDocumentManager.getPsiFile(document)
       if (file != null) {
         CodeStyleManager.getInstance(project).reformatText(file, marker.startOffset, marker.endOffset)
@@ -216,15 +208,8 @@ private class SolMemberChooserObject(val member: SolNamedElement) : ClassMember 
     component.icon = member.getIcon(0)
   }
 
-  override fun getText(): String {
-    val name = (member as? SolFunctionDefinition)?.specialFunction?.name?.lowercase() ?: member.name
-    val params = when (member) {
-      is SolFunctionDefinition -> member.parameterListList.firstOrNull()?.text
-      is me.serce.solidity.lang.psi.SolModifierDefinition -> member.parameterList?.text
-      else -> null
-    } ?: "()"
-    return "$name$params"
-  }
+  override fun getText(): String =
+    "${SolOverrideResolver.displayName(member)}${SolOverrideResolver.parametersText(member) ?: "()"}"
 
   override fun equals(other: Any?) = other is SolMemberChooserObject && other.member == member
   override fun hashCode() = member.hashCode()

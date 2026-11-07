@@ -3,7 +3,6 @@ package me.serce.solidity.ide.inspections
 import com.intellij.codeInspection.LocalInspectionTool
 import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
-import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiElementVisitor
 import me.serce.solidity.ide.inspections.fixes.AddOverrideFix
 import me.serce.solidity.ide.inspections.fixes.SolSpecifierEditor
@@ -19,10 +18,9 @@ class MissingOverrideInspection : LocalInspectionTool() {
       override fun visitModifierDefinition(o: SolModifierDefinition) = check(o, "Modifier")
 
       private fun check(member: SolNamedElement, kind: String) {
-        val overridden = SolOverrideResolver.directlyOverridden(member)
-        if (overridden.isEmpty()) return
-        val contract = SolOverrideResolver.containingContract(member) ?: return
-        val bases = SolOverrideResolver.visibleDeclaringBases(contract, member)
+        val overrides = SolOverrideResolver.overrides(member)
+        if (overrides.isEmpty()) return
+        val bases = overrides.bases
         val baseNames = bases.mapNotNull { it.name }
         val specifier = SolOverrideResolver.overrideSpecifier(member)
         val fix = AddOverrideFix(member, baseNames)
@@ -30,10 +28,10 @@ class MissingOverrideInspection : LocalInspectionTool() {
           specifier == null -> {
             // since 0.8.8 `override` is optional when overriding a single interface function
             if (bases.size == 1 && bases[0].contractType == ContractType.INTERFACE) return
-            val anchor = nameElement(member) ?: return
+            val anchor = SolOverrideResolver.nameElement(member) ?: return
             holder.registerProblem(
               anchor,
-              "$kind overrides '${SolOverrideResolver.label(overridden.first())}' but is missing 'override'",
+              "$kind overrides '${SolOverrideResolver.label(overrides.declarations.first())}' but is missing 'override'",
               ProblemHighlightType.GENERIC_ERROR,
               fix
             )
@@ -49,12 +47,4 @@ class MissingOverrideInspection : LocalInspectionTool() {
     }
   }
 
-  companion object {
-    /** Name identifier, or the `receive`/`fallback` keyword. */
-    fun nameElement(member: SolNamedElement): PsiElement? = when (member) {
-      is SolFunctionDefinition -> member.identifier ?: member.firstChild
-      is SolModifierDefinition -> member.identifier
-      else -> null
-    }
-  }
 }

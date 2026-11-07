@@ -5,7 +5,6 @@ import com.intellij.codeInspection.LocalQuickFix
 import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.psi.PsiElementVisitor
-import me.serce.solidity.ide.inspections.MissingOverrideInspection.Companion.nameElement
 import me.serce.solidity.ide.inspections.fixes.AddVirtualFix
 import me.serce.solidity.lang.psi.SolFunctionDefinition
 import me.serce.solidity.lang.psi.SolModifierDefinition
@@ -22,7 +21,7 @@ class MissingVirtualInspection : LocalInspectionTool() {
       override fun visitModifierDefinition(o: SolModifierDefinition) = check(o, "Modifier", "modifier")
 
       private fun check(member: SolNamedElement, kind: String, kindLower: String) {
-        val anchor = nameElement(member) ?: return
+        val anchor = SolOverrideResolver.nameElement(member) ?: return
         // override site: every directly overridden declaration must be virtual
         for (decl in SolOverrideResolver.directlyOverridden(member)) {
           if (needsVirtual(decl)) {
@@ -38,7 +37,7 @@ class MissingVirtualInspection : LocalInspectionTool() {
         }
         // base site: a declaration that is overridden somewhere must be virtual
         if (SolOverrideResolver.participates(member) && needsVirtual(member) &&
-          SolOverrideResolver.overridesInDerived(member).isNotEmpty()
+          SolOverrideResolver.isOverriddenInDerived(member)
         ) {
           holder.registerProblem(
             anchor,

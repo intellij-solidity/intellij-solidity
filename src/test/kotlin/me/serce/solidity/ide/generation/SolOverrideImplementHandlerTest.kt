@@ -3,7 +3,6 @@ package me.serce.solidity.ide.generation
 import me.serce.solidity.lang.psi.SolNamedElement
 import me.serce.solidity.utils.SolTestBase
 import me.serce.solidity.settings.FormatterType
-import me.serce.solidity.settings.SoliditySettings
 import org.intellij.lang.annotations.Language
 
 class SolOverrideImplementHandlerTest : SolTestBase() {
@@ -268,11 +267,7 @@ class SolOverrideImplementHandlerTest : SolTestBase() {
     assertFalse(SolOverrideMethodsHandler().isValidFor(myFixture.editor, myFixture.file))
   }
 
-  fun testIndentedWithoutIdeFormatter() {
-    val settings = SoliditySettings.getInstance(project)
-    val old = settings.formatterType
-    settings.formatterType = FormatterType.DISABLED
-    try {
+  fun testIndentedWithoutIdeFormatter() = withFormatter(FormatterType.DISABLED) {
       doTest(
         SolOverrideMethodsHandler(),
         """
@@ -294,9 +289,6 @@ class SolOverrideImplementHandlerTest : SolTestBase() {
         }
         """
       )
-    } finally {
-      settings.formatterType = old
-    }
   }
 
   // Ctrl+O must react (with a hint) when bases exist but nothing can be overridden, instead of silently doing nothing

@@ -1,6 +1,7 @@
 package me.serce.solidity.ide.formatting
 
 import com.intellij.lang.LanguageFormattingRestriction
+import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import me.serce.solidity.lang.core.SolidityFile
 import me.serce.solidity.settings.FormatterType
@@ -15,7 +16,12 @@ class SolidityFormattingRestriction : LanguageFormattingRestriction {
       return true
     }
 
-    val settings = SoliditySettings.getInstance(element.project)
-    return settings.formatterType == FormatterType.INTELLIJ_SOLIDITY
+    return isIdeFormatterActive(element.project)
+  }
+
+  companion object {
+    /** False when an external formatter (Foundry) or none is configured; edits must then be formatted by hand. */
+    fun isIdeFormatterActive(project: Project): Boolean =
+      SoliditySettings.getInstance(project).formatterType == FormatterType.INTELLIJ_SOLIDITY
   }
 }
