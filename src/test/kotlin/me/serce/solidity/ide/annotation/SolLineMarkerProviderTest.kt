@@ -94,4 +94,35 @@ class SolLineMarkerProviderTest : SolTestBase() {
     assertNotNull(implementationGutter)
     assertEquals(AllIcons.Gutter.OverridenMethod, implementationGutter?.icon)
   }
+
+  fun testContractGutterForBaseContracts() {
+    InlineFile(
+      """
+          contract A {}
+          contract B {}
+          contract C is A, B {}
+          /*caret*/
+      """,
+      name = "A.sol"
+    ).withCaret()
+
+    val gutter = myFixture.findAllGutters().find { it.tooltipText == "Inherits A, B" }
+    assertNotNull(gutter)
+    assertEquals(AllIcons.Gutter.OverridingMethod, gutter?.icon)
+  }
+
+  fun testContractGutterForInterfaces() {
+    InlineFile(
+      """
+          interface I {}
+          contract C is I {}
+          /*caret*/
+      """,
+      name = "A.sol"
+    ).withCaret()
+
+    val gutter = myFixture.findAllGutters().find { it.tooltipText == "Inherits I" }
+    assertNotNull(gutter)
+    assertEquals(AllIcons.Gutter.ImplementingMethod, gutter?.icon)
+  }
 }
