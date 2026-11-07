@@ -175,7 +175,7 @@ class SolOverrideImplementHandlerTest : SolTestBase() {
     assertEquals(listOf("g"), names)
   }
 
-  fun testNonVirtualNotOffered() {
+  fun testNonVirtualOfferedPrivateNot() {
     val names = candidateNames(
       SolOverrideMethodsHandler(),
       """
@@ -189,7 +189,52 @@ class SolOverrideImplementHandlerTest : SolTestBase() {
       }
       """
     )
-    assertEquals(listOf("g"), names)
+    assertEquals(listOf("f", "g"), names)
+  }
+
+  fun testNonVirtualBaseIsMadeVirtual() = doTest(
+    SolOverrideMethodsHandler(),
+    """
+    contract SimpleStorage {
+        function retrieve() public view returns (uint256) { return 1; }
+    }
+    contract AddFiveStorage is SimpleStorage {
+        <caret>
+    }
+    """,
+    """
+    contract SimpleStorage {
+        function retrieve() public view virtual returns (uint256) { return 1; }
+    }
+    contract AddFiveStorage is SimpleStorage {
+        function retrieve() public view override returns (uint256) {
+            return super.retrieve();
+        }
+    }
+    """
+  )
+
+  fun testNonVirtualBaseInOtherFileIsMadeVirtual() {
+    myFixture.addFileToProject("SimpleStorage.sol", "contract SimpleStorage {\n    function store(uint256 _x) public {}\n}")
+    doTest(
+      SolOverrideMethodsHandler(),
+      """
+      import "./SimpleStorage.sol";
+      contract AddFiveStorage is SimpleStorage {
+          <caret>
+      }
+      """,
+      """
+      import "./SimpleStorage.sol";
+      contract AddFiveStorage is SimpleStorage {
+          function store(uint256 _x) public override {
+              super.store(_x);
+          }
+      }
+      """
+    )
+    val base = com.intellij.psi.PsiManager.getInstance(project).findFile(myFixture.findFileInTempDir("SimpleStorage.sol"))!!
+    assertEquals("contract SimpleStorage {\n    function store(uint256 _x) public virtual {}\n}", base.text)
   }
 
   fun testImplementSkipsImplemented() {
@@ -254,13 +299,14 @@ class SolOverrideImplementHandlerTest : SolTestBase() {
     }
   }
 
-  // Ctrl+O must react (with a hint) when bases exist but nothing is virtual, instead of silently doing nothing
+  // Ctrl+O must react (with a hint) when bases exist but nothing can be overridden, instead of silently doing nothing
   fun testAvailableWhenNothingToOverride() {
     val before = """
       contract A {
           function f() public {}
       }
       contract B is A {
+          function f() public override {}
           <caret>
       }
       """.trimIndent()

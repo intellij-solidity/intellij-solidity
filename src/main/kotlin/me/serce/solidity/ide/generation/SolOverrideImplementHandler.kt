@@ -15,9 +15,13 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
+import com.intellij.psi.SmartPointerManager
 import com.intellij.psi.codeStyle.CodeStyleManager
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.ui.SimpleColoredComponent
+import com.intellij.ui.SimpleTextAttributes
+import me.serce.solidity.ide.inspections.fixes.AddVirtualFix
+import me.serce.solidity.ide.inspections.fixes.SolSpecifierEditor
 import me.serce.solidity.lang.SolidityFileType
 import me.serce.solidity.lang.core.SolidityTokenTypes
 import me.serce.solidity.lang.psi.ContractType
@@ -58,7 +62,9 @@ abstract class SolOverrideImplementHandler : LanguageCodeInsightActionHandler {
     }
     val chosen = choose(project, candidates)
     if (chosen.isNullOrEmpty()) return
-    WriteCommandAction.runWriteCommandAction(project, title, null, { insert(editor, contract, chosen) }, file)
+    // non-virtual bases get `virtual` added, possibly in other files
+    val files = (listOf(file) + chosen.mapNotNull { it.containingFile }).distinct().toTypedArray()
+    WriteCommandAction.runWriteCommandAction(project, title, null, { insert(editor, contract, chosen) }, *files)
   }
 
   /** The contract whose body contains the caret; libraries can't inherit, so they are excluded. */
@@ -103,6 +109,9 @@ abstract class SolOverrideImplementHandler : LanguageCodeInsightActionHandler {
 
   fun insert(editor: Editor, contract: SolContractDefinition, members: List<SolNamedElement>) {
     val project = contract.project
+    // bases that must become virtual; pointers survive the reparse caused by inserting the stubs
+    val pointerManager = SmartPointerManager.getInstance(project)
+    val toMakeVirtual = members.filter { !SolOverrideResolver.isVirtual(it) }.map { pointerManager.createSmartPsiElementPointer(it) }
     val document = editor.document
     val psiDocumentManager = PsiDocumentManager.getInstance(project)
     psiDocumentManager.doPostponedOperationsAndUnblockDocument(document)
@@ -153,6 +162,10 @@ abstract class SolOverrideImplementHandler : LanguageCodeInsightActionHandler {
       editor.caretModel.moveToOffset(start + lineText.indexOfFirst { !it.isWhitespace() }.coerceAtLeast(0))
     }
     marker.dispose()
+
+    for (pointer in toMakeVirtual) {
+      pointer.element?.let { SolSpecifierEditor.addVirtual(project, it) }
+    }
   }
 
   private fun lineIndent(document: Document, offset: Int): String {
@@ -178,8 +191,10 @@ abstract class SolOverrideImplementHandler : LanguageCodeInsightActionHandler {
 
 class SolOverrideMethodsHandler : SolOverrideImplementHandler() {
   override val title = "Override Functions"
-  override val nothingFoundMessage = "No functions to override. Only virtual functions can be overridden."
-  override fun accept(member: SolNamedElement) = SolOverrideResolver.isVirtual(member)
+  override val nothingFoundMessage = "No functions to override"
+
+  // non-virtual members are offered too and made virtual on insert, as long as their file can be edited
+  override fun accept(member: SolNamedElement) = SolOverrideResolver.isVirtual(member) || AddVirtualFix.canEdit(member)
 }
 
 class SolImplementMethodsHandler : SolOverrideImplementHandler() {
@@ -195,6 +210,9 @@ private class SolMemberChooserObject(val member: SolNamedElement) : ClassMember 
 
   override fun renderTreeNode(component: SimpleColoredComponent, tree: JTree?) {
     component.append(text)
+    if (!SolOverrideResolver.isVirtual(member)) {
+      component.append("  will be made virtual", SimpleTextAttributes.GRAYED_ATTRIBUTES)
+    }
     component.icon = member.getIcon(0)
   }
 
