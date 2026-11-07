@@ -280,6 +280,11 @@
                          level="ERROR"
                          implementationClass="me.serce.solidity.ide.inspections.MissingVirtualInspection"/>
 
+        <codeInsight.overrideMethod language="Solidity"
+                                    implementationClass="me.serce.solidity.ide.generation.SolOverrideMethodsHandler"/>
+        <codeInsight.implementMethod language="Solidity"
+                                     implementationClass="me.serce.solidity.ide.generation.SolImplementMethodsHandler"/>
+
         <!-- Forge Test Runner -->
         <configurationType implementation="me.serce.solidity.ide.run.ForgeTestRunConfigurationType"/>
         <runConfigurationProducer
