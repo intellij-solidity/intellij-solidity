@@ -268,6 +268,18 @@
                          level="ERROR"
                          implementationClass="me.serce.solidity.ide.inspections.AddressChecksumInspection"/>
 
+        <localInspection language="Solidity" groupName="Solidity"
+                         displayName="Missing override specifier"
+                         enabledByDefault="true"
+                         level="ERROR"
+                         implementationClass="me.serce.solidity.ide.inspections.MissingOverrideInspection"/>
+
+        <localInspection language="Solidity" groupName="Solidity"
+                         displayName="Overridden member is not virtual"
+                         enabledByDefault="true"
+                         level="ERROR"
+                         implementationClass="me.serce.solidity.ide.inspections.MissingVirtualInspection"/>
+
         <!-- Forge Test Runner -->
         <configurationType implementation="me.serce.solidity.ide.run.ForgeTestRunConfigurationType"/>
         <runConfigurationProducer
