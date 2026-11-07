@@ -1,12 +1,20 @@
 package me.serce.solidity.ide.inspections.fixes
 
+import com.intellij.openapi.editor.Document
 import com.intellij.openapi.project.Project
+import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiParserFacade
-import me.serce.solidity.lang.psi.*
+import me.serce.solidity.lang.psi.SolFunctionDefinition
+import me.serce.solidity.lang.psi.SolModifierDefinition
+import me.serce.solidity.lang.psi.SolNamedElement
 import me.serce.solidity.lang.resolve.function.SolOverrideResolver
 
-/** PSI edits that add or rewrite `virtual` / `override` specifiers on functions and modifiers. */
+/**
+ * Adds or rewrites `virtual` / `override` specifiers on functions and modifiers.
+ *
+ * Edits go through the document with exact spacing: when an external formatter (Foundry) or none is configured,
+ * IntelliJ's formatter is disabled for Solidity and would not clean up whitespace after PSI insertions.
+ */
 object SolSpecifierEditor {
 
   fun overrideText(bases: List<String>) = if (bases.size > 1) "override(${bases.joinToString(", ")})" else "override"
@@ -15,61 +23,43 @@ object SolSpecifierEditor {
     val text = overrideText(bases)
     val existing = SolOverrideResolver.overrideSpecifier(member)
     if (existing != null) {
-      existing.replace(dummySpecifiers(project, text).single { it.overrideSpecifier != null }.overrideSpecifier!!)
-      return
-    }
-    when (member) {
-      is SolFunctionDefinition -> insertAfter(project, member, functionAnchor(member), dummySpecifiers(project, text).single())
-      is SolModifierDefinition -> insertAfter(project, member, modifierAnchor(member), dummyModifierSpecifiers(project, text).single())
+      val range = existing.textRange
+      edit(project, member) { it.replaceString(range.startOffset, range.endOffset, text) }
+    } else {
+      val offset = anchor(member)?.textRange?.endOffset ?: return
+      edit(project, member) { it.insertString(offset, " $text") }
     }
   }
 
   fun addVirtual(project: Project, member: SolNamedElement) {
     if (SolOverrideResolver.virtualSpecifier(member) != null) return
     val override = SolOverrideResolver.overrideSpecifier(member)
-    when (member) {
-      is SolFunctionDefinition -> {
-        val spec = dummySpecifiers(project, "virtual").single()
-        val overrideWrapper = override?.parent
-        if (overrideWrapper != null) insertBefore(project, member, overrideWrapper, spec)
-        else insertAfter(project, member, functionAnchor(member), spec)
-      }
-      is SolModifierDefinition -> {
-        val spec = dummyModifierSpecifiers(project, "virtual").single()
-        if (override != null) insertBefore(project, member, override, spec)
-        else insertAfter(project, member, modifierAnchor(member), spec)
-      }
+    if (override != null) {
+      val offset = override.textRange.startOffset
+      edit(project, member) { it.insertString(offset, "virtual ") }
+    } else {
+      val offset = anchor(member)?.textRange?.endOffset ?: return
+      edit(project, member) { it.insertString(offset, " virtual") }
     }
   }
 
-  /** Last visibility/mutability/virtual/override specifier, or the parameter list. */
-  private fun functionAnchor(f: SolFunctionDefinition): PsiElement =
-    (f.functionVisibilitySpecifierList + f.stateMutabilitySpecifierList).maxByOrNull { it.textOffset }
-      ?: f.parameterListList.first()
-
-  private fun modifierAnchor(m: SolModifierDefinition): PsiElement =
-    (m.virtualSpecifierList + m.overrideSpecifierList).maxByOrNull { it.textOffset }
-      ?: m.parameterList
-      ?: m.identifier!!
-
-  private fun insertAfter(project: Project, parent: PsiElement, anchor: PsiElement, element: PsiElement) {
-    val added = parent.addAfter(element, anchor)
-    parent.addBefore(space(project), added)
+  /** Element after which a new specifier goes: the last visibility/mutability/virtual/override specifier, else the parameters. */
+  private fun anchor(member: SolNamedElement): PsiElement? = when (member) {
+    is SolFunctionDefinition ->
+      (member.functionVisibilitySpecifierList + member.stateMutabilitySpecifierList).maxByOrNull { it.textOffset }
+        ?: member.parameterListList.firstOrNull()
+    is SolModifierDefinition ->
+      (member.virtualSpecifierList + member.overrideSpecifierList).maxByOrNull { it.textOffset }
+        ?: member.parameterList
+        ?: member.identifier
+    else -> null
   }
 
-  private fun insertBefore(project: Project, parent: PsiElement, anchor: PsiElement, element: PsiElement) {
-    val added = parent.addBefore(element, anchor)
-    parent.addAfter(space(project), added)
-  }
-
-  private fun space(project: Project) = PsiParserFacade.getInstance(project).createWhiteSpaceFromText(" ")
-
-  private fun dummySpecifiers(project: Project, text: String): List<SolFunctionVisibilitySpecifier> =
-    SolPsiFactory(project).createFunction("function dummy() $text {}").functionVisibilitySpecifierList
-
-  private fun dummyModifierSpecifiers(project: Project, text: String): List<PsiElement> {
-    val modifier = SolPsiFactory(project).createContract("contract Dummy { modifier dummy() $text { _; } }")
-      .modifierDefinitionList.single()
-    return modifier.virtualSpecifierList + modifier.overrideSpecifierList
+  private fun edit(project: Project, member: SolNamedElement, action: (Document) -> Unit) {
+    val documentManager = PsiDocumentManager.getInstance(project)
+    val document = documentManager.getDocument(member.containingFile) ?: return
+    documentManager.doPostponedOperationsAndUnblockDocument(document)
+    action(document)
+    documentManager.commitDocument(document)
   }
 }

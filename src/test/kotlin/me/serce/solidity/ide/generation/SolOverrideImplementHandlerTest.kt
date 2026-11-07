@@ -2,6 +2,8 @@ package me.serce.solidity.ide.generation
 
 import me.serce.solidity.lang.psi.SolNamedElement
 import me.serce.solidity.utils.SolTestBase
+import me.serce.solidity.settings.FormatterType
+import me.serce.solidity.settings.SoliditySettings
 import org.intellij.lang.annotations.Language
 
 class SolOverrideImplementHandlerTest : SolTestBase() {
@@ -219,6 +221,54 @@ class SolOverrideImplementHandlerTest : SolTestBase() {
       """.trimIndent()
     )
     assertFalse(SolOverrideMethodsHandler().isValidFor(myFixture.editor, myFixture.file))
+  }
+
+  fun testIndentedWithoutIdeFormatter() {
+    val settings = SoliditySettings.getInstance(project)
+    val old = settings.formatterType
+    settings.formatterType = FormatterType.DISABLED
+    try {
+      doTest(
+        SolOverrideMethodsHandler(),
+        """
+        contract A {
+            function store(uint256 _x) public virtual {}
+        }
+        contract B is A {
+            <caret>
+        }
+        """,
+        """
+        contract A {
+            function store(uint256 _x) public virtual {}
+        }
+        contract B is A {
+            function store(uint256 _x) public override {
+                super.store(_x);
+            }
+        }
+        """
+      )
+    } finally {
+      settings.formatterType = old
+    }
+  }
+
+  // Ctrl+O must react (with a hint) when bases exist but nothing is virtual, instead of silently doing nothing
+  fun testAvailableWhenNothingToOverride() {
+    val before = """
+      contract A {
+          function f() public {}
+      }
+      contract B is A {
+          <caret>
+      }
+      """.trimIndent()
+    myFixture.configureByText("main.sol", before)
+    val handler = SolOverrideMethodsHandler()
+    assertTrue(handler.isValidFor(myFixture.editor, myFixture.file))
+    handler.invoke(project, myFixture.editor, myFixture.file)
+    assertEquals(before.replace("<caret>", ""), myFixture.editor.document.text)
   }
 
   fun testNotAvailableWithoutBases() {

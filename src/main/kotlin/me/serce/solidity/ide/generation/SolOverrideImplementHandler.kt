@@ -1,5 +1,7 @@
 package me.serce.solidity.ide.generation
 
+import com.intellij.application.options.CodeStyle
+import com.intellij.codeInsight.hint.HintManager
 import com.intellij.codeInsight.generation.ClassMember
 import com.intellij.codeInsight.generation.MemberChooserObject
 import com.intellij.codeInsight.generation.MemberChooserObjectBase
@@ -7,6 +9,7 @@ import com.intellij.ide.util.MemberChooser
 import com.intellij.lang.LanguageCodeInsightActionHandler
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.command.WriteCommandAction
+import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
@@ -15,6 +18,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.codeStyle.CodeStyleManager
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.ui.SimpleColoredComponent
+import me.serce.solidity.lang.SolidityFileType
 import me.serce.solidity.lang.core.SolidityTokenTypes
 import me.serce.solidity.lang.psi.ContractType
 import me.serce.solidity.lang.psi.SolContractDefinition
@@ -23,6 +27,8 @@ import me.serce.solidity.lang.psi.SolNamedElement
 import me.serce.solidity.lang.psi.impl.LinearizationImpossibleException
 import me.serce.solidity.lang.resolve.function.SolOverrideResolver
 import me.serce.solidity.lang.types.SolContract
+import me.serce.solidity.settings.FormatterType
+import me.serce.solidity.settings.SoliditySettings
 import javax.swing.JTree
 
 /** Shared logic of Code | Override Methods (Ctrl+O) and Code | Implement Methods (Ctrl+I) for Solidity. */
@@ -32,17 +38,24 @@ abstract class SolOverrideImplementHandler : LanguageCodeInsightActionHandler {
   /** Whether a not-yet-overridden base member is offered by this action. */
   protected abstract fun accept(member: SolNamedElement): Boolean
 
+  /** Hint shown when the contract has bases but nothing to offer. */
+  protected abstract val nothingFoundMessage: String
+
   override fun startInWriteAction() = false
 
   override fun isValidFor(editor: Editor, file: PsiFile): Boolean {
+    // available whenever the contract inherits something, so an empty result can be explained with a hint
     val contract = contractAt(editor, file) ?: return false
-    return candidates(contract).isNotEmpty()
+    return SolContract(contract).getParents().isNotEmpty()
   }
 
   override fun invoke(project: Project, editor: Editor, file: PsiFile) {
     val contract = contractAt(editor, file) ?: return
     val candidates = candidates(contract)
-    if (candidates.isEmpty()) return
+    if (candidates.isEmpty()) {
+      HintManager.getInstance().showErrorHint(editor, nothingFoundMessage)
+      return
+    }
     val chosen = choose(project, candidates)
     if (chosen.isNullOrEmpty()) return
     WriteCommandAction.runWriteCommandAction(project, title, null, { insert(editor, contract, chosen) }, file)
@@ -90,39 +103,66 @@ abstract class SolOverrideImplementHandler : LanguageCodeInsightActionHandler {
 
   fun insert(editor: Editor, contract: SolContractDefinition, members: List<SolNamedElement>) {
     val project = contract.project
-    val text = members.joinToString("\n\n") { m ->
-      SolOverrideStubRenderer.render(m, SolOverrideResolver.visibleDeclaringBases(contract, m).mapNotNull { it.name })
-    }
     val document = editor.document
     val psiDocumentManager = PsiDocumentManager.getInstance(project)
     psiDocumentManager.doPostponedOperationsAndUnblockDocument(document)
+
+    // indent ourselves: with an external formatter (Foundry) IntelliJ's formatter is disabled for Solidity
+    val unit = indentUnit(project)
+    val baseIndent = lineIndent(document, contract.textRange.startOffset) + unit
+    val text = members.joinToString("\n\n") { m ->
+      val stub = SolOverrideStubRenderer.render(m, SolOverrideResolver.visibleDeclaringBases(contract, m).mapNotNull { it.name })
+      val lines = stub.lines()
+      lines.mapIndexed { i, l -> if (i == 0 || i == lines.lastIndex) baseIndent + l else baseIndent + unit + l }
+        .joinToString("\n")
+    }
+
     var offset = insertionOffset(editor, contract)
     val line = document.getLineNumber(offset)
     val lineStart = document.getLineStartOffset(line)
     val lineEnd = document.getLineEndOffset(line)
     val inserted: String
     if (document.charsSequence.subSequence(lineStart, lineEnd).isBlank()) {
-      // the caret is on an empty line: replace it with the generated members
+      // an empty line: replace it with the generated members
       document.deleteString(lineStart, lineEnd)
       offset = lineStart
       inserted = text
+    } else if (document.charsSequence.subSequence(lineStart, offset).isBlank()) {
+      // only indentation before the offset (e.g. before the closing brace)
+      document.deleteString(lineStart, offset)
+      offset = lineStart
+      inserted = "$text\n" + lineIndent(document, contract.textRange.startOffset)
     } else {
       inserted = "\n$text\n"
     }
     document.insertString(offset, inserted)
     psiDocumentManager.commitDocument(document)
-    val file = psiDocumentManager.getPsiFile(document) ?: return
     val marker = document.createRangeMarker(offset, offset + inserted.length)
-    CodeStyleManager.getInstance(project).reformatText(file, offset, offset + inserted.length)
-    psiDocumentManager.commitDocument(document)
+    if (SoliditySettings.getInstance(project).formatterType == FormatterType.INTELLIJ_SOLIDITY) {
+      val file = psiDocumentManager.getPsiFile(document)
+      if (file != null) {
+        CodeStyleManager.getInstance(project).reformatText(file, marker.startOffset, marker.endOffset)
+        psiDocumentManager.commitDocument(document)
+      }
+    }
     // place the caret at the start of the first generated member
     val firstLine = document.getLineNumber(marker.startOffset) + if (inserted.startsWith("\n")) 1 else 0
     if (firstLine < document.lineCount) {
-      val lineStart = document.getLineStartOffset(firstLine)
-      val lineText = document.charsSequence.subSequence(lineStart, document.getLineEndOffset(firstLine))
-      editor.caretModel.moveToOffset(lineStart + lineText.indexOfFirst { !it.isWhitespace() }.coerceAtLeast(0))
+      val start = document.getLineStartOffset(firstLine)
+      val lineText = document.charsSequence.subSequence(start, document.getLineEndOffset(firstLine))
+      editor.caretModel.moveToOffset(start + lineText.indexOfFirst { !it.isWhitespace() }.coerceAtLeast(0))
     }
     marker.dispose()
+  }
+
+  private fun lineIndent(document: Document, offset: Int): String {
+    val start = document.getLineStartOffset(document.getLineNumber(offset))
+    return document.charsSequence.subSequence(start, offset).takeWhile { it == ' ' || it == '\t' }.toString()
+  }
+
+  private fun indentUnit(project: Project): String {
+    val options = CodeStyle.getProjectOrDefaultSettings(project).getIndentOptions(SolidityFileType)
+    return if (options.USE_TAB_CHARACTER) "\t" else " ".repeat(options.INDENT_SIZE)
   }
 
   /** At the caret when it is between members of [contract]; after the member under the caret; else before `}`. */
@@ -138,11 +178,13 @@ abstract class SolOverrideImplementHandler : LanguageCodeInsightActionHandler {
 
 class SolOverrideMethodsHandler : SolOverrideImplementHandler() {
   override val title = "Override Functions"
+  override val nothingFoundMessage = "No functions to override. Only virtual functions can be overridden."
   override fun accept(member: SolNamedElement) = SolOverrideResolver.isVirtual(member)
 }
 
 class SolImplementMethodsHandler : SolOverrideImplementHandler() {
   override val title = "Implement Functions"
+  override val nothingFoundMessage = "No functions to implement"
   override fun accept(member: SolNamedElement) = member is SolFunctionDefinition && !SolOverrideResolver.hasBody(member)
 }
 
