@@ -1,6 +1,5 @@
 package me.serce.solidity.ide
 
-import com.intellij.diagnostic.IdeaReportingEvent
 import com.intellij.ide.DataManager
 import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.openapi.actionSystem.CommonDataKeys
@@ -24,6 +23,7 @@ import io.sentry.event.Event
 import io.sentry.event.EventBuilder
 import io.sentry.event.interfaces.ExceptionInterface
 import java.awt.Component
+import java.util.concurrent.CancellationException
 
 
 class SentryReportSubmitter : ErrorReportSubmitter() {
@@ -68,14 +68,19 @@ class SentryReportSubmitter : ErrorReportSubmitter() {
             .withTag("os_arch", SystemInfo.OS_ARCH)
             .withTag("java_version", SystemInfo.JAVA_VERSION)
             .withTag("java_runtime_version", SystemInfo.JAVA_RUNTIME_VERSION)
-          // replace with `error.throwable` when the minimum version is updated to 2025.1, see
-          // https://youtrack.jetbrains.com/issue/IJPL-175997/Error-Reporting-API-made-ApiStatus.Internal-in-2025.1
-          val error = when (ijEvent) {
-            is IdeaReportingEvent -> ijEvent.data.throwable
-            else -> ijEvent.throwable
-          }
-          if (error != null) {
+          ijEvent.throwable?.let { error ->
             eventBuilder.withSentryInterface(ExceptionInterface(error))
+          }
+          // Keep the rendered trace because IntelliJ can omit causes and suppressed
+          // exceptions from the Throwable it reconstructs for an edited report.
+          val stackTrace = try {
+            ijEvent.throwableText
+          } catch (e: RuntimeException) {
+            if (e is CancellationException) throw e
+            null
+          }
+          if (!stackTrace.isNullOrEmpty()) {
+            eventBuilder.withExtra("stack_trace", stackTrace)
           }
           if (additionalInfo != null) {
             eventBuilder.withExtra("additional_info", additionalInfo)
