@@ -7,6 +7,7 @@ import me.serce.solidity.lang.psi.SolFunctionDefinition
 import me.serce.solidity.lang.psi.impl.LinearizationImpossibleException
 import me.serce.solidity.lang.psi.parentOfType
 import me.serce.solidity.lang.types.SolContract
+import me.serce.solidity.lang.types.SolUnknown
 import me.serce.solidity.lang.types.getSolType
 
 object SolFunctionResolver {
@@ -36,7 +37,7 @@ object SolFunctionResolver {
       .any { signatureEquals(func, it) }
   }
 
-  private fun signatureEquals(f1: SolFunctionDefElement, f2: SolFunctionDefElement): Boolean {
+  internal fun signatureEquals(f1: SolFunctionDefElement, f2: SolFunctionDefElement): Boolean {
     if (f1.name != f2.name) {
       return false
     }
@@ -44,7 +45,9 @@ object SolFunctionResolver {
       return false
     }
     for ((p1, p2) in f1.parameters.zip(f2.parameters)) {
-      if (getSolType(p1.typeName) != getSolType(p2.typeName)) {
+      val t1 = getSolType(p1.typeName)
+      // unresolved types never match: better to miss an override than to report a false one
+      if (t1 == SolUnknown || t1 != getSolType(p2.typeName)) {
         return false
       }
     }

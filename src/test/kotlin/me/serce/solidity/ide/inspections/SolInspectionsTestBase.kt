@@ -34,6 +34,14 @@ abstract class SolInspectionsTestBase(private val inspection: LocalInspectionToo
     myFixture.checkResult(after)
   }
 
+  /** Applies [fixName] at the caret of [before] without checking highlighting markup. */
+  protected fun checkFix(fixName: String, @Language("Solidity") before: String, @Language("Solidity") after: String) {
+    myFixture.configureByText("main.sol", before.trimIndent())
+    enableInspection()
+    applyQuickFix(fixName)
+    myFixture.checkResult(after.trimIndent())
+  }
+
   protected fun applyQuickFix(name: String) {
     val action = myFixture.findSingleIntention(name)
     myFixture.launchAction(action)

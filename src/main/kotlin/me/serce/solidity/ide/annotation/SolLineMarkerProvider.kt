@@ -9,9 +9,11 @@ import com.intellij.openapi.util.Iconable
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import me.serce.solidity.ide.navigation.findAllImplementations
+import me.serce.solidity.lang.psi.ContractType
 import me.serce.solidity.lang.psi.SolContractDefinition
 import me.serce.solidity.lang.psi.SolFunctionDefinition
 import me.serce.solidity.lang.resolve.function.SolFunctionResolver
+import me.serce.solidity.lang.types.SolContract
 
 class SolLineMarkerProvider : LineMarkerProvider {
   override fun getLineMarkerInfo(element: PsiElement): LineMarkerInfo<*>? = null
@@ -25,6 +27,19 @@ class SolLineMarkerProvider : LineMarkerProvider {
         is SolContractDefinition -> {
           val identifier = el.identifier
           if (identifier != null) {
+            val bases = SolContract(el).getParents().map { it.ref }.asReversed() // source order
+            if (bases.isNotEmpty()) {
+              // like Java: "implements" when every base is an interface, otherwise "extends"
+              val icon = if (bases.all { it.contractType == ContractType.INTERFACE }) AllIcons.Gutter.ImplementingMethod
+                else AllIcons.Gutter.OverridingMethod
+              val info = NavigationGutterIconBuilder
+                .create(icon)
+                .setTargets(bases)
+                .setPopupTitle("Go To Base Contracts")
+                .setTooltipText("Inherits ${bases.joinToString(", ") { it.name ?: "?" }}")
+                .createLineMarkerInfo(identifier)
+              result.add(info)
+            }
             val implementations = el.findAllImplementations()
             if (implementations.isNotEmpty()) {
               val info = NavigationGutterIconBuilder
