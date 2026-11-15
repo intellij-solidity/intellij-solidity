@@ -23,7 +23,7 @@
         We've created a new <a href="https://discord.gg/2pARGQ8RMf">Discord</a> community.
         Join to discuss Solidity, the plugin features you'd like to see, and the issues you're experiencing with the plugin.
 
-        <b>v2.4.12</b>
+        <b>v2.4.13</b>
         In this release:
         <ul>
           <li>Improved performance of gutter markers and "Go to Implementation", thank you @mhxw!</li>
